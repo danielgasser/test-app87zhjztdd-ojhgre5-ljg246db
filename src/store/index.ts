@@ -1,7 +1,6 @@
-import 'expo-router/entry';
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from 'src/store/authSlice';
-import userReducer from 'src/store/userSlice';
+import authReducer from './authSlice';
+import userReducer from './userSlice';
 
 export const store = configureStore({
   reducer: {
