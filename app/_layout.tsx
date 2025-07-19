@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+// app/_layout.tsx
+import { useEffect, useState } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { Provider } from 'react-redux';
-import { store } from 'src/store';
-import { supabase } from 'src/services/supabase';
-import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { setSession, checkSession } from 'src/store/authSlice';
+import { store } from '../src/store';
+import { supabase } from '../src/services/supabase';
+import { useAppDispatch, useAppSelector } from '../src/store/hooks';
+import { setSession, checkSession } from '../src/store/authSlice';
 import { View, ActivityIndicator } from 'react-native';
 
 // Main layout component
@@ -13,10 +14,13 @@ function RootLayoutNav() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user, loading } = useAppSelector((state) => state.auth);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // Check for existing session
-    dispatch(checkSession());
+    dispatch(checkSession()).finally(() => {
+      setIsReady(true);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -29,7 +33,8 @@ function RootLayoutNav() {
   useEffect(() => {
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (!loading) {
+    // Only navigate after the app is ready and loading is complete
+    if (isReady && !loading) {
       // Redirect to login if not authenticated
       if (!user && !inAuthGroup) {
         router.replace('/login');
@@ -39,9 +44,9 @@ function RootLayoutNav() {
         router.replace('/');
       }
     }
-  }, [user, segments, loading]);
+  }, [user, segments, loading, isReady]);
 
-  if (loading) {
+  if (!isReady || loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#007AFF" />

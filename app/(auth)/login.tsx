@@ -13,6 +13,7 @@ import {
 import { Link } from 'expo-router';
 import { useAppDispatch, useAppSelector } from 'src/store/hooks';
 import { signIn } from 'src/store/authSlice';
+import { supabase } from '@/services/supabase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -32,6 +33,28 @@ export default function LoginScreen() {
       Alert.alert('Login Failed', error || 'Invalid credentials');
     }
   };
+
+  const handleForgotPassword = async () => {
+  if (!email) {
+    Alert.alert('Error', 'Please enter your email address first');
+    return;
+  }
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'safepath://reset-password',
+    });
+    
+    if (error) throw error;
+    
+    Alert.alert(
+      'Check your email',
+      'We sent you a password reset link. Please check your email.'
+    );
+  } catch (error: any) {
+    Alert.alert('Error', error.message);
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -62,7 +85,9 @@ export default function LoginScreen() {
             secureTextEntry
             autoComplete="password"
           />
-
+<TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPassword}>
+  <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+</TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleLogin}
@@ -123,6 +148,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#f9f9f9',
   },
+  forgotPassword: {
+  alignSelf: 'flex-end',
+  marginBottom: 20,
+  marginTop: 5,
+},
+forgotPasswordText: {
+  color: '#007AFF',
+  fontSize: 14,
+},
   button: {
     backgroundColor: '#007AFF',
     padding: 15,
