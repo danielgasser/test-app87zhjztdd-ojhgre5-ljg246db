@@ -29,11 +29,6 @@ export default function MapScreen() {
 
   const [mapReady, setMapReady] = useState(false); // Add this line
 
-  useEffect(() => {
-    // Force re-render when locations change
-    // This fixes the marker rendering issue
-  }, [nearbyLocations]);
-
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
