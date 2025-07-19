@@ -1,51 +1,377 @@
-import { DemographicProfile } from './index';
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
-      profiles: {
+      user_profiles: {
         Row: {
-          id: string;
-          user_id: string;
-          demographics: DemographicProfile;
-          onboarding_complete: boolean;
-          created_at: string;
-          updated_at: string;
-        };
+          id: string
+          username: string | null
+          full_name: string | null
+          avatar_url: string | null
+          race_ethnicity: string[] | null
+          gender: string | null
+          lgbtq_status: boolean | null
+          disability_status: string[] | null
+          religion: string | null
+          age_range: string | null
+          privacy_level: 'public' | 'anonymous' | 'private'
+          show_demographics: boolean
+          total_reviews: number
+          helpful_votes: number
+          created_at: string
+          updated_at: string
+        }
         Insert: {
-          user_id: string;
-          demographics?: DemographicProfile;
-          onboarding_complete?: boolean;
-        };
+          id: string
+          username?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          race_ethnicity?: string[] | null
+          gender?: string | null
+          lgbtq_status?: boolean | null
+          disability_status?: string[] | null
+          religion?: string | null
+          age_range?: string | null
+          privacy_level?: 'public' | 'anonymous' | 'private'
+          show_demographics?: boolean
+          total_reviews?: number
+          helpful_votes?: number
+          created_at?: string
+          updated_at?: string
+        }
         Update: {
-          demographics?: DemographicProfile;
-          onboarding_complete?: boolean;
-        };
-      };
+          id?: string
+          username?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          race_ethnicity?: string[] | null
+          gender?: string | null
+          lgbtq_status?: boolean | null
+          disability_status?: string[] | null
+          religion?: string | null
+          age_range?: string | null
+          privacy_level?: 'public' | 'anonymous' | 'private'
+          show_demographics?: boolean
+          total_reviews?: number
+          helpful_votes?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
       locations: {
         Row: {
-          id: string;
-          name: string;
-          address: string;
-          latitude: number;
-          longitude: number;
-          place_type: string;
-          created_at: string;
-          updated_at: string;
-        };
-      };
+          id: string
+          name: string
+          description: string | null
+          address: string
+          city: string
+          state_province: string
+          country: string
+          postal_code: string | null
+          coordinates: unknown // PostGIS geography type
+          place_type: 'restaurant' | 'bar' | 'cafe' | 'hotel' | 'gas_station' | 
+                      'retail' | 'grocery' | 'park' | 'attraction' | 'service' | 'other'
+          tags: string[] | null
+          google_place_id: string | null
+          created_by: string | null
+          verified: boolean
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          address: string
+          city: string
+          state_province: string
+          country?: string
+          postal_code?: string | null
+          coordinates: unknown
+          place_type: 'restaurant' | 'bar' | 'cafe' | 'hotel' | 'gas_station' | 
+                      'retail' | 'grocery' | 'park' | 'attraction' | 'service' | 'other'
+          tags?: string[] | null
+          google_place_id?: string | null
+          created_by?: string | null
+          verified?: boolean
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          address?: string
+          city?: string
+          state_province?: string
+          country?: string
+          postal_code?: string | null
+          coordinates?: unknown
+          place_type?: 'restaurant' | 'bar' | 'cafe' | 'hotel' | 'gas_station' | 
+                       'retail' | 'grocery' | 'park' | 'attraction' | 'service' | 'other'
+          tags?: string[] | null
+          google_place_id?: string | null
+          created_by?: string | null
+          verified?: boolean
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
       reviews: {
         Row: {
-          id: string;
-          location_id: string;
-          user_id: string;
-          rating: number;
-          title: string;
-          content: string;
-          demographic_context: DemographicProfile;
-          created_at: string;
-        };
-      };
-    };
-  };
-};
+          id: string
+          location_id: string
+          user_id: string
+          title: string
+          content: string
+          overall_rating: number
+          safety_rating: number
+          comfort_rating: number
+          accessibility_rating: number | null
+          service_rating: number | null
+          visited_at: string | null
+          visit_type: 'solo' | 'couple' | 'family' | 'group' | 'business' | null
+          photo_urls: string[] | null
+          status: 'active' | 'flagged' | 'hidden' | 'deleted'
+          flag_count: number
+          helpful_count: number
+          unhelpful_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          user_id: string
+          title: string
+          content: string
+          overall_rating: number
+          safety_rating: number
+          comfort_rating: number
+          accessibility_rating?: number | null
+          service_rating?: number | null
+          visit_date?: string | null
+          time_of_day?: 'morning' | 'afternoon' | 'evening' | 'night' | null
+          visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business' | null
+          photo_urls?: string[] | null
+          status?: 'active' | 'flagged' | 'hidden' | 'deleted'
+          flag_count?: number
+          helpful_count?: number
+          unhelpful_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          user_id?: string
+          title?: string
+          content?: string
+          overall_rating?: number
+          safety_rating?: number
+          comfort_rating?: number
+          accessibility_rating?: number | null
+          service_rating?: number | null
+          visit_date?: string | null
+          time_of_day?: 'morning' | 'afternoon' | 'evening' | 'night' | null
+          visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business' | null
+          photo_urls?: string[] | null
+          status?: 'active' | 'flagged' | 'hidden' | 'deleted'
+          flag_count?: number
+          helpful_count?: number
+          unhelpful_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      safety_scores: {
+        Row: {
+          id: string
+          location_id: string
+          demographic_type: 'race_ethnicity' | 'gender' | 'lgbtq' | 
+                           'disability' | 'religion' | 'age' | 'overall'
+          demographic_value: string | null
+          avg_safety_score: number | null
+          avg_comfort_score: number | null
+          avg_overall_score: number | null
+          review_count: number
+          last_review_date: string | null
+          calculated_at: string
+        }
+        Insert: {
+          id?: string
+          location_id: string
+          demographic_type: 'race_ethnicity' | 'gender' | 'lgbtq' | 
+                           'disability' | 'religion' | 'age' | 'overall'
+          demographic_value?: string | null
+          avg_safety_score?: number | null
+          avg_comfort_score?: number | null
+          avg_overall_score?: number | null
+          review_count?: number
+          last_review_date?: string | null
+          calculated_at?: string
+        }
+        Update: {
+          id?: string
+          location_id?: string
+          demographic_type?: 'race_ethnicity' | 'gender' | 'lgbtq' | 
+                            'disability' | 'religion' | 'age' | 'overall'
+          demographic_value?: string | null
+          avg_safety_score?: number | null
+          avg_comfort_score?: number | null
+          avg_overall_score?: number | null
+          review_count?: number
+          last_review_date?: string | null
+          calculated_at?: string
+        }
+      }
+      review_votes: {
+        Row: {
+          id: string
+          review_id: string
+          user_id: string
+          vote_type: 'helpful' | 'unhelpful'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          review_id: string
+          user_id: string
+          vote_type: 'helpful' | 'unhelpful'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          review_id?: string
+          user_id?: string
+          vote_type?: 'helpful' | 'unhelpful'
+          created_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      calculate_location_safety_scores: {
+        Args: {
+          p_location_id: string
+        }
+        Returns: undefined
+      }
+      get_nearby_locations: {
+        Args: {
+          lat: number
+          lng: number
+          radius_meters?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          address: string
+          place_type: string
+          distance_meters: number
+          avg_safety_score: number | null
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+  }
+}
+
+// Helper types for easier use
+export type Tables<T extends keyof Database['public']['Tables']> = 
+  Database['public']['Tables'][T]['Row']
+  
+export type InsertTables<T extends keyof Database['public']['Tables']> = 
+  Database['public']['Tables'][T]['Insert']
+  
+export type UpdateTables<T extends keyof Database['public']['Tables']> = 
+  Database['public']['Tables'][T]['Update']
+
+// Convenience types
+export type UserProfile = Tables<'user_profiles'>
+export type Location = Tables<'locations'>
+export type Review = Tables<'reviews'>
+export type SafetyScore = Tables<'safety_scores'>
+export type ReviewVote = Tables<'review_votes'>
+
+// Extended types with relationships
+export interface LocationWithScores extends Location {
+  avg_safety_score: any
+  longitude: number
+  latitude: number
+  safety_scores?: SafetyScore[]
+  overall_safety_score?: number
+  review_count?: number
+}
+
+export interface ReviewWithUser extends Review {
+  user_profiles?: UserProfile
+}
+
+export interface ReviewWithLocation extends Review {
+  locations?: Location
+}
+
+// Form types for submissions
+export interface CreateReviewForm {
+  location_id: string
+  title: string
+  content: string
+  overall_rating: number
+  safety_rating: number
+  comfort_rating: number
+  accessibility_rating?: number
+  service_rating?: number
+  visited_at?: string
+  visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business'
+}
+
+export interface CreateLocationForm {
+  name: string
+  description?: string
+  address: string
+  city: string
+  state_province: string
+  country: string
+  postal_code?: string
+  latitude: number
+  longitude: number
+  place_type: Location['place_type']
+  tags?: string[]
+}
+
+// Coordinate helper type
+export interface Coordinates {
+  latitude: number
+  longitude: number
+}
+
+export interface RouteRequest {
+  start: Coordinates;
+  end: Coordinates;
+  user_demographics: UserProfile;
+  avoid_safety_threshold?: number;
+  optimize_for: 'safety' | 'time' | 'balanced';
+}
+
+export interface RouteSegment {
+  coordinates: Coordinates[];
+  safety_score: number;
+  distance: number;
+  duration: number;
+  warnings?: string[];
+}
