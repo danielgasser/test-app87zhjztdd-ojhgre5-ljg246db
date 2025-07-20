@@ -1,4 +1,4 @@
-// Replace the content of app/(tabs)/index.tsx with this updated version:
+// Replace the entire content of app/(tabs)/index.tsx
 
 import React, { useEffect, useState } from "react";
 import {
@@ -16,10 +16,8 @@ import { useRouter } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchNearbyLocations,
-  searchLocations,
   createLocationFromSearch,
   clearSearchResults,
-  setShowSearchResults,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -38,15 +36,15 @@ interface SearchResult {
   latitude: number;
   longitude: number;
   place_type?: string;
+  source: "database" | "mapbox";
 }
 
 export default function MapScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
+  const [userLocation, setUserLocation] =
+    useState<Location.LocationObject | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
@@ -55,8 +53,7 @@ export default function MapScreen() {
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
 
   const dispatch = useAppDispatch();
-  const { nearbyLocations, searchResults, searchLoading, showSearchResults } =
-    useAppSelector((state) => state.locations);
+  const { nearbyLocations } = useAppSelector((state) => state.locations);
   const [mapReady, setMapReady] = useState(false);
 
   const [region, setRegion] = useState({
@@ -77,7 +74,7 @@ export default function MapScreen() {
         }
 
         let currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation);
+        setUserLocation(currentLocation);
 
         // Fetch real locations from database
         dispatch(
@@ -114,20 +111,23 @@ export default function MapScreen() {
   };
 
   const handleLocationSelect = async (selectedLocation: SearchResult) => {
+    console.log("Selected location:", selectedLocation);
+
     // Center map on selected location
-    setRegion({
+    const newRegion = {
       latitude: selectedLocation.latitude,
       longitude: selectedLocation.longitude,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
-    });
+    };
+
+    setRegion(newRegion);
 
     // Show search result as a temporary marker
     setSearchMarker(selectedLocation);
 
     // Clear search results
     dispatch(clearSearchResults());
-    dispatch(setShowSearchResults(false));
   };
 
   const handleSearchToggle = (isVisible: boolean) => {
@@ -141,8 +141,24 @@ export default function MapScreen() {
     if (!searchMarker) return;
 
     try {
+      // For database results, just navigate to the existing location
+      if (searchMarker.source === "database") {
+        setSelectedLocationId(searchMarker.id);
+        setModalVisible(true);
+        setSearchMarker(null);
+        return;
+      }
+
+      // For Mapbox results, create new location
       const locationId = await dispatch(
-        createLocationFromSearch(searchMarker)
+        createLocationFromSearch({
+          id: searchMarker.id,
+          name: searchMarker.name,
+          address: searchMarker.address,
+          latitude: searchMarker.latitude,
+          longitude: searchMarker.longitude,
+          place_type: searchMarker.place_type,
+        })
       ).unwrap();
 
       // Navigate to review screen for the new location
@@ -157,6 +173,14 @@ export default function MapScreen() {
       setSearchMarker(null);
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to add location");
+    }
+  };
+
+  const handleMapPress = () => {
+    // Clear search marker when tapping on map
+    setSearchMarker(null);
+    if (showSearch) {
+      handleSearchToggle(false);
     }
   };
 
@@ -183,31 +207,33 @@ export default function MapScreen() {
       <SearchBar
         onLocationSelect={handleLocationSelect}
         onSearchToggle={handleSearchToggle}
+        userLocation={
+          userLocation
+            ? {
+                latitude: userLocation.coords.latitude,
+                longitude: userLocation.coords.longitude,
+              }
+            : undefined
+        }
       />
 
       <MapView
-        key={nearbyLocations.length}
+        key={`${nearbyLocations.length}-${region.latitude}-${region.longitude}`}
         style={styles.map}
         region={region}
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
         onMapReady={() => setMapReady(true)}
-        onPress={() => {
-          // Clear search marker when tapping on map
-          setSearchMarker(null);
-          if (showSearch) {
-            handleSearchToggle(false);
-          }
-        }}
+        onPress={handleMapPress}
       >
-        {/* Existing location markers */}
+        {/* Existing location markers from database */}
         {mapReady &&
           nearbyLocations &&
           nearbyLocations.length > 0 &&
           nearbyLocations.map((loc) => (
             <Marker
-              key={loc.id}
+              key={`db-${loc.id}`}
               coordinate={{
                 latitude: Number(loc.latitude),
                 longitude: Number(loc.longitude),
@@ -224,12 +250,17 @@ export default function MapScreen() {
         {/* Search result marker */}
         {searchMarker && (
           <Marker
+            key={`search-${searchMarker.id}`}
             coordinate={{
               latitude: searchMarker.latitude,
               longitude: searchMarker.longitude,
             }}
             title={searchMarker.name}
-            description="Tap + to add this location"
+            description={
+              searchMarker.source === "database"
+                ? "Tap to view details"
+                : "Tap + to add this location"
+            }
             pinColor="#2196F3" // Blue for search results
           />
         )}
@@ -239,11 +270,22 @@ export default function MapScreen() {
       {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
-            style={styles.addLocationButton}
+            style={[
+              styles.addLocationButton,
+              searchMarker.source === "database" && styles.viewLocationButton,
+            ]}
             onPress={handleAddLocation}
           >
-            <Ionicons name="add-circle" size={24} color="#FFF" />
-            <Text style={styles.addLocationText}>Add & Review Location</Text>
+            <Ionicons
+              name={searchMarker.source === "database" ? "eye" : "add-circle"}
+              size={24}
+              color="#FFF"
+            />
+            <Text style={styles.addLocationText}>
+              {searchMarker.source === "database"
+                ? "View Location"
+                : "Add & Review Location"}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -302,6 +344,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  viewLocationButton: {
+    backgroundColor: "#2196F3",
   },
   addLocationText: {
     color: "#FFF",
