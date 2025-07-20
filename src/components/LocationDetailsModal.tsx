@@ -238,8 +238,15 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         <TouchableOpacity
                           style={styles.editButton}
                           onPress={() => {
-                            // TODO: Navigate to edit review screen
-                            console.log("Edit review:", review.id);
+                            onClose();
+                            router.push({
+                              pathname: "/edit-review",
+                              params: {
+                                reviewId: review.id,
+                                locationId: selectedLocation.id,
+                                locationName: selectedLocation.name,
+                              },
+                            });
                           }}
                         >
                           <Ionicons name="pencil" size={18} color="#FFF" />

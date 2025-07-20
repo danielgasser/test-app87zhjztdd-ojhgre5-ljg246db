@@ -340,6 +340,19 @@ export interface CreateReviewForm {
   visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business'
 }
 
+export interface UpdateReviewForm {
+  title?: string
+  content?: string
+  overall_rating?: number
+  safety_rating?: number
+  comfort_rating?: number
+  accessibility_rating?: number | null
+  service_rating?: number | null
+  visited_at?: string
+  visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business' | null
+  location_id?: string // For triggering safety score recalculation
+}
+
 export interface CreateLocationForm {
   name: string
   description?: string

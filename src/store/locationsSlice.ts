@@ -138,6 +138,42 @@ export const submitReview = createAsyncThunk(
   }
 );
 
+export const updateReview = createAsyncThunk(
+  'locations/updateReview',
+  async ({ reviewId, reviewData }: { reviewId: string; reviewData: Partial<CreateReviewForm> }, { getState, dispatch }) => {
+    const state = getState() as any;
+    const userId = state.auth.user?.id;
+
+    if (!userId) throw new Error('User must be logged in to update reviews');
+
+    // Update the review
+    const { data: review, error } = await supabase
+      .from('reviews')
+      .update({
+        ...reviewData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', reviewId)
+      .eq('user_id', userId) // Ensure user can only update their own reviews
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Trigger safety score recalculation if location_id is available
+    if (reviewData.location_id) {
+      await supabase.rpc('calculate_location_safety_scores', {
+        p_location_id: reviewData.location_id,
+      });
+
+      // Refresh location details to get updated scores
+      dispatch(fetchLocationDetails(reviewData.location_id));
+    }
+
+    return review;
+  }
+);
+
 export const fetchUserReviews = createAsyncThunk(
   'locations/fetchUserReviews',
   async (userId: string) => {
@@ -234,7 +270,7 @@ const locationsSlice = createSlice({
       .addCase(fetchNearbyLocations.fulfilled, (state, action) => {
         state.loading = false;
         state.nearbyLocations = action.payload;
-   })
+      })
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch nearby locations';
@@ -284,7 +320,25 @@ const locationsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to submit review';
       });
-
+    
+    // Update review
+      builder
+        .addCase(updateReview.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(updateReview.fulfilled, (state, action) => {
+          state.loading = false;
+          // Update the review in userReviews if it exists
+          const index = state.userReviews.findIndex(review => review.id === action.payload.id);
+          if (index !== -1) {
+            state.userReviews[index] = action.payload;
+          }
+        })
+        .addCase(updateReview.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.error.message || 'Failed to update review';
+        });
     // Fetch user reviews
     builder
       .addCase(fetchUserReviews.pending, (state) => {
