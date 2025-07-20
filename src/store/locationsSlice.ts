@@ -9,6 +9,16 @@ import {
   Coordinates 
 } from '../types/supabase';
 
+interface SearchLocation {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  place_type?: string;
+}
+
+// FIXED: Updated interface to include search properties
 interface LocationsState {
   locations: LocationWithScores[];
   selectedLocation: LocationWithScores | null;
@@ -21,8 +31,13 @@ interface LocationsState {
     minSafetyScore: number | null;
     radius: number;
   };
+  // ADDED: Search-related state properties
+  searchResults: SearchLocation[];
+  searchLoading: boolean;
+  showSearchResults: boolean;
 }
 
+// FIXED: Updated initialState to include search properties
 const initialState: LocationsState = {
   locations: [],
   selectedLocation: null,
@@ -35,6 +50,10 @@ const initialState: LocationsState = {
     minSafetyScore: null,
     radius: 5000, // 5km default
   },
+  // ADDED: Search initial state
+  searchResults: [],
+  searchLoading: false,
+  showSearchResults: false,
 };
 
 // Async thunks
@@ -245,6 +264,122 @@ export const voteReview = createAsyncThunk(
   }
 );
 
+export const searchLocations = createAsyncThunk(
+  'locations/searchLocations',
+  async ({ query, userLocation }: { query: string; userLocation?: { lat: number; lng: number } }) => {
+    if (query.length < 3) {
+      return [];
+    }
+
+    try {
+      // First, search our own database for existing locations
+      const { data: existingLocations, error: dbError } = await supabase
+        .from('locations')
+        .select('id, name, address, city, state_province, place_type, coordinates')
+        .or(`name.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%`)
+        .eq('active', true)
+        .limit(3);
+
+      let results: SearchLocation[] = [];
+
+      // Add existing locations from our database
+      if (existingLocations) {
+        results = existingLocations.map(loc => {
+          // Extract coordinates from PostGIS POINT
+          const coords = loc.coordinates as any;
+          // This is a simplified extraction - you might need to parse this differently
+          // based on how PostGIS returns the coordinates
+          const latitude = coords?.coordinates?.[1] || 0;
+          const longitude = coords?.coordinates?.[0] || 0;
+          
+          return {
+            id: loc.id,
+            name: loc.name,
+            address: `${loc.address}, ${loc.city}, ${loc.state_province}`,
+            latitude,
+            longitude,
+            place_type: loc.place_type,
+          };
+        });
+      }
+
+      // TODO: Later, add Mapbox Geocoding API search here
+      // For now, we'll just search our existing database
+      // When budget allows, uncomment this section:
+      /*
+      const mapboxResponse = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&types=poi,address&limit=5&country=us,ca`
+      );
+      const mapboxData = await mapboxResponse.json();
+      
+      if (mapboxData.features) {
+        const mapboxResults = mapboxData.features.map((feature: any) => ({
+          id: `mapbox_${feature.id}`,
+          name: feature.text || feature.place_name,
+          address: feature.place_name,
+          latitude: feature.center[1],
+          longitude: feature.center[0],
+          place_type: feature.place_type?.[0] || 'location',
+        }));
+        results = [...results, ...mapboxResults];
+      }
+      */
+
+      return results;
+    } catch (error) {
+      console.error('Search error:', error);
+      throw error;
+    }
+  }
+);
+
+export const createLocationFromSearch = createAsyncThunk(
+  'locations/createLocationFromSearch',
+  async (searchLocation: SearchLocation, { getState }) => {
+    const state = getState() as any;
+    const userId = state.auth.user?.id;
+
+    if (!userId) throw new Error('User must be logged in');
+
+    // Check if location already exists
+    const { data: existingLocation } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('name', searchLocation.name)
+      .eq('address', searchLocation.address)
+      .single();
+
+    if (existingLocation) {
+      return existingLocation.id;
+    }
+
+    // Create new location
+    const locationData: CreateLocationForm = {
+      name: searchLocation.name,
+      address: searchLocation.address,
+      city: 'Unknown', // We'll need to parse this from address later
+      state_province: 'Unknown',
+      country: 'US',
+      latitude: searchLocation.latitude,
+      longitude: searchLocation.longitude,
+      place_type: (searchLocation.place_type as any) || 'other',
+    };
+
+    const { data, error } = await supabase
+      .from('locations')
+      .insert({
+        ...locationData,
+        coordinates: `POINT(${locationData.longitude} ${locationData.latitude})`,
+        created_by: userId,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data.id;
+  }
+);
+
 // Slice
 const locationsSlice = createSlice({
   name: 'locations',
@@ -258,6 +393,14 @@ const locationsSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    // ADDED: Missing search reducers
+    clearSearchResults: (state) => {
+      state.searchResults = [];
+      state.showSearchResults = false;
+    },
+    setShowSearchResults: (state, action: PayloadAction<boolean>) => {
+      state.showSearchResults = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -322,23 +465,24 @@ const locationsSlice = createSlice({
       });
     
     // Update review
-      builder
-        .addCase(updateReview.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(updateReview.fulfilled, (state, action) => {
-          state.loading = false;
-          // Update the review in userReviews if it exists
-          const index = state.userReviews.findIndex(review => review.id === action.payload.id);
-          if (index !== -1) {
-            state.userReviews[index] = action.payload;
-          }
-        })
-        .addCase(updateReview.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.error.message || 'Failed to update review';
-        });
+    builder
+      .addCase(updateReview.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateReview.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update the review in userReviews if it exists
+        const index = state.userReviews.findIndex(review => review.id === action.payload.id);
+        if (index !== -1) {
+          state.userReviews[index] = action.payload;
+        }
+      })
+      .addCase(updateReview.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update review';
+      });
+
     // Fetch user reviews
     builder
       .addCase(fetchUserReviews.pending, (state) => {
@@ -353,8 +497,45 @@ const locationsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch user reviews';
       });
+
+    // FIXED: Proper search cases
+    // Search locations
+    builder
+      .addCase(searchLocations.pending, (state) => {
+        state.searchLoading = true;
+      })
+      .addCase(searchLocations.fulfilled, (state, action) => {
+        state.searchLoading = false;
+        state.searchResults = action.payload;
+        state.showSearchResults = action.payload.length > 0;
+      })
+      .addCase(searchLocations.rejected, (state, action) => {
+        state.searchLoading = false;
+        state.error = action.error.message || 'Search failed';
+      });
+
+    // Create location from search
+    builder
+      .addCase(createLocationFromSearch.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(createLocationFromSearch.fulfilled, (state, action) => {
+        state.loading = false;
+        // The location ID is returned, we can use it to navigate to review screen
+      })
+      .addCase(createLocationFromSearch.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to create location';
+      });
   },
 });
 
-export const { setSelectedLocation, setFilters, clearError } = locationsSlice.actions;
+export const { 
+  setSelectedLocation, 
+  setFilters, 
+  clearError,
+  clearSearchResults,
+  setShowSearchResults 
+} = locationsSlice.actions;
+
 export default locationsSlice.reducer;
