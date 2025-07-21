@@ -66,6 +66,7 @@ export const fetchNearbyLocations = createAsyncThunk(
       lng: longitude,
       radius_meters: radius,
     });
+console.log("🔍 Raw nearby locations from DB:", data);
 
     if (error) throw error;
     return data || [];

@@ -184,22 +184,6 @@ export default function ReviewScreen() {
         userId: user?.id,
       });
 
-      console.log("🔍 Checking for existing review:", {
-        locationId: finalLocationId,
-        userId: user?.id,
-      });
-
-      // Check if user already reviewed this location
-      const { data: existingReview } = await supabase
-        .from("reviews")
-        .select("id")
-        .eq("location_id", finalLocationId)
-        .eq("user_id", user?.id)
-        .single();
-
-      if (existingReview) {
-        throw new Error("You have already reviewed this location");
-      }
       console.log("🐛 DEBUG reviewData:", {
         location_id: reviewData.location_id,
         finalLocationId: finalLocationId,

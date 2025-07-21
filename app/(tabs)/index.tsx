@@ -25,11 +25,12 @@ import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { LocationWithScores } from "@/types/supabase";
 
-const getMarkerColor = (rating: number) => {
-  console.log("🎨 Marker color for rating:", rating);
+const getMarkerColor = (rating: number | string | null) => {
+  const numRating = Number(rating) || 0;
+  console.log("🎨 Marker color for rating:", numRating);
 
-  if (rating >= 4) return "#4CAF50";
-  if (rating >= 3) return "#FFC107";
+  if (numRating >= 4) return "#4CAF50";
+  if (numRating >= 3) return "#FFC107";
   return "#F44336";
 };
 
