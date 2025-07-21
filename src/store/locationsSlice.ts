@@ -35,6 +35,7 @@ interface LocationsState {
   searchResults: SearchLocation[];
   searchLoading: boolean;
   showSearchResults: boolean;
+  userLocation: { latitude: number; longitude: number } | null;
 }
 
 const initialState: LocationsState = {
@@ -52,6 +53,8 @@ const initialState: LocationsState = {
   searchResults: [],
   searchLoading: false,
   showSearchResults: false,
+  userLocation: null,
+
 };
 
 export const fetchNearbyLocations = createAsyncThunk(
@@ -397,6 +400,9 @@ const locationsSlice = createSlice({
     setShowSearchResults: (state, action: PayloadAction<boolean>) => {
       state.showSearchResults = action.payload;
     },
+    setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
+      state.userLocation = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -519,7 +525,9 @@ export const {
   setFilters, 
   clearError,
   clearSearchResults,
-  setShowSearchResults 
+  setShowSearchResults,
+  setUserLocation
+
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

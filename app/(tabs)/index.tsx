@@ -17,6 +17,7 @@ import {
   fetchLocationDetails,
   createLocationFromSearch,
   clearSearchResults,
+  setUserLocation,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -43,17 +44,18 @@ export default function MapScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [userLocation, setUserLocation] =
-    useState<Location.LocationObject | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
+
   const [modalVisible, setModalVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
 
   const dispatch = useAppDispatch();
-  const { nearbyLocations } = useAppSelector((state) => state.locations);
+  const { nearbyLocations, userLocation } = useAppSelector(
+    (state) => state.locations
+  );
   const [mapReady, setMapReady] = useState(false);
 
   // San Francisco (for dev)
@@ -65,18 +67,21 @@ export default function MapScreen() {
   });
 
   useEffect(() => {
+    // Don't re-run location detection if we already have a user location
     if (userLocation) {
-      console.log("🚧 User location already set, skipping location detection");
+      console.log(
+        "🚧 User location already exists in Redux, skipping detection"
+      );
+      setLoading(false);
       return;
     }
+
     (async () => {
       try {
-        // Check if we should use dev location
         const useDevLocation =
           process.env.EXPO_PUBLIC_USE_DEV_LOCATION === "true";
 
         if (useDevLocation && __DEV__) {
-          // Use development location
           const devLat = parseFloat(
             process.env.EXPO_PUBLIC_DEV_LATITUDE || "40.7128"
           );
@@ -86,14 +91,8 @@ export default function MapScreen() {
 
           console.log("🚧 Using development location:", devLat, devLng);
 
-          const devLocation = {
-            coords: {
-              latitude: devLat,
-              longitude: devLng,
-            },
-          } as Location.LocationObject;
-
-          setUserLocation(devLocation);
+          // Store in Redux instead of local state
+          dispatch(setUserLocation({ latitude: devLat, longitude: devLng }));
 
           dispatch(
             fetchNearbyLocations({
@@ -114,7 +113,7 @@ export default function MapScreen() {
           return;
         }
 
-        // Production: Use actual location
+        // Production location code...
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
           setErrorMsg("Permission to access location was denied");
@@ -123,7 +122,14 @@ export default function MapScreen() {
         }
 
         let currentLocation = await Location.getCurrentPositionAsync({});
-        setUserLocation(currentLocation);
+
+        // Store in Redux instead of local state
+        dispatch(
+          setUserLocation({
+            latitude: currentLocation.coords.latitude,
+            longitude: currentLocation.coords.longitude,
+          })
+        );
 
         dispatch(
           fetchNearbyLocations({
@@ -155,8 +161,8 @@ export default function MapScreen() {
         console.log("🔄 Screen focused - refetching nearby locations");
         dispatch(
           fetchNearbyLocations({
-            latitude: userLocation.coords.latitude,
-            longitude: userLocation.coords.longitude,
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
             radius: 5000,
           })
         );
@@ -258,8 +264,12 @@ export default function MapScreen() {
         },
       } as Location.LocationObject;
 
-      setUserLocation(newUserLocation);
-
+      dispatch(
+        setUserLocation({
+          latitude: searchMarker.latitude,
+          longitude: searchMarker.longitude,
+        })
+      );
       // Fetch nearby locations for the NEW area (not dev location)
       await dispatch(
         fetchNearbyLocations({
@@ -319,8 +329,8 @@ export default function MapScreen() {
         userLocation={
           userLocation
             ? {
-                latitude: userLocation.coords.latitude,
-                longitude: userLocation.coords.longitude,
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
               }
             : undefined
         }
