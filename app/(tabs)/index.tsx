@@ -17,6 +17,7 @@ import {
   createLocationFromSearch,
   clearSearchResults,
   setUserLocation,
+  addLocationToNearby,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -340,6 +341,7 @@ export default function MapScreen() {
           longitude: searchMarker.longitude,
         })
       );
+
       // Fetch nearby locations for the NEW area (not dev location)
       await dispatch(
         fetchNearbyLocations({
