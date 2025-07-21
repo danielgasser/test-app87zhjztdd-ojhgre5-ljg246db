@@ -164,34 +164,7 @@ export default function ReviewScreen() {
       if (!finalLocationId) {
         throw new Error("No location ID available for review submission");
       }
-      const newLocationWithScores: LocationWithScores = {
-        id: finalLocationId,
-        name: parsedLocationData.name,
-        address: parsedLocationData.address,
-        city: parsedLocationData.address.split(", ")[1] || "Unknown",
-        state_province: parsedLocationData.address.split(", ")[2] || "Unknown",
-        country: parsedLocationData.address.includes("Canada")
-          ? "Canada"
-          : "United States",
-        coordinates: `POINT(${parsedLocationData.longitude} ${parsedLocationData.latitude})`,
-        latitude: parsedLocationData.latitude,
-        longitude: parsedLocationData.longitude,
-        avg_safety_score: null,
-        review_count: 0,
-        safety_scores: [],
-        place_type: parsedLocationData.place_type,
-        created_by: user?.id || "",
-        verified: false,
-        active: true,
-        description: null,
-        postal_code: null,
-        tags: null,
-        google_place_id: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
 
-      dispatch(addLocationToNearby(newLocationWithScores));
       if (!finalLocationId) {
         throw new Error("No location ID available for review submission");
       }
@@ -234,7 +207,37 @@ export default function ReviewScreen() {
         typedLocationId: typedLocationId,
       });
       await dispatch(submitReview(reviewData)).unwrap();
+      if (isCreatingNew && parsedLocationData) {
+        const newLocationWithScores: LocationWithScores = {
+          id: finalLocationId,
+          name: parsedLocationData.name,
+          address: parsedLocationData.address,
+          city: parsedLocationData.address.split(", ")[1] || "Unknown",
+          state_province:
+            parsedLocationData.address.split(", ")[2] || "Unknown",
+          country: parsedLocationData.address.includes("Canada")
+            ? "Canada"
+            : "United States",
+          coordinates: `POINT(${parsedLocationData.longitude} ${parsedLocationData.latitude})`,
+          latitude: parsedLocationData.latitude,
+          longitude: parsedLocationData.longitude,
+          avg_safety_score: null,
+          review_count: 0,
+          safety_scores: [],
+          place_type: parsedLocationData.place_type,
+          created_by: user?.id || "",
+          verified: false,
+          active: true,
+          description: null,
+          postal_code: null,
+          tags: null,
+          google_place_id: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
 
+        dispatch(addLocationToNearby(newLocationWithScores));
+      }
       Alert.alert("Success", "Review submitted successfully!", [
         { text: "OK", onPress: () => router.back() },
       ]);
