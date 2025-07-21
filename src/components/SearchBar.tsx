@@ -1,5 +1,3 @@
-// Create/Replace src/components/SearchBar.tsx
-
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -22,7 +20,7 @@ interface SearchResult {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source?: "database" | "mapbox"; // Make optional to match Redux interface
+  source?: "database" | "mapbox";
 }
 
 interface SearchBarProps {
@@ -54,7 +52,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
 
     try {
-      // Build Mapbox URL with proximity bias if user location available
       let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
         query
       )}.json?access_token=${mapboxToken}&types=poi,address&limit=5&country=us,ca`;
@@ -104,7 +101,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       setShowResults(true);
 
-      // Search our database first
       dispatch(
         searchLocations({
           query,
@@ -114,7 +110,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         })
       );
 
-      // Also search Mapbox
       const mapboxResults = await searchMapbox(query);
       setMapboxResults(mapboxResults);
     },
@@ -239,7 +234,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 50, // Adjust based on your safe area
+    top: 50,
     left: 16,
     right: 16,
     zIndex: 1000,

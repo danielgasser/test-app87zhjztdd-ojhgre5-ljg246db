@@ -17,10 +17,9 @@ interface SearchLocation {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source?: 'database' | 'mapbox'; // Make optional to match component interface
+  source?: 'database' | 'mapbox'; 
 }
 
-// FIXED: Updated interface to include search properties
 interface LocationsState {
   locations: LocationWithScores[];
   selectedLocation: LocationWithScores | null;
@@ -33,13 +32,11 @@ interface LocationsState {
     minSafetyScore: number | null;
     radius: number;
   };
-  // Add these missing search properties:
   searchResults: SearchLocation[];
   searchLoading: boolean;
   showSearchResults: boolean;
 }
 
-// FIXED: Updated initialState to include search properties
 const initialState: LocationsState = {
   locations: [],
   selectedLocation: null,
@@ -52,13 +49,11 @@ const initialState: LocationsState = {
     minSafetyScore: null,
     radius: 5000,
   },
-  // Add these:
   searchResults: [],
   searchLoading: false,
   showSearchResults: false,
 };
 
-// Async thunks
 export const fetchNearbyLocations = createAsyncThunk(
   'locations/fetchNearby',
   async ({ latitude, longitude, radius = 5000 }: Coordinates & { radius?: number }) => {
@@ -77,7 +72,6 @@ export const fetchNearbyLocations = createAsyncThunk(
 export const fetchLocationDetails = createAsyncThunk(
   'locations/fetchDetails',
   async (locationId: string) => {
-    // First get the location data
     const { data: location, error: locationError } = await supabase
       .from('locations')
       .select(`
@@ -89,18 +83,14 @@ export const fetchLocationDetails = createAsyncThunk(
 
     if (locationError) throw locationError;
 
-    // Extract coordinates using the get_nearby_locations function as a workaround
-    // This is a hack but it works with your existing database setup
     if (location.coordinates) {
       try {
-        // Get nearby locations for this exact location to extract coordinates
         const { data: nearbyData } = await supabase.rpc('get_nearby_locations', {
-          lat: 0, // These will be ignored since we're searching by ID
+          lat: 0, 
           lng: 0,
           radius_meters: 1,
         });
 
-        // Find our location in the nearby results to get extracted coordinates
         const locationWithCoords = nearbyData?.find((loc: any) => loc.id === locationId);
         
         if (locationWithCoords) {
@@ -109,13 +99,11 @@ export const fetchLocationDetails = createAsyncThunk(
         }
       } catch (coordError) {
         console.warn('Could not extract coordinates:', coordError);
-        // Set default coordinates if extraction fails
         location.latitude = 0;
         location.longitude = 0;
       }
     }
 
-    // Calculate overall safety score
     const overallScore = location.safety_scores?.find(
       (score: any) => score.demographic_type === 'overall'
     );
@@ -163,7 +151,6 @@ export const submitReview = createAsyncThunk(
 
     if (!userId) throw new Error('User must be logged in to submit reviews');
 
-    // Submit the review
     const { data: review, error } = await supabase
       .from('reviews')
       .insert({
@@ -175,12 +162,10 @@ export const submitReview = createAsyncThunk(
 
     if (error) throw error;
 
-    // Trigger safety score recalculation
     await supabase.rpc('calculate_location_safety_scores', {
       p_location_id: reviewData.location_id,
     });
 
-    // Refresh location details to get updated scores
     dispatch(fetchLocationDetails(reviewData.location_id));
 
     return review;
@@ -195,7 +180,6 @@ export const updateReview = createAsyncThunk(
 
     if (!userId) throw new Error('User must be logged in to update reviews');
 
-    // Update the review
     const { data: review, error } = await supabase
       .from('reviews')
       .update({
@@ -203,19 +187,17 @@ export const updateReview = createAsyncThunk(
         updated_at: new Date().toISOString(),
       })
       .eq('id', reviewId)
-      .eq('user_id', userId) // Ensure user can only update their own reviews
+      .eq('user_id', userId) 
       .select()
       .single();
 
     if (error) throw error;
 
-    // Trigger safety score recalculation if location_id is available
     if (reviewData.location_id) {
       await supabase.rpc('calculate_location_safety_scores', {
         p_location_id: reviewData.location_id,
       });
 
-      // Refresh location details to get updated scores
       dispatch(fetchLocationDetails(reviewData.location_id));
     }
 
@@ -253,7 +235,6 @@ export const voteReview = createAsyncThunk(
 
     if (!userId) throw new Error('User must be logged in to vote');
 
-    // Check if user already voted
     const { data: existingVote } = await supabase
       .from('review_votes')
       .select()
@@ -262,7 +243,6 @@ export const voteReview = createAsyncThunk(
       .single();
 
     if (existingVote) {
-      // Update existing vote
       const { error } = await supabase
         .from('review_votes')
         .update({ vote_type: voteType })
@@ -270,7 +250,6 @@ export const voteReview = createAsyncThunk(
 
       if (error) throw error;
     } else {
-      // Create new vote
       const { error } = await supabase
         .from('review_votes')
         .insert({
@@ -282,7 +261,6 @@ export const voteReview = createAsyncThunk(
       if (error) throw error;
     }
 
-    // Update review counts
     const { error: updateError } = await supabase.rpc(
       voteType === 'helpful' ? 'increment_helpful_count' : 'increment_unhelpful_count',
       { review_id: reviewId }
@@ -303,7 +281,6 @@ export const searchLocations = createAsyncThunk(
     }
 
     try {
-      // Simple search without coordinates first - we'll get coordinates when needed
       const { data: existingLocations, error: dbError } = await supabase
         .from('locations')
         .select('id, name, address, city, state_province, place_type')
@@ -314,14 +291,12 @@ export const searchLocations = createAsyncThunk(
       let results: SearchLocation[] = [];
 
       if (existingLocations && !dbError) {
-        // For database results, we'll fetch coordinates individually when needed
-        // For now, just mark them as database results with placeholder coordinates
         results = existingLocations.map(loc => ({
           id: loc.id,
           name: loc.name,
           address: `${loc.address}, ${loc.city}, ${loc.state_province}`,
-          latitude: 0, // Will be fetched when location is selected
-          longitude: 0, // Will be fetched when location is selected
+          latitude: 0,
+          longitude: 0,
           place_type: loc.place_type,
           source: 'database' as const,
         }));
@@ -347,7 +322,6 @@ export const createLocationFromSearch = createAsyncThunk(
 
     console.log('Creating location from search:', searchLocation);
 
-    // Check if location already exists by name and approximate address
     const { data: existingLocation } = await supabase
       .from('locations')
       .select('id')
@@ -360,17 +334,14 @@ export const createLocationFromSearch = createAsyncThunk(
       return existingLocation.id;
     }
 
-    // Parse address components from Mapbox result
     const addressParts = searchLocation.address.split(',').map(part => part.trim());
     const streetAddress = addressParts[0] || searchLocation.address;
     const city = addressParts[1] || 'Unknown';
     const stateProvince = addressParts[2] || 'Unknown';
     const country = addressParts[3] || 'US';
 
-    // Use the proper mapper function
     const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type);
 
-    // Create new location with properly mapped place_type
     const locationData = {
       name: searchLocation.name,
       description: null,
@@ -406,7 +377,6 @@ export const createLocationFromSearch = createAsyncThunk(
   }
 );
 
-// Slice
 const locationsSlice = createSlice({
   name: 'locations',
   initialState,
@@ -420,7 +390,6 @@ const locationsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    // ADDED: Missing search reducers
     clearSearchResults: (state) => {
       state.searchResults = [];
       state.showSearchResults = false;
@@ -430,7 +399,6 @@ const locationsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch nearby locations
     builder
       .addCase(fetchNearbyLocations.pending, (state) => {
         state.loading = true;
@@ -445,7 +413,6 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch nearby locations';
       });
 
-    // Fetch location details
     builder
       .addCase(fetchLocationDetails.pending, (state) => {
         state.loading = true;
@@ -460,7 +427,6 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch location details';
       });
 
-    // Create location
     builder
       .addCase(createLocation.pending, (state) => {
         state.loading = true;
@@ -475,7 +441,6 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Failed to create location';
       });
 
-    // Submit review
     builder
       .addCase(submitReview.pending, (state) => {
         state.loading = true;
@@ -490,7 +455,6 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Failed to submit review';
       });
     
-    // Update review
     builder
       .addCase(updateReview.pending, (state) => {
         state.loading = true;
@@ -498,7 +462,6 @@ const locationsSlice = createSlice({
       })
       .addCase(updateReview.fulfilled, (state, action) => {
         state.loading = false;
-        // Update the review in userReviews if it exists
         const index = state.userReviews.findIndex(review => review.id === action.payload.id);
         if (index !== -1) {
           state.userReviews[index] = action.payload;
@@ -509,7 +472,6 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Failed to update review';
       });
 
-    // Fetch user reviews
     builder
       .addCase(fetchUserReviews.pending, (state) => {
         state.loading = true;
@@ -524,8 +486,6 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch user reviews';
       });
 
-    // FIXED: Proper search cases
-    // Search locations
     builder
       .addCase(searchLocations.pending, (state) => {
         state.searchLoading = true;
@@ -540,14 +500,12 @@ const locationsSlice = createSlice({
         state.error = action.error.message || 'Search failed';
       });
 
-    // Create location from search
     builder
       .addCase(createLocationFromSearch.pending, (state) => {
         state.loading = true;
       })
       .addCase(createLocationFromSearch.fulfilled, (state, action) => {
         state.loading = false;
-        // The location ID is returned, we can use it to navigate to review screen
       })
       .addCase(createLocationFromSearch.rejected, (state, action) => {
         state.loading = false;

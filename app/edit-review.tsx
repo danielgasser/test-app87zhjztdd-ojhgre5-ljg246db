@@ -89,7 +89,7 @@ export default function EditReviewScreen() {
         .from("reviews")
         .select("*")
         .eq("id", reviewId as string)
-        .eq("user_id", user?.id) // Ensure user can only edit their own reviews
+        .eq("user_id", user?.id)
         .single();
 
       if (error) throw error;
@@ -107,7 +107,6 @@ export default function EditReviewScreen() {
           visit_type: review.visit_type || "solo",
         });
 
-        // Parse the visited_at timestamp back to date
         if (review.visited_at) {
           setVisitDateTime(new Date(review.visited_at));
         }
@@ -122,7 +121,6 @@ export default function EditReviewScreen() {
   };
 
   const handleSubmit = async () => {
-    // Validation
     if (!formData.title.trim()) {
       Alert.alert("Error", "Please enter a title for your review");
       return;

@@ -75,8 +75,7 @@ export interface Database {
           state_province: string
           country: string
           postal_code: string | null
-          coordinates: unknown // PostGIS geography type
-          // In src/types/supabase.ts, replace line 79-80:
+          coordinates: unknown 
 place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
            'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
            'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
@@ -115,7 +114,6 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
           country?: string
           postal_code?: string | null
           coordinates: unknown
-          // In src/types/supabase.ts, replace line 79-80:
 place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
            'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
            'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
@@ -154,7 +152,6 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
           country?: string
           postal_code?: string | null
           coordinates?: unknown
-          // In src/types/supabase.ts, replace line 79-80:
 place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
            'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
            'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
@@ -348,7 +345,6 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
   }
 }
 
-// Helper types for easier use
 export type Tables<T extends keyof Database['public']['Tables']> = 
   Database['public']['Tables'][T]['Row']
   
@@ -358,14 +354,12 @@ export type InsertTables<T extends keyof Database['public']['Tables']> =
 export type UpdateTables<T extends keyof Database['public']['Tables']> = 
   Database['public']['Tables'][T]['Update']
 
-// Convenience types
 export type UserProfile = Tables<'user_profiles'>
 export type Location = Tables<'locations'>
 export type Review = Tables<'reviews'>
 export type SafetyScore = Tables<'safety_scores'>
 export type ReviewVote = Tables<'review_votes'>
 
-// Extended types with relationships
 export interface LocationWithScores extends Location {
   avg_safety_score: any
   longitude: number
@@ -382,8 +376,6 @@ export interface ReviewWithUser extends Review {
 export interface ReviewWithLocation extends Review {
   locations?: Location
 }
-
-// Form types for submissions
 export interface CreateReviewForm {
   location_id: string
   title: string
@@ -407,7 +399,7 @@ export interface UpdateReviewForm {
   service_rating?: number | null
   visited_at?: string
   visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business' | null
-  location_id?: string // For triggering safety score recalculation
+  location_id?: string 
 }
 
 export interface CreateLocationForm {
@@ -423,8 +415,6 @@ export interface CreateLocationForm {
   place_type: Location['place_type']
   tags?: string[]
 }
-
-// Coordinate helper type
 export interface Coordinates {
   latitude: number
   longitude: number

@@ -1,11 +1,9 @@
-// app/services/supabase.ts
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { Database } from '../types/supabase';
 
-// Secure storage adapter for Supabase auth
 const ExpoSecureStoreAdapter = {
   getItem: (key: string) => {
     return SecureStore.getItemAsync(key);
@@ -18,7 +16,6 @@ const ExpoSecureStoreAdapter = {
   },
 };
 
-// These will come from your .env.local file
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 

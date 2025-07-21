@@ -1,6 +1,3 @@
-// Create this new file: src/utils/placeTypeMappers.ts
-
-// Valid database place types (matches your new enum)
 export type DatabasePlaceType = 
   'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
   'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
@@ -23,15 +20,12 @@ export type DatabasePlaceType =
   'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' | 
   'country' | 'poi' | 'place' | 'other';
 
-/**
- * Maps Mapbox place types to our database enum
- */
+
 export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
   if (!mapboxType) return 'other';
   
   const type = mapboxType.toLowerCase();
   
-  // Direct mappings for Mapbox types
   const mapboxMappings: { [key: string]: DatabasePlaceType } = {
     'address': 'address',
     'neighborhood': 'neighborhood', 
@@ -43,7 +37,6 @@ export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
     'country': 'country',
     'poi': 'poi',
     
-    // Business type mappings (when Mapbox provides them)
     'restaurant': 'restaurant',
     'cafe': 'cafe',
     'bar': 'bar',
@@ -82,64 +75,49 @@ export function mapGooglePlaceType(googleTypes?: string[]): DatabasePlaceType {
   // Google Places can return multiple types, we want the most specific one
   // Order by specificity (most specific first)
   const priorityOrder: DatabasePlaceType[] = [
-    // Food & Drink (high priority for safety considerations)
     'restaurant', 'bar', 'cafe', 'bakery', 'meal_delivery', 'meal_takeaway',
     
-    // Lodging (high priority)
     'lodging', 'campground', 'rv_park',
     
-    // Transportation (high priority) 
     'gas_station', 'airport', 'train_station', 'bus_station', 'subway_station', 
     'light_rail_station', 'transit_station', 'taxi_stand',
     
-    // Entertainment & Nightlife (high priority)
     'night_club', 'casino', 'movie_theater', 'amusement_park', 'bowling_alley',
     
-    // Retail
     'supermarket', 'convenience_store', 'shopping_mall', 
     'department_store', 'clothing_store', 'shoe_store', 'electronics_store',
     'jewelry_store', 'book_store', 'bicycle_store', 'furniture_store',
     'hardware_store', 'home_goods_store', 'pet_store', 'store',
     
-    // Health & Services
     'hospital', 'doctor', 'dentist', 'pharmacy', 'drugstore', 'veterinary_care',
     'physiotherapist', 'beauty_salon', 'hair_care', 'spa', 'gym',
     
-    // Professional Services
     'bank', 'atm', 'lawyer', 'accounting', 'insurance_agency', 'real_estate_agency',
     'travel_agency',
     
-    // Government & Public
     'city_hall', 'courthouse', 'police', 'fire_station', 'post_office', 
     'embassy', 'local_government_office',
     
-    // Education
     'school', 'primary_school', 'secondary_school', 'university', 'library',
     
-    // Religious
     'church', 'mosque', 'synagogue', 'hindu_temple',
     
-    // Recreation
     'park', 'tourist_attraction', 'museum', 'art_gallery', 'zoo', 'aquarium',
     'stadium',
     
-    // Other services
     'car_dealer', 'car_rental', 'car_repair', 'car_wash', 'moving_company',
     'storage', 'laundry', 'locksmith', 'electrician', 'plumber', 'painter',
     'roofing_contractor', 'florist', 'funeral_home',
     
-    // Generic
     'parking', 'other'
   ];
   
-  // Find the highest priority type that exists in the Google types array
   for (const priorityType of priorityOrder) {
     if (googleTypes.includes(priorityType)) {
       return priorityType;
     }
   }
   
-  // Fallback: just use the first Google type if it's valid
   const firstType = googleTypes[0] as DatabasePlaceType;
   const allValidTypes: DatabasePlaceType[] = [
     'accounting', 'airport', 'amusement_park', 'aquarium', 'art_gallery', 'atm',

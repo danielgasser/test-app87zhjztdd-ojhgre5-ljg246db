@@ -1,5 +1,3 @@
-// Replace the entire content of app/(tabs)/index.tsx
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -16,18 +14,17 @@ import { useRouter } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchNearbyLocations,
-  fetchLocationDetails, // Make sure this is imported
+  fetchLocationDetails,
   createLocationFromSearch,
   clearSearchResults,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
 
-// Helper function to get marker color based on safety rating
 const getMarkerColor = (rating: number) => {
-  if (rating >= 4) return "#4CAF50"; // Green - Safe
-  if (rating >= 3) return "#FFC107"; // Yellow - Mixed
-  return "#F44336"; // Red - Unsafe
+  if (rating >= 4) return "#4CAF50";
+  if (rating >= 3) return "#FFC107";
+  return "#F44336";
 };
 
 interface SearchResult {
@@ -37,7 +34,7 @@ interface SearchResult {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source?: "database" | "mapbox"; // Make optional to match SearchBar interface
+  source?: "database" | "mapbox";
 }
 
 export default function MapScreen() {
@@ -57,9 +54,10 @@ export default function MapScreen() {
   const { nearbyLocations } = useAppSelector((state) => state.locations);
   const [mapReady, setMapReady] = useState(false);
 
+  // San Francisco (for dev)
   const [region, setRegion] = useState({
-    latitude: 37.78825, // San Francisco
-    longitude: -122.4324, // San Francisco
+    latitude: 37.78825,
+    longitude: -122.4324,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
@@ -157,13 +155,10 @@ export default function MapScreen() {
   const handleLocationSelect = async (selectedLocation: SearchResult) => {
     console.log("Selected location:", selectedLocation);
 
-    // Ensure we have a source property
     const source = selectedLocation.source || "database";
 
-    // For database results, we need to fetch the actual coordinates
     if (source === "database") {
       try {
-        // Fetch full location details with coordinates
         const locationWithCoords = await dispatch(
           fetchLocationDetails(selectedLocation.id)
         ).unwrap();
@@ -178,7 +173,6 @@ export default function MapScreen() {
 
           setRegion(newRegion);
 
-          // Update search marker with real coordinates and source
           setSearchMarker({
             ...selectedLocation,
             latitude: Number(locationWithCoords.latitude),
@@ -190,7 +184,6 @@ export default function MapScreen() {
         console.error("Error fetching location details:", error);
       }
     } else {
-      // For Mapbox results, coordinates are already available
       const newRegion = {
         latitude: selectedLocation.latitude,
         longitude: selectedLocation.longitude,
@@ -205,7 +198,6 @@ export default function MapScreen() {
       });
     }
 
-    // Clear search results
     dispatch(clearSearchResults());
   };
 
@@ -222,7 +214,6 @@ export default function MapScreen() {
     const source = searchMarker.source || "database";
 
     try {
-      // For database results, just navigate to the existing location
       if (source === "database") {
         setSelectedLocationId(searchMarker.id);
         setModalVisible(true);
@@ -230,7 +221,6 @@ export default function MapScreen() {
         return;
       }
 
-      // For Mapbox results, create new location
       const locationId = await dispatch(
         createLocationFromSearch({
           id: searchMarker.id,
@@ -242,7 +232,6 @@ export default function MapScreen() {
         })
       ).unwrap();
 
-      // Navigate to review screen for the new location
       router.push({
         pathname: "/review",
         params: {
@@ -259,7 +248,6 @@ export default function MapScreen() {
   };
 
   const handleMapPress = () => {
-    // Clear search marker when tapping on map
     setSearchMarker(null);
     if (showSearch) {
       handleSearchToggle(false);
@@ -348,12 +336,11 @@ export default function MapScreen() {
                 ? "Tap to view details"
                 : "Tap + to add this location"
             }
-            pinColor="#2196F3" // Blue for search results
+            pinColor="#2196F3"
           />
         )}
       </MapView>
 
-      {/* Add Location Button (appears when search marker is shown) */}
       {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
@@ -382,7 +369,6 @@ export default function MapScreen() {
         </View>
       )}
 
-      {/* Location Details Modal */}
       <LocationDetailsModal
         visible={modalVisible}
         locationId={selectedLocationId}

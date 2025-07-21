@@ -1,5 +1,3 @@
-// src/components/LocationDetailsModal.tsx
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -59,7 +57,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
       if (error) throw error;
 
-      // Get user profiles for the reviews
       if (data && data.length > 0) {
         const userIds = [...new Set(data.map((r) => r.user_id))];
         const { data: profiles } = await supabase
@@ -67,7 +64,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           .select("*")
           .in("id", userIds);
 
-        // Merge the data
         const reviewsWithProfiles = data.map((review) => ({
           ...review,
           user_profiles: profiles?.find((p) => p.id === review.user_id),

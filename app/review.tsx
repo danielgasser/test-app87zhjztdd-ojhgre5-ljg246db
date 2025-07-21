@@ -74,7 +74,6 @@ export default function ReviewScreen() {
   });
 
   const handleSubmit = async () => {
-    // Validation
     if (!formData.title.trim()) {
       Alert.alert("Error", "Please enter a title for your review");
       return;

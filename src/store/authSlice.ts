@@ -66,7 +66,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Sign In
       .addCase(signIn.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -80,7 +79,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Sign in failed';
       })
-      // Sign Up
       .addCase(signUp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -94,12 +92,10 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Sign up failed';
       })
-      // Sign Out
       .addCase(signOut.fulfilled, (state) => {
         state.session = null;
         state.user = null;
       })
-      // Check Session
       .addCase(checkSession.fulfilled, (state, action) => {
         state.session = action.payload;
         state.user = action.payload?.user ?? null;
