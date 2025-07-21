@@ -58,12 +58,25 @@ export default function MapScreen() {
   );
   const [mapReady, setMapReady] = useState(false);
 
-  // San Francisco (for dev)
-  const [region, setRegion] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
+  const [region, setRegion] = useState(() => {
+    // Initialize from Redux location if available
+    if (userLocation) {
+      return {
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      };
+    }
+    // Fallback to dev location env vars
+    return {
+      latitude: parseFloat(process.env.EXPO_PUBLIC_DEV_LATITUDE || "40.7128"),
+      longitude: parseFloat(
+        process.env.EXPO_PUBLIC_DEV_LONGITUDE || "-74.0060"
+      ),
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    };
   });
 
   useEffect(() => {
@@ -165,11 +178,28 @@ export default function MapScreen() {
             longitude: userLocation.longitude,
             radius: 5000,
           })
-        );
+        ).then((result) => {
+          console.log(
+            "📍 Nearby locations result:",
+            result.payload?.length || 0,
+            "locations found"
+          );
+        });
       }
     }, [userLocation, dispatch])
   );
-
+  useEffect(() => {
+    // Sync region with Redux user location when it changes
+    if (userLocation) {
+      console.log("📍 Syncing region with Redux location:", userLocation);
+      setRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
+    }
+  }, [userLocation]);
   const handleMarkerPress = (locationId: string) => {
     setSelectedLocationId(locationId);
     setModalVisible(true);
@@ -319,7 +349,8 @@ export default function MapScreen() {
       </View>
     );
   }
-
+  console.log("🗺️ Current region:", region);
+  console.log("🗺️ Redux userLocation:", userLocation);
   return (
     <View style={styles.container}>
       {/* Search Bar */}

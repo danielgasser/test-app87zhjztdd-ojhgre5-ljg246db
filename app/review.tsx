@@ -101,6 +101,11 @@ export default function ReviewScreen() {
       accessibility_rating: formData.accessibility_rating || undefined,
       service_rating: formData.service_rating || undefined,
     };
+    console.log("🔍 Submitting review for:", {
+      locationId: locationId as string,
+      locationName,
+      userId: user?.id,
+    });
     try {
       await dispatch(
         submitReview({

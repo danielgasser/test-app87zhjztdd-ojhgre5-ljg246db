@@ -153,7 +153,20 @@ export const submitReview = createAsyncThunk(
     const userId = state.auth.user?.id;
 
     if (!userId) throw new Error('User must be logged in to submit reviews');
+console.log('🔍 Checking for existing review:', {
+      locationId: reviewData.location_id,
+      userId
+    });
+    const { data: existingReview } = await supabase
+      .from('reviews')
+      .select('id')
+      .eq('location_id', reviewData.location_id)
+      .eq('user_id', userId)
+      .single();
 
+    if (existingReview) {
+      throw new Error('You have already reviewed this location');
+    }
     const { data: review, error } = await supabase
       .from('reviews')
       .insert({
@@ -317,7 +330,7 @@ export const searchLocations = createAsyncThunk(
 
 export const createLocationFromSearch = createAsyncThunk(
   'locations/createLocationFromSearch',
-  async (searchLocation: SearchLocation, { getState }) => {
+  async (searchLocation: SearchLocation, { getState, dispatch }) => {
     const state = getState() as any;
     const userId = state.auth.user?.id;
 
@@ -376,6 +389,18 @@ export const createLocationFromSearch = createAsyncThunk(
     }
 
     console.log('Location created successfully:', data.id);
+    const newLocationWithScores = {
+      ...data,
+      latitude: searchLocation.latitude,
+      longitude: searchLocation.longitude,
+      avg_safety_score: null,
+      overall_safety_score: null,
+      review_count: 0,
+      safety_scores: [],
+    };
+
+    // Add to Redux state immediately
+    dispatch(addLocationToNearby(newLocationWithScores));
     return data.id;
   }
 );
@@ -403,6 +428,12 @@ const locationsSlice = createSlice({
     setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
       state.userLocation = action.payload;
     },
+    addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
+  // Add location to nearby if not already present
+  if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
+    state.nearbyLocations.push(action.payload);
+  }
+},
   },
   extraReducers: (builder) => {
     builder
@@ -526,8 +557,8 @@ export const {
   clearError,
   clearSearchResults,
   setShowSearchResults,
-  setUserLocation
-
+  setUserLocation,
+addLocationToNearby
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
