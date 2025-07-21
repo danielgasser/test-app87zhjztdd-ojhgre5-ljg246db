@@ -20,6 +20,8 @@ import {
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const getMarkerColor = (rating: number) => {
   if (rating >= 4) return "#4CAF50";
@@ -63,6 +65,10 @@ export default function MapScreen() {
   });
 
   useEffect(() => {
+    if (userLocation) {
+      console.log("🚧 User location already set, skipping location detection");
+      return;
+    }
     (async () => {
       try {
         // Check if we should use dev location
@@ -142,6 +148,22 @@ export default function MapScreen() {
     })();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      // When screen comes back into focus (returning from review), refetch nearby locations
+      if (userLocation) {
+        console.log("🔄 Screen focused - refetching nearby locations");
+        dispatch(
+          fetchNearbyLocations({
+            latitude: userLocation.coords.latitude,
+            longitude: userLocation.coords.longitude,
+            radius: 5000,
+          })
+        );
+      }
+    }, [userLocation, dispatch])
+  );
+
   const handleMarkerPress = (locationId: string) => {
     setSelectedLocationId(locationId);
     setModalVisible(true);
@@ -215,23 +237,39 @@ export default function MapScreen() {
 
     try {
       if (source === "database") {
+        // For database results, just navigate to existing location
         setSelectedLocationId(searchMarker.id);
         setModalVisible(true);
         setSearchMarker(null);
         return;
       }
 
+      // For Mapbox results, create new location
+      console.log("Creating location from Mapbox result...");
       const locationId = await dispatch(
-        createLocationFromSearch({
-          id: searchMarker.id,
-          name: searchMarker.name,
-          address: searchMarker.address,
-          latitude: searchMarker.latitude,
-          longitude: searchMarker.longitude,
-          place_type: searchMarker.place_type,
-        })
+        createLocationFromSearch(searchMarker)
       ).unwrap();
 
+      // CRITICAL: Update user location and refetch nearby locations for new area
+      const newUserLocation = {
+        coords: {
+          latitude: searchMarker.latitude,
+          longitude: searchMarker.longitude,
+        },
+      } as Location.LocationObject;
+
+      setUserLocation(newUserLocation);
+
+      // Fetch nearby locations for the NEW area (not dev location)
+      await dispatch(
+        fetchNearbyLocations({
+          latitude: searchMarker.latitude,
+          longitude: searchMarker.longitude,
+          radius: 5000,
+        })
+      );
+
+      // Navigate to review screen with new location
       router.push({
         pathname: "/review",
         params: {
@@ -240,10 +278,11 @@ export default function MapScreen() {
         },
       });
 
+      // Clear search marker
       setSearchMarker(null);
-    } catch (error: any) {
-      console.error("Add location error:", error);
-      Alert.alert("Error", error.message || "Failed to add location");
+    } catch (error) {
+      console.error("Error creating location:", error);
+      Alert.alert("Error", "Failed to create location. Please try again.");
     }
   };
 
