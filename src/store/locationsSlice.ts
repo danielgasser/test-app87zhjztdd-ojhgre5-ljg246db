@@ -8,6 +8,7 @@ import {
   CreateLocationForm,
   Coordinates 
 } from '../types/supabase';
+import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
 
 interface SearchLocation {
   id: string;
@@ -366,7 +367,10 @@ export const createLocationFromSearch = createAsyncThunk(
     const stateProvince = addressParts[2] || 'Unknown';
     const country = addressParts[3] || 'US';
 
-    // Create new location - DON'T use latitude/longitude properties
+    // Use the proper mapper function
+    const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type);
+
+    // Create new location with properly mapped place_type
     const locationData = {
       name: searchLocation.name,
       description: null,
@@ -375,9 +379,8 @@ export const createLocationFromSearch = createAsyncThunk(
       state_province: stateProvince,
       country: country,
       postal_code: null,
-      // Store coordinates as PostGIS POINT (longitude, latitude order!)
       coordinates: `POINT(${searchLocation.longitude} ${searchLocation.latitude})`,
-      place_type: (searchLocation.place_type as any) || 'other',
+      place_type: mappedPlaceType,
       tags: null,
       google_place_id: null,
       created_by: userId,
