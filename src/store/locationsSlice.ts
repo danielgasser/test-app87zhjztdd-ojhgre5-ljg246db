@@ -427,7 +427,18 @@ const locationsSlice = createSlice({
     setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
       state.userLocation = action.payload;
     },
-   
+   addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
+      console.log("🎯 addLocationToNearby reducer called with:", action.payload.id);
+      console.log("🎯 Current nearbyLocations count before:", state.nearbyLocations.length);
+      
+      // Add location to nearby if not already present
+      if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
+        state.nearbyLocations.push(action.payload);
+        console.log("🎯 Location added to nearbyLocations. New count:", state.nearbyLocations.length);
+      } else {
+        console.log("🎯 Location already exists in nearbyLocations");
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -556,6 +567,7 @@ export const {
   clearSearchResults,
   setShowSearchResults,
   setUserLocation,
+  addLocationToNearby
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

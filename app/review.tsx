@@ -16,8 +16,13 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { submitReview } from "src/store/locationsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { createLocationFromSearch } from "src/store/locationsSlice";
 import { supabase } from "@/services/supabase";
+import {
+  createLocationFromSearch,
+  setUserLocation,
+  addLocationToNearby,
+} from "src/store/locationsSlice";
+import { LocationWithScores } from "@/types/supabase";
 
 interface RatingProps {
   label: string;
@@ -149,8 +154,44 @@ export default function ReviewScreen() {
         setCurrentLocationId(finalLocationId);
 
         console.log("🏗️ Location created successfully:", finalLocationId);
+        dispatch(
+          setUserLocation({
+            latitude: parsedLocationData.latitude,
+            longitude: parsedLocationData.longitude,
+          })
+        );
       }
+      if (!finalLocationId) {
+        throw new Error("No location ID available for review submission");
+      }
+      const newLocationWithScores: LocationWithScores = {
+        id: finalLocationId,
+        name: parsedLocationData.name,
+        address: parsedLocationData.address,
+        city: parsedLocationData.address.split(", ")[1] || "Unknown",
+        state_province: parsedLocationData.address.split(", ")[2] || "Unknown",
+        country: parsedLocationData.address.includes("Canada")
+          ? "Canada"
+          : "United States",
+        coordinates: `POINT(${parsedLocationData.longitude} ${parsedLocationData.latitude})`,
+        latitude: parsedLocationData.latitude,
+        longitude: parsedLocationData.longitude,
+        avg_safety_score: null,
+        review_count: 0,
+        safety_scores: [],
+        place_type: parsedLocationData.place_type,
+        created_by: user?.id || "",
+        verified: false,
+        active: true,
+        description: null,
+        postal_code: null,
+        tags: null,
+        google_place_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
+      dispatch(addLocationToNearby(newLocationWithScores));
       if (!finalLocationId) {
         throw new Error("No location ID available for review submission");
       }
