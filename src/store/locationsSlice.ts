@@ -443,7 +443,11 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchNearbyLocations.fulfilled, (state, action) => {
         state.loading = false;
-        state.nearbyLocations = action.payload;
+        const manuallyAdded = state.nearbyLocations.filter(existing => 
+          !action.payload.find((fetched: { id: string; }) => fetched.id === existing.id)
+        );
+  
+        state.nearbyLocations = [...action.payload, ...manuallyAdded];
       })
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;

@@ -308,16 +308,6 @@ export default function MapScreen() {
       // ADD THE NEW LOCATION TO REDUX IMMEDIATELY
       console.log("🎯 About to add location to nearby:", locationId);
 
-      const extractCity = (address: string) => {
-        const parts = address.split(", ");
-        return parts[1] || "Unknown";
-      };
-
-      const extractStateProvince = (address: string) => {
-        const parts = address.split(", ");
-        return parts[2] || "Unknown";
-      };
-
       const newLocationWithScores: LocationWithScores = {
         id: locationId,
         name: searchMarker.name,
