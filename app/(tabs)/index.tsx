@@ -58,8 +58,8 @@ export default function MapScreen() {
   const [mapReady, setMapReady] = useState(false);
 
   const [region, setRegion] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
+    latitude: 37.78825, // San Francisco
+    longitude: -122.4324, // San Francisco
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
