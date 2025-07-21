@@ -24,6 +24,7 @@ import SearchBar from "src/components/SearchBar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import { LocationWithScores } from "@/types/supabase";
 
 const getMarkerColor = (rating: number) => {
   if (rating >= 4) return "#4CAF50";
@@ -48,7 +49,6 @@ export default function MapScreen() {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
-  const user = useAppSelector((state) => state.auth.user);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -58,6 +58,7 @@ export default function MapScreen() {
   const { nearbyLocations, userLocation } = useAppSelector(
     (state) => state.locations
   );
+  const user = useAppSelector((state) => state.auth.user);
   const [mapReady, setMapReady] = useState(false);
 
   const [region, setRegion] = useState(() => {
@@ -285,39 +286,55 @@ export default function MapScreen() {
 
     try {
       if (source === "database") {
-        // For database results, just navigate to existing location
         setSelectedLocationId(searchMarker.id);
         setModalVisible(true);
         setSearchMarker(null);
         return;
       }
 
-      // For Mapbox results, create new location
       console.log("Creating location from Mapbox result...");
       const locationId = await dispatch(
         createLocationFromSearch(searchMarker)
       ).unwrap();
 
+      // Update user location
       dispatch(
         setUserLocation({
           latitude: searchMarker.latitude,
           longitude: searchMarker.longitude,
         })
       );
-      const newLocationWithScores = {
+
+      // ADD THE NEW LOCATION TO REDUX IMMEDIATELY
+      console.log("🎯 About to add location to nearby:", locationId);
+
+      const extractCity = (address: string) => {
+        const parts = address.split(", ");
+        return parts[1] || "Unknown";
+      };
+
+      const extractStateProvince = (address: string) => {
+        const parts = address.split(", ");
+        return parts[2] || "Unknown";
+      };
+
+      const newLocationWithScores: LocationWithScores = {
         id: locationId,
         name: searchMarker.name,
         address: searchMarker.address,
         city: extractCity(searchMarker.address),
         state_province: extractStateProvince(searchMarker.address),
-        country: "United States", // or extract from address
+        country: searchMarker.address.includes("Canada")
+          ? "Canada"
+          : "United States",
+        coordinates: `POINT(${searchMarker.longitude} ${searchMarker.latitude})`, // ADD THIS LINE
         latitude: searchMarker.latitude,
         longitude: searchMarker.longitude,
         avg_safety_score: null,
-        overall_safety_score: null,
+        overall_safety_score: undefined,
         review_count: 0,
         safety_scores: [],
-        place_type: searchMarker.place_type || "address",
+        place_type: (searchMarker.place_type as any) || "address",
         created_by: user?.id || "",
         verified: false,
         active: true,
@@ -328,30 +345,15 @@ export default function MapScreen() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      const newUserLocation = {
-        coords: {
-          latitude: searchMarker.latitude,
-          longitude: searchMarker.longitude,
-        },
-      } as Location.LocationObject;
 
-      dispatch(
-        setUserLocation({
-          latitude: searchMarker.latitude,
-          longitude: searchMarker.longitude,
-        })
+      console.log(
+        "🎯 Dispatching addLocationToNearby with:",
+        newLocationWithScores
       );
+      dispatch(addLocationToNearby(newLocationWithScores));
+      console.log("🎯 addLocationToNearby dispatched successfully");
 
-      // Fetch nearby locations for the NEW area (not dev location)
-      await dispatch(
-        fetchNearbyLocations({
-          latitude: searchMarker.latitude,
-          longitude: searchMarker.longitude,
-          radius: 5000,
-        })
-      );
-
-      // Navigate to review screen with new location
+      // Navigate to review screen
       router.push({
         pathname: "/review",
         params: {
@@ -360,7 +362,6 @@ export default function MapScreen() {
         },
       });
 
-      // Clear search marker
       setSearchMarker(null);
     } catch (error) {
       console.error("Error creating location:", error);
