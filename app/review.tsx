@@ -227,7 +227,12 @@ export default function ReviewScreen() {
       if (existingReview) {
         throw new Error("You have already reviewed this location");
       }
-
+      console.log("🐛 DEBUG reviewData:", {
+        location_id: reviewData.location_id,
+        finalLocationId: finalLocationId,
+        currentLocationId: currentLocationId,
+        typedLocationId: typedLocationId,
+      });
       await dispatch(submitReview(reviewData)).unwrap();
 
       Alert.alert("Success", "Review submitted successfully!", [

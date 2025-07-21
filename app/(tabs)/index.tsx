@@ -26,6 +26,8 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { LocationWithScores } from "@/types/supabase";
 
 const getMarkerColor = (rating: number) => {
+  console.log("🎨 Marker color for rating:", rating);
+
   if (rating >= 4) return "#4CAF50";
   if (rating >= 3) return "#FFC107";
   return "#F44336";
