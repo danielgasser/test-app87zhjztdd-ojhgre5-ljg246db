@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { submitReview } from "src/store/locationsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { createLocationFromSearch } from "src/store/locationsSlice";
+import { supabase } from "@/services/supabase";
 
 interface RatingProps {
   label: string;
@@ -23,7 +25,13 @@ interface RatingProps {
   onChange: (value: number) => void;
   required?: boolean;
 }
-
+// Update your existing interface
+interface ReviewParams {
+  locationId?: string;
+  locationName?: string;
+  locationData?: string; // Add these new fields
+  isNewLocation?: string;
+}
 const RatingInput: React.FC<RatingProps> = ({
   label,
   value,
@@ -53,7 +61,12 @@ const RatingInput: React.FC<RatingProps> = ({
 export default function ReviewScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { locationId, locationName } = useLocalSearchParams();
+  const { locationId, locationName, locationData, isNewLocation } =
+    useLocalSearchParams();
+  const typedLocationId = locationId as string | undefined;
+  const typedLocationName = locationName as string | undefined;
+  const typedLocationData = locationData as string | undefined;
+  const typedIsNewLocation = isNewLocation as string | undefined;
   const [showVisitTypePicker, setShowVisitTypePicker] = useState(false);
 
   const { loading } = useAppSelector((state) => state.locations);
@@ -72,58 +85,124 @@ export default function ReviewScreen() {
     service_rating: 0,
     visit_type: "solo" as const,
   });
+  const parsedLocationData = typedLocationData
+    ? JSON.parse(typedLocationData)
+    : null;
+  const isCreatingNew = typedIsNewLocation === "true";
+  const [currentLocationId, setCurrentLocationId] = useState<string | null>(
+    isCreatingNew ? null : typedLocationId || null
+  );
+
+  useEffect(() => {
+    if (!isCreatingNew && !typedLocationId) {
+      Alert.alert("Error", "No location specified");
+      router.back();
+      return;
+    }
+
+    if (isCreatingNew && !parsedLocationData) {
+      Alert.alert("Error", "No location data provided");
+      router.back();
+      return;
+    }
+  }, [typedLocationId, isCreatingNew, parsedLocationData]);
 
   const handleSubmit = async () => {
+    // Validation
     if (!formData.title.trim()) {
-      Alert.alert("Error", "Please enter a title for your review");
+      Alert.alert("Error", "Please enter a review title");
       return;
     }
-    if (!formData.content.trim()) {
-      Alert.alert("Error", "Please write your review");
-      return;
-    }
-    if (formData.overall_rating === 0) {
-      Alert.alert("Error", "Please provide an overall rating");
-      return;
-    }
-    if (formData.safety_rating === 0) {
-      Alert.alert("Error", "Please provide a safety rating");
-      return;
-    }
-    if (formData.comfort_rating === 0) {
-      Alert.alert("Error", "Please provide a comfort rating");
-      return;
-    }
-    const reviewData = {
-      location_id: locationId as string,
-      ...formData,
-      visited_at: visitDateTime.toISOString(),
-      accessibility_rating: formData.accessibility_rating || undefined,
-      service_rating: formData.service_rating || undefined,
-    };
-    console.log("🔍 Submitting review for:", {
-      locationId: locationId as string,
-      locationName,
-      userId: user?.id,
-    });
-    try {
-      await dispatch(
-        submitReview({
-          location_id: locationId as string,
-          ...formData,
-          visited_at: visitDateTime.toISOString(),
-          accessibility_rating: formData.accessibility_rating || undefined,
-          service_rating: formData.service_rating || undefined,
-        })
-      ).unwrap();
 
-      Alert.alert("Success", "Your review has been submitted!", [
+    if (!formData.content.trim()) {
+      Alert.alert("Error", "Please enter review content");
+      return;
+    }
+
+    if (!formData.overall_rating || !formData.safety_rating) {
+      Alert.alert("Error", "Please provide both overall and safety ratings");
+      return;
+    }
+
+    let finalLocationId = currentLocationId;
+
+    try {
+      // If this is a new location, create it first
+      if (isCreatingNew && parsedLocationData) {
+        console.log("🏗️ Creating location before submitting review...");
+
+        // Convert parsed data to SearchLocation format
+        const searchLocation = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          name: parsedLocationData.name,
+          address: parsedLocationData.address,
+          latitude: parsedLocationData.latitude,
+          longitude: parsedLocationData.longitude,
+          place_type: parsedLocationData.place_type,
+          source: "mapbox" as const,
+        };
+
+        // Create the location
+        finalLocationId = await dispatch(
+          createLocationFromSearch(searchLocation)
+        ).unwrap();
+        setCurrentLocationId(finalLocationId);
+
+        console.log("🏗️ Location created successfully:", finalLocationId);
+      }
+
+      if (!finalLocationId) {
+        throw new Error("No location ID available for review submission");
+      }
+
+      // Now submit the review with the location ID
+      const reviewData = {
+        location_id: finalLocationId,
+        ...formData,
+        visited_at: visitDateTime.toISOString(),
+        accessibility_rating: formData.accessibility_rating || undefined,
+        service_rating: formData.service_rating || undefined,
+      };
+
+      console.log("🔍 Submitting review for:", {
+        locationId: finalLocationId,
+        locationName: typedLocationName || parsedLocationData?.name,
+        userId: user?.id,
+      });
+
+      console.log("🔍 Checking for existing review:", {
+        locationId: finalLocationId,
+        userId: user?.id,
+      });
+
+      // Check if user already reviewed this location
+      const { data: existingReview } = await supabase
+        .from("reviews")
+        .select("id")
+        .eq("location_id", finalLocationId)
+        .eq("user_id", user?.id)
+        .single();
+
+      if (existingReview) {
+        throw new Error("You have already reviewed this location");
+      }
+
+      await dispatch(submitReview(reviewData)).unwrap();
+
+      Alert.alert("Success", "Review submitted successfully!", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      console.error("Review submission error:", error);
-      console.error("Error details:", error.message);
-      console.error("Error code:", error.code);
+      console.error("🚨 Review submission error:", error);
+
+      if (error.code === "23505") {
+        Alert.alert(
+          "Already Reviewed",
+          "You have already reviewed this location. You can edit your existing review instead."
+        );
+        return;
+      }
+
       Alert.alert(
         "Error",
         error.message || "Failed to submit review. Please try again."

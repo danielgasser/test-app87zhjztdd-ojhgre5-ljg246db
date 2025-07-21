@@ -17,7 +17,6 @@ import {
   createLocationFromSearch,
   clearSearchResults,
   setUserLocation,
-  addLocationToNearby,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -286,18 +285,17 @@ export default function MapScreen() {
 
     try {
       if (source === "database") {
+        // Existing location - navigate normally
         setSelectedLocationId(searchMarker.id);
         setModalVisible(true);
         setSearchMarker(null);
         return;
       }
 
-      console.log("Creating location from Mapbox result...");
-      const locationId = await dispatch(
-        createLocationFromSearch(searchMarker)
-      ).unwrap();
+      // For NEW locations - don't create yet, just pass the data
+      console.log("Passing location data to review screen for creation...");
 
-      // Update user location
+      // Update user location for map centering
       dispatch(
         setUserLocation({
           latitude: searchMarker.latitude,
@@ -305,57 +303,27 @@ export default function MapScreen() {
         })
       );
 
-      // ADD THE NEW LOCATION TO REDUX IMMEDIATELY
-      console.log("🎯 About to add location to nearby:", locationId);
-
-      const newLocationWithScores: LocationWithScores = {
-        id: locationId,
-        name: searchMarker.name,
-        address: searchMarker.address,
-        city: extractCity(searchMarker.address),
-        state_province: extractStateProvince(searchMarker.address),
-        country: searchMarker.address.includes("Canada")
-          ? "Canada"
-          : "United States",
-        coordinates: `POINT(${searchMarker.longitude} ${searchMarker.latitude})`, // ADD THIS LINE
-        latitude: searchMarker.latitude,
-        longitude: searchMarker.longitude,
-        avg_safety_score: null,
-        overall_safety_score: undefined,
-        review_count: 0,
-        safety_scores: [],
-        place_type: (searchMarker.place_type as any) || "address",
-        created_by: user?.id || "",
-        verified: false,
-        active: true,
-        description: null,
-        postal_code: null,
-        tags: null,
-        google_place_id: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      console.log(
-        "🎯 Dispatching addLocationToNearby with:",
-        newLocationWithScores
-      );
-      dispatch(addLocationToNearby(newLocationWithScores));
-      console.log("🎯 addLocationToNearby dispatched successfully");
-
-      // Navigate to review screen
+      // Navigate to review with location data (not ID)
       router.push({
         pathname: "/review",
         params: {
-          locationId: locationId,
+          // Pass the raw location data instead of locationId
+          locationData: JSON.stringify({
+            name: searchMarker.name,
+            address: searchMarker.address,
+            latitude: searchMarker.latitude,
+            longitude: searchMarker.longitude,
+            place_type: searchMarker.place_type || "address",
+          }),
           locationName: searchMarker.name,
+          isNewLocation: "true", // Flag to indicate this needs to be created
         },
       });
 
       setSearchMarker(null);
     } catch (error) {
-      console.error("Error creating location:", error);
-      Alert.alert("Error", "Failed to create location. Please try again.");
+      console.error("Error preparing location:", error);
+      Alert.alert("Error", "Failed to prepare location. Please try again.");
     }
   };
 

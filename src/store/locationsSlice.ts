@@ -400,7 +400,6 @@ export const createLocationFromSearch = createAsyncThunk(
     };
 
     // Add to Redux state immediately
-    dispatch(addLocationToNearby(newLocationWithScores));
     return data.id;
   }
 );
@@ -428,12 +427,7 @@ const locationsSlice = createSlice({
     setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
       state.userLocation = action.payload;
     },
-    addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
-  // Add location to nearby if not already present
-  if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
-    state.nearbyLocations.push(action.payload);
-  }
-},
+   
   },
   extraReducers: (builder) => {
     builder
@@ -562,7 +556,6 @@ export const {
   clearSearchResults,
   setShowSearchResults,
   setUserLocation,
-addLocationToNearby
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
