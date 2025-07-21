@@ -11,7 +11,6 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchNearbyLocations,
   fetchLocationDetails,
@@ -23,6 +22,7 @@ import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
 
 const getMarkerColor = (rating: number) => {
   if (rating >= 4) return "#4CAF50";
@@ -47,6 +47,7 @@ export default function MapScreen() {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
+  const user = useAppSelector((state) => state.auth.user);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -266,6 +267,16 @@ export default function MapScreen() {
     }
   };
 
+  const extractCity = (address: string) => {
+    const parts = address.split(", ");
+    return parts[1] || "Unknown";
+  };
+
+  const extractStateProvince = (address: string) => {
+    const parts = address.split(", ");
+    return parts[2] || "Unknown";
+  };
+
   const handleAddLocation = async () => {
     if (!searchMarker) return;
 
@@ -286,7 +297,36 @@ export default function MapScreen() {
         createLocationFromSearch(searchMarker)
       ).unwrap();
 
-      // CRITICAL: Update user location and refetch nearby locations for new area
+      dispatch(
+        setUserLocation({
+          latitude: searchMarker.latitude,
+          longitude: searchMarker.longitude,
+        })
+      );
+      const newLocationWithScores = {
+        id: locationId,
+        name: searchMarker.name,
+        address: searchMarker.address,
+        city: extractCity(searchMarker.address),
+        state_province: extractStateProvince(searchMarker.address),
+        country: "United States", // or extract from address
+        latitude: searchMarker.latitude,
+        longitude: searchMarker.longitude,
+        avg_safety_score: null,
+        overall_safety_score: null,
+        review_count: 0,
+        safety_scores: [],
+        place_type: searchMarker.place_type || "address",
+        created_by: user?.id || "",
+        verified: false,
+        active: true,
+        description: null,
+        postal_code: null,
+        tags: null,
+        google_place_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
       const newUserLocation = {
         coords: {
           latitude: searchMarker.latitude,
