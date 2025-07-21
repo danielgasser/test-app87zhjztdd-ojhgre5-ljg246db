@@ -22,7 +22,7 @@ interface SearchResult {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source: "database" | "mapbox"; // Track where result came from
+  source?: "database" | "mapbox"; // Make optional to match Redux interface
 }
 
 interface SearchBarProps {
@@ -135,7 +135,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   // Combine results: database results first, then Mapbox results
-  const allResults = [...searchResults, ...mapboxResults];
+  // Ensure all results have a source property
+  const dbResultsWithSource = searchResults.map((result) => ({
+    ...result,
+    source: (result.source || "database") as "database" | "mapbox",
+  }));
+
+  const mapboxResultsWithSource = mapboxResults.map((result) => ({
+    ...result,
+    source: (result.source || "mapbox") as "database" | "mapbox",
+  }));
+
+  const allResults = [...dbResultsWithSource, ...mapboxResultsWithSource];
 
   const renderSearchResult = ({ item }: { item: SearchResult }) => (
     <TouchableOpacity

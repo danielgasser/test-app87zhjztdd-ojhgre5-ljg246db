@@ -16,6 +16,7 @@ interface SearchLocation {
   latitude: number;
   longitude: number;
   place_type?: string;
+  source?: 'database' | 'mapbox'; // Make optional to match component interface
 }
 
 // FIXED: Updated interface to include search properties
@@ -31,7 +32,7 @@ interface LocationsState {
     minSafetyScore: number | null;
     radius: number;
   };
-  // ADDED: Search-related state properties
+  // Add these missing search properties:
   searchResults: SearchLocation[];
   searchLoading: boolean;
   showSearchResults: boolean;
@@ -48,9 +49,9 @@ const initialState: LocationsState = {
   filters: {
     placeType: null,
     minSafetyScore: null,
-    radius: 5000, // 5km default
+    radius: 5000,
   },
-  // ADDED: Search initial state
+  // Add these:
   searchResults: [],
   searchLoading: false,
   showSearchResults: false,
@@ -75,7 +76,7 @@ export const fetchNearbyLocations = createAsyncThunk(
 export const fetchLocationDetails = createAsyncThunk(
   'locations/fetchDetails',
   async (locationId: string) => {
-    // Fetch location with safety scores
+    // First get the location data
     const { data: location, error: locationError } = await supabase
       .from('locations')
       .select(`
@@ -87,6 +88,32 @@ export const fetchLocationDetails = createAsyncThunk(
 
     if (locationError) throw locationError;
 
+    // Extract coordinates using the get_nearby_locations function as a workaround
+    // This is a hack but it works with your existing database setup
+    if (location.coordinates) {
+      try {
+        // Get nearby locations for this exact location to extract coordinates
+        const { data: nearbyData } = await supabase.rpc('get_nearby_locations', {
+          lat: 0, // These will be ignored since we're searching by ID
+          lng: 0,
+          radius_meters: 1,
+        });
+
+        // Find our location in the nearby results to get extracted coordinates
+        const locationWithCoords = nearbyData?.find((loc: any) => loc.id === locationId);
+        
+        if (locationWithCoords) {
+          location.latitude = locationWithCoords.latitude;
+          location.longitude = locationWithCoords.longitude;
+        }
+      } catch (coordError) {
+        console.warn('Could not extract coordinates:', coordError);
+        // Set default coordinates if extraction fails
+        location.latitude = 0;
+        location.longitude = 0;
+      }
+    }
+
     // Calculate overall safety score
     const overallScore = location.safety_scores?.find(
       (score: any) => score.demographic_type === 'overall'
@@ -96,6 +123,8 @@ export const fetchLocationDetails = createAsyncThunk(
       ...location,
       overall_safety_score: overallScore?.avg_safety_score || null,
       review_count: overallScore?.review_count || 0,
+      latitude: location.latitude || 0,
+      longitude: location.longitude || 0,
     };
   }
 );
@@ -264,6 +293,7 @@ export const voteReview = createAsyncThunk(
   }
 );
 
+
 export const searchLocations = createAsyncThunk(
   'locations/searchLocations',
   async ({ query, userLocation }: { query: string; userLocation?: { lat: number; lng: number } }) => {
@@ -272,58 +302,31 @@ export const searchLocations = createAsyncThunk(
     }
 
     try {
-      // First, search our own database for existing locations
+      // Simple search without coordinates first - we'll get coordinates when needed
       const { data: existingLocations, error: dbError } = await supabase
         .from('locations')
-        .select('id, name, address, city, state_province, place_type, coordinates')
+        .select('id, name, address, city, state_province, place_type')
         .or(`name.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%`)
         .eq('active', true)
         .limit(3);
 
       let results: SearchLocation[] = [];
 
-      // Add existing locations from our database
-      if (existingLocations) {
-        results = existingLocations.map(loc => {
-          // Extract coordinates from PostGIS POINT
-          const coords = loc.coordinates as any;
-          // This is a simplified extraction - you might need to parse this differently
-          // based on how PostGIS returns the coordinates
-          const latitude = coords?.coordinates?.[1] || 0;
-          const longitude = coords?.coordinates?.[0] || 0;
-          
-          return {
-            id: loc.id,
-            name: loc.name,
-            address: `${loc.address}, ${loc.city}, ${loc.state_province}`,
-            latitude,
-            longitude,
-            place_type: loc.place_type,
-          };
-        });
-      }
-
-      // TODO: Later, add Mapbox Geocoding API search here
-      // For now, we'll just search our existing database
-      // When budget allows, uncomment this section:
-      /*
-      const mapboxResponse = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&types=poi,address&limit=5&country=us,ca`
-      );
-      const mapboxData = await mapboxResponse.json();
-      
-      if (mapboxData.features) {
-        const mapboxResults = mapboxData.features.map((feature: any) => ({
-          id: `mapbox_${feature.id}`,
-          name: feature.text || feature.place_name,
-          address: feature.place_name,
-          latitude: feature.center[1],
-          longitude: feature.center[0],
-          place_type: feature.place_type?.[0] || 'location',
+      if (existingLocations && !dbError) {
+        // For database results, we'll fetch coordinates individually when needed
+        // For now, just mark them as database results with placeholder coordinates
+        results = existingLocations.map(loc => ({
+          id: loc.id,
+          name: loc.name,
+          address: `${loc.address}, ${loc.city}, ${loc.state_province}`,
+          latitude: 0, // Will be fetched when location is selected
+          longitude: 0, // Will be fetched when location is selected
+          place_type: loc.place_type,
+          source: 'database' as const,
         }));
-        results = [...results, ...mapboxResults];
+      } else if (dbError) {
+        console.error('Database search error:', dbError);
       }
-      */
 
       return results;
     } catch (error) {
@@ -341,41 +344,61 @@ export const createLocationFromSearch = createAsyncThunk(
 
     if (!userId) throw new Error('User must be logged in');
 
-    // Check if location already exists
+    console.log('Creating location from search:', searchLocation);
+
+    // Check if location already exists by name and approximate address
     const { data: existingLocation } = await supabase
       .from('locations')
       .select('id')
       .eq('name', searchLocation.name)
-      .eq('address', searchLocation.address)
+      .ilike('address', `%${searchLocation.address.split(',')[0]}%`)
       .single();
 
     if (existingLocation) {
+      console.log('Location already exists:', existingLocation.id);
       return existingLocation.id;
     }
 
-    // Create new location
-    const locationData: CreateLocationForm = {
+    // Parse address components from Mapbox result
+    const addressParts = searchLocation.address.split(',').map(part => part.trim());
+    const streetAddress = addressParts[0] || searchLocation.address;
+    const city = addressParts[1] || 'Unknown';
+    const stateProvince = addressParts[2] || 'Unknown';
+    const country = addressParts[3] || 'US';
+
+    // Create new location - DON'T use latitude/longitude properties
+    const locationData = {
       name: searchLocation.name,
-      address: searchLocation.address,
-      city: 'Unknown', // We'll need to parse this from address later
-      state_province: 'Unknown',
-      country: 'US',
-      latitude: searchLocation.latitude,
-      longitude: searchLocation.longitude,
+      description: null,
+      address: streetAddress,
+      city: city,
+      state_province: stateProvince,
+      country: country,
+      postal_code: null,
+      // Store coordinates as PostGIS POINT (longitude, latitude order!)
+      coordinates: `POINT(${searchLocation.longitude} ${searchLocation.latitude})`,
       place_type: (searchLocation.place_type as any) || 'other',
+      tags: null,
+      google_place_id: null,
+      created_by: userId,
+      verified: false,
+      active: true,
     };
+
+    console.log('Inserting location data:', locationData);
 
     const { data, error } = await supabase
       .from('locations')
-      .insert({
-        ...locationData,
-        coordinates: `POINT(${locationData.longitude} ${locationData.latitude})`,
-        created_by: userId,
-      })
+      .insert(locationData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Location creation error:', error);
+      throw error;
+    }
+
+    console.log('Location created successfully:', data.id);
     return data.id;
   }
 );

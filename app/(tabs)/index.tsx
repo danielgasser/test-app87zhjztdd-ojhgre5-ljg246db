@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchNearbyLocations,
+  fetchLocationDetails, // Make sure this is imported
   createLocationFromSearch,
   clearSearchResults,
 } from "src/store/locationsSlice";
@@ -36,7 +37,7 @@ interface SearchResult {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source: "database" | "mapbox";
+  source?: "database" | "mapbox"; // Make optional to match SearchBar interface
 }
 
 export default function MapScreen() {
@@ -113,18 +114,53 @@ export default function MapScreen() {
   const handleLocationSelect = async (selectedLocation: SearchResult) => {
     console.log("Selected location:", selectedLocation);
 
-    // Center map on selected location
-    const newRegion = {
-      latitude: selectedLocation.latitude,
-      longitude: selectedLocation.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    };
+    // Ensure we have a source property
+    const source = selectedLocation.source || "database";
 
-    setRegion(newRegion);
+    // For database results, we need to fetch the actual coordinates
+    if (source === "database") {
+      try {
+        // Fetch full location details with coordinates
+        const locationWithCoords = await dispatch(
+          fetchLocationDetails(selectedLocation.id)
+        ).unwrap();
 
-    // Show search result as a temporary marker
-    setSearchMarker(selectedLocation);
+        if (locationWithCoords.latitude && locationWithCoords.longitude) {
+          const newRegion = {
+            latitude: Number(locationWithCoords.latitude),
+            longitude: Number(locationWithCoords.longitude),
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          };
+
+          setRegion(newRegion);
+
+          // Update search marker with real coordinates and source
+          setSearchMarker({
+            ...selectedLocation,
+            latitude: Number(locationWithCoords.latitude),
+            longitude: Number(locationWithCoords.longitude),
+            source: "database",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching location details:", error);
+      }
+    } else {
+      // For Mapbox results, coordinates are already available
+      const newRegion = {
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+
+      setRegion(newRegion);
+      setSearchMarker({
+        ...selectedLocation,
+        source: "mapbox",
+      });
+    }
 
     // Clear search results
     dispatch(clearSearchResults());
@@ -140,9 +176,11 @@ export default function MapScreen() {
   const handleAddLocation = async () => {
     if (!searchMarker) return;
 
+    const source = searchMarker.source || "database";
+
     try {
       // For database results, just navigate to the existing location
-      if (searchMarker.source === "database") {
+      if (source === "database") {
         setSelectedLocationId(searchMarker.id);
         setModalVisible(true);
         setSearchMarker(null);
@@ -172,6 +210,7 @@ export default function MapScreen() {
 
       setSearchMarker(null);
     } catch (error: any) {
+      console.error("Add location error:", error);
       Alert.alert("Error", error.message || "Failed to add location");
     }
   };
@@ -272,17 +311,22 @@ export default function MapScreen() {
           <TouchableOpacity
             style={[
               styles.addLocationButton,
-              searchMarker.source === "database" && styles.viewLocationButton,
+              (searchMarker.source || "database") === "database" &&
+                styles.viewLocationButton,
             ]}
             onPress={handleAddLocation}
           >
             <Ionicons
-              name={searchMarker.source === "database" ? "eye" : "add-circle"}
+              name={
+                (searchMarker.source || "database") === "database"
+                  ? "eye"
+                  : "add-circle"
+              }
               size={24}
               color="#FFF"
             />
             <Text style={styles.addLocationText}>
-              {searchMarker.source === "database"
+              {(searchMarker.source || "database") === "database"
                 ? "View Location"
                 : "Add & Review Location"}
             </Text>
