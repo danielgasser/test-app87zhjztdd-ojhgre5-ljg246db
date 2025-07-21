@@ -67,6 +67,50 @@ export default function MapScreen() {
   useEffect(() => {
     (async () => {
       try {
+        // Check if we should use dev location
+        const useDevLocation =
+          process.env.EXPO_PUBLIC_USE_DEV_LOCATION === "true";
+
+        if (useDevLocation && __DEV__) {
+          // Use development location
+          const devLat = parseFloat(
+            process.env.EXPO_PUBLIC_DEV_LATITUDE || "40.7128"
+          );
+          const devLng = parseFloat(
+            process.env.EXPO_PUBLIC_DEV_LONGITUDE || "-74.0060"
+          );
+
+          console.log("🚧 Using development location:", devLat, devLng);
+
+          const devLocation = {
+            coords: {
+              latitude: devLat,
+              longitude: devLng,
+            },
+          } as Location.LocationObject;
+
+          setUserLocation(devLocation);
+
+          dispatch(
+            fetchNearbyLocations({
+              latitude: devLat,
+              longitude: devLng,
+              radius: 5000,
+            })
+          );
+
+          setRegion({
+            latitude: devLat,
+            longitude: devLng,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+
+          setLoading(false);
+          return;
+        }
+
+        // Production: Use actual location
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
           setErrorMsg("Permission to access location was denied");
@@ -77,7 +121,6 @@ export default function MapScreen() {
         let currentLocation = await Location.getCurrentPositionAsync({});
         setUserLocation(currentLocation);
 
-        // Fetch real locations from database
         dispatch(
           fetchNearbyLocations({
             latitude: currentLocation.coords.latitude,
@@ -99,7 +142,7 @@ export default function MapScreen() {
         console.error(error);
       }
     })();
-  }, [dispatch]);
+  }, []);
 
   const handleMarkerPress = (locationId: string) => {
     setSelectedLocationId(locationId);
@@ -257,14 +300,19 @@ export default function MapScreen() {
       />
 
       <MapView
-        key={`${nearbyLocations.length}-${region.latitude}-${region.longitude}`}
+        key={`${region.latitude}-${region.longitude}`}
         style={styles.map}
         region={region}
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
-        onMapReady={() => setMapReady(true)}
-        onPress={handleMapPress}
+        onMapReady={() => {
+          console.log("📍 Map is ready");
+          setMapReady(true);
+        }}
+        onRegionChangeComplete={(newRegion) => {
+          console.log("📍 Region changed:", newRegion);
+        }}
       >
         {/* Existing location markers from database */}
         {mapReady &&
