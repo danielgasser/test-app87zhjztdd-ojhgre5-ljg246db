@@ -203,6 +203,7 @@ export default function MapScreen() {
 
   const handleLocationSelect = async (selectedLocation: SearchResult) => {
     const source = selectedLocation.source || "database";
+    console.log("🔍 handleLocationSelect called with:", selectedLocation);
 
     if (source === "database") {
       try {
