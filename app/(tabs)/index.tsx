@@ -27,7 +27,6 @@ import { LocationWithScores } from "@/types/supabase";
 
 const getMarkerColor = (rating: number | string | null) => {
   const numRating = Number(rating) || 0;
-  console.log("🎨 Marker color for rating:", numRating);
 
   if (numRating >= 4) return "#4CAF50";
   if (numRating >= 3) return "#FFC107";
@@ -87,9 +86,6 @@ export default function MapScreen() {
   useEffect(() => {
     // Don't re-run location detection if we already have a user location
     if (userLocation) {
-      console.log(
-        "🚧 User location already exists in Redux, skipping detection"
-      );
       setLoading(false);
       return;
     }
@@ -106,8 +102,6 @@ export default function MapScreen() {
           const devLng = parseFloat(
             process.env.EXPO_PUBLIC_DEV_LONGITUDE || "-74.0060"
           );
-
-          console.log("🚧 Using development location:", devLat, devLng);
 
           // Store in Redux instead of local state
           dispatch(setUserLocation({ latitude: devLat, longitude: devLng }));
@@ -176,27 +170,19 @@ export default function MapScreen() {
     useCallback(() => {
       // When screen comes back into focus (returning from review), refetch nearby locations
       if (userLocation) {
-        console.log("🔄 Screen focused - refetching nearby locations");
         dispatch(
           fetchNearbyLocations({
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
             radius: 5000,
           })
-        ).then((result) => {
-          console.log(
-            "📍 Nearby locations result:",
-            result.payload?.length || 0,
-            "locations found"
-          );
-        });
+        );
       }
     }, [userLocation, dispatch])
   );
   useEffect(() => {
     // Sync region with Redux user location when it changes
     if (userLocation) {
-      console.log("📍 Syncing region with Redux location:", userLocation);
       setRegion({
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
@@ -216,8 +202,6 @@ export default function MapScreen() {
   };
 
   const handleLocationSelect = async (selectedLocation: SearchResult) => {
-    console.log("Selected location:", selectedLocation);
-
     const source = selectedLocation.source || "database";
 
     if (source === "database") {
@@ -295,10 +279,6 @@ export default function MapScreen() {
         return;
       }
 
-      // For NEW locations - don't create yet, just pass the data
-      console.log("Passing location data to review screen for creation...");
-
-      // Update user location for map centering
       dispatch(
         setUserLocation({
           latitude: searchMarker.latitude,
@@ -353,8 +333,6 @@ export default function MapScreen() {
       </View>
     );
   }
-  console.log("🗺️ Current region:", region);
-  console.log("🗺️ Redux userLocation:", userLocation);
   return (
     <View style={styles.container}>
       {/* Search Bar */}
@@ -379,12 +357,9 @@ export default function MapScreen() {
         showsMyLocationButton={true}
         showsCompass={true}
         onMapReady={() => {
-          console.log("📍 Map is ready");
           setMapReady(true);
         }}
-        onRegionChangeComplete={(newRegion) => {
-          console.log("📍 Region changed:", newRegion);
-        }}
+        onRegionChangeComplete={(newRegion) => {}}
       >
         {/* Existing location markers from database */}
         {mapReady &&

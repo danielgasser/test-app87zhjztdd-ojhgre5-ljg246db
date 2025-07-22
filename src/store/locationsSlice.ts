@@ -66,7 +66,6 @@ export const fetchNearbyLocations = createAsyncThunk(
       lng: longitude,
       radius_meters: radius,
     });
-console.log("🔍 Raw nearby locations from DB:", data);
 
     if (error) throw error;
     return data || [];
@@ -154,10 +153,6 @@ export const submitReview = createAsyncThunk(
     const userId = state.auth.user?.id;
 
     if (!userId) throw new Error('User must be logged in to submit reviews');
-console.log('🔍 Checking for existing review:', {
-      locationId: reviewData.location_id,
-      userId
-    });
     const { data: existingReview } = await supabase
       .from('reviews')
       .select('id')
@@ -337,8 +332,6 @@ export const createLocationFromSearch = createAsyncThunk(
 
     if (!userId) throw new Error('User must be logged in');
 
-    console.log('Creating location from search:', searchLocation);
-
     const { data: existingLocation } = await supabase
       .from('locations')
       .select('id')
@@ -347,7 +340,6 @@ export const createLocationFromSearch = createAsyncThunk(
       .single();
 
     if (existingLocation) {
-      console.log('Location already exists:', existingLocation.id);
       return existingLocation.id;
     }
 
@@ -376,8 +368,6 @@ export const createLocationFromSearch = createAsyncThunk(
       active: true,
     };
 
-    console.log('Inserting location data:', locationData);
-
     const { data, error } = await supabase
       .from('locations')
       .insert(locationData)
@@ -385,11 +375,9 @@ export const createLocationFromSearch = createAsyncThunk(
       .single();
 
     if (error) {
-      console.error('Location creation error:', error);
       throw error;
     }
 
-    console.log('Location created successfully:', data.id);
     const newLocationWithScores = {
       ...data,
       latitude: searchLocation.latitude,
@@ -429,15 +417,10 @@ const locationsSlice = createSlice({
       state.userLocation = action.payload;
     },
    addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
-      console.log("🎯 addLocationToNearby reducer called with:", action.payload.id);
-      console.log("🎯 Current nearbyLocations count before:", state.nearbyLocations.length);
       
       // Add location to nearby if not already present
       if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
         state.nearbyLocations.push(action.payload);
-        console.log("🎯 Location added to nearbyLocations. New count:", state.nearbyLocations.length);
-      } else {
-        console.log("🎯 Location already exists in nearbyLocations");
       }
     },
   },

@@ -134,8 +134,6 @@ export default function ReviewScreen() {
     try {
       // If this is a new location, create it first
       if (isCreatingNew && parsedLocationData) {
-        console.log("🏗️ Creating location before submitting review...");
-
         // Convert parsed data to SearchLocation format
         const searchLocation = {
           id: `temp-${Date.now()}`, // Temporary ID
@@ -153,7 +151,6 @@ export default function ReviewScreen() {
         ).unwrap();
         setCurrentLocationId(finalLocationId);
 
-        console.log("🏗️ Location created successfully:", finalLocationId);
         dispatch(
           setUserLocation({
             latitude: parsedLocationData.latitude,
@@ -178,18 +175,6 @@ export default function ReviewScreen() {
         service_rating: formData.service_rating || undefined,
       };
 
-      console.log("🔍 Submitting review for:", {
-        locationId: finalLocationId,
-        locationName: typedLocationName || parsedLocationData?.name,
-        userId: user?.id,
-      });
-
-      console.log("🐛 DEBUG reviewData:", {
-        location_id: reviewData.location_id,
-        finalLocationId: finalLocationId,
-        currentLocationId: currentLocationId,
-        typedLocationId: typedLocationId,
-      });
       await dispatch(submitReview(reviewData)).unwrap();
       if (isCreatingNew && parsedLocationData) {
         const newLocationWithScores: LocationWithScores = {
