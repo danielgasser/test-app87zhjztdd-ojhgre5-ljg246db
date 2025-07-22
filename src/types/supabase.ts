@@ -336,6 +336,8 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
           place_type: string
           distance_meters: number
           avg_safety_score: number | null
+          latitude: number
+          longitude: number
         }[]
       }
     }
