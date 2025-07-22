@@ -1,9 +1,16 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { signOut } from 'src/store/authSlice';
-
+import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { signOut } from "src/store/authSlice";
+import { router } from "expo-router";
+import { useAppDispatch, useAppSelector } from "../../src/store/hooks";
+import { fetchUserProfile } from "../../src/store/userSlice";
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
@@ -12,6 +19,12 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     dispatch(signOut());
   };
+
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserProfile(user.id));
+    }
+  }, [user?.id, dispatch]);
 
   return (
     <ScrollView style={styles.container}>
@@ -27,7 +40,10 @@ export default function ProfileScreen() {
             <Text style={styles.demographicText}>Profile configured</Text>
           </View>
         ) : (
-          <TouchableOpacity style={styles.setupButton}>
+          <TouchableOpacity
+            style={styles.setupButton}
+            onPress={() => router.push("/onboarding")}
+          >
             <Text style={styles.setupButtonText}>Set up profile</Text>
           </TouchableOpacity>
         )}
@@ -57,76 +73,76 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 30,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   email: {
     fontSize: 18,
-    color: '#333',
+    color: "#333",
     marginTop: 10,
   },
   section: {
     marginTop: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingVertical: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     paddingHorizontal: 20,
     marginBottom: 15,
   },
   demographicsCard: {
     marginHorizontal: 20,
     padding: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     borderRadius: 8,
   },
   demographicText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   setupButton: {
     marginHorizontal: 20,
     padding: 15,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   setupButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   menuText: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
     marginLeft: 15,
   },
   logoutButton: {
     margin: 20,
     padding: 15,
-    backgroundColor: '#ff3b30',
+    backgroundColor: "#ff3b30",
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   logoutText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

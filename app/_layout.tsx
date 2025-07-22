@@ -6,6 +6,7 @@ import { supabase } from "../src/services/supabase";
 import { useAppDispatch, useAppSelector } from "../src/store/hooks";
 import { setSession, checkSession } from "../src/store/authSlice";
 import { View, ActivityIndicator } from "react-native";
+import { fetchUserProfile } from "../src/store/userSlice";
 
 function RootLayoutNav() {
   const segments = useSegments();
@@ -39,6 +40,21 @@ function RootLayoutNav() {
       }
     }
   }, [user, segments, loading, isReady]);
+
+  useEffect(() => {
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (isReady && !loading) {
+      if (!user && !inAuthGroup) {
+        router.replace("/login");
+      } else if (user && inAuthGroup) {
+        router.replace("/");
+      } else if (user) {
+        // Fetch user profile when user is authenticated
+        dispatch(fetchUserProfile(user.id));
+      }
+    }
+  }, [user, segments, loading, isReady, dispatch]);
 
   if (!isReady || loading) {
     return (

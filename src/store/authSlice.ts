@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase'
 import { Session, User } from '@supabase/supabase-js';
+import { fetchUserProfile } from './userSlice';
 
 interface AuthState {
   user: User | null;
