@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Heatmap } from "react-native-maps";
+import MapView, { Marker, Heatmap, Circle, Polygon } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -26,6 +26,12 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { LocationWithScores } from "@/types/supabase";
 import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
 
+console.log("Available components:", {
+  MapView: !!MapView,
+  Marker: !!Marker,
+  Circle: !!Circle,
+  Heatmap: !!Heatmap,
+});
 const getMarkerColor = (rating: number | string | null) => {
   const numRating = Number(rating) || 0;
 
@@ -355,6 +361,17 @@ export default function MapScreen() {
       </View>
     );
   }
+  console.log("🔥 Heat map data:", heatMapData);
+  console.log("🔥 Heat map visible:", heatMapVisible);
+  console.log("🔥 Heat map points count:", heatMapData.length);
+  if (heatMapVisible && heatMapData.length > 0) {
+    const heatPoints = heatMapData.map((point) => ({
+      latitude: point.latitude,
+      longitude: point.longitude,
+      weight: point.heat_weight,
+    }));
+    console.log("🔥 Heat points for map:", heatPoints);
+  }
   return (
     <View style={styles.container}>
       {/* Search Bar */}
@@ -383,29 +400,78 @@ export default function MapScreen() {
         }}
         onRegionChangeComplete={(newRegion) => {
           console.log("📍 Region changed:", newRegion);
-          // Optionally fetch new heat map data when region changes significantly
-          // if (Math.abs(newRegion.latitude - region.latitude) > 0.01) {
-          //   dispatch(fetchHeatMapData({ ...newRegion, userProfile: profile }));
-          // }
+
+          // Update region state
+          setRegion(newRegion);
+
+          // Calculate dynamic radius (same for both)
+          const latRadius = newRegion.latitudeDelta * 111 * 1000;
+          const dynamicRadius = Math.min(Math.max(latRadius, 10000), 500000);
+
+          // Fetch both regular markers AND heat map with same radius
+          if (
+            Math.abs(newRegion.latitude - region.latitude) > 0.01 ||
+            Math.abs(newRegion.longitude - region.longitude) > 0.01
+          ) {
+            // Fetch regular location markers
+            dispatch(
+              fetchNearbyLocations({
+                latitude: newRegion.latitude,
+                longitude: newRegion.longitude,
+                radius: dynamicRadius, // Use dynamic radius instead of fixed 5000
+              })
+            );
+
+            // Fetch heat map data
+            if (profile) {
+              dispatch(
+                fetchHeatMapData({
+                  latitude: newRegion.latitude,
+                  longitude: newRegion.longitude,
+                  radius: dynamicRadius,
+                  userProfile: profile,
+                })
+              );
+            }
+          }
         }}
       >
         {/* Heat Map Overlay */}
-        {heatMapVisible && heatMapData.length > 0 && (
-          <Heatmap
-            points={heatMapData.map((point) => ({
-              latitude: point.latitude,
-              longitude: point.longitude,
-              weight: point.heat_weight,
-            }))}
-            radius={40}
-            opacity={0.7}
-            gradient={{
-              colors: ["#4CAF50", "#FFC107", "#F44336"],
-              startPoints: [0.1, 0.5, 1.0],
-              colorMapSize: 256,
-            }}
-          />
-        )}
+        {heatMapVisible &&
+          heatMapData.length > 0 &&
+          heatMapData.map((point, index) => {
+            // Better color and size logic
+            const getHeatColor = (weight: number) => {
+              if (weight >= 4.5) return "#4CAF5060"; // Light green
+              if (weight >= 3.5) return "#8BC34A60"; // Green-yellow
+              if (weight >= 2.5) return "#FFC10760"; // Yellow
+              if (weight >= 1.5) return "#FF572260"; // Orange
+              return "#F4433660"; // Red
+            };
+
+            // Dynamic size based on weight and zoom
+            const baseRadius = 200 + point.heat_weight * 100;
+            console.log("🔥 Heat point:", {
+              name: point.latitude + "," + point.longitude,
+              safety_score: point.safety_score,
+              heat_weight: point.heat_weight,
+              color: getHeatColor(point.heat_weight),
+            });
+            return (
+              <Circle
+                key={`heat-${index}`}
+                center={{
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                }}
+                radius={baseRadius}
+                fillColor={getHeatColor(point.heat_weight)}
+                strokeColor="transparent"
+                strokeWidth={0} // No borders for smoother look
+              />
+            );
+          })}
+
         {/* Existing location markers from database */}
         {mapReady &&
           nearbyLocations &&
@@ -425,7 +491,6 @@ export default function MapScreen() {
               onPress={() => handleMarkerPress(loc.id)}
             />
           ))}
-
         {/* Search result marker */}
         {searchMarker && (
           <Marker
@@ -444,6 +509,7 @@ export default function MapScreen() {
           />
         )}
       </MapView>
+
       <View style={styles.heatMapControls}>
         <TouchableOpacity
           style={[
@@ -588,25 +654,28 @@ const styles = StyleSheet.create({
   },
   heatMapControls: {
     position: "absolute",
-    top: 60,
+    bottom: 120, // Above the tab bar (usually ~80px) + some spacing
     right: 20,
-    zIndex: 1,
+    zIndex: 1000,
   },
   heatMapToggle: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 16, // More padding
+    paddingVertical: 12, // More padding
+    borderRadius: 25, // More rounded
+    borderWidth: 2, // Add border
+    borderColor: "#4CAF50",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3, // Stronger shadow
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 8, // Higher elevation
   },
   heatMapToggleActive: {
     backgroundColor: "#4CAF50",
+    borderColor: "#4CAF50",
   },
   heatMapToggleText: {
     marginLeft: 6,
