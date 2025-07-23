@@ -9,12 +9,13 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { signOut } from "src/store/authSlice";
 import { router } from "expo-router";
-import { useAppDispatch, useAppSelector } from "../../src/store/hooks";
-import { fetchUserProfile } from "../../src/store/userSlice";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import { fetchUserProfile } from "src/store/userSlice";
+
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { profile } = useAppSelector((state) => state.user);
+  const { profile, loading } = useAppSelector((state) => state.user);
 
   const handleLogout = () => {
     dispatch(signOut());
@@ -34,10 +35,39 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>My Demographics</Text>
+        <Text style={styles.sectionTitle}>Demographics</Text>
         {profile ? (
           <View style={styles.demographicsCard}>
-            <Text style={styles.demographicText}>Profile configured</Text>
+            {profile.race_ethnicity && profile.race_ethnicity.length > 0 && (
+              <Text style={styles.demographicText}>
+                Race/Ethnicity: {profile.race_ethnicity.join(", ")}
+              </Text>
+            )}
+            {profile.gender && (
+              <Text style={styles.demographicText}>
+                Gender: {profile.gender}
+              </Text>
+            )}
+            {profile.lgbtq_status && (
+              <Text style={styles.demographicText}>LGBTQ+: Yes</Text>
+            )}
+            {profile.religion && (
+              <Text style={styles.demographicText}>
+                Religion: {profile.religion}
+              </Text>
+            )}
+            {profile.age_range && (
+              <Text style={styles.demographicText}>
+                Age: {profile.age_range}
+              </Text>
+            )}
+
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => router.push("/onboarding")}
+            >
+              <Text style={styles.editButtonText}>Edit Profile</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity
@@ -71,6 +101,18 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  editButton: {
+    marginTop: 15,
+    padding: 12,
+    backgroundColor: "#007AFF",
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  editButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",

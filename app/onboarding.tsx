@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,10 +13,9 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { updateUserProfile } from "src/store/userSlice";
-import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { fetchUserProfile } from "src/store/userSlice";
+import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
+import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -33,10 +32,10 @@ const ONBOARDING_STEPS = [
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { loading, error } = useAppSelector((state) => state.user);
-  const { profile } = useAppSelector((state) => state.user);
+  const { profile, loading, error } = useAppSelector((state) => state.user);
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     race_ethnicity: [] as string[],
     gender: "",
@@ -54,6 +53,80 @@ export default function OnboardingScreen() {
     religion_other: "",
     disability_other: "",
   });
+
+  // Helper function to parse "Other: Custom text" back into separate values
+  const parseOtherValue = (value: string) => {
+    if (value?.startsWith("Other: ")) {
+      return {
+        mainValue: "Other",
+        customValue: value.substring(7), // Remove "Other: " prefix
+      };
+    }
+    return {
+      mainValue: value,
+      customValue: "",
+    };
+  };
+
+  // Load existing profile data when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserProfile(user.id));
+    }
+  }, [user?.id, dispatch]);
+
+  // Pre-populate form when profile data is available
+  useEffect(() => {
+    if (profile) {
+      setIsEditing(true);
+
+      // Parse race/ethnicity array and handle "Other" values
+      const parsedRaceEthnicity: string[] = [];
+      const raceOtherValues: string[] = [];
+
+      profile.race_ethnicity?.forEach((race) => {
+        const parsed = parseOtherValue(race);
+        parsedRaceEthnicity.push(parsed.mainValue);
+        if (parsed.customValue) {
+          raceOtherValues.push(parsed.customValue);
+        }
+      });
+
+      // Parse disability status array and handle "Other" values
+      const parsedDisabilityStatus: string[] = [];
+      const disabilityOtherValues: string[] = [];
+
+      profile.disability_status?.forEach((disability) => {
+        const parsed = parseOtherValue(disability);
+        parsedDisabilityStatus.push(parsed.mainValue);
+        if (parsed.customValue) {
+          disabilityOtherValues.push(parsed.customValue);
+        }
+      });
+
+      // Parse gender and religion
+      const parsedGender = parseOtherValue(profile.gender || "");
+      const parsedReligion = parseOtherValue(profile.religion || "");
+
+      setFormData({
+        race_ethnicity: parsedRaceEthnicity,
+        gender: parsedGender.mainValue,
+        lgbtq_status: profile.lgbtq_status || false,
+        disability_status: parsedDisabilityStatus,
+        religion: parsedReligion.mainValue,
+        age_range: profile.age_range || "",
+        privacy_level: profile.privacy_level || "public",
+        show_demographics: profile.show_demographics !== false, // Default to true
+      });
+
+      setOtherInputs({
+        race_other: raceOtherValues.join(", "), // Combine multiple "Other" values
+        gender_other: parsedGender.customValue,
+        religion_other: parsedReligion.customValue,
+        disability_other: disabilityOtherValues.join(", "), // Combine multiple "Other" values
+      });
+    }
+  }, [profile]);
 
   const handleNext = () => {
     if (currentStep < ONBOARDING_STEPS.length - 1) {
@@ -105,11 +178,13 @@ export default function OnboardingScreen() {
       ).unwrap();
 
       Alert.alert(
-        "Welcome to SafePath!",
-        "Your profile has been set up. You can now start using the app and contributing to our safety community.",
+        isEditing ? "Profile Updated!" : "Welcome to SafePath!",
+        isEditing
+          ? "Your profile has been updated successfully."
+          : "Your profile has been set up. You can now start using the app and contributing to our safety community.",
         [
           {
-            text: "Get Started",
+            text: isEditing ? "Done" : "Get Started",
             onPress: () => router.replace("/(tabs)"),
           },
         ]
@@ -121,17 +196,32 @@ export default function OnboardingScreen() {
   };
 
   const handleSkip = () => {
-    Alert.alert(
-      "Skip Profile Setup?",
-      "You can set up your profile later in Settings. However, demographic information helps provide better safety insights.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Skip",
-          onPress: () => router.replace("/(tabs)"),
-        },
-      ]
-    );
+    if (isEditing) {
+      Alert.alert(
+        "Cancel Changes?",
+        "Your changes will not be saved. Are you sure you want to cancel?",
+        [
+          { text: "Keep Editing", style: "cancel" },
+          {
+            text: "Cancel",
+            style: "destructive",
+            onPress: () => router.replace("/(tabs)/profile"),
+          },
+        ]
+      );
+    } else {
+      Alert.alert(
+        "Skip Profile Setup?",
+        "You can set up your profile later in Settings. However, demographic information helps provide better safety insights.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Skip",
+            onPress: () => router.replace("/(tabs)"),
+          },
+        ]
+      );
+    }
   };
 
   const toggleRaceEthnicity = (race: string) => {
@@ -167,30 +257,34 @@ export default function OnboardingScreen() {
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
       <Ionicons name="shield-checkmark" size={80} color="#4CAF50" />
-      <Text style={styles.stepTitle}>Welcome to SafePath</Text>
-      <Text style={styles.stepDescription}>
-        SafePath provides safety ratings based on real experiences from
-        travelers who share similar identities. Let's set up your profile to
-        give you the most relevant safety information.
+      <Text style={styles.stepTitle}>
+        {isEditing ? "Edit Your Profile" : "Welcome to SafePath"}
       </Text>
-      <View style={styles.bulletPoints}>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-          <Text style={styles.bulletText}>
-            Get personalized safety recommendations
-          </Text>
+      <Text style={styles.stepDescription}>
+        {isEditing
+          ? "Update your demographic information to continue getting personalized safety recommendations."
+          : "SafePath provides safety ratings based on real experiences from travelers who share similar identities. Let's set up your profile to give you the most relevant safety information."}
+      </Text>
+      {!isEditing && (
+        <View style={styles.bulletPoints}>
+          <View style={styles.bulletPoint}>
+            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            <Text style={styles.bulletText}>
+              Get personalized safety recommendations
+            </Text>
+          </View>
+          <View style={styles.bulletPoint}>
+            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            <Text style={styles.bulletText}>
+              Help others by sharing your experiences
+            </Text>
+          </View>
+          <View style={styles.bulletPoint}>
+            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            <Text style={styles.bulletText}>Control your privacy settings</Text>
+          </View>
         </View>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-          <Text style={styles.bulletText}>
-            Help others by sharing your experiences
-          </Text>
-        </View>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-          <Text style={styles.bulletText}>Control your privacy settings</Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 
@@ -533,30 +627,36 @@ export default function OnboardingScreen() {
   const renderCompleteStep = () => (
     <View style={styles.stepContainer}>
       <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
-      <Text style={styles.stepTitle}>You're All Set!</Text>
-      <Text style={styles.stepDescription}>
-        Your profile is ready. You can now:
+      <Text style={styles.stepTitle}>
+        {isEditing ? "Profile Updated!" : "You're All Set!"}
       </Text>
-      <View style={styles.bulletPoints}>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="map" size={20} color="#4CAF50" />
-          <Text style={styles.bulletText}>
-            View safety ratings personalized for you
-          </Text>
+      <Text style={styles.stepDescription}>
+        {isEditing
+          ? "Your demographic information has been updated successfully."
+          : "Your profile is ready. You can now:"}
+      </Text>
+      {!isEditing && (
+        <View style={styles.bulletPoints}>
+          <View style={styles.bulletPoint}>
+            <Ionicons name="map" size={20} color="#4CAF50" />
+            <Text style={styles.bulletText}>
+              View safety ratings personalized for you
+            </Text>
+          </View>
+          <View style={styles.bulletPoint}>
+            <Ionicons name="star" size={20} color="#4CAF50" />
+            <Text style={styles.bulletText}>
+              Leave reviews to help your community
+            </Text>
+          </View>
+          <View style={styles.bulletPoint}>
+            <Ionicons name="settings" size={20} color="#4CAF50" />
+            <Text style={styles.bulletText}>
+              Update your profile anytime in Settings
+            </Text>
+          </View>
         </View>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="star" size={20} color="#4CAF50" />
-          <Text style={styles.bulletText}>
-            Leave reviews to help your community
-          </Text>
-        </View>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="settings" size={20} color="#4CAF50" />
-          <Text style={styles.bulletText}>
-            Update your profile anytime in Settings
-          </Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 
@@ -617,7 +717,9 @@ export default function OnboardingScreen() {
           style={[styles.navButton, styles.skipButton]}
           onPress={handleSkip}
         >
-          <Text style={styles.skipButtonText}>Skip</Text>
+          <Text style={styles.skipButtonText}>
+            {isEditing ? "Cancel" : "Skip"}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.navButtonsRight}>
@@ -643,7 +745,9 @@ export default function OnboardingScreen() {
               {loading
                 ? "Saving..."
                 : currentStep === ONBOARDING_STEPS.length - 1
-                ? "Get Started"
+                ? isEditing
+                  ? "Update Profile"
+                  : "Get Started"
                 : "Next"}
             </Text>
           </TouchableOpacity>
