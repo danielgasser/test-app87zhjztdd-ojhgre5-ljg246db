@@ -78,53 +78,67 @@ export default function OnboardingScreen() {
   // Pre-populate form when profile data is available
   useEffect(() => {
     if (profile) {
-      setIsEditing(true);
+      // Check if profile has any actual demographic data (not just empty defaults)
+      const hasRealData =
+        (profile.race_ethnicity && profile.race_ethnicity.length > 0) ||
+        (profile.gender && profile.gender.trim() !== "") ||
+        profile.lgbtq_status ||
+        (profile.disability_status && profile.disability_status.length > 0) ||
+        (profile.religion && profile.religion.trim() !== "") ||
+        (profile.age_range && profile.age_range.trim() !== "");
 
-      // Parse race/ethnicity array and handle "Other" values
-      const parsedRaceEthnicity: string[] = [];
-      const raceOtherValues: string[] = [];
+      if (hasRealData) {
+        setIsEditing(true);
 
-      profile.race_ethnicity?.forEach((race) => {
-        const parsed = parseOtherValue(race);
-        parsedRaceEthnicity.push(parsed.mainValue);
-        if (parsed.customValue) {
-          raceOtherValues.push(parsed.customValue);
-        }
-      });
+        // Parse race/ethnicity array and handle "Other" values
+        const parsedRaceEthnicity: string[] = [];
+        const raceOtherValues: string[] = [];
 
-      // Parse disability status array and handle "Other" values
-      const parsedDisabilityStatus: string[] = [];
-      const disabilityOtherValues: string[] = [];
+        profile.race_ethnicity?.forEach((race) => {
+          const parsed = parseOtherValue(race);
+          parsedRaceEthnicity.push(parsed.mainValue);
+          if (parsed.customValue) {
+            raceOtherValues.push(parsed.customValue);
+          }
+        });
 
-      profile.disability_status?.forEach((disability) => {
-        const parsed = parseOtherValue(disability);
-        parsedDisabilityStatus.push(parsed.mainValue);
-        if (parsed.customValue) {
-          disabilityOtherValues.push(parsed.customValue);
-        }
-      });
+        // Parse disability status array and handle "Other" values
+        const parsedDisabilityStatus: string[] = [];
+        const disabilityOtherValues: string[] = [];
 
-      // Parse gender and religion
-      const parsedGender = parseOtherValue(profile.gender || "");
-      const parsedReligion = parseOtherValue(profile.religion || "");
+        profile.disability_status?.forEach((disability) => {
+          const parsed = parseOtherValue(disability);
+          parsedDisabilityStatus.push(parsed.mainValue);
+          if (parsed.customValue) {
+            disabilityOtherValues.push(parsed.customValue);
+          }
+        });
 
-      setFormData({
-        race_ethnicity: parsedRaceEthnicity,
-        gender: parsedGender.mainValue,
-        lgbtq_status: profile.lgbtq_status || false,
-        disability_status: parsedDisabilityStatus,
-        religion: parsedReligion.mainValue,
-        age_range: profile.age_range || "",
-        privacy_level: profile.privacy_level || "public",
-        show_demographics: profile.show_demographics !== false, // Default to true
-      });
+        // Parse gender and religion
+        const parsedGender = parseOtherValue(profile.gender || "");
+        const parsedReligion = parseOtherValue(profile.religion || "");
 
-      setOtherInputs({
-        race_other: raceOtherValues.join(", "), // Combine multiple "Other" values
-        gender_other: parsedGender.customValue,
-        religion_other: parsedReligion.customValue,
-        disability_other: disabilityOtherValues.join(", "), // Combine multiple "Other" values
-      });
+        setFormData({
+          race_ethnicity: parsedRaceEthnicity,
+          gender: parsedGender.mainValue,
+          lgbtq_status: profile.lgbtq_status || false,
+          disability_status: parsedDisabilityStatus,
+          religion: parsedReligion.mainValue,
+          age_range: profile.age_range || "",
+          privacy_level: profile.privacy_level || "public",
+          show_demographics: profile.show_demographics !== false, // Default to true
+        });
+
+        setOtherInputs({
+          race_other: raceOtherValues.join(", "), // Combine multiple "Other" values
+          gender_other: parsedGender.customValue,
+          religion_other: parsedReligion.customValue,
+          disability_other: disabilityOtherValues.join(", "), // Combine multiple "Other" values
+        });
+      } else {
+        // Profile exists but is empty - this is initial setup
+        setIsEditing(false);
+      }
     }
   }, [profile]);
 
@@ -214,7 +228,7 @@ export default function OnboardingScreen() {
         "Skip Profile Setup?",
         "You can set up your profile later in Settings. However, demographic information helps provide better safety insights.",
         [
-          { text: "Cancel", style: "cancel" },
+          { text: "Continue Setup", style: "cancel" },
           {
             text: "Skip",
             onPress: () => router.replace("/(tabs)"),
