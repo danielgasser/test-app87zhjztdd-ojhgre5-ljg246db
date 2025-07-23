@@ -222,6 +222,18 @@ export default function MapScreen() {
   };
   const handleToggleHeatMap = () => {
     dispatch(toggleHeatMap());
+
+    // Fetch heat map data when toggling ON
+    if (!heatMapVisible && userLocation && profile) {
+      dispatch(
+        fetchHeatMapData({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          radius: 200000, // 200km radius for heat map
+          userProfile: profile,
+        })
+      );
+    }
   };
   const handleModalClose = () => {
     setModalVisible(false);
@@ -387,7 +399,14 @@ export default function MapScreen() {
             : undefined
         }
       />
-
+      {(() => {
+        console.log("🎯 Rendering markers:", {
+          nearbyLocationsCount: nearbyLocations.length,
+          nearbyLocationIds: nearbyLocations.map((loc) => loc.id),
+          mapReady: mapReady,
+        });
+        return null;
+      })()}
       <MapView
         key={`${region.latitude}-${region.longitude}`}
         style={styles.map}
@@ -400,39 +419,20 @@ export default function MapScreen() {
         }}
         onRegionChangeComplete={(newRegion) => {
           console.log("📍 Region changed:", newRegion);
-
-          // Update region state
           setRegion(newRegion);
 
-          // Calculate dynamic radius (same for both)
-          const latRadius = newRegion.latitudeDelta * 111 * 1000;
-          const dynamicRadius = Math.min(Math.max(latRadius, 10000), 500000);
-
-          // Fetch both regular markers AND heat map with same radius
+          // Only update nearby locations on region change
           if (
             Math.abs(newRegion.latitude - region.latitude) > 0.01 ||
             Math.abs(newRegion.longitude - region.longitude) > 0.01
           ) {
-            // Fetch regular location markers
             dispatch(
               fetchNearbyLocations({
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
-                radius: dynamicRadius, // Use dynamic radius instead of fixed 5000
+                radius: 50000, // Fixed 50km radius for nearby locations
               })
             );
-
-            // Fetch heat map data
-            if (profile) {
-              dispatch(
-                fetchHeatMapData({
-                  latitude: newRegion.latitude,
-                  longitude: newRegion.longitude,
-                  radius: dynamicRadius,
-                  userProfile: profile,
-                })
-              );
-            }
           }
         }}
       >
@@ -476,21 +476,29 @@ export default function MapScreen() {
         {mapReady &&
           nearbyLocations &&
           nearbyLocations.length > 0 &&
-          nearbyLocations.map((loc) => (
-            <Marker
-              key={`db-${loc.id}`}
-              coordinate={{
-                latitude: Number(loc.latitude),
-                longitude: Number(loc.longitude),
-              }}
-              title={loc.name}
-              description={`Safety: ${
-                loc.avg_safety_score?.toFixed(1) || "N/A"
-              }/5`}
-              pinColor={getMarkerColor(loc.avg_safety_score || 0)}
-              onPress={() => handleMarkerPress(loc.id)}
-            />
-          ))}
+          nearbyLocations.map((loc) => {
+            console.log("🎯 Rendering marker:", {
+              id: loc.id,
+              name: loc.name,
+              lat: loc.latitude,
+              lng: loc.longitude,
+            });
+            return (
+              <Marker
+                key={`db-${loc.id}`}
+                coordinate={{
+                  latitude: Number(loc.latitude),
+                  longitude: Number(loc.longitude),
+                }}
+                title={loc.name}
+                description={`Safety: ${
+                  loc.avg_safety_score?.toFixed(1) || "N/A"
+                }/5`}
+                pinColor={getMarkerColor(loc.avg_safety_score || 0)}
+                onPress={() => handleMarkerPress(loc.id)}
+              />
+            );
+          })}
         {/* Search result marker */}
         {searchMarker && (
           <Marker

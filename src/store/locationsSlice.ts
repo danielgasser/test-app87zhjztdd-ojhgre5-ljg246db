@@ -480,13 +480,13 @@ const locationsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchNearbyLocations.fulfilled, (state, action) => {
-        state.loading = false;
-        const manuallyAdded = state.nearbyLocations.filter(existing => 
-          !action.payload.find((fetched: { id: string; }) => fetched.id === existing.id)
-        );
-  
-        state.nearbyLocations = [...action.payload, ...manuallyAdded];
-      })
+  console.log('📍 fetchNearbyLocations SUCCESS:', {
+    count: action.payload.length,
+    locationIds: action.payload.map((loc: { id: any; }) => loc.id)
+  });
+  state.loading = false;
+  state.nearbyLocations = action.payload;
+})
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch nearby locations';
