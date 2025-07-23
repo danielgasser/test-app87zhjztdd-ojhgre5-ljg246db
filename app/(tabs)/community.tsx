@@ -1,5 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React from "react";
+import { theme } from "src/styles/theme";
+
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
 export default function CommunityScreen() {
   return (
@@ -7,7 +9,7 @@ export default function CommunityScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Community Feed</Text>
         <Text style={styles.subtitle}>Recent reviews and safety updates</Text>
-        
+
         <View style={styles.placeholder}>
           <Text style={styles.placeholderText}>No reviews yet</Text>
           <Text style={styles.placeholderSubtext}>
@@ -22,29 +24,29 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   content: {
-    padding: 20,
+    padding: theme.spacing.lg,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: theme.colors.text,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 20,
   },
   placeholder: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 40,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -52,11 +54,11 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 18,
-    color: '#999',
+    color: "#999",
     marginBottom: 5,
   },
   placeholderSubtext: {
     fontSize: 14,
-    color: '#bbb',
+    color: "#bbb",
   },
 });

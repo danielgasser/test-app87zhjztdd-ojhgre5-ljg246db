@@ -1,30 +1,31 @@
-import { Tabs } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Tabs } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { theme } from "src/styles/theme";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: theme.colors.secondary,
+        tabBarInactiveTintColor: "#999",
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: "#fff",
           borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
+          borderTopColor: "#e0e0e0",
         },
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: theme.colors.secondary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: "#fff",
         headerTitleStyle: {
-          fontWeight: 'bold',
+          fontWeight: "bold",
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Map',
+          title: "Map",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="map" size={size} color={color} />
           ),
@@ -33,7 +34,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: 'Community',
+          title: "Community",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="people" size={size} color={color} />
           ),
@@ -42,7 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="person" size={size} color={color} />
           ),

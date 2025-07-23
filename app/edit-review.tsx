@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { theme } from "src/styles/theme";
+
 import {
   View,
   Text,
@@ -470,7 +472,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: theme.spacing.lg,
   },
   errorText: {
     fontSize: 18,

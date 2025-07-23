@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { theme } from "src/styles/theme";
+
 import {
   View,
   Text,
@@ -9,47 +11,47 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-} from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { signUp } from 'src/store/authSlice';
+} from "react-native";
+import { Link, useRouter } from "expo-router";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import { signUp } from "src/store/authSlice";
 
 export default function RegisterScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { loading } = useAppSelector((state) => state.auth);
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert("Error", "Password must be at least 6 characters");
       return;
     }
 
     try {
       await dispatch(signUp({ email, password })).unwrap();
-      router.replace('/onboarding');
+      router.replace("/onboarding");
     } catch (err: any) {
-      Alert.alert('Registration Failed', err.message || 'Please try again');
+      Alert.alert("Registration Failed", err.message || "Please try again");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
         <View style={styles.header}>
@@ -90,7 +92,7 @@ export default function RegisterScreen() {
             disabled={loading}
           >
             <Text style={styles.buttonText}>
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? "Creating account..." : "Sign Up"}
             </Text>
           </TouchableOpacity>
 
@@ -111,66 +113,66 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 20,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 50,
   },
   title: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontWeight: "bold",
+    color: theme.colors.secondary,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: '#666',
+    color: "#666",
   },
   form: {
-    width: '100%',
+    width: "100%",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 15,
-    marginBottom: 15,
+    borderColor: "#ddd",
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
   },
   button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
+    backgroundColor: theme.colors.secondary,
+    padding: theme.spacing.md,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 30,
   },
   footerText: {
-    color: '#666',
+    color: "#666",
     fontSize: 16,
   },
   link: {
-    color: '#007AFF',
+    color: theme.colors.secondary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

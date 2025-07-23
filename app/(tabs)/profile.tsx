@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { theme } from "src/styles/theme";
 import {
   View,
   Text,
@@ -137,11 +138,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
     paddingHorizontal: 20,
-    marginBottom: 15,
+    marginBottom: theme.spacing.md,
   },
   demographicsCard: {
     marginHorizontal: 20,
-    padding: 15,
+    padding: theme.spacing.md,
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
   },
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
   },
   setupButton: {
     marginHorizontal: 20,
-    padding: 15,
+    padding: theme.spacing.md,
     backgroundColor: "#007AFF",
     borderRadius: 8,
     alignItems: "center",
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     margin: 20,
-    padding: 15,
+    padding: theme.spacing.md,
     backgroundColor: "#ff3b30",
     borderRadius: 8,
     alignItems: "center",

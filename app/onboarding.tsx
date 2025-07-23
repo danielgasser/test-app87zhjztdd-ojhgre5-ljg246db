@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { theme } from "src/styles/theme";
+
 import {
   View,
   Text,
@@ -809,7 +811,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 15,
+    marginBottom: theme.spacing.md,
     textAlign: "center",
   },
   stepDescription: {
@@ -827,7 +829,7 @@ const styles = StyleSheet.create({
   bulletPoint: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: theme.spacing.md,
     paddingHorizontal: 10,
   },
   bulletText: {
@@ -843,7 +845,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
+    padding: theme.spacing.md,
     marginBottom: 10,
     borderWidth: 2,
     borderColor: "#E0E0E0",
@@ -883,7 +885,7 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     flex: 1,
-    padding: 15,
+    padding: theme.spacing.md,
     marginHorizontal: 5,
     borderWidth: 2,
     borderColor: "#E0E0E0",
@@ -906,8 +908,8 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   privacyOption: {
-    padding: 15,
-    marginBottom: 15,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
     borderWidth: 2,
     borderColor: "#E0E0E0",
     borderRadius: 8,
@@ -939,7 +941,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "stretch",
     marginTop: 20,
-    padding: 15,
+    padding: theme.spacing.md,
     backgroundColor: "#F8F8F8",
     borderRadius: 8,
   },

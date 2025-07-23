@@ -1,4 +1,6 @@
 import React, { useState, useCallback } from "react";
+import { theme } from "src/styles/theme";
+
 import {
   View,
   TextInput,
@@ -313,7 +315,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 12,
     marginTop: 4,
-    padding: 20,
+    padding: theme.spacing.lg,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
