@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Heatmap } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -24,6 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { LocationWithScores } from "@/types/supabase";
+import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
   const numRating = Number(rating) || 0;
@@ -56,9 +57,15 @@ export default function MapScreen() {
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
 
   const dispatch = useAppDispatch();
-  const { nearbyLocations, userLocation } = useAppSelector(
-    (state) => state.locations
-  );
+  const {
+    nearbyLocations,
+    userLocation,
+    heatMapData,
+    heatMapVisible,
+    heatMapLoading,
+  } = useAppSelector((state) => state.locations);
+  const { profile } = useAppSelector((state) => state.user);
+
   const user = useAppSelector((state) => state.auth.user);
   const [mapReady, setMapReady] = useState(false);
 
@@ -82,6 +89,18 @@ export default function MapScreen() {
       longitudeDelta: 0.05,
     };
   });
+  useEffect(() => {
+    if (userLocation && profile) {
+      dispatch(
+        fetchHeatMapData({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          radius: 10000, // 10km radius
+          userProfile: profile,
+        })
+      );
+    }
+  }, [userLocation, profile, dispatch]);
 
   useEffect(() => {
     // Don't re-run location detection if we already have a user location
@@ -195,7 +214,9 @@ export default function MapScreen() {
     setSelectedLocationId(locationId);
     setModalVisible(true);
   };
-
+  const handleToggleHeatMap = () => {
+    dispatch(toggleHeatMap());
+  };
   const handleModalClose = () => {
     setModalVisible(false);
     setSelectedLocationId(null);
@@ -360,8 +381,31 @@ export default function MapScreen() {
         onMapReady={() => {
           setMapReady(true);
         }}
-        onRegionChangeComplete={(newRegion) => {}}
+        onRegionChangeComplete={(newRegion) => {
+          console.log("📍 Region changed:", newRegion);
+          // Optionally fetch new heat map data when region changes significantly
+          // if (Math.abs(newRegion.latitude - region.latitude) > 0.01) {
+          //   dispatch(fetchHeatMapData({ ...newRegion, userProfile: profile }));
+          // }
+        }}
       >
+        {/* Heat Map Overlay */}
+        {heatMapVisible && heatMapData.length > 0 && (
+          <Heatmap
+            points={heatMapData.map((point) => ({
+              latitude: point.latitude,
+              longitude: point.longitude,
+              weight: point.heat_weight,
+            }))}
+            radius={40}
+            opacity={0.7}
+            gradient={{
+              colors: ["#4CAF50", "#FFC107", "#F44336"],
+              startPoints: [0.1, 0.5, 1.0],
+              colorMapSize: 256,
+            }}
+          />
+        )}
         {/* Existing location markers from database */}
         {mapReady &&
           nearbyLocations &&
@@ -400,7 +444,57 @@ export default function MapScreen() {
           />
         )}
       </MapView>
+      <View style={styles.heatMapControls}>
+        <TouchableOpacity
+          style={[
+            styles.heatMapToggle,
+            heatMapVisible && styles.heatMapToggleActive,
+          ]}
+          onPress={handleToggleHeatMap}
+          disabled={heatMapLoading}
+        >
+          <Ionicons
+            name={heatMapVisible ? "thermometer" : "thermometer-outline"}
+            size={24}
+            color={heatMapVisible ? "#fff" : "#333"}
+          />
+          <Text
+            style={[
+              styles.heatMapToggleText,
+              heatMapVisible && styles.heatMapToggleTextActive,
+            ]}
+          >
+            {heatMapLoading ? "Loading..." : "Heat Map"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
+      {/* Heat Map Legend */}
+      {heatMapVisible && (
+        <View style={styles.heatMapLegend}>
+          <Text style={styles.legendTitle}>Safety for People Like You</Text>
+          <View style={styles.legendItems}>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: "#4CAF50" }]}
+              />
+              <Text style={styles.legendText}>Safe</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: "#FFC107" }]}
+              />
+              <Text style={styles.legendText}>Mixed</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: "#F44336" }]}
+              />
+              <Text style={styles.legendText}>Unsafe</Text>
+            </View>
+          </View>
+        </View>
+      )}
       {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
@@ -491,5 +585,73 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
+  },
+  heatMapControls: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    zIndex: 1,
+  },
+  heatMapToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  heatMapToggleActive: {
+    backgroundColor: "#4CAF50",
+  },
+  heatMapToggleText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  heatMapToggleTextActive: {
+    color: "#fff",
+  },
+  heatMapLegend: {
+    position: "absolute",
+    bottom: 100,
+    left: 20,
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  legendTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  legendItems: {
+    flexDirection: "row",
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 4,
+  },
+  legendText: {
+    fontSize: 12,
+    color: "#666",
   },
 });

@@ -36,6 +36,17 @@ interface LocationsState {
   searchLoading: boolean;
   showSearchResults: boolean;
   userLocation: { latitude: number; longitude: number } | null;
+  heatMapData: HeatMapPoint[];
+  heatMapVisible: boolean;
+  heatMapLoading: boolean;
+}
+
+interface HeatMapPoint {
+  latitude: number;
+  longitude: number;
+  safety_score: number;
+  review_count: number;
+  heat_weight: number;
 }
 
 const initialState: LocationsState = {
@@ -54,7 +65,9 @@ const initialState: LocationsState = {
   searchLoading: false,
   showSearchResults: false,
   userLocation: null,
-
+  heatMapData: [],
+  heatMapVisible: false,
+  heatMapLoading: false,
 };
 
 export const fetchNearbyLocations = createAsyncThunk(
@@ -393,6 +406,36 @@ export const createLocationFromSearch = createAsyncThunk(
   }
 );
 
+export const fetchHeatMapData = createAsyncThunk(
+  'locations/fetchHeatMapData',
+  async ({ 
+    latitude, 
+    longitude, 
+    radius = 10000,
+    userProfile 
+  }: { 
+    latitude: number; 
+    longitude: number; 
+    radius?: number;
+    userProfile?: any;
+  }) => {
+    const { data, error } = await supabase.rpc('get_heatmap_data', {
+      center_lat: latitude,
+      center_lng: longitude,
+      radius_meters: radius,
+      user_race_ethnicity: userProfile?.race_ethnicity || null,
+      user_gender: userProfile?.gender || null,
+      user_lgbtq_status: userProfile?.lgbtq_status || null,
+      user_disability_status: userProfile?.disability_status || null,
+      user_religion: userProfile?.religion || null,
+      user_age_range: userProfile?.age_range || null,
+    });
+
+    if (error) throw error;
+    return data || [];
+  }
+);
+
 const locationsSlice = createSlice({
   name: 'locations',
   initialState,
@@ -422,6 +465,12 @@ const locationsSlice = createSlice({
       if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
         state.nearbyLocations.push(action.payload);
       }
+    },
+    toggleHeatMap: (state) => {
+      state.heatMapVisible = !state.heatMapVisible;
+    },
+    setHeatMapVisible: (state, action: PayloadAction<boolean>) => {
+      state.heatMapVisible = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -541,6 +590,18 @@ const locationsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to create location';
       });
+      builder
+      .addCase(fetchHeatMapData.pending, (state) => {
+        state.heatMapLoading = true;
+      })
+      .addCase(fetchHeatMapData.fulfilled, (state, action) => {
+        state.heatMapLoading = false;
+        state.heatMapData = action.payload;
+      })
+      .addCase(fetchHeatMapData.rejected, (state) => {
+        state.heatMapLoading = false;
+        state.heatMapData = [];
+      });
   },
 });
 
@@ -551,7 +612,9 @@ export const {
   clearSearchResults,
   setShowSearchResults,
   setUserLocation,
-  addLocationToNearby
+  addLocationToNearby,
+  toggleHeatMap,
+  setHeatMapVisible
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
