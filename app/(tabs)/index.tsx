@@ -26,13 +26,10 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { LocationWithScores } from "@/types/supabase";
 import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
 
-console.log("Available components:", {
-  MapView: !!MapView,
-  Marker: !!Marker,
-  Circle: !!Circle,
-  Heatmap: !!Heatmap,
-});
 const getMarkerColor = (rating: number | string | null) => {
+  if (rating === null || rating === undefined) {
+    return "#007AFF"; // Blue for no reviews
+  }
   const numRating = Number(rating) || 0;
 
   if (numRating >= 4) return "#4CAF50";
@@ -242,7 +239,6 @@ export default function MapScreen() {
 
   const handleLocationSelect = async (selectedLocation: SearchResult) => {
     const source = selectedLocation.source || "database";
-    console.log("🔍 handleLocationSelect called with:", selectedLocation);
 
     if (source === "database") {
       try {
@@ -373,16 +369,13 @@ export default function MapScreen() {
       </View>
     );
   }
-  console.log("🔥 Heat map data:", heatMapData);
-  console.log("🔥 Heat map visible:", heatMapVisible);
-  console.log("🔥 Heat map points count:", heatMapData.length);
+
   if (heatMapVisible && heatMapData.length > 0) {
     const heatPoints = heatMapData.map((point) => ({
       latitude: point.latitude,
       longitude: point.longitude,
       weight: point.heat_weight,
     }));
-    console.log("🔥 Heat points for map:", heatPoints);
   }
   return (
     <View style={styles.container}>
@@ -400,15 +393,10 @@ export default function MapScreen() {
         }
       />
       {(() => {
-        console.log("🎯 Rendering markers:", {
-          nearbyLocationsCount: nearbyLocations.length,
-          nearbyLocationIds: nearbyLocations.map((loc) => loc.id),
-          mapReady: mapReady,
-        });
         return null;
       })()}
       <MapView
-        key={`${region.latitude}-${region.longitude}`}
+        //key={`${region.latitude}-${region.longitude}`}
         style={styles.map}
         region={region}
         showsUserLocation={true}
@@ -418,19 +406,27 @@ export default function MapScreen() {
           setMapReady(true);
         }}
         onRegionChangeComplete={(newRegion) => {
-          console.log("📍 Region changed:", newRegion);
           setRegion(newRegion);
 
-          // Only update nearby locations on region change
-          if (
+          // Check for position OR zoom changes
+          const positionChanged =
             Math.abs(newRegion.latitude - region.latitude) > 0.01 ||
-            Math.abs(newRegion.longitude - region.longitude) > 0.01
-          ) {
+            Math.abs(newRegion.longitude - region.longitude) > 0.01;
+
+          const zoomChanged =
+            Math.abs(newRegion.latitudeDelta - region.latitudeDelta) > 0.02 ||
+            Math.abs(newRegion.longitudeDelta - region.longitudeDelta) > 0.02;
+
+          if (positionChanged || zoomChanged) {
+            // Calculate dynamic radius based on zoom level
+            const latRadius = newRegion.latitudeDelta * 111 * 1000;
+            const dynamicRadius = Math.min(Math.max(latRadius, 10000), 100000);
+
             dispatch(
               fetchNearbyLocations({
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
-                radius: 50000, // Fixed 50km radius for nearby locations
+                radius: dynamicRadius,
               })
             );
           }
@@ -451,12 +447,7 @@ export default function MapScreen() {
 
             // Dynamic size based on weight and zoom
             const baseRadius = 200 + point.heat_weight * 100;
-            console.log("🔥 Heat point:", {
-              name: point.latitude + "," + point.longitude,
-              safety_score: point.safety_score,
-              heat_weight: point.heat_weight,
-              color: getHeatColor(point.heat_weight),
-            });
+
             return (
               <Circle
                 key={`heat-${index}`}
@@ -477,11 +468,10 @@ export default function MapScreen() {
           nearbyLocations &&
           nearbyLocations.length > 0 &&
           nearbyLocations.map((loc) => {
-            console.log("🎯 Rendering marker:", {
+            console.log(`🔍 Marker ${loc.name}:`, {
               id: loc.id,
-              name: loc.name,
-              lat: loc.latitude,
-              lng: loc.longitude,
+              avg_safety_score: loc.avg_safety_score,
+              calculated_color: getMarkerColor(loc.avg_safety_score || 0),
             });
             return (
               <Marker

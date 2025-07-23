@@ -480,10 +480,7 @@ const locationsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchNearbyLocations.fulfilled, (state, action) => {
-  console.log('📍 fetchNearbyLocations SUCCESS:', {
-    count: action.payload.length,
-    locationIds: action.payload.map((loc: { id: any; }) => loc.id)
-  });
+
   state.loading = false;
   state.nearbyLocations = action.payload;
 })
