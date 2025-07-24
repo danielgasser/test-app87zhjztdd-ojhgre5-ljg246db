@@ -32,7 +32,7 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <MaterialIcons name="account-circle" size={80} color="#007AFF" />
-        <Text style={styles.email}>{user?.email}</Text>
+        <Text style={styles.email}>{profile?.full_name}</Text>
       </View>
 
       <View style={styles.section}>

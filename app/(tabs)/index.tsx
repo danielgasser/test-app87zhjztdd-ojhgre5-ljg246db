@@ -71,7 +71,8 @@ export default function MapScreen() {
 
   const user = useAppSelector((state) => state.auth.user);
   const [mapReady, setMapReady] = useState(false);
-
+  console.log("🔍 Auth user:", user?.id);
+  console.log("🔍 User profile in Redux:", profile);
   const [region, setRegion] = useState(() => {
     // Initialize from Redux location if available
     if (userLocation) {
@@ -482,9 +483,13 @@ export default function MapScreen() {
                 }}
                 title={loc.name}
                 description={`Safety: ${
-                  loc.avg_safety_score?.toFixed(1) || "N/A"
+                  (
+                    loc.demographic_safety_score || loc.avg_safety_score
+                  )?.toFixed(1) || "N/A"
                 }/5`}
-                pinColor={getMarkerColor(loc.avg_safety_score || 0)}
+                pinColor={getMarkerColor(
+                  loc.demographic_safety_score || loc.avg_safety_score || 0
+                )}
                 onPress={() => handleMarkerPress(loc.id)}
               />
             );

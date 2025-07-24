@@ -363,6 +363,7 @@ export type SafetyScore = Tables<'safety_scores'>
 export type ReviewVote = Tables<'review_votes'>
 
 export interface LocationWithScores extends Location {
+  demographic_safety_score: any
   avg_safety_score: any
   longitude: number
   latitude: number
