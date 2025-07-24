@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
 
+const isProfileComplete = (profile: UserProfile | null): boolean => {
+  if (!profile) return false;
+  
+  // Profile is complete if user has filled at least some demographic info
+  return !!(
+    (profile.race_ethnicity && profile.race_ethnicity.length > 0) ||
+    profile.gender ||
+    profile.lgbtq_status !== undefined ||
+    (profile.disability_status && profile.disability_status.length > 0) ||
+    profile.religion ||
+    profile.age_range
+  );
+};
 export interface UserProfile {
   id: string;
   username?: string;
@@ -140,7 +153,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload;
         // Set onboarding complete after successful profile update
-        state.onboardingComplete = true;
+      state.onboardingComplete = isProfileComplete(action.payload);
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;

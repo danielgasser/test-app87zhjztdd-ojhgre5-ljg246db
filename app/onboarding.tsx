@@ -213,29 +213,14 @@ export default function OnboardingScreen() {
 
   const handleSkip = () => {
     if (isEditing) {
-      Alert.alert(
-        "Cancel Changes?",
-        "Your changes will not be saved. Are you sure you want to cancel?",
-        [
-          { text: "Keep Editing", style: "cancel" },
-          {
-            text: "Cancel",
-            style: "destructive",
-            onPress: () => router.replace("/(tabs)/profile"),
-          },
-        ]
-      );
+      // If editing existing profile, allow cancel back to main app
+      router.back();
     } else {
+      // If initial setup, show alert that profile is required
       Alert.alert(
-        "Skip Profile Setup?",
-        "You can set up your profile later in Settings. However, demographic information helps provide better safety insights.",
-        [
-          { text: "Continue Setup", style: "cancel" },
-          {
-            text: "Skip",
-            onPress: () => router.replace("/(tabs)"),
-          },
-        ]
+        "Profile Required",
+        "Setting up your profile is required to use SafePath's personalized safety features. This helps us show you relevant safety information based on your travel needs.",
+        [{ text: "Continue Setup", style: "default" }]
       );
     }
   };
@@ -272,35 +257,40 @@ export default function OnboardingScreen() {
 
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
-      <Ionicons name="shield-checkmark" size={80} color="#4CAF50" />
-      <Text style={styles.stepTitle}>
-        {isEditing ? "Edit Your Profile" : "Welcome to SafePath"}
-      </Text>
+      <Text style={styles.stepTitle}>Welcome to SafePath!</Text>
       <Text style={styles.stepDescription}>
-        {isEditing
-          ? "Update your demographic information to continue getting personalized safety recommendations."
-          : "SafePath provides safety ratings based on real experiences from travelers who share similar identities. Let's set up your profile to give you the most relevant safety information."}
+        To provide personalized safety information, we need to understand your
+        travel preferences and needs.
       </Text>
-      {!isEditing && (
-        <View style={styles.bulletPoints}>
-          <View style={styles.bulletPoint}>
-            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-            <Text style={styles.bulletText}>
-              Get personalized safety recommendations
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-            <Text style={styles.bulletText}>
-              Help others by sharing your experiences
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-            <Text style={styles.bulletText}>Control your privacy settings</Text>
-          </View>
+      <Text
+        style={[styles.stepDescription, { fontWeight: "600", color: "#333" }]}
+      >
+        This setup is required to access SafePath's core features.
+      </Text>
+      <View style={styles.bulletPoints}>
+        <View style={styles.bulletPoint}>
+          <Ionicons name="shield-checkmark" size={20} color="#4CAF50" />
+          <Text style={styles.bulletText}>
+            Get safety ratings personalized for your demographic
+          </Text>
         </View>
-      )}
+        <View style={styles.bulletPoint}>
+          <Ionicons name="map" size={20} color="#4CAF50" />
+          <Text style={styles.bulletText}>
+            See location safety from your perspective
+          </Text>
+        </View>
+        <View style={styles.bulletPoint}>
+          <Ionicons name="people" size={20} color="#4CAF50" />
+          <Text style={styles.bulletText}>
+            Connect with travelers who share your experiences
+          </Text>
+        </View>
+        <View style={styles.bulletPoint}>
+          <Ionicons name="lock-closed" size={20} color="#4CAF50" />
+          <Text style={styles.bulletText}>Your data is private and secure</Text>
+        </View>
+      </View>
     </View>
   );
 
@@ -729,14 +719,14 @@ export default function OnboardingScreen() {
 
       {/* Navigation Buttons */}
       <View style={styles.navigationContainer}>
-        <TouchableOpacity
-          style={[styles.navButton, styles.skipButton]}
-          onPress={handleSkip}
-        >
-          <Text style={styles.skipButtonText}>
-            {isEditing ? "Cancel" : "Skip"}
-          </Text>
-        </TouchableOpacity>
+        {isEditing && (
+          <TouchableOpacity
+            style={[styles.navButton, styles.skipButton]}
+            onPress={handleSkip}
+          >
+            <Text style={styles.skipButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.navButtonsRight}>
           {currentStep > 0 && (
@@ -763,7 +753,7 @@ export default function OnboardingScreen() {
                 : currentStep === ONBOARDING_STEPS.length - 1
                 ? isEditing
                   ? "Update Profile"
-                  : "Get Started"
+                  : "Complete Setup"
                 : "Next"}
             </Text>
           </TouchableOpacity>
