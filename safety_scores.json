@@ -1,0 +1,74 @@
+[
+  {
+    "id": "d5d6574e-9c61-4b04-bb6e-aa6420fde16a",
+    "location_id": "c6780f63-8976-4242-a45e-936b50f9011f",
+    "demographic_type": "gender",
+    "demographic_value": "man",
+    "avg_safety_score": "4.00",
+    "avg_comfort_score": "4.00",
+    "avg_overall_score": "4.00",
+    "review_count": 2,
+    "last_review_date": "2025-07-24 14:24:36.668729+00",
+    "calculated_at": "2025-07-24 14:24:45.297929+00"
+  },
+  {
+    "id": "03ac2e41-7131-42eb-a674-90dc40742417",
+    "location_id": "c6780f63-8976-4242-a45e-936b50f9011f",
+    "demographic_type": "gender",
+    "demographic_value": "woman",
+    "avg_safety_score": "1.00",
+    "avg_comfort_score": "1.00",
+    "avg_overall_score": "1.00",
+    "review_count": 1,
+    "last_review_date": "2025-07-24 14:24:36.668729+00",
+    "calculated_at": "2025-07-24 14:24:45.297929+00"
+  },
+  {
+    "id": "b7ffd739-13eb-4b4d-bb59-72853aeb9a86",
+    "location_id": "c6780f63-8976-4242-a45e-936b50f9011f",
+    "demographic_type": "overall",
+    "demographic_value": null,
+    "avg_safety_score": "3.00",
+    "avg_comfort_score": "3.00",
+    "avg_overall_score": "3.00",
+    "review_count": 3,
+    "last_review_date": "2025-07-24 14:24:36.668729+00",
+    "calculated_at": "2025-07-24 14:24:45.297929+00"
+  },
+  {
+    "id": "8d09b87f-7bc1-41c8-b0ac-0b2a3eaf01d1",
+    "location_id": "c6780f63-8976-4242-a45e-936b50f9011f",
+    "demographic_type": "race_ethnicity",
+    "demographic_value": "black",
+    "avg_safety_score": "1.00",
+    "avg_comfort_score": "1.00",
+    "avg_overall_score": "1.00",
+    "review_count": 1,
+    "last_review_date": "2025-07-24 14:24:36.668729+00",
+    "calculated_at": "2025-07-24 14:24:45.297929+00"
+  },
+  {
+    "id": "2fa57bf5-2abe-40e1-ac2e-1beb3b6be9cd",
+    "location_id": "c6780f63-8976-4242-a45e-936b50f9011f",
+    "demographic_type": "race_ethnicity",
+    "demographic_value": "hispanic_latino",
+    "avg_safety_score": "3.00",
+    "avg_comfort_score": "3.00",
+    "avg_overall_score": "3.00",
+    "review_count": 1,
+    "last_review_date": "2025-07-24 14:24:36.668729+00",
+    "calculated_at": "2025-07-24 14:24:45.297929+00"
+  },
+  {
+    "id": "c80d9eb0-1a0a-4f5c-818b-c1d85379b955",
+    "location_id": "c6780f63-8976-4242-a45e-936b50f9011f",
+    "demographic_type": "race_ethnicity",
+    "demographic_value": "white",
+    "avg_safety_score": "5.00",
+    "avg_comfort_score": "5.00",
+    "avg_overall_score": "5.00",
+    "review_count": 1,
+    "last_review_date": "2025-07-24 14:24:36.668729+00",
+    "calculated_at": "2025-07-24 14:24:45.297929+00"
+  }
+]
