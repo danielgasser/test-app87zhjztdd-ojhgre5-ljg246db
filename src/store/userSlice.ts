@@ -133,13 +133,15 @@ const userSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload;
-        // Set onboarding complete if profile has basic demographic info
-        state.onboardingComplete = !!(
-          action.payload?.race_ethnicity?.length ||
-          action.payload?.gender ||
-          action.payload?.lgbtq_status !== undefined
-        );
+        state.onboardingComplete = isProfileComplete(action.payload);
+        
+        console.log("🔍 Profile check:", {
+          hasProfile: !!action.payload,
+          profileData: action.payload,
+          isComplete: state.onboardingComplete
+        });
       })
+
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch profile';
