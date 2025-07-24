@@ -71,9 +71,6 @@ export default function MapScreen() {
 
   const user = useAppSelector((state) => state.auth.user);
   const [mapReady, setMapReady] = useState(false);
-  console.log("🔍 Auth user ID:", user?.id);
-  console.log("🔍 Profile data:", profile);
-  console.log("🔍 Profile race_ethnicity:", profile?.race_ethnicity);
   const [region, setRegion] = useState(() => {
     // Initialize from Redux location if available
     if (userLocation) {
@@ -218,9 +215,6 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (userLocation && profile && profile.race_ethnicity) {
-      console.log(
-        "🎯 Profile loaded! Re-fetching nearby locations with demographics"
-      );
       dispatch(
         fetchNearbyLocations({
           latitude: userLocation.latitude,
@@ -485,13 +479,6 @@ export default function MapScreen() {
           nearbyLocations &&
           nearbyLocations.length > 0 &&
           nearbyLocations.map((loc) => {
-            console.log(`🔍 Marker ${loc.name}:`, {
-              id: loc.id,
-              avg_safety_score: loc.avg_safety_score,
-              calculated_color: getMarkerColor(
-                loc.avg_safety_score || loc.avg_safety_score || null
-              ),
-            });
             return (
               <Marker
                 key={`db-${loc.id}`}
