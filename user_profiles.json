@@ -1,0 +1,53 @@
+[
+  {
+    "id": "88bb1b77-a84e-4c13-a787-0ff4b797376d",
+    "username": "carlos_rodriguez",
+    "full_name": "Carlos Rodriguez",
+    "race_ethnicity": [
+      "hispanic_latino"
+    ],
+    "gender": "man",
+    "lgbtq_status": false,
+    "age_range": "28-34",
+    "privacy_level": "public",
+    "show_demographics": true,
+    "total_reviews": 0,
+    "helpful_votes": 0,
+    "created_at": "2025-07-24 14:14:53.840228+00",
+    "updated_at": "2025-07-24 14:14:53.840228+00"
+  },
+  {
+    "id": "572aa506-5d2c-4a28-9e7c-a5b4be39a033",
+    "username": "john_smith",
+    "full_name": "John Smith",
+    "race_ethnicity": [
+      "white"
+    ],
+    "gender": "man",
+    "lgbtq_status": false,
+    "age_range": "35-44",
+    "privacy_level": "public",
+    "show_demographics": true,
+    "total_reviews": 0,
+    "helpful_votes": 0,
+    "created_at": "2025-07-24 14:14:53.840228+00",
+    "updated_at": "2025-07-24 14:14:53.840228+00"
+  },
+  {
+    "id": "afcc06cb-fcd0-450a-a573-380eb4ab7581",
+    "username": "maya_johnson",
+    "full_name": "Maya Johnson",
+    "race_ethnicity": [
+      "black"
+    ],
+    "gender": "woman",
+    "lgbtq_status": true,
+    "age_range": "25-34",
+    "privacy_level": "public",
+    "show_demographics": true,
+    "total_reviews": 0,
+    "helpful_votes": 0,
+    "created_at": "2025-07-24 14:14:53.840228+00",
+    "updated_at": "2025-07-24 14:14:53.840228+00"
+  }
+]
