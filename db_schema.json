@@ -1,0 +1,578 @@
+[
+  {
+    "table_name": "locations",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "address",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "city",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "state_province",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "country",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": "'US'::text",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "postal_code",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "coordinates",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "place_type",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "tags",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "google_place_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "verified",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "active",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "true",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "place_type_backup",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "avg_safety_score",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "avg_comfort_score",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "avg_overall_score",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "locations",
+    "column_name": "review_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "review_votes",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "review_votes",
+    "column_name": "review_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "review_votes",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "review_votes",
+    "column_name": "vote_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "review_votes",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "location_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "content",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "overall_rating",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "safety_rating",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "comfort_rating",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "accessibility_rating",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "service_rating",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "visit_type",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "photo_urls",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'active'::text",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "flag_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "helpful_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "unhelpful_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "reviews",
+    "column_name": "visited_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "location_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "demographic_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "demographic_value",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "avg_safety_score",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "avg_comfort_score",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "avg_overall_score",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "review_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "last_review_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "safety_scores",
+    "column_name": "calculated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "username",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "full_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "avatar_url",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "race_ethnicity",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "gender",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "lgbtq_status",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "disability_status",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "religion",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "age_range",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "privacy_level",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'public'::text",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "show_demographics",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "true",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "total_reviews",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "helpful_votes",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  },
+  {
+    "table_name": "user_profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "character_maximum_length": null
+  }
+]

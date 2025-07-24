@@ -1,0 +1,82 @@
+[
+  {
+    "tablename": "locations",
+    "indexname": "locations_pkey",
+    "indexdef": "CREATE UNIQUE INDEX locations_pkey ON public.locations USING btree (id)"
+  },
+  {
+    "tablename": "locations",
+    "indexname": "locations_google_place_id_key",
+    "indexdef": "CREATE UNIQUE INDEX locations_google_place_id_key ON public.locations USING btree (google_place_id)"
+  },
+  {
+    "tablename": "locations",
+    "indexname": "idx_locations_coordinates",
+    "indexdef": "CREATE INDEX idx_locations_coordinates ON public.locations USING gist (coordinates)"
+  },
+  {
+    "tablename": "review_votes",
+    "indexname": "review_votes_pkey",
+    "indexdef": "CREATE UNIQUE INDEX review_votes_pkey ON public.review_votes USING btree (id)"
+  },
+  {
+    "tablename": "review_votes",
+    "indexname": "review_votes_review_id_user_id_key",
+    "indexdef": "CREATE UNIQUE INDEX review_votes_review_id_user_id_key ON public.review_votes USING btree (review_id, user_id)"
+  },
+  {
+    "tablename": "reviews",
+    "indexname": "reviews_pkey",
+    "indexdef": "CREATE UNIQUE INDEX reviews_pkey ON public.reviews USING btree (id)"
+  },
+  {
+    "tablename": "reviews",
+    "indexname": "idx_reviews_location",
+    "indexdef": "CREATE INDEX idx_reviews_location ON public.reviews USING btree (location_id)"
+  },
+  {
+    "tablename": "reviews",
+    "indexname": "idx_reviews_user",
+    "indexdef": "CREATE INDEX idx_reviews_user ON public.reviews USING btree (user_id)"
+  },
+  {
+    "tablename": "reviews",
+    "indexname": "idx_reviews_created",
+    "indexdef": "CREATE INDEX idx_reviews_created ON public.reviews USING btree (created_at DESC)"
+  },
+  {
+    "tablename": "reviews",
+    "indexname": "idx_unique_user_location_review",
+    "indexdef": "CREATE UNIQUE INDEX idx_unique_user_location_review ON public.reviews USING btree (user_id, location_id) WHERE (status = 'active'::text)"
+  },
+  {
+    "tablename": "safety_scores",
+    "indexname": "safety_scores_pkey",
+    "indexdef": "CREATE UNIQUE INDEX safety_scores_pkey ON public.safety_scores USING btree (id)"
+  },
+  {
+    "tablename": "safety_scores",
+    "indexname": "safety_scores_location_id_demographic_type_demographic_valu_key",
+    "indexdef": "CREATE UNIQUE INDEX safety_scores_location_id_demographic_type_demographic_valu_key ON public.safety_scores USING btree (location_id, demographic_type, demographic_value)"
+  },
+  {
+    "tablename": "safety_scores",
+    "indexname": "idx_safety_scores_location",
+    "indexdef": "CREATE INDEX idx_safety_scores_location ON public.safety_scores USING btree (location_id)"
+  },
+  {
+    "tablename": "safety_scores",
+    "indexname": "idx_safety_scores_demographic",
+    "indexdef": "CREATE INDEX idx_safety_scores_demographic ON public.safety_scores USING btree (demographic_type, demographic_value)"
+  },
+  {
+    "tablename": "user_profiles",
+    "indexname": "user_profiles_pkey",
+    "indexdef": "CREATE UNIQUE INDEX user_profiles_pkey ON public.user_profiles USING btree (id)"
+  },
+  {
+    "tablename": "user_profiles",
+    "indexname": "user_profiles_username_key",
+    "indexdef": "CREATE UNIQUE INDEX user_profiles_username_key ON public.user_profiles USING btree (username)"
+  }
+]

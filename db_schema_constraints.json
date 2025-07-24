@@ -1,0 +1,267 @@
+[
+  {
+    "table_name": "locations",
+    "constraint_name": "locations_created_by_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "locations_google_place_id_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "locations_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "review_votes_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "review_votes_review_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "review_votes_review_id_user_id_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "review_votes_user_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "review_votes_vote_type_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_accessibility_rating_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_comfort_rating_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_location_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_overall_rating_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_safety_rating_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_service_rating_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_status_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_user_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "reviews_visit_type_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_avg_comfort_score_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_avg_overall_score_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_avg_safety_score_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_demographic_type_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_location_id_demographic_type_demographic_valu_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_location_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "safety_scores_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "user_profiles",
+    "constraint_name": "user_profiles_id_fkey",
+    "constraint_type": "FOREIGN KEY"
+  },
+  {
+    "table_name": "user_profiles",
+    "constraint_name": "user_profiles_pkey",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "user_profiles",
+    "constraint_name": "user_profiles_privacy_level_check",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "user_profiles",
+    "constraint_name": "user_profiles_username_key",
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_6_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_7_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_9_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "locations",
+    "constraint_name": "2200_18383_10_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "2200_18466_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "2200_18466_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "2200_18466_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "review_votes",
+    "constraint_name": "2200_18466_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_4_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_5_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_6_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_7_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "reviews",
+    "constraint_name": "2200_18406_8_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "2200_18443_1_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "2200_18443_2_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "safety_scores",
+    "constraint_name": "2200_18443_3_not_null",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "user_profiles",
+    "constraint_name": "2200_18360_1_not_null",
+    "constraint_type": "CHECK"
+  }
+]
