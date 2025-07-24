@@ -77,6 +77,15 @@ export const fetchNearbyLocations = createAsyncThunk(
     const state = getState() as any;
     const userProfile = state.user.profile;
 
+    // DEBUG: Log exactly what we're checking
+    console.log("_______________________________");
+    console.log("🔍 Redux state.user:", state.user);
+    console.log("🔍 userProfile:", userProfile);
+    console.log("🔍 userProfile exists?", !!userProfile);
+    console.log("🔍 userProfile.race_ethnicity:", userProfile?.race_ethnicity);
+    console.log("🔍 race_ethnicity exists?", !!userProfile?.race_ethnicity);
+    console.log("🔍 Conditional result:", !!(userProfile && userProfile.race_ethnicity));
+
     // Use demographic-aware function if user has profile, otherwise fallback
     if (userProfile && userProfile.race_ethnicity) {
       console.log("🎯 Using demographic-aware search for:", userProfile.race_ethnicity, userProfile.gender);
@@ -95,6 +104,7 @@ export const fetchNearbyLocations = createAsyncThunk(
     } else {
       // Fallback to standard function if no profile
       console.log("⚪ Using standard search (no demographic profile)");
+      console.log("⚪ Reason: userProfile =", !!userProfile, "race_ethnicity =", !!userProfile?.race_ethnicity);
       
       const { data, error } = await supabase.rpc('get_nearby_locations', {
         lat: latitude,

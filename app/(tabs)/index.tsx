@@ -71,8 +71,9 @@ export default function MapScreen() {
 
   const user = useAppSelector((state) => state.auth.user);
   const [mapReady, setMapReady] = useState(false);
-  console.log("🔍 Auth user:", user?.id);
-  console.log("🔍 User profile in Redux:", profile);
+  console.log("🔍 Auth user ID:", user?.id);
+  console.log("🔍 Profile data:", profile);
+  console.log("🔍 Profile race_ethnicity:", profile?.race_ethnicity);
   const [region, setRegion] = useState(() => {
     // Initialize from Redux location if available
     if (userLocation) {
@@ -214,6 +215,21 @@ export default function MapScreen() {
       });
     }
   }, [userLocation]);
+
+  useEffect(() => {
+    if (userLocation && profile && profile.race_ethnicity) {
+      console.log(
+        "🎯 Profile loaded! Re-fetching nearby locations with demographics"
+      );
+      dispatch(
+        fetchNearbyLocations({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          radius: 5000,
+        })
+      );
+    }
+  }, [profile, userLocation, dispatch]);
   const handleMarkerPress = (locationId: string) => {
     setSelectedLocationId(locationId);
     setModalVisible(true);
@@ -472,7 +488,9 @@ export default function MapScreen() {
             console.log(`🔍 Marker ${loc.name}:`, {
               id: loc.id,
               avg_safety_score: loc.avg_safety_score,
-              calculated_color: getMarkerColor(loc.avg_safety_score || 0),
+              calculated_color: getMarkerColor(
+                loc.avg_safety_score || loc.avg_safety_score || null
+              ),
             });
             return (
               <Marker
@@ -488,7 +506,7 @@ export default function MapScreen() {
                   )?.toFixed(1) || "N/A"
                 }/5`}
                 pinColor={getMarkerColor(
-                  loc.demographic_safety_score || loc.avg_safety_score || 0
+                  loc.demographic_safety_score || loc.avg_safety_score || null
                 )}
                 onPress={() => handleMarkerPress(loc.id)}
               />
