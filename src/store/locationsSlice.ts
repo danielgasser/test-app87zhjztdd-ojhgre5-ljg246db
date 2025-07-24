@@ -109,48 +109,35 @@ export const fetchNearbyLocations = createAsyncThunk(
 export const fetchLocationDetails = createAsyncThunk(
   'locations/fetchDetails',
   async (locationId: string) => {
-    const { data: location, error: locationError } = await supabase
-      .from('locations')
-      .select(`
-        *,
-        safety_scores (*)
-      `)
-      .eq('id', locationId)
-      .single();
+    // Get location with coordinates using our dedicated function
+    const { data: locationData, error: locationError } = await supabase
+      .rpc('get_location_with_coords', { location_id: locationId });
 
-    if (locationError) throw locationError;
-
-    if (location.coordinates) {
-      try {
-        const { data: nearbyData } = await supabase.rpc('get_nearby_locations', {
-          lat: 0, 
-          lng: 0,
-          radius_meters: 1,
-        });
-
-        const locationWithCoords = nearbyData?.find((loc: any) => loc.id === locationId);
-        
-        if (locationWithCoords) {
-          location.latitude = locationWithCoords.latitude;
-          location.longitude = locationWithCoords.longitude;
-        }
-      } catch (coordError) {
-        console.warn('Could not extract coordinates:', coordError);
-        location.latitude = 0;
-        location.longitude = 0;
-      }
+    if (locationError || !locationData || locationData.length === 0) {
+      throw new Error(`Location not found: ${locationError?.message}`);
     }
 
-    const overallScore = location.safety_scores?.find(
+    const location = locationData[0];
+
+    // Get safety scores separately
+    const { data: safetyScores, error: scoresError } = await supabase
+      .from('safety_scores')
+      .select('*')
+      .eq('location_id', locationId);
+
+    if (scoresError) {
+      console.warn('Error fetching safety scores:', scoresError);
+    }
+
+    const overallScore = safetyScores?.find(
       (score: any) => score.demographic_type === 'overall'
     );
 
     return {
       ...location,
+      safety_scores: safetyScores || [],
       overall_safety_score: overallScore?.avg_safety_score || null,
       review_count: overallScore?.review_count || 0,
-      latitude: location.latitude || 0,
-      longitude: location.longitude || 0,
     };
   }
 );
@@ -328,21 +315,20 @@ export const searchLocations = createAsyncThunk(
 
     try {
       const { data: existingLocations, error: dbError } = await supabase
-        .from('locations')
-        .select('id, name, address, city, state_province, place_type')
-        .or(`name.ilike.%${query}%,address.ilike.%${query}%,city.ilike.%${query}%`)
-        .eq('active', true)
-        .limit(3);
+        .rpc('search_locations_with_coords', {
+          search_query: query,
+          result_limit: 5
+        });
 
       let results: SearchLocation[] = [];
 
       if (existingLocations && !dbError) {
-        results = existingLocations.map(loc => ({
+        results = existingLocations.map((loc: { id: any; name: any; address: any; city: any; state_province: any; latitude: any; longitude: any; place_type: any; }) => ({
           id: loc.id,
           name: loc.name,
           address: `${loc.address}, ${loc.city}, ${loc.state_province}`,
-          latitude: 0,
-          longitude: 0,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
           place_type: loc.place_type,
           source: 'database' as const,
         }));

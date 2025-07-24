@@ -266,13 +266,15 @@ export default function MapScreen() {
           };
 
           setRegion(newRegion);
-
           setSearchMarker({
             ...selectedLocation,
             latitude: Number(locationWithCoords.latitude),
             longitude: Number(locationWithCoords.longitude),
             source: "database",
           });
+          // For database locations, directly open the modal instead of showing search marker
+          setSelectedLocationId(selectedLocation.id);
+          //setModalVisible(true);
         }
       } catch (error) {
         console.error("Error fetching location details:", error);
