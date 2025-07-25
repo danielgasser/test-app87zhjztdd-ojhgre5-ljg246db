@@ -240,18 +240,40 @@ export default function OnboardingScreen() {
   };
 
   const toggleDisability = (disability: string) => {
-    if (formData.disability_status.includes(disability)) {
-      setFormData({
-        ...formData,
-        disability_status: formData.disability_status.filter(
-          (d) => d !== disability
-        ),
-      });
+    if (disability === "None") {
+      // If "None" is selected, clear all other selections and toggle "None"
+      if (formData.disability_status.includes("None")) {
+        // Remove "None" if it's already selected
+        setFormData({
+          ...formData,
+          disability_status: [],
+        });
+      } else {
+        // Select only "None" and clear everything else
+        setFormData({
+          ...formData,
+          disability_status: ["None"],
+        });
+      }
     } else {
-      setFormData({
-        ...formData,
-        disability_status: [...formData.disability_status, disability],
-      });
+      // For any other disability, remove "None" if it exists and toggle the selection
+      const updatedStatus = formData.disability_status.filter(
+        (d) => d !== "None"
+      );
+
+      if (updatedStatus.includes(disability)) {
+        // Remove the disability if it's already selected
+        setFormData({
+          ...formData,
+          disability_status: updatedStatus.filter((d) => d !== disability),
+        });
+      } else {
+        // Add the disability to the selection
+        setFormData({
+          ...formData,
+          disability_status: [...updatedStatus, disability],
+        });
+      }
     }
   };
 
