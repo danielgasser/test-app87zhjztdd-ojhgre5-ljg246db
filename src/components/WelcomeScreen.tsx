@@ -1,16 +1,36 @@
 import { useEffect, useState } from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
-import { store } from "../store";
-import { theme } from "src/styles/theme";
+import { store } from "src/store";
 
 export default function RootLayout() {
+  return (
+    <Provider store={store}>
+      <RootLayoutNav />
+    </Provider>
+  );
+}
+
+function RootLayoutNav() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+  const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
     checkFirstLaunch();
   }, []);
+
+  useEffect(() => {
+    if (isFirstLaunch === null) return;
+
+    // Navigate based on first launch status
+    if (isFirstLaunch) {
+      router.replace("/welcome");
+    } else {
+      router.replace("/(tabs)");
+    }
+  }, [isFirstLaunch]);
 
   const checkFirstLaunch = async () => {
     try {
@@ -29,40 +49,19 @@ export default function RootLayout() {
     }
   };
 
-  // Show nothing while checking first launch status
-  if (isFirstLaunch === null) {
-    return null;
-  }
-
   return (
-    <Provider store={store}>
-      <Stack screenOptions={{ headerShown: false }}>
-        {isFirstLaunch ? (
-          // First time user - show welcome screen
-          <>
-            <Stack.Screen
-              name="welcome"
-              options={{
-                headerShown: false,
-                gestureEnabled: false, // Prevent swipe back
-              }}
-            />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="signup" />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="(tabs)" />
-          </>
-        ) : (
-          // Returning user - go straight to main app
-          <>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="signup" />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="welcome" />
-          </>
-        )}
-      </Stack>
-    </Provider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="welcome"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signup" />
+      <Stack.Screen name="onboarding" />
+    </Stack>
   );
 }
