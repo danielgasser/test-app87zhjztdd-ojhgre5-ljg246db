@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
-import { store } from "src/store";
+import { store } from "../store";
+import { theme } from "src/styles/theme";
 
 export default function RootLayout() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
