@@ -18,7 +18,6 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { submitReview } from "src/store/locationsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { supabase } from "@/services/supabase";
 import {
   createLocationFromSearch,
   setUserLocation,

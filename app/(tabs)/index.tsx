@@ -7,14 +7,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Heatmap, Circle, Polygon } from "react-native-maps";
+import MapView, { Marker, Circle } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
   fetchNearbyLocations,
   fetchLocationDetails,
-  createLocationFromSearch,
   clearSearchResults,
   setUserLocation,
 } from "src/store/locationsSlice";
@@ -23,7 +22,6 @@ import SearchBar from "src/components/SearchBar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { LocationWithScores } from "@/types/supabase";
 import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
 
 const getMarkerColor = (rating: number | string | null) => {

@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
 import { 
-  Location, 
   LocationWithScores, 
   Review, 
   CreateReviewForm,
