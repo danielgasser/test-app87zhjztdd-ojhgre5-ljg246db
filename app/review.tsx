@@ -205,6 +205,7 @@ export default function ReviewScreen() {
           google_place_id: null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          demographic_safety_score: undefined,
         };
 
         dispatch(addLocationToNearby(newLocationWithScores));

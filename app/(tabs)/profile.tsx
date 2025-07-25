@@ -20,6 +20,7 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     dispatch(signOut());
+    router.replace("/login");
   };
 
   useEffect(() => {
