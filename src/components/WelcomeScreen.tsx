@@ -8,10 +8,12 @@ import {
   Dimensions,
   StatusBar,
   useColorScheme,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import logoImage from "src/assets/images/logo.png";
 
 const { width, height } = Dimensions.get("window");
 
@@ -95,9 +97,13 @@ const WelcomeScreenNew = () => {
         <Animated.View
           style={[styles.logoContainer, { transform: [{ scale: scaleAnim }] }]}
         >
-          <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>SafePath</Text>
-          </View>
+          {/* New image logo */}
+          <Image
+            source={logoImage}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.logoText}>SafePath</Text>
         </Animated.View>
 
         {/* Hero Text */}
@@ -205,6 +211,11 @@ const WelcomeScreenNew = () => {
 
 const getStyles = (isDark: boolean) =>
   StyleSheet.create({
+    logoImage: {
+      width: 120,
+      height: 60,
+      marginBottom: 20,
+    },
     container: {
       flex: 1,
       backgroundColor: isDark ? "#1a1a2e" : "#667eea",
