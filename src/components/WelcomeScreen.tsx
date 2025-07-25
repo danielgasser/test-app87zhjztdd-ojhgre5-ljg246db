@@ -1,67 +1,384 @@
-import { useEffect, useState } from "react";
-import { Stack, useRouter, useSegments } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Provider } from "react-redux";
-import { store } from "src/store";
+import React, { useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  Dimensions,
+  StatusBar,
+  useColorScheme,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
-export default function RootLayout() {
-  return (
-    <Provider store={store}>
-      <RootLayoutNav />
-    </Provider>
-  );
-}
+const { width, height } = Dimensions.get("window");
 
-function RootLayoutNav() {
-  const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+const WelcomeScreenNew = () => {
   const router = useRouter();
-  const segments = useSegments();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
-    checkFirstLaunch();
+    // Staggered animations for smooth entrance
+    Animated.sequence([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
   }, []);
 
-  useEffect(() => {
-    if (isFirstLaunch === null) return;
-
-    // Navigate based on first launch status
-    if (isFirstLaunch) {
-      router.replace("/welcome");
-    } else {
-      router.replace("/(tabs)");
-    }
-  }, [isFirstLaunch]);
-
-  const checkFirstLaunch = async () => {
-    try {
-      const hasLaunched = await AsyncStorage.getItem("hasLaunched");
-      if (hasLaunched === null) {
-        // First time launching
-        setIsFirstLaunch(true);
-        await AsyncStorage.setItem("hasLaunched", "true");
-      } else {
-        // Not first time
-        setIsFirstLaunch(false);
-      }
-    } catch (error) {
-      console.error("Error checking first launch:", error);
-      setIsFirstLaunch(false);
-    }
+  const handleGetStarted = () => {
+    router.replace("/(auth)/register");
   };
 
+  const handleSignIn = () => {
+    router.replace("/(auth)/login");
+  };
+
+  const handleDemo = () => {
+    // For now, just navigate to the map - later we can add a demo mode
+    router.replace("/(tabs)");
+  };
+
+  const styles = getStyles(isDark);
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="welcome"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-        }}
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
       />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="signup" />
-      <Stack.Screen name="onboarding" />
-    </Stack>
+
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={
+          isDark
+            ? ["#1a1a2e", "#16213e", "#0f3460"]
+            : ["#667eea", "#764ba2", "#f093fb"]
+        }
+        style={styles.gradient}
+      />
+
+      {/* Main Content */}
+      <Animated.View
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        {/* Logo/Brand Area */}
+        <Animated.View
+          style={[styles.logoContainer, { transform: [{ scale: scaleAnim }] }]}
+        >
+          <View style={styles.logoPlaceholder}>
+            <Text style={styles.logoText}>SafePath</Text>
+          </View>
+        </Animated.View>
+
+        {/* Hero Text */}
+        <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>
+            Travel Safely.{"\n"}
+            <Text style={styles.heroAccent}>Belong Everywhere.</Text>
+          </Text>
+
+          <Text style={styles.heroSubtitle}>
+            The first GPS app that shows you how safe places are for people like
+            you
+          </Text>
+        </View>
+
+        {/* Feature Illustration */}
+        <Animated.View
+          style={[
+            styles.illustrationContainer,
+            { transform: [{ scale: scaleAnim }] },
+          ]}
+        >
+          {/* Map Mockup */}
+          <View style={styles.mapMockup}>
+            <View style={styles.mapPin1}>
+              <View style={[styles.pin, { backgroundColor: "#4CAF50" }]} />
+              <Text style={styles.pinLabel}>Safe</Text>
+            </View>
+            <View style={styles.mapPin2}>
+              <View style={[styles.pin, { backgroundColor: "#FFC107" }]} />
+              <Text style={styles.pinLabel}>Caution</Text>
+            </View>
+            <View style={styles.mapPin3}>
+              <View style={[styles.pin, { backgroundColor: "#F44336" }]} />
+              <Text style={styles.pinLabel}>Avoid</Text>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Key Benefits */}
+        <View style={styles.benefitsContainer}>
+          <View style={styles.benefit}>
+            <Text style={styles.benefitIcon}>🎯</Text>
+            <Text style={styles.benefitText}>
+              Demographic-aware safety ratings
+            </Text>
+          </View>
+          <View style={styles.benefit}>
+            <Text style={styles.benefitIcon}>👥</Text>
+            <Text style={styles.benefitText}>
+              Community-powered recommendations
+            </Text>
+          </View>
+          <View style={styles.benefit}>
+            <Text style={styles.benefitIcon}>🤖</Text>
+            <Text style={styles.benefitText}>AI-powered travel insights</Text>
+          </View>
+        </View>
+      </Animated.View>
+
+      {/* Bottom CTA Section */}
+      <Animated.View
+        style={[
+          styles.ctaContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleGetStarted}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={["#667eea", "#764ba2"]}
+            style={styles.buttonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Text style={styles.primaryButtonText}>Get Started</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={handleSignIn}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.secondaryButtonText}>Sign In</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.demoButton}
+          onPress={handleDemo}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.demoButtonText}>See how it works</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </SafeAreaView>
   );
-}
+};
+
+const getStyles = (isDark: boolean) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? "#1a1a2e" : "#667eea",
+    },
+    gradient: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      top: 0,
+      height: height,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: 24,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    logoContainer: {
+      marginBottom: 40,
+    },
+    logoPlaceholder: {
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 20,
+      borderWidth: 2,
+      borderColor: "rgba(255, 255, 255, 0.3)",
+    },
+    logoText: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: "#FFFFFF",
+      textAlign: "center",
+    },
+    heroSection: {
+      alignItems: "center",
+      marginBottom: 40,
+    },
+    heroTitle: {
+      fontSize: 36,
+      fontWeight: "bold",
+      color: "#FFFFFF",
+      textAlign: "center",
+      lineHeight: 42,
+      marginBottom: 16,
+    },
+    heroAccent: {
+      fontSize: 36,
+      fontWeight: "bold",
+      color: "#FFD700",
+    },
+    heroSubtitle: {
+      fontSize: 18,
+      color: "rgba(255, 255, 255, 0.9)",
+      textAlign: "center",
+      lineHeight: 24,
+      paddingHorizontal: 20,
+    },
+    illustrationContainer: {
+      marginBottom: 40,
+    },
+    mapMockup: {
+      width: 200,
+      height: 120,
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+      borderRadius: 16,
+      position: "relative",
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.2)",
+    },
+    mapPin1: {
+      position: "absolute",
+      top: 20,
+      left: 30,
+      alignItems: "center",
+    },
+    mapPin2: {
+      position: "absolute",
+      top: 40,
+      right: 40,
+      alignItems: "center",
+    },
+    mapPin3: {
+      position: "absolute",
+      bottom: 20,
+      left: 50,
+      alignItems: "center",
+    },
+    pin: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      marginBottom: 4,
+    },
+    pinLabel: {
+      fontSize: 10,
+      color: "#FFFFFF",
+      fontWeight: "600",
+    },
+    benefitsContainer: {
+      width: "100%",
+    },
+    benefit: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+      paddingHorizontal: 20,
+    },
+    benefitIcon: {
+      fontSize: 24,
+      marginRight: 16,
+    },
+    benefitText: {
+      fontSize: 16,
+      color: "rgba(255, 255, 255, 0.95)",
+      fontWeight: "500",
+      flex: 1,
+    },
+    ctaContainer: {
+      paddingHorizontal: 24,
+      paddingBottom: 40,
+      width: "100%",
+    },
+    primaryButton: {
+      width: "100%",
+      height: 56,
+      borderRadius: 28,
+      marginBottom: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    buttonGradient: {
+      flex: 1,
+      borderRadius: 28,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    primaryButtonText: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: "#FFFFFF",
+    },
+    secondaryButton: {
+      width: "100%",
+      height: 56,
+      borderRadius: 28,
+      borderWidth: 2,
+      borderColor: "rgba(255, 255, 255, 0.4)",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 16,
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    },
+    secondaryButtonText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: "#FFFFFF",
+    },
+    demoButton: {
+      width: "100%",
+      height: 44,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    demoButtonText: {
+      fontSize: 16,
+      color: "rgba(255, 255, 255, 0.8)",
+      textDecorationLine: "underline",
+    },
+  });
+
+export default WelcomeScreenNew;
