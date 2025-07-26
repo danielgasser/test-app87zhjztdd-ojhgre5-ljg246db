@@ -12,7 +12,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { signIn } from "src/store/authSlice";
 import { supabase } from "@/services/supabase";
@@ -35,6 +35,7 @@ export default function LoginScreen() {
 
     try {
       await dispatch(signIn({ email, password })).unwrap();
+      router.replace("/(tabs)");
     } catch (err) {
       Alert.alert("Login Failed", error || "Invalid credentials");
     }
