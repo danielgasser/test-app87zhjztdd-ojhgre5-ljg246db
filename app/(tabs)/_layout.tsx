@@ -11,7 +11,6 @@ export default function TabLayout() {
 
   useEffect(() => {
     if (user?.id) {
-      console.log("📱 Fetching user profile on tab mount:", user.id);
       dispatch(fetchUserProfile(user.id));
     }
   }, [user, dispatch]);

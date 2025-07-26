@@ -92,14 +92,6 @@ export default function MapScreen() {
   });
   useEffect(() => {
     if (userLocation && profile) {
-      console.log("🔥 Fetching heatmap data with:", {
-        userLocation,
-        profile: {
-          race_ethnicity: profile.race_ethnicity,
-          gender: profile.gender,
-        },
-      });
-
       dispatch(
         fetchHeatMapData({
           latitude: userLocation.latitude,
@@ -117,11 +109,6 @@ export default function MapScreen() {
           lat: userLocation.latitude,
           lng: userLocation.longitude,
           radius_meters: 50000, // 50km radius
-        });
-        console.log("🗺️ Debug - Nearby locations:", {
-          count: data?.length || 0,
-          error,
-          locations: data?.slice(0, 3), // First 3 locations
         });
       };
       debugCheckLocations();
@@ -145,18 +132,6 @@ export default function MapScreen() {
           .from("locations")
           .select("*")
           .limit(5);
-
-        console.log("🗺️ Debug - Raw locations:", {
-          count: locData?.length || 0,
-          error: locError,
-          firstLocation: locData?.[0],
-        });
-      } else {
-        console.log("🗺️ Debug - Location with coords:", {
-          name: data[0]?.name,
-          lat: data[0]?.latitude,
-          lng: data[0]?.longitude,
-        });
       }
     };
     debugCheckAllLocations();
@@ -286,12 +261,6 @@ export default function MapScreen() {
     setModalVisible(true);
   };
   const handleToggleHeatMap = () => {
-    console.log("🔥 Toggle heatmap. Current state:", {
-      heatMapVisible,
-      heatMapData: heatMapData.length,
-      userLocation,
-      profile: !!profile,
-    });
     dispatch(toggleHeatMap());
 
     // Fetch heat map data when toggling ON
@@ -445,21 +414,7 @@ export default function MapScreen() {
       </View>
     );
   }
-  /*
-  if (heatMapVisible && heatMapData.length > 0) {
-    const heatPoints = heatMapData.map((point) => ({
-      latitude: point.latitude,
-      longitude: point.longitude,
-      weight: point.heat_weight,
-    }));
-  }*/
-  {
-    console.log("🔥 Rendering heatmap:", {
-      visible: heatMapVisible,
-      dataLength: heatMapData.length,
-      data: heatMapData,
-    });
-  }
+
   return (
     <View style={styles.container}>
       {/* Search Bar */}
