@@ -1,8 +1,20 @@
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { theme } from "src/styles/theme";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchUserProfile } from "@/store/userSlice";
 
 export default function TabLayout() {
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user?.id) {
+      console.log("📱 Fetching user profile on tab mount:", user.id);
+      dispatch(fetchUserProfile(user.id));
+    }
+  }, [user, dispatch]);
   return (
     <Tabs
       screenOptions={{

@@ -23,6 +23,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
+import { supabase } from "@/services/supabase";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -91,6 +92,14 @@ export default function MapScreen() {
   });
   useEffect(() => {
     if (userLocation && profile) {
+      console.log("🔥 Fetching heatmap data with:", {
+        userLocation,
+        profile: {
+          race_ethnicity: profile.race_ethnicity,
+          gender: profile.gender,
+        },
+      });
+
       dispatch(
         fetchHeatMapData({
           latitude: userLocation.latitude,
@@ -101,7 +110,57 @@ export default function MapScreen() {
       );
     }
   }, [userLocation, profile, dispatch]);
+  useEffect(() => {
+    if (userLocation) {
+      const debugCheckLocations = async () => {
+        const { data, error } = await supabase.rpc("get_nearby_locations", {
+          lat: userLocation.latitude,
+          lng: userLocation.longitude,
+          radius_meters: 50000, // 50km radius
+        });
+        console.log("🗺️ Debug - Nearby locations:", {
+          count: data?.length || 0,
+          error,
+          locations: data?.slice(0, 3), // First 3 locations
+        });
+      };
+      debugCheckLocations();
+    }
+  }, [userLocation]);
 
+  /*
+  Debug!
+
+  */
+  // Temporary debug: Check ALL locations with proper coordinates
+  useEffect(() => {
+    const debugCheckAllLocations = async () => {
+      const { data, error } = await supabase.rpc("get_location_with_coords", {
+        location_id: "6525e18c-7983-406e-83a1-a03ad89174cc", // Halal Kitchen Express ID
+      });
+
+      if (!data || data.length === 0) {
+        // Fallback: get locations with extracted coordinates
+        const { data: locData, error: locError } = await supabase
+          .from("locations")
+          .select("*")
+          .limit(5);
+
+        console.log("🗺️ Debug - Raw locations:", {
+          count: locData?.length || 0,
+          error: locError,
+          firstLocation: locData?.[0],
+        });
+      } else {
+        console.log("🗺️ Debug - Location with coords:", {
+          name: data[0]?.name,
+          lat: data[0]?.latitude,
+          lng: data[0]?.longitude,
+        });
+      }
+    };
+    debugCheckAllLocations();
+  }, []);
   useEffect(() => {
     // Don't re-run location detection if we already have a user location
     if (userLocation) {
@@ -227,6 +286,12 @@ export default function MapScreen() {
     setModalVisible(true);
   };
   const handleToggleHeatMap = () => {
+    console.log("🔥 Toggle heatmap. Current state:", {
+      heatMapVisible,
+      heatMapData: heatMapData.length,
+      userLocation,
+      profile: !!profile,
+    });
     dispatch(toggleHeatMap());
 
     // Fetch heat map data when toggling ON
@@ -380,13 +445,20 @@ export default function MapScreen() {
       </View>
     );
   }
-
+  /*
   if (heatMapVisible && heatMapData.length > 0) {
     const heatPoints = heatMapData.map((point) => ({
       latitude: point.latitude,
       longitude: point.longitude,
       weight: point.heat_weight,
     }));
+  }*/
+  {
+    console.log("🔥 Rendering heatmap:", {
+      visible: heatMapVisible,
+      dataLength: heatMapData.length,
+      data: heatMapData,
+    });
   }
   return (
     <View style={styles.container}>

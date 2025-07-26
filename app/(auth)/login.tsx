@@ -67,6 +67,8 @@ export default function LoginScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>SafePath</Text>
+          <Text>daniel@danielg.online</Text>
+          <Text>123456</Text>
           <Text style={styles.subtitle}>Travel with confidence</Text>
         </View>
 

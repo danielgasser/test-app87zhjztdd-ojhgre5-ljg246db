@@ -462,20 +462,41 @@ export const fetchHeatMapData = createAsyncThunk(
     radius?: number;
     userProfile?: any;
   }) => {
-    const { data, error } = await supabase.rpc('get_heatmap_data', {
-      center_lat: latitude,
-      center_lng: longitude,
-      radius_meters: radius,
-      user_race_ethnicity: userProfile?.race_ethnicity || null,
-      user_gender: userProfile?.gender || null,
-      user_lgbtq_status: userProfile?.lgbtq_status || null,
-      user_disability_status: userProfile?.disability_status || null,
-      user_religion: userProfile?.religion || null,
-      user_age_range: userProfile?.age_range || null,
+    console.log("🔥 fetchHeatMapData called with:", {
+      latitude,
+      longitude,
+      radius,
+      userProfile
     });
+    
+    try {
+      const { data, error } = await supabase.rpc('get_heatmap_data', {
+        center_lat: latitude,
+        center_lng: longitude,
+        radius_meters: radius,
+        user_race_ethnicity: userProfile?.race_ethnicity || null,
+        user_gender: userProfile?.gender || null,
+        user_lgbtq_status: userProfile?.lgbtq_status || null,
+        user_disability_status: userProfile?.disability_status || null,
+        user_religion: userProfile?.religion || null,
+        user_age_range: userProfile?.age_range || null,
+      });
 
-    if (error) throw error;
-    return data || [];
+      console.log("🔥 fetchHeatMapData response:", { 
+        data, 
+        error,
+        dataLength: data?.length || 0 
+      });
+      
+      if (error) {
+        console.error("🔥 Heatmap error:", error);
+        throw error;
+      }
+      return data || [];
+    } catch (err) {
+      console.error("🔥 fetchHeatMapData caught error:", err);
+      throw err;
+    }
   }
 );
 
@@ -635,7 +656,10 @@ const locationsSlice = createSlice({
         state.heatMapLoading = true;
       })
       .addCase(fetchHeatMapData.fulfilled, (state, action) => {
-        state.heatMapLoading = false;
+        console.log("🔥 Heatmap data stored in Redux:", {
+    dataLength: action.payload.length,
+    data: action.payload
+  });state.heatMapLoading = false;
         state.heatMapData = action.payload;
       })
       .addCase(fetchHeatMapData.rejected, (state) => {
