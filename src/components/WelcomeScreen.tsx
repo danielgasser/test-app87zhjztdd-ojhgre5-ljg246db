@@ -103,7 +103,6 @@ const WelcomeScreenNew = () => {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.logoText}>SafePath</Text>
         </Animated.View>
 
         {/* Hero Text */}
@@ -212,8 +211,8 @@ const WelcomeScreenNew = () => {
 const getStyles = (isDark: boolean) =>
   StyleSheet.create({
     logoImage: {
-      width: 120,
-      height: 60,
+      width: 150,
+      height: 150,
       marginBottom: 20,
     },
     container: {
@@ -235,6 +234,9 @@ const getStyles = (isDark: boolean) =>
     },
     logoContainer: {
       marginBottom: 40,
+      position: "relative",
+      top: 50,
+      left: 0,
     },
     logoPlaceholder: {
       backgroundColor: "rgba(255, 255, 255, 0.2)",
