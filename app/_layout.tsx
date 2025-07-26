@@ -3,6 +3,8 @@ import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
 import { store } from "src/store";
+import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import { checkSession } from "src/store/authSlice";
 
 export default function RootLayout() {
   return (
@@ -14,39 +16,54 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { user, loading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    checkFirstLaunch();
+    initializeApp();
   }, []);
 
   useEffect(() => {
-    if (isFirstLaunch === null) return;
+    if (!isReady || loading) return;
 
-    // Navigate based on first launch status
+    // Navigation logic after app is ready
     if (isFirstLaunch) {
       router.replace("/welcome");
-    } else {
+    } else if (user) {
       router.replace("/(tabs)");
+    } else {
+      router.replace("/(auth)/login");
     }
-  }, [isFirstLaunch]);
+  }, [isReady, loading, isFirstLaunch, user]);
 
-  const checkFirstLaunch = async () => {
+  const initializeApp = async () => {
     try {
+      // Check first launch
       const hasLaunched = await AsyncStorage.getItem("hasLaunched");
       if (hasLaunched === null) {
-        // First time launching
         setIsFirstLaunch(true);
         await AsyncStorage.setItem("hasLaunched", "true");
       } else {
-        // Not first time
         setIsFirstLaunch(false);
       }
+
+      // Check auth session
+      await dispatch(checkSession());
+
+      setIsReady(true);
     } catch (error) {
-      console.error("Error checking first launch:", error);
+      console.error("Error initializing app:", error);
       setIsFirstLaunch(false);
+      setIsReady(true);
     }
   };
+
+  // Show nothing while initializing
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
