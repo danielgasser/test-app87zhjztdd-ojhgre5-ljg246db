@@ -38,6 +38,8 @@ interface LocationsState {
   heatMapData: HeatMapPoint[];
   heatMapVisible: boolean;
   heatMapLoading: boolean;
+    communityReviews: CommunityReview[];
+  communityLoading: boolean;
 }
 
 interface HeatMapPoint {
@@ -46,6 +48,11 @@ interface HeatMapPoint {
   safety_score: number;
   review_count: number;
   heat_weight: number;
+}
+
+interface CommunityReview extends Review {
+  location_name: string;
+  location_address: string;
 }
 
 const initialState: LocationsState = {
@@ -67,6 +74,8 @@ const initialState: LocationsState = {
   heatMapData: [],
   heatMapVisible: false,
   heatMapLoading: false,
+  communityReviews: [],
+  communityLoading: false,
 };
 
 export const fetchNearbyLocations = createAsyncThunk(
@@ -201,6 +210,42 @@ export const submitReview = createAsyncThunk(
     dispatch(fetchLocationDetails(reviewData.location_id));
 
     return review;
+  }
+);
+
+export const fetchRecentReviews = createAsyncThunk(
+  'locations/fetchRecentReviews',
+  async () => {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select(`
+        *,
+        locations (
+          name,
+          address
+        ),
+        user_profiles (
+          race_ethnicity,
+          gender,
+          lgbtq_status,
+          disability_status,
+          age_range,
+          privacy_level
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    // Transform the data to include location info at top level
+    const transformedReviews = data?.map(review => ({
+      ...review,
+      location_name: review.locations?.name || 'Unknown Location',
+      location_address: review.locations?.address || '',
+    })) || [];
+
+    return transformedReviews;
   }
 );
 
@@ -604,6 +649,19 @@ const locationsSlice = createSlice({
       .addCase(fetchHeatMapData.rejected, (state) => {
         state.heatMapLoading = false;
         state.heatMapData = [];
+      })
+      builder
+      .addCase(fetchRecentReviews.pending, (state) => {
+        state.communityLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchRecentReviews.fulfilled, (state, action) => {
+        state.communityLoading = false;
+        state.communityReviews = action.payload;
+      })
+      .addCase(fetchRecentReviews.rejected, (state, action) => {
+        state.communityLoading = false;
+        state.error = action.error.message || 'Failed to fetch community reviews';
       });
   },
 });
