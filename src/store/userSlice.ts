@@ -135,11 +135,6 @@ const userSlice = createSlice({
         state.profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
         
-        console.log("🔍 Profile check:", {
-          hasProfile: !!action.payload,
-          profileData: action.payload,
-          isComplete: state.onboardingComplete
-        });
       })
 
       .addCase(fetchUserProfile.rejected, (state, action) => {

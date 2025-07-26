@@ -97,19 +97,14 @@ const authSlice = createSlice({
         state.user = null;
       })
       .addCase(checkSession.pending, (state) => {
-        console.log("🟡 checkSession.pending - setting loading true");
         state.loading = true;
       })
       .addCase(checkSession.fulfilled, (state, action) => {
-          console.log("🟢 checkSession.fulfilled - setting loading false");
-
         state.session = action.payload;
         state.user = action.payload?.user ?? null;
         state.loading = false;
       })
       .addCase(checkSession.rejected, (state) => {
-          console.log("🔴 checkSession.rejected - setting loading false");
-
         state.loading = false;
       });
 

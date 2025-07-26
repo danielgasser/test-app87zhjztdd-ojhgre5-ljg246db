@@ -223,14 +223,6 @@ export const fetchRecentReviews = createAsyncThunk(
         locations (
           name,
           address
-        ),
-        user_profiles (
-          race_ethnicity,
-          gender,
-          lgbtq_status,
-          disability_status,
-          age_range,
-          privacy_level
         )
       `)
       .order('created_at', { ascending: false })

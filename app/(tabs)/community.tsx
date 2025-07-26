@@ -51,21 +51,8 @@ export default function CommunityScreen() {
       addSuffix: true,
     });
 
-    // Build demographics string based on privacy settings
-    let demographicsText = "";
-    if (
-      review.user_profiles &&
-      review.user_profiles.privacy_level !== "private"
-    ) {
-      const demos = [];
-      if (review.user_profiles.age_range)
-        demos.push(review.user_profiles.age_range);
-      if (review.user_profiles.gender) demos.push(review.user_profiles.gender);
-      if (review.user_profiles.race_ethnicity?.length > 0) {
-        demos.push(review.user_profiles.race_ethnicity.join(", "));
-      }
-      demographicsText = demos.join(" • ");
-    }
+    // Parse the overall_rating string to float
+    const rating = parseFloat(review.overall_rating) || 0;
 
     return (
       <TouchableOpacity key={review.id} style={styles.reviewCard}>
@@ -79,30 +66,21 @@ export default function CommunityScreen() {
           <View
             style={[
               styles.ratingBadge,
-              { backgroundColor: getRatingColor(review.overall_safety) },
+              { backgroundColor: getRatingColor(rating) },
             ]}
           >
-            <Text style={styles.ratingText}>
-              {review.overall_safety.toFixed(1)}
-            </Text>
+            <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
           </View>
         </View>
 
         <Text style={styles.reviewTitle}>{review.title}</Text>
         <Text style={styles.reviewBody} numberOfLines={2}>
-          {review.body}
+          {review.content}
         </Text>
 
         <View style={styles.reviewFooter}>
           <View style={styles.userInfo}>
-            {demographicsText ? (
-              <>
-                <Ionicons name="person-outline" size={14} color="#666" />
-                <Text style={styles.demographicsText}>{demographicsText}</Text>
-              </>
-            ) : (
-              <Text style={styles.anonymousText}>Anonymous reviewer</Text>
-            )}
+            <Text style={styles.anonymousText}>Anonymous reviewer</Text>
           </View>
           <Text style={styles.timeText}>{timeAgo}</Text>
         </View>

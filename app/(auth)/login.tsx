@@ -22,11 +22,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
-  console.log("🔴 LoginScreen - loading state:", loading);
-  console.log(
-    "🔴 LoginScreen - full auth state:",
-    useAppSelector((state) => state.auth)
-  );
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields");
