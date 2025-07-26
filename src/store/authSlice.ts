@@ -12,7 +12,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   session: null,
-  loading: true,
+  loading: false,
   error: null,
 };
 
@@ -96,16 +96,24 @@ const authSlice = createSlice({
         state.session = null;
         state.user = null;
       })
+      .addCase(checkSession.pending, (state) => {
+        console.log("🟡 checkSession.pending - setting loading true");
+        state.loading = true;
+      })
       .addCase(checkSession.fulfilled, (state, action) => {
+          console.log("🟢 checkSession.fulfilled - setting loading false");
+
         state.session = action.payload;
         state.user = action.payload?.user ?? null;
         state.loading = false;
       })
       .addCase(checkSession.rejected, (state) => {
+          console.log("🔴 checkSession.rejected - setting loading false");
+
         state.loading = false;
       });
+
   },
 });
-
 export const { setSession, setLoading } = authSlice.actions;
 export default authSlice.reducer;
