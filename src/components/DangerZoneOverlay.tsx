@@ -1,0 +1,204 @@
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Polygon, Callout, Marker } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
+import { DangerZone } from "../types/supabase";
+
+interface DangerZoneOverlayProps {
+  dangerZones: DangerZone[];
+  visible: boolean;
+}
+
+const getDangerColor = (level: "high" | "medium" | "low") => {
+  switch (level) {
+    case "high":
+      return { fill: "#F4433640", stroke: "#F44336", icon: "alert-circle" };
+    case "medium":
+      return { fill: "#FF980040", stroke: "#FF9800", icon: "warning" };
+    case "low":
+      return {
+        fill: "#FFC10740",
+        stroke: "#FFC107",
+        icon: "information-circle",
+      };
+  }
+};
+
+export default function DangerZoneOverlay({
+  dangerZones,
+  visible,
+}: DangerZoneOverlayProps) {
+  console.log("DangerZoneOverlay render:", {
+    visible,
+    zonesCount: dangerZones.length,
+  });
+
+  if (!visible || dangerZones.length === 0) {
+    console.log("DangerZoneOverlay not rendering because:", {
+      visible,
+      length: dangerZones.length,
+    });
+    return null;
+  }
+  return (
+    <>
+      {dangerZones.map((zone) => {
+        console.log("Rendering zone:", zone.id, zone.location_name);
+        console.log("Zone coordinates:", {
+          lat: zone.center_lat,
+          lng: zone.center_lng,
+        });
+        console.log("Polygon points:", zone.polygon_points);
+        const colors = getDangerColor(zone.danger_level);
+        if (
+          !zone.center_lat ||
+          !zone.center_lng ||
+          (zone.center_lat === 0 && zone.center_lng === 0)
+        ) {
+          console.warn(
+            `Invalid coordinates for zone ${zone.id}:`,
+            zone.center_lat,
+            zone.center_lng
+          );
+          return null; // Skip rendering this zone
+        }
+        return (
+          <React.Fragment key={zone.id}>
+            {/* Danger zone polygon */}
+            <Polygon
+              coordinates={zone.polygon_points.map((point) => {
+                console.log("Mapping point:", point);
+                return {
+                  latitude: point.lat,
+                  longitude: point.lng,
+                };
+              })}
+              fillColor={colors.fill}
+              strokeColor={colors.stroke}
+              strokeWidth={2}
+            />
+
+            {/* Center marker with warning icon */}
+            <Marker
+              coordinate={{
+                latitude: zone.center_lat,
+                longitude: zone.center_lng,
+              }}
+              anchor={{ x: 0.5, y: 0.5 }}
+            >
+              <View style={styles.markerContainer}>
+                <Ionicons
+                  name={colors.icon as any}
+                  size={30}
+                  color={colors.stroke}
+                />
+              </View>
+
+              <Callout tooltip>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>
+                    ⚠️ {zone.location_name}
+                  </Text>
+                  <Text style={[styles.dangerLevel, { color: colors.stroke }]}>
+                    {zone.danger_level.toUpperCase()} RISK AREA
+                  </Text>
+
+                  <View style={styles.divider} />
+
+                  <Text style={styles.sectionTitle}>Affected Groups:</Text>
+                  {zone.affected_demographics.map((demo, idx) => (
+                    <Text key={idx} style={styles.demographicItem}>
+                      • {demo}
+                    </Text>
+                  ))}
+
+                  <View style={styles.divider} />
+
+                  <Text style={styles.sectionTitle}>Reasons:</Text>
+                  {zone.reasons.map((reason, idx) => (
+                    <Text key={idx} style={styles.reasonItem}>
+                      • {reason}
+                    </Text>
+                  ))}
+
+                  {zone.time_based && (
+                    <>
+                      <View style={styles.divider} />
+                      <Text style={styles.timeWarning}>
+                        ⏰ Higher risk during: {zone.active_times?.join(", ")}
+                      </Text>
+                    </>
+                  )}
+                </View>
+              </Callout>
+            </Marker>
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  markerContainer: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 5,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  calloutContainer: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 16,
+    maxWidth: 280,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  calloutTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  dangerLevel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#e0e0e0",
+    marginVertical: 12,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 6,
+  },
+  demographicItem: {
+    fontSize: 13,
+    color: "#333",
+    marginLeft: 8,
+    marginBottom: 3,
+  },
+  reasonItem: {
+    fontSize: 13,
+    color: "#666",
+    marginLeft: 8,
+    marginBottom: 3,
+  },
+  timeWarning: {
+    fontSize: 13,
+    color: "#FF6B35",
+    fontWeight: "500",
+    marginTop: 4,
+  },
+});

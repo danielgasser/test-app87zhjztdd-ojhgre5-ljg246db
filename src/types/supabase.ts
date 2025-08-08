@@ -438,3 +438,29 @@ export interface RouteSegment {
   duration: number;
   warnings?: string[];
 }
+
+export interface DangerZone {
+  id: string
+  location_id: string
+  location_name: string
+  center_lat: number
+  center_lng: number
+  danger_level: 'high' | 'medium' | 'low'
+  affected_demographics: string[]
+  polygon_points: Array<{lat: number, lng: number}>
+  reasons: string[]
+  time_based: boolean
+  active_times?: string[]
+}
+
+export interface DangerZonesResponse {
+  user_id: string
+  danger_zones: DangerZone[]
+  total_zones: number
+  user_demographics: {
+    race_ethnicity: string[]
+    gender: string
+    lgbtq_status: boolean
+  }
+  generated_at: string
+}

@@ -24,6 +24,8 @@ import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
 import { supabase } from "@/services/supabase";
+import DangerZoneOverlay from "src/components/DangerZoneOverlay";
+import { fetchDangerZones, toggleDangerZones } from "src/store/locationsSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -57,7 +59,9 @@ export default function MapScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
-
+  const { dangerZones, dangerZonesVisible, dangerZonesLoading } =
+    useAppSelector((state) => state.locations);
+  const userId = useAppSelector((state) => state.auth.user?.id);
   const dispatch = useAppDispatch();
   const {
     nearbyLocations,
@@ -90,6 +94,11 @@ export default function MapScreen() {
       longitudeDelta: 0.05,
     };
   });
+  useEffect(() => {
+    if (userId && userLocation) {
+      dispatch(fetchDangerZones({ userId }));
+    }
+  }, [userId, userLocation, dispatch]);
   useEffect(() => {
     if (userLocation && profile) {
       dispatch(
@@ -256,6 +265,17 @@ export default function MapScreen() {
       );
     }
   }, [profile, userLocation, dispatch]);
+  const handleToggleDangerZones = () => {
+    console.log("Toggle danger zones clicked");
+    console.log("Current userId:", userId);
+    console.log("Current dangerZonesVisible:", dangerZonesVisible);
+
+    dispatch(toggleDangerZones());
+    if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
+      console.log("Fetching danger zones for userId:", userId);
+      dispatch(fetchDangerZones({ userId }));
+    }
+  };
   const handleMarkerPress = (locationId: string) => {
     setSelectedLocationId(locationId);
     setModalVisible(true);
@@ -526,6 +546,7 @@ export default function MapScreen() {
               />
             );
           })}
+
         {/* Search result marker */}
         {searchMarker && (
           <Marker
@@ -544,12 +565,16 @@ export default function MapScreen() {
           />
         )}
       </MapView>
-
+      <DangerZoneOverlay
+        dangerZones={dangerZones}
+        visible={dangerZonesVisible}
+      />
       <View style={styles.heatMapControls}>
         <TouchableOpacity
           style={[
             styles.heatMapToggle,
             heatMapVisible && styles.heatMapToggleActive,
+            { marginTop: 10 },
           ]}
           onPress={handleToggleHeatMap}
           disabled={heatMapLoading}
@@ -569,7 +594,32 @@ export default function MapScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.mapControls}>
+        {/* Existing heat map toggle */}
 
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            dangerZonesVisible && styles.controlButtonActive,
+          ]}
+          onPress={handleToggleDangerZones}
+          disabled={dangerZonesLoading}
+        >
+          <Ionicons
+            name={dangerZonesVisible ? "shield" : "shield-outline"}
+            size={24}
+            color={dangerZonesVisible ? "#fff" : "#333"}
+          />
+          <Text
+            style={[
+              styles.controlButtonText,
+              dangerZonesVisible && styles.controlButtonTextActive,
+            ]}
+          >
+            {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+          </Text>
+        </TouchableOpacity>
+      </View>
       {/* Heat Map Legend */}
       {heatMapVisible && (
         <View style={styles.heatMapLegend}>
@@ -592,6 +642,34 @@ export default function MapScreen() {
                 style={[styles.legendColor, { backgroundColor: "#F44336" }]}
               />
               <Text style={styles.legendText}>Unsafe</Text>
+            </View>
+          </View>
+        </View>
+      )}
+      {dangerZonesVisible && dangerZones.length > 0 && (
+        <View style={styles.dangerZoneLegend}>
+          <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
+          <Text style={styles.legendSubtitle}>
+            Areas with reported discrimination
+          </Text>
+          <View style={styles.legendItems}>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: "#F44336" }]}
+              />
+              <Text style={styles.legendText}>High Risk</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: "#FF9800" }]}
+              />
+              <Text style={styles.legendText}>Medium Risk</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendColor, { backgroundColor: "#FFC107" }]}
+              />
+              <Text style={styles.legendText}>Low Risk</Text>
             </View>
           </View>
         </View>
@@ -634,6 +712,61 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
+  dangerZoneLegend: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#F44336",
+  },
+  legendSubtitle: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 8,
+  },
+  mapControls: {
+    position: "absolute",
+    bottom: 170,
+    right: 20,
+    zIndex: 1000,
+  },
+  controlButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: "#F44336",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+    marginBottom: 10,
+  },
+  controlButtonActive: {
+    backgroundColor: "#F44336",
+    borderColor: "#F44336",
+  },
+  controlButtonText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  controlButtonTextActive: {
+    color: "#fff",
+  },
   container: {
     flex: 1,
   },
