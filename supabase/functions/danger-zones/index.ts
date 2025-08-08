@@ -37,32 +37,55 @@ serve(async (req) => {
     }
 
     // Get user's demographics
-    const { data: userProfile } = await supabase
+    const { data: userProfile, error: profileError } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', user_id)
       .single()
 
-    if (!userProfile) {
+    if (profileError || !userProfile) {
       throw new Error('User profile not found')
     }
 
-    // Get dangerous locations within radius
-    // Using safety score < 3 as danger threshold
-    const { data: dangerousLocations } = await supabase
+    // Build filter conditions for user's demographics
+    const demographicFilters = []
+    
+    // Add race/ethnicity filters
+    if (userProfile.race_ethnicity && userProfile.race_ethnicity.length > 0) {
+      demographicFilters.push(...userProfile.race_ethnicity.map(race => 
+        `demographic_value.eq.${race}`
+      ))
+    }
+    
+    // Add gender filter
+    if (userProfile.gender) {
+      demographicFilters.push(`demographic_value.eq.${userProfile.gender}`)
+    }
+    
+    // Add LGBTQ+ filter if applicable
+    if (userProfile.lgbtq_status) {
+      demographicFilters.push(`demographic_value.eq.LGBTQ+`)
+    }
+
+    // Get dangerous locations
+    const { data: dangerousLocations, error: locError } = await supabase
       .from('safety_scores')
       .select(`
         *,
         locations!inner(
           id,
           name,
-          latitude,
-          longitude,
+          coordinates,
           place_type
         )
       `)
       .lt('avg_overall_score', 3)
-      .or(`demographic_value.cs.{${userProfile.race_ethnicity?.join(',')}},demographic_value.eq.${userProfile.gender}`)
+      .or(demographicFilters.join(','))
+
+    if (locError) {
+      console.error('Query error:', locError)
+      throw new Error(`Failed to fetch dangerous locations: ${locError.message}`)
+    }
 
     const dangerZones: DangerZone[] = []
 
@@ -84,11 +107,21 @@ serve(async (req) => {
       for (const [locationId, data] of Object.entries(locationGroups)) {
         const { location, scores } = data
         
+        // Get location coordinates using PostGIS functions
+        const { data: locationWithCoords, error: coordError } = await supabase
+          .rpc('get_location_with_coords', { location_id: locationId })
+          .single()
+          
+        if (coordError || !locationWithCoords) {
+          console.error('Failed to get coordinates for location:', locationId)
+          continue
+        }
+        
         // Check if this location is particularly dangerous for user's demographics
         const userDemoScores = scores.filter((s: any) => {
           return (userProfile.race_ethnicity?.includes(s.demographic_value) ||
                   s.demographic_value === userProfile.gender ||
-                  (s.demographic_type === 'lgbtq_status' && userProfile.lgbtq_status))
+                  (s.demographic_type === 'lgbtq_status' && userProfile.lgbtq_status && s.demographic_value === 'LGBTQ+'))
         })
 
         if (userDemoScores.length === 0) continue
@@ -103,8 +136,8 @@ serve(async (req) => {
         else dangerLevel = 'low'
 
         // Create 2-mile radius polygon (octagon for simplicity)
-        const centerLat = Number(location.latitude)
-        const centerLng = Number(location.longitude)
+        const centerLat = Number(locationWithCoords.latitude)
+        const centerLng = Number(locationWithCoords.longitude)
         const radiusInDegrees = 2 / 69 // Approximately 2 miles in degrees
 
         const polygonPoints = []
@@ -156,7 +189,7 @@ serve(async (req) => {
         dangerZones.push({
           id: `zone_${locationId}`,
           location_id: locationId,
-          location_name: location.name,
+          location_name: locationWithCoords.name,
           center_lat: centerLat,
           center_lng: centerLng,
           danger_level: dangerLevel,
