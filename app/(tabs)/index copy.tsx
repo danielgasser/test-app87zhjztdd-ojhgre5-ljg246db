@@ -16,18 +16,16 @@ import {
   fetchLocationDetails,
   clearSearchResults,
   setUserLocation,
-  fetchHeatMapData,
-  toggleHeatMap,
-  fetchDangerZones,
-  toggleDangerZones,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
-import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import { fetchHeatMapData, toggleHeatMap } from "src/store/locationsSlice";
 import { supabase } from "@/services/supabase";
+import DangerZoneOverlay from "src/components/DangerZoneOverlay";
+import { fetchDangerZones, toggleDangerZones } from "src/store/locationsSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -51,89 +49,189 @@ interface SearchResult {
 }
 
 export default function MapScreen() {
-  const [region, setRegion] = useState({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-  const [locationPermission, setLocationPermission] = useState(false);
-  const [mapReady, setMapReady] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null
   );
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
-
+  const { dangerZones, dangerZonesVisible, dangerZonesLoading } =
+    useAppSelector((state) => state.locations);
+  const userId = useAppSelector((state) => state.auth.user?.id);
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const mapRef = React.useRef<MapView>(null);
-
-  // Redux selectors
   const {
     nearbyLocations,
-    loading,
-    error,
     userLocation,
     heatMapData,
     heatMapVisible,
     heatMapLoading,
-    dangerZones,
-    dangerZonesVisible,
-    dangerZonesLoading,
   } = useAppSelector((state) => state.locations);
+  const { profile } = useAppSelector((state) => state.user);
 
-  const userId = useAppSelector((state) => state.auth.user?.id);
-  const userProfile = useAppSelector((state) => state.user.profile);
-
-  // Request location permission
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission is required to show nearby locations"
-        );
-        return;
-      }
-      setLocationPermission(true);
-
-      let location = await Location.getCurrentPositionAsync({});
-      const newRegion = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+  const user = useAppSelector((state) => state.auth.user);
+  const [mapReady, setMapReady] = useState(false);
+  const [region, setRegion] = useState(() => {
+    // Initialize from Redux location if available
+    if (userLocation) {
+      return {
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
       };
-      setRegion(newRegion);
-      dispatch(
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        })
-      );
-    })();
-  }, [dispatch]);
-
-  // Fetch danger zones when user location is available
+    }
+    // Fallback to dev location env vars
+    return {
+      latitude: parseFloat(process.env.EXPO_PUBLIC_DEV_LATITUDE || "40.7128"),
+      longitude: parseFloat(
+        process.env.EXPO_PUBLIC_DEV_LONGITUDE || "-74.0060"
+      ),
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    };
+  });
   useEffect(() => {
     if (userId && userLocation) {
-      console.log("Fetching danger zones for user:", userId);
       dispatch(fetchDangerZones({ userId }));
     }
   }, [userId, userLocation, dispatch]);
-
-  // Debug danger zones
   useEffect(() => {
-    console.log("Danger zones:", dangerZones);
-    console.log("Danger zones visible:", dangerZonesVisible);
-  }, [dangerZones, dangerZonesVisible]);
+    if (userLocation && profile) {
+      dispatch(
+        fetchHeatMapData({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          radius: 10000, // 10km radius
+          userProfile: profile,
+        })
+      );
+    }
+  }, [userLocation, profile, dispatch]);
+  useEffect(() => {
+    if (userLocation) {
+      const debugCheckLocations = async () => {
+        const { data, error } = await supabase.rpc("get_nearby_locations", {
+          lat: userLocation.latitude,
+          lng: userLocation.longitude,
+          radius_meters: 50000, // 50km radius
+        });
+      };
+      debugCheckLocations();
+    }
+  }, [userLocation]);
 
-  // Refresh nearby locations on focus
+  /*
+  Debug!
+
+  */
+  // Temporary debug: Check ALL locations with proper coordinates
+  useEffect(() => {
+    const debugCheckAllLocations = async () => {
+      const { data, error } = await supabase.rpc("get_location_with_coords", {
+        location_id: "6525e18c-7983-406e-83a1-a03ad89174cc", // Halal Kitchen Express ID
+      });
+
+      if (!data || data.length === 0) {
+        // Fallback: get locations with extracted coordinates
+        const { data: locData, error: locError } = await supabase
+          .from("locations")
+          .select("*")
+          .limit(5);
+      }
+    };
+    debugCheckAllLocations();
+  }, []);
+  useEffect(() => {
+    // Don't re-run location detection if we already have a user location
+    if (userLocation) {
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
+      try {
+        const useDevLocation =
+          process.env.EXPO_PUBLIC_USE_DEV_LOCATION === "true";
+
+        if (useDevLocation && __DEV__) {
+          const devLat = parseFloat(
+            process.env.EXPO_PUBLIC_DEV_LATITUDE || "40.7128"
+          );
+          const devLng = parseFloat(
+            process.env.EXPO_PUBLIC_DEV_LONGITUDE || "-74.0060"
+          );
+
+          // Store in Redux instead of local state
+          dispatch(setUserLocation({ latitude: devLat, longitude: devLng }));
+
+          dispatch(
+            fetchNearbyLocations({
+              latitude: devLat,
+              longitude: devLng,
+              radius: 5000,
+            })
+          );
+
+          setRegion({
+            latitude: devLat,
+            longitude: devLng,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+
+          setLoading(false);
+          return;
+        }
+
+        // Production location code...
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          setLoading(false);
+          return;
+        }
+
+        let currentLocation = await Location.getCurrentPositionAsync({});
+
+        // Store in Redux instead of local state
+        dispatch(
+          setUserLocation({
+            latitude: currentLocation.coords.latitude,
+            longitude: currentLocation.coords.longitude,
+          })
+        );
+
+        dispatch(
+          fetchNearbyLocations({
+            latitude: currentLocation.coords.latitude,
+            longitude: currentLocation.coords.longitude,
+            radius: 5000,
+          })
+        );
+
+        setRegion({
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+        setLoading(false);
+      } catch (error) {
+        setErrorMsg("Error getting location");
+        setLoading(false);
+        console.error(error);
+      }
+    })();
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      if (userLocation && mapReady) {
+      // When screen comes back into focus (returning from review), refetch nearby locations
+      if (userLocation) {
         dispatch(
           fetchNearbyLocations({
             latitude: userLocation.latitude,
@@ -142,112 +240,221 @@ export default function MapScreen() {
           })
         );
       }
-    }, [dispatch, userLocation, mapReady])
+    }, [userLocation, dispatch])
   );
-
-  const handleMarkerPress = async (locationId: string) => {
-    setSelectedLocationId(locationId);
-    setModalVisible(true);
-    await dispatch(fetchLocationDetails(locationId));
-  };
-
-  const handleModalClose = () => {
-    setModalVisible(false);
-    setSelectedLocationId(null);
-  };
-
-  const handleLocationSelected = async (location: SearchResult) => {
-    setSearchMarker(location);
-    const newRegion = {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    };
-    setRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 1000);
-
-    if (location.source === "database" && location.id) {
-      await handleMarkerPress(location.id);
-    }
-  };
-
-  const handleAddLocation = async () => {
-    if (!searchMarker) return;
-
-    if (searchMarker.source === "database" && searchMarker.id) {
-      await handleMarkerPress(searchMarker.id);
-    } else {
-      router.push({
-        pathname: "/add-location",
-        params: {
-          name: searchMarker.name,
-          address: searchMarker.address,
-          latitude: searchMarker.latitude,
-          longitude: searchMarker.longitude,
-          placeType: searchMarker.place_type || "other",
-        },
+  useEffect(() => {
+    // Sync region with Redux user location when it changes
+    if (userLocation) {
+      setRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
       });
     }
-  };
+  }, [userLocation]);
 
-  const handleToggleHeatMap = () => {
-    dispatch(toggleHeatMap());
-    if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
+  useEffect(() => {
+    if (userLocation && profile && profile.race_ethnicity) {
       dispatch(
-        fetchHeatMapData({
+        fetchNearbyLocations({
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          radius: 10000,
-          userProfile,
+          radius: 5000,
         })
       );
     }
-  };
-
+  }, [profile, userLocation, dispatch]);
   const handleToggleDangerZones = () => {
     console.log("Toggle danger zones clicked");
     console.log("Current userId:", userId);
     console.log("Current dangerZonesVisible:", dangerZonesVisible);
 
     dispatch(toggleDangerZones());
-
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
       console.log("Fetching danger zones for userId:", userId);
       dispatch(fetchDangerZones({ userId }));
     }
   };
+  const handleMarkerPress = (locationId: string) => {
+    setSelectedLocationId(locationId);
+    setModalVisible(true);
+  };
+  const handleToggleHeatMap = () => {
+    dispatch(toggleHeatMap());
 
-  if (!locationPermission) {
+    // Fetch heat map data when toggling ON
+    if (!heatMapVisible && userLocation && profile) {
+      dispatch(
+        fetchHeatMapData({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          radius: 200000, // 200km radius for heat map
+          userProfile: profile,
+        })
+      );
+    }
+  };
+  const handleModalClose = () => {
+    setModalVisible(false);
+    setSelectedLocationId(null);
+  };
+
+  const handleLocationSelect = async (selectedLocation: SearchResult) => {
+    const source = selectedLocation.source || "database";
+
+    if (source === "database") {
+      try {
+        const locationWithCoords = await dispatch(
+          fetchLocationDetails(selectedLocation.id)
+        ).unwrap();
+
+        if (locationWithCoords.latitude && locationWithCoords.longitude) {
+          const newRegion = {
+            latitude: Number(locationWithCoords.latitude),
+            longitude: Number(locationWithCoords.longitude),
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          };
+
+          setRegion(newRegion);
+          setSearchMarker({
+            ...selectedLocation,
+            latitude: Number(locationWithCoords.latitude),
+            longitude: Number(locationWithCoords.longitude),
+            source: "database",
+          });
+          // For database locations, directly open the modal instead of showing search marker
+          setSelectedLocationId(selectedLocation.id);
+          //setModalVisible(true);
+        }
+      } catch (error) {
+        console.error("Error fetching location details:", error);
+      }
+    } else {
+      const newRegion = {
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+
+      setRegion(newRegion);
+      setSearchMarker({
+        ...selectedLocation,
+        source: "mapbox",
+      });
+    }
+
+    dispatch(clearSearchResults());
+  };
+
+  const handleSearchToggle = (isVisible: boolean) => {
+    setShowSearch(isVisible);
+    if (!isVisible) {
+      dispatch(clearSearchResults());
+    }
+  };
+
+  const extractCity = (address: string) => {
+    const parts = address.split(", ");
+    return parts[1] || "Unknown";
+  };
+
+  const extractStateProvince = (address: string) => {
+    const parts = address.split(", ");
+    return parts[2] || "Unknown";
+  };
+
+  const handleAddLocation = async () => {
+    if (!searchMarker) return;
+
+    const source = searchMarker.source || "database";
+
+    try {
+      if (source === "database") {
+        // Existing location - navigate normally
+        setSelectedLocationId(searchMarker.id);
+        setModalVisible(true);
+        setSearchMarker(null);
+        return;
+      }
+
+      dispatch(
+        setUserLocation({
+          latitude: searchMarker.latitude,
+          longitude: searchMarker.longitude,
+        })
+      );
+
+      // Navigate to review with location data (not ID)
+      router.push({
+        pathname: "/review",
+        params: {
+          // Pass the raw location data instead of locationId
+          locationData: JSON.stringify({
+            name: searchMarker.name,
+            address: searchMarker.address,
+            latitude: searchMarker.latitude,
+            longitude: searchMarker.longitude,
+            place_type: searchMarker.place_type || "address",
+          }),
+          locationName: searchMarker.name,
+          isNewLocation: "true", // Flag to indicate this needs to be created
+        },
+      });
+
+      setSearchMarker(null);
+    } catch (error) {
+      console.error("Error preparing location:", error);
+      Alert.alert("Error", "Failed to prepare location. Please try again.");
+    }
+  };
+
+  const handleMapPress = () => {
+    setSearchMarker(null);
+    if (showSearch) {
+      handleSearchToggle(false);
+    }
+  };
+
+  if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>
-          Location permission is required to use this feature
-        </Text>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Loading map...</Text>
       </View>
     );
   }
 
-  if (loading && nearbyLocations.length === 0) {
+  if (errorMsg) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading nearby locations...</Text>
+        <Text style={styles.errorText}>{errorMsg}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {/* Search Bar */}
       <SearchBar
-        onLocationSelect={handleLocationSelected}
-        userLocation={userLocation || undefined}
+        onLocationSelect={handleLocationSelect}
+        onSearchToggle={handleSearchToggle}
+        userLocation={
+          userLocation
+            ? {
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+              }
+            : undefined
+        }
       />
       {(() => {
         return null;
       })()}
       <MapView
-        ref={mapRef}
+        //key={`${region.latitude}-${region.longitude}`}
         style={styles.map}
         region={region}
         showsUserLocation={true}
@@ -313,17 +520,7 @@ export default function MapScreen() {
               />
             );
           })}
-        {(() => {
-          console.log("About to render DangerZoneOverlay:", {
-            dangerZonesLength: dangerZones.length,
-            dangerZonesVisible,
-          });
-          return null;
-        })()}{" "}
-        <DangerZoneOverlay
-          dangerZones={dangerZones}
-          visible={dangerZonesVisible}
-        />
+
         {/* Existing location markers from database */}
         {mapReady &&
           nearbyLocations &&
@@ -349,6 +546,7 @@ export default function MapScreen() {
               />
             );
           })}
+
         {/* Search result marker */}
         {searchMarker && (
           <Marker
@@ -367,14 +565,16 @@ export default function MapScreen() {
           />
         )}
       </MapView>
-
-      {/* Map Controls Container */}
-      <View style={styles.mapControls}>
-        {/* Heat Map Toggle */}
+      <DangerZoneOverlay
+        dangerZones={dangerZones}
+        visible={dangerZonesVisible}
+      />
+      <View style={styles.heatMapControls}>
         <TouchableOpacity
           style={[
             styles.heatMapToggle,
             heatMapVisible && styles.heatMapToggleActive,
+            { marginTop: 10 },
           ]}
           onPress={handleToggleHeatMap}
           disabled={heatMapLoading}
@@ -393,8 +593,10 @@ export default function MapScreen() {
             {heatMapLoading ? "Loading..." : "Heat Map"}
           </Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.mapControls}>
+        {/* Existing heat map toggle */}
 
-        {/* Danger Zones Toggle */}
         <TouchableOpacity
           style={[
             styles.controlButton,
@@ -418,7 +620,6 @@ export default function MapScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
       {/* Heat Map Legend */}
       {heatMapVisible && (
         <View style={styles.heatMapLegend}>
@@ -445,8 +646,6 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-
-      {/* Danger Zones Legend */}
       {dangerZonesVisible && dangerZones.length > 0 && (
         <View style={styles.dangerZoneLegend}>
           <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
@@ -475,8 +674,6 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-
-      {/* Add Location Button */}
       {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
@@ -515,6 +712,61 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
+  dangerZoneLegend: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#F44336",
+  },
+  legendSubtitle: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 8,
+  },
+  mapControls: {
+    position: "absolute",
+    bottom: 170,
+    right: 20,
+    zIndex: 1000,
+  },
+  controlButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: "#F44336",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+    marginBottom: 10,
+  },
+  controlButtonActive: {
+    backgroundColor: "#F44336",
+    borderColor: "#F44336",
+  },
+  controlButtonText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  controlButtonTextActive: {
+    color: "#fff",
+  },
   container: {
     flex: 1,
   },
@@ -568,9 +820,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 8,
   },
-  mapControls: {
+  heatMapControls: {
     position: "absolute",
-    bottom: 120,
+    bottom: 120, // Above the tab bar (usually ~80px) + some spacing
     right: 20,
     zIndex: 1000,
   },
@@ -578,16 +830,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 25,
-    borderWidth: 2,
+    paddingHorizontal: 16, // More padding
+    paddingVertical: 12, // More padding
+    borderRadius: 25, // More rounded
+    borderWidth: 2, // Add border
     borderColor: "#4CAF50",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.3, // Stronger shadow
     shadowRadius: 4,
-    elevation: 8,
+    elevation: 8, // Higher elevation
   },
   heatMapToggleActive: {
     backgroundColor: "#4CAF50",
@@ -600,35 +852,6 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   heatMapToggleTextActive: {
-    color: "#fff",
-  },
-  controlButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: "#F44336",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
-    marginTop: 10,
-  },
-  controlButtonActive: {
-    backgroundColor: "#F44336",
-    borderColor: "#F44336",
-  },
-  controlButtonText: {
-    marginLeft: 6,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-  },
-  controlButtonTextActive: {
     color: "#fff",
   },
   heatMapLegend: {
@@ -644,30 +867,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  dangerZoneLegend: {
-    position: "absolute",
-    bottom: 180,
-    left: 20,
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "#F44336",
-  },
   legendTitle: {
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
-  },
-  legendSubtitle: {
-    fontSize: 12,
-    color: "#666",
     marginBottom: 8,
   },
   legendItems: {
