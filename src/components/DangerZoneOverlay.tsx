@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Polygon, Callout, Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { DangerZone } from "../types/supabase";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 interface DangerZoneOverlayProps {
   dangerZones: DangerZone[];
@@ -12,13 +13,21 @@ interface DangerZoneOverlayProps {
 const getDangerColor = (level: "high" | "medium" | "low") => {
   switch (level) {
     case "high":
-      return { fill: "#F4433640", stroke: "#F44336", icon: "alert-circle" };
+      return {
+        fill: `${APP_CONFIG.MAP_MARKERS.COLOR_UNSAFE}40`,
+        stroke: APP_CONFIG.MAP_MARKERS.COLOR_UNSAFE,
+        icon: "alert-circle",
+      };
     case "medium":
-      return { fill: "#FF980040", stroke: "#FF9800", icon: "warning" };
+      return {
+        fill: `${APP_CONFIG.MAP_MARKERS.COLOR_MEDIUM}40`,
+        stroke: APP_CONFIG.MAP_MARKERS.COLOR_MEDIUM,
+        icon: "warning",
+      };
     case "low":
       return {
-        fill: "#FFC10740",
-        stroke: "#FFC107",
+        fill: `${APP_CONFIG.MAP_MARKERS.COLOR_MIXED}40`,
+        stroke: APP_CONFIG.MAP_MARKERS.COLOR_MIXED,
         icon: "information-circle",
       };
   }
