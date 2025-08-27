@@ -136,37 +136,52 @@ export default function MapScreen() {
   useEffect(() => {}, [dangerZones, dangerZonesVisible]);
 
   useEffect(() => {
-    const fetchPredictionsForUnreviewedLocations = async () => {
+    const fetchPredictionsInBatches = async () => {
       if (!userProfile || !nearbyLocations.length) return;
 
-      // Find locations that have no reviews (need predictions)
+      // Find locations that need predictions
       const locationsNeedingPredictions = nearbyLocations.filter((location) => {
-        // Location needs prediction if it has no safety score or very few reviews
         const hasNoScore =
           !location.demographic_safety_score && !location.avg_safety_score;
         const hasLowReviewCount = (location.review_count || 0) === 0;
         const noPredictionYet = !predictions[location.id];
-
         return (hasNoScore || hasLowReviewCount) && noPredictionYet;
       });
 
-      if (locationsNeedingPredictions.length > 0) {
-        const locationIds = locationsNeedingPredictions.map((loc) => loc.id);
-        console.log("Fetching ML predictions for:", locationIds);
+      if (locationsNeedingPredictions.length === 0) return;
 
-        dispatch(
+      console.log(
+        `Fetching ML predictions for ${locationsNeedingPredictions.length} locations in batches`
+      );
+
+      // Process in batches of 5
+      const BATCH_SIZE = 5;
+      const DELAY_MS = 500; // 500ms delay between batches
+
+      for (let i = 0; i < locationsNeedingPredictions.length; i += BATCH_SIZE) {
+        const batch = locationsNeedingPredictions.slice(i, i + BATCH_SIZE);
+        const batchIds = batch.map((loc) => loc.id);
+
+        console.log(
+          `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batchIds}`
+        );
+
+        // Dispatch batch prediction
+        await dispatch(
           fetchMLPredictions({
-            locationIds,
+            locationIds: batchIds,
             userProfile,
           })
         );
+
+        // Add delay between batches (except for the last one)
+        if (i + BATCH_SIZE < locationsNeedingPredictions.length) {
+          await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+        }
       }
     };
 
-    // Only fetch predictions if we have user profile and nearby locations
-    if (userProfile && nearbyLocations.length > 0) {
-      fetchPredictionsForUnreviewedLocations();
-    }
+    fetchPredictionsInBatches();
   }, [nearbyLocations, userProfile, predictions, dispatch]);
 
   // Refresh nearby locations on focus
