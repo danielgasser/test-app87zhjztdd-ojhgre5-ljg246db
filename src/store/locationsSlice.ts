@@ -46,6 +46,12 @@ interface LocationsState {
   dangerZones: DangerZone[]
   dangerZonesVisible: boolean
   dangerZonesLoading: boolean
+  similarUsers: Array<{
+    user_id: string;
+    similarity_score: number;
+    shared_demographics: string[];
+  }>;
+  similarUsersLoading: boolean;
 }
 
 interface HeatMapPoint {
@@ -85,6 +91,8 @@ const initialState: LocationsState = {
   dangerZones: [],
   dangerZonesVisible: false,
   dangerZonesLoading: false,
+  similarUsers: [],
+  similarUsersLoading: false,
 };
 
 export const fetchNearbyLocations = createAsyncThunk(
@@ -526,6 +534,30 @@ export const fetchHeatMapData = createAsyncThunk(
   }
 );
 
+export const fetchSimilarUsers = createAsyncThunk(
+  'locations/fetchSimilarUsers',
+  async (userId: string) => {
+    const response = await fetch(
+      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/similarity-calculator`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ user_id: userId, limit: 10 }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch similar users');
+    }
+
+    const data = await response.json();
+    return data.similar_users;
+  }
+);
+
 const locationsSlice = createSlice({
   name: 'locations',
   initialState,
@@ -725,6 +757,17 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
  state.dangerZonesLoading = false
     state.dangerZones = []
   })
+  .addCase(fetchSimilarUsers.pending, (state) => {
+  state.similarUsersLoading = true;
+})
+.addCase(fetchSimilarUsers.fulfilled, (state, action) => {
+  state.similarUsersLoading = false;
+  state.similarUsers = action.payload;
+})
+.addCase(fetchSimilarUsers.rejected, (state) => {
+  state.similarUsersLoading = false;
+  state.error = 'Failed to fetch similar users';
+})
   },
 });
 
