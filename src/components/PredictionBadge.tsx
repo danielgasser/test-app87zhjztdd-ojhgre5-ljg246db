@@ -52,7 +52,7 @@ interface PredictedMarkerProps {
   coordinate: { latitude: number; longitude: number };
   title: string;
   predictedScore: number;
-  confidence: number;
+  confidence?: number | undefined;
   onPress?: () => void;
 }
 
@@ -90,7 +90,7 @@ export const PredictedMarker: React.FC<PredictedMarkerProps> = ({
       {/* Confidence badge */}
       <View style={styles.confidenceBadge}>
         <Text style={styles.confidenceBadgeText}>
-          {Math.round(confidence * 100)}%
+          {Math.round((confidence || 0) * 100)}%
         </Text>
       </View>
     </View>
