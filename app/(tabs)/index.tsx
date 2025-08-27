@@ -27,8 +27,12 @@ import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { supabase } from "@/services/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
+import {
+  PredictedMarker,
+  PredictionBadge,
+} from "src/components/PredictionBadge";
+import { fetchMLPredictions } from "src/store/locationsSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -84,6 +88,8 @@ export default function MapScreen() {
     dangerZones,
     dangerZonesVisible,
     dangerZonesLoading,
+    predictions,
+    predictionsLoading,
   } = useAppSelector((state) => state.locations);
 
   const userId = useAppSelector((state) => state.auth.user?.id);
@@ -129,6 +135,40 @@ export default function MapScreen() {
   // Debug danger zones
   useEffect(() => {}, [dangerZones, dangerZonesVisible]);
 
+  useEffect(() => {
+    const fetchPredictionsForUnreviewedLocations = async () => {
+      if (!userProfile || !nearbyLocations.length) return;
+
+      // Find locations that have no reviews (need predictions)
+      const locationsNeedingPredictions = nearbyLocations.filter((location) => {
+        // Location needs prediction if it has no safety score or very few reviews
+        const hasNoScore =
+          !location.demographic_safety_score && !location.avg_safety_score;
+        const hasLowReviewCount = (location.review_count || 0) === 0;
+        const noPredictionYet = !predictions[location.id];
+
+        return (hasNoScore || hasLowReviewCount) && noPredictionYet;
+      });
+
+      if (locationsNeedingPredictions.length > 0) {
+        const locationIds = locationsNeedingPredictions.map((loc) => loc.id);
+        console.log("Fetching ML predictions for:", locationIds);
+
+        dispatch(
+          fetchMLPredictions({
+            locationIds,
+            userProfile,
+          })
+        );
+      }
+    };
+
+    // Only fetch predictions if we have user profile and nearby locations
+    if (userProfile && nearbyLocations.length > 0) {
+      fetchPredictionsForUnreviewedLocations();
+    }
+  }, [nearbyLocations, userProfile, predictions, dispatch]);
+
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
@@ -143,6 +183,47 @@ export default function MapScreen() {
       }
     }, [dispatch, userLocation, mapReady])
   );
+
+  const getMarkerProps = (location: any) => {
+    const hasReviews =
+      location.demographic_safety_score || location.avg_safety_score;
+    const prediction = predictions[location.id];
+
+    if (hasReviews) {
+      // Location has actual reviews - use existing marker logic
+      return {
+        type: "reviewed",
+        score: location.demographic_safety_score || location.avg_safety_score,
+        color: getMarkerColor(
+          location.demographic_safety_score || location.avg_safety_score
+        ),
+        description: `Safety: ${
+          (
+            location.demographic_safety_score || location.avg_safety_score
+          )?.toFixed(1) || "N/A"
+        }/5`,
+      };
+    } else if (prediction) {
+      // Location has ML prediction
+      return {
+        type: "predicted",
+        score: prediction.predicted_safety_score,
+        confidence: prediction.confidence,
+        color: getMarkerColor(prediction.predicted_safety_score),
+        description: `Predicted: ${prediction.predicted_safety_score.toFixed(
+          1
+        )}/5 (${Math.round(prediction.confidence * 100)}% confident)`,
+      };
+    } else {
+      // No data available yet
+      return {
+        type: "unknown",
+        score: null,
+        color: "#007AFF",
+        description: "No data available",
+      };
+    }
+  };
 
   const handleMarkerPress = async (locationId: string) => {
     setSelectedLocationId(locationId);
@@ -319,25 +400,62 @@ export default function MapScreen() {
           nearbyLocations &&
           nearbyLocations.length > 0 &&
           nearbyLocations.map((loc) => {
-            return (
-              <Marker
-                key={`db-${loc.id}`}
-                coordinate={{
-                  latitude: Number(loc.latitude),
-                  longitude: Number(loc.longitude),
-                }}
-                title={loc.name}
-                description={`Safety: ${
-                  (
-                    loc.demographic_safety_score || loc.avg_safety_score
-                  )?.toFixed(1) || "N/A"
-                }/5`}
-                pinColor={getMarkerColor(
-                  loc.demographic_safety_score || loc.avg_safety_score || null
-                )}
-                onPress={() => handleMarkerPress(loc.id)}
-              />
-            );
+            const markerProps = getMarkerProps(loc);
+
+            if (markerProps.type === "predicted") {
+              // Use custom predicted marker
+              return (
+                <Marker
+                  key={`predicted-${loc.id}`}
+                  coordinate={{
+                    latitude: Number(loc.latitude),
+                    longitude: Number(loc.longitude),
+                  }}
+                  onPress={() => handleMarkerPress(loc.id)}
+                >
+                  <PredictedMarker
+                    coordinate={{
+                      latitude: Number(loc.latitude),
+                      longitude: Number(loc.longitude),
+                    }}
+                    title={loc.name}
+                    predictedScore={markerProps.score}
+                    confidence={markerProps.confidence}
+                  />
+
+                  {/* Custom callout for predictions */}
+                  <Callout>
+                    <View style={styles.predictionCallout}>
+                      <Text style={styles.calloutTitle}>{loc.name}</Text>
+                      <Text style={styles.calloutPrediction}>
+                        🤖 AI Prediction: {markerProps.score.toFixed(1)}/5
+                      </Text>
+                      <Text style={styles.calloutConfidence}>
+                        {Math.round(markerProps.confidence * 100)}% confident
+                      </Text>
+                      <Text style={styles.calloutNote}>
+                        Based on similar locations and user demographics
+                      </Text>
+                    </View>
+                  </Callout>
+                </Marker>
+              );
+            } else {
+              // Use regular marker for reviewed locations
+              return (
+                <Marker
+                  key={`db-${loc.id}`}
+                  coordinate={{
+                    latitude: Number(loc.latitude),
+                    longitude: Number(loc.longitude),
+                  }}
+                  title={loc.name}
+                  description={markerProps.description}
+                  pinColor={markerProps.color}
+                  onPress={() => handleMarkerPress(loc.id)}
+                />
+              );
+            }
           })}
         {/* Search result marker */}
         {searchMarker && (
@@ -407,6 +525,12 @@ export default function MapScreen() {
             {dangerZonesLoading ? "Loading..." : "Danger Zones"}
           </Text>
         </TouchableOpacity>
+        {predictionsLoading && (
+          <View style={styles.mlLoadingContainer}>
+            <ActivityIndicator size="small" color="#2196F3" />
+            <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>
+          </View>
+        )}
       </View>
 
       {/* Heat Map Legend */}
@@ -677,5 +801,55 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 12,
     color: "#666",
+  },
+});
+
+const additionalStyles = StyleSheet.create({
+  predictionCallout: {
+    width: 200,
+    padding: 10,
+  },
+  calloutTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  calloutPrediction: {
+    fontSize: 14,
+    color: "#2196F3",
+    fontWeight: "600",
+    marginBottom: 3,
+  },
+  calloutConfidence: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 5,
+  },
+  calloutNote: {
+    fontSize: 11,
+    color: "#888",
+    fontStyle: "italic",
+  },
+  mlLoadingContainer: {
+    position: "absolute",
+    top: 100,
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  mlLoadingText: {
+    marginLeft: 8,
+    fontSize: 12,
+    color: "#2196F3",
+    fontWeight: "600",
   },
 });

@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
-import { 
-  LocationWithScores, 
-  Review, 
+import {
+  LocationWithScores,
+  Review,
   CreateReviewForm,
   CreateLocationForm,
-  Coordinates, 
+  Coordinates,
   DangerZone,
   DangerZonesResponse
 } from '../types/supabase';
@@ -19,7 +19,7 @@ interface SearchLocation {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source?: 'database' | 'mapbox'; 
+  source?: 'database' | 'mapbox';
 }
 
 interface LocationsState {
@@ -41,7 +41,7 @@ interface LocationsState {
   heatMapData: HeatMapPoint[];
   heatMapVisible: boolean;
   heatMapLoading: boolean;
-    communityReviews: CommunityReview[];
+  communityReviews: CommunityReview[];
   communityLoading: boolean;
   dangerZones: DangerZone[]
   dangerZonesVisible: boolean
@@ -52,6 +52,18 @@ interface LocationsState {
     shared_demographics: string[];
   }>;
   similarUsersLoading: boolean;
+  predictions: Record<string, MLPrediction>;
+  predictionsLoading: boolean;
+}
+
+interface MLPrediction {
+  location_id: string;
+  location_name: string;
+  predicted_safety_score: number;
+  confidence: number;
+  source: 'ml_prediction';
+  calculation_timestamp: string;
+  based_on_locations: number;
 }
 
 interface HeatMapPoint {
@@ -77,7 +89,7 @@ const initialState: LocationsState = {
   filters: {
     placeType: null,
     minSafetyScore: null,
-    radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS ,
+    radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
   },
   searchResults: [],
   searchLoading: false,
@@ -93,18 +105,20 @@ const initialState: LocationsState = {
   dangerZonesLoading: false,
   similarUsers: [],
   similarUsersLoading: false,
+  predictions: {},
+  predictionsLoading: false,
 };
 
 export const fetchNearbyLocations = createAsyncThunk(
   'locations/fetchNearby',
-  async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS  }: Coordinates & { radius?: number }, { getState }) => {
+  async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS }: Coordinates & { radius?: number }, { getState }) => {
     // Get user profile from Redux state
     const state = getState() as any;
     const userProfile = state.user.profile;
 
     // Use demographic-aware function if user has profile, otherwise fallback
     if (userProfile && userProfile.race_ethnicity) {
-      
+
       const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
         lat: latitude,
         lng: longitude,
@@ -118,7 +132,7 @@ export const fetchNearbyLocations = createAsyncThunk(
       return data || [];
     } else {
       // Fallback to standard function if no profile
-      
+
       const { data, error } = await supabase.rpc('get_nearby_locations', {
         lat: latitude,
         lng: longitude,
@@ -170,9 +184,9 @@ export const fetchLocationDetails = createAsyncThunk(
 export const fetchDangerZones = createAsyncThunk(
   'locations/fetchDangerZones',
   async ({ userId, radiusMiles = 50 }: { userId: string; radiusMiles?: number }) => {
-  const supabaseUrl = (supabase as any).supabaseUrl
+    const supabaseUrl = (supabase as any).supabaseUrl
     const supabaseAnonKey = (supabase as any).supabaseKey
-    
+
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`,
       {
@@ -191,7 +205,7 @@ export const fetchDangerZones = createAsyncThunk(
     }
 
     const data: DangerZonesResponse = await response.json()
-  return data.danger_zones
+    return data.danger_zones
   }
 )
 
@@ -301,7 +315,7 @@ export const updateReview = createAsyncThunk(
         updated_at: new Date().toISOString(),
       })
       .eq('id', reviewId)
-      .eq('user_id', userId) 
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -496,14 +510,14 @@ export const createLocationFromSearch = createAsyncThunk(
 
 export const fetchHeatMapData = createAsyncThunk(
   'locations/fetchHeatMapData',
-  async ({ 
-    latitude, 
-    longitude, 
+  async ({
+    latitude,
+    longitude,
     radius = 10000,
-    userProfile 
-  }: { 
-    latitude: number; 
-    longitude: number; 
+    userProfile
+  }: {
+    latitude: number;
+    longitude: number;
     radius?: number;
     userProfile?: any;
   }) => {
@@ -553,6 +567,51 @@ export const fetchSimilarUsers = createAsyncThunk(
   }
 );
 
+export const fetchMLPredictions = createAsyncThunk(
+  'locations/fetchMLPredictions',
+  async ({
+    locationIds,
+    userProfile
+  }: {
+    locationIds: string[];
+    userProfile: any;
+  }) => {
+    const predictions: Record<string, MLPrediction> = {};
+
+    // Call safety-predictor for each location that needs prediction
+    for (const locationId of locationIds) {
+      try {
+        const { data, error } = await supabase.functions.invoke('safety-predictor', {
+          body: {
+            location_id: locationId,
+            user_demographics: {
+              race_ethnicity: userProfile?.race_ethnicity || [],
+              gender: userProfile?.gender || null,
+              lgbtq_status: userProfile?.lgbtq_status || false,
+              disability_status: userProfile?.disability_status || [],
+              religion: userProfile?.religion || null,
+              age_range: userProfile?.age_range || null,
+            }
+          }
+        });
+
+        if (error) {
+          console.error(`Prediction error for location ${locationId}:`, error);
+          continue;
+        }
+
+        if (data && data.source === 'ml_prediction') {
+          predictions[locationId] = data;
+        }
+      } catch (err) {
+        console.error(`Failed to get prediction for ${locationId}:`, err);
+      }
+    }
+
+    return predictions;
+  }
+);
+
 const locationsSlice = createSlice({
   name: 'locations',
   initialState,
@@ -576,8 +635,8 @@ const locationsSlice = createSlice({
     setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
       state.userLocation = action.payload;
     },
-   addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
-      
+    addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
+
       // Add location to nearby if not already present
       if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
         state.nearbyLocations.push(action.payload);
@@ -591,11 +650,17 @@ const locationsSlice = createSlice({
     },
     toggleDangerZones: (state) => {
 
-  state.dangerZonesVisible = !state.dangerZonesVisible
-},
-setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
-  state.dangerZonesVisible = action.payload
-},
+      state.dangerZonesVisible = !state.dangerZonesVisible
+    },
+    setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
+      state.dangerZonesVisible = action.payload
+    },
+    clearPredictions: (state) => {
+      state.predictions = {};
+    },
+    addPrediction: (state, action: PayloadAction<MLPrediction>) => {
+      state.predictions[action.payload.location_id] = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -605,9 +670,9 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
       })
       .addCase(fetchNearbyLocations.fulfilled, (state, action) => {
 
-  state.loading = false;
-  state.nearbyLocations = action.payload;
-})
+        state.loading = false;
+        state.nearbyLocations = action.payload;
+      })
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch nearby locations';
@@ -654,7 +719,7 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to submit review';
       });
-    
+
     builder
       .addCase(updateReview.pending, (state) => {
         state.loading = true;
@@ -711,7 +776,7 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to create location';
       });
-      builder
+    builder
       .addCase(fetchHeatMapData.pending, (state) => {
         state.heatMapLoading = true;
       })
@@ -723,7 +788,7 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
         state.heatMapLoading = false;
         state.heatMapData = [];
       })
-      builder
+    builder
       .addCase(fetchRecentReviews.pending, (state) => {
         state.communityLoading = true;
         state.error = null;
@@ -736,35 +801,46 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
         state.communityLoading = false;
         state.error = action.error.message || 'Failed to fetch community reviews';
       });
-      builder
-  .addCase(fetchDangerZones.pending, (state) => {
- state.dangerZonesLoading = true
-  })
-  .addCase(fetchDangerZones.fulfilled, (state, action) => {
-  state.dangerZonesLoading = false
-    state.dangerZones = action.payload
-  })
-  .addCase(fetchDangerZones.rejected, (state, action) => {
- state.dangerZonesLoading = false
-    state.dangerZones = []
-  })
-  .addCase(fetchSimilarUsers.pending, (state) => {
-  state.similarUsersLoading = true;
-})
-.addCase(fetchSimilarUsers.fulfilled, (state, action) => {
-  state.similarUsersLoading = false;
-  state.similarUsers = action.payload;
-})
-.addCase(fetchSimilarUsers.rejected, (state) => {
-  state.similarUsersLoading = false;
-  state.error = 'Failed to fetch similar users';
-})
+    builder
+      .addCase(fetchDangerZones.pending, (state) => {
+        state.dangerZonesLoading = true
+      })
+      .addCase(fetchDangerZones.fulfilled, (state, action) => {
+        state.dangerZonesLoading = false
+        state.dangerZones = action.payload
+      })
+      .addCase(fetchDangerZones.rejected, (state, action) => {
+        state.dangerZonesLoading = false
+        state.dangerZones = []
+      })
+      .addCase(fetchSimilarUsers.pending, (state) => {
+        state.similarUsersLoading = true;
+      })
+      .addCase(fetchSimilarUsers.fulfilled, (state, action) => {
+        state.similarUsersLoading = false;
+        state.similarUsers = action.payload;
+      })
+      .addCase(fetchSimilarUsers.rejected, (state) => {
+        state.similarUsersLoading = false;
+        state.error = 'Failed to fetch similar users';
+      })
+    builder
+      .addCase(fetchMLPredictions.pending, (state) => {
+        state.predictionsLoading = true;
+      })
+      .addCase(fetchMLPredictions.fulfilled, (state, action) => {
+        state.predictionsLoading = false;
+        state.predictions = { ...state.predictions, ...action.payload };
+      })
+      .addCase(fetchMLPredictions.rejected, (state) => {
+        state.predictionsLoading = false;
+      });
   },
 });
 
-export const { 
-  setSelectedLocation, 
-  setFilters, 
+export const {
+  setSelectedLocation,
+  setFilters,
   clearError,
   clearSearchResults,
   setShowSearchResults,
@@ -774,6 +850,8 @@ export const {
   setHeatMapVisible,
   toggleDangerZones,
   setDangerZonesVisible,
+  clearPredictions,
+  addPrediction,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
