@@ -37,27 +37,12 @@ export default function DangerZoneOverlay({
   dangerZones,
   visible,
 }: DangerZoneOverlayProps) {
-  console.log("DangerZoneOverlay render:", {
-    visible,
-    zonesCount: dangerZones.length,
-  });
-
   if (!visible || dangerZones.length === 0) {
-    console.log("DangerZoneOverlay not rendering because:", {
-      visible,
-      length: dangerZones.length,
-    });
     return null;
   }
   return (
     <>
       {dangerZones.map((zone) => {
-        console.log("Rendering zone:", zone.id, zone.location_name);
-        console.log("Zone coordinates:", {
-          lat: zone.center_lat,
-          lng: zone.center_lng,
-        });
-        console.log("Polygon points:", zone.polygon_points);
         const colors = getDangerColor(zone.danger_level);
         if (
           !zone.center_lat ||
@@ -76,7 +61,6 @@ export default function DangerZoneOverlay({
             {/* Danger zone polygon */}
             <Polygon
               coordinates={zone.polygon_points.map((point) => {
-                console.log("Mapping point:", point);
                 return {
                   latitude: point.lat,
                   longitude: point.lng,
