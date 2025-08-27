@@ -170,11 +170,9 @@ export const fetchLocationDetails = createAsyncThunk(
 export const fetchDangerZones = createAsyncThunk(
   'locations/fetchDangerZones',
   async ({ userId, radiusMiles = 50 }: { userId: string; radiusMiles?: number }) => {
-        console.log('fetchDangerZones called with userId:', userId);
   const supabaseUrl = (supabase as any).supabaseUrl
     const supabaseAnonKey = (supabase as any).supabaseKey
     
-    console.log('Calling danger-zones API...');
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`,
       {
@@ -186,16 +184,13 @@ export const fetchDangerZones = createAsyncThunk(
         body: JSON.stringify({ user_id: userId, radius_miles: radiusMiles }),
       }
     )
-    console.log('API Response status:', response.status);
 
     if (!response.ok) {
       const error = await response.json()
-      console.error('API Error:', error);
       throw new Error('Failed to fetch danger zones')
     }
 
     const data: DangerZonesResponse = await response.json()
-      console.log('Danger zones received:', data);
   return data.danger_zones
   }
 )
@@ -595,7 +590,6 @@ const locationsSlice = createSlice({
       state.heatMapVisible = action.payload;
     },
     toggleDangerZones: (state) => {
-        console.log('Redux: toggling danger zones from', state.dangerZonesVisible, 'to', !state.dangerZonesVisible);
 
   state.dangerZonesVisible = !state.dangerZonesVisible
 },
@@ -744,16 +738,13 @@ setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
       });
       builder
   .addCase(fetchDangerZones.pending, (state) => {
-     console.log('fetchDangerZones.pending');
  state.dangerZonesLoading = true
   })
   .addCase(fetchDangerZones.fulfilled, (state, action) => {
-    console.log('fetchDangerZones.fulfilled with data:', action.payload);
   state.dangerZonesLoading = false
     state.dangerZones = action.payload
   })
   .addCase(fetchDangerZones.rejected, (state, action) => {
-     console.error('fetchDangerZones.rejected:', action.error);
  state.dangerZonesLoading = false
     state.dangerZones = []
   })

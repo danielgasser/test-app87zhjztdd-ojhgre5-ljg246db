@@ -102,9 +102,6 @@ export default function ProfileScreen() {
         data: { publicUrl },
       } = supabase.storage.from("user-avatars").getPublicUrl(filePath);
 
-      console.log("🖼️ Public URL:", publicUrl);
-
-      // Update user profile with new avatar URL
       await dispatch(
         updateUserProfile({
           userId: user!.id,
@@ -206,10 +203,6 @@ export default function ProfileScreen() {
                   key={profile.avatar_url}
                   source={{ uri: profile.avatar_url }}
                   style={styles.avatar}
-                  onError={(e) =>
-                    console.log("🖼️ Image load error:", e.nativeEvent.error)
-                  }
-                  onLoad={() => console.log("🖼️ Image loaded successfully")}
                 />
               </>
             ) : (

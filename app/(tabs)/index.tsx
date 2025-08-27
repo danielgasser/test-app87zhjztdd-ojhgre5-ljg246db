@@ -122,16 +122,12 @@ export default function MapScreen() {
   // Fetch danger zones when user location is available
   useEffect(() => {
     if (userId && userLocation) {
-      console.log("Fetching danger zones for user:", userId);
       dispatch(fetchDangerZones({ userId }));
     }
   }, [userId, userLocation, dispatch]);
 
   // Debug danger zones
-  useEffect(() => {
-    console.log("Danger zones:", dangerZones);
-    console.log("Danger zones visible:", dangerZonesVisible);
-  }, [dangerZones, dangerZonesVisible]);
+  useEffect(() => {}, [dangerZones, dangerZonesVisible]);
 
   // Refresh nearby locations on focus
   useFocusEffect(
@@ -209,14 +205,9 @@ export default function MapScreen() {
   };
 
   const handleToggleDangerZones = () => {
-    console.log("Toggle danger zones clicked");
-    console.log("Current userId:", userId);
-    console.log("Current dangerZonesVisible:", dangerZonesVisible);
-
     dispatch(toggleDangerZones());
 
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
-      console.log("Fetching danger zones for userId:", userId);
       dispatch(fetchDangerZones({ userId }));
     }
   };
@@ -317,10 +308,6 @@ export default function MapScreen() {
             );
           })}
         {(() => {
-          console.log("About to render DangerZoneOverlay:", {
-            dangerZonesLength: dangerZones.length,
-            dangerZonesVisible,
-          });
           return null;
         })()}{" "}
         <DangerZoneOverlay
