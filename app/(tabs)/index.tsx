@@ -309,7 +309,7 @@ export default function MapScreen() {
           })}
         {(() => {
           return null;
-        })()}{" "}
+        })()}
         <DangerZoneOverlay
           dangerZones={dangerZones}
           visible={dangerZonesVisible}
