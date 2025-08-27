@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Circle } from "react-native-maps";
+import MapView, { Marker, Circle, Callout } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -431,7 +431,8 @@ export default function MapScreen() {
                         🤖 AI Prediction: {markerProps.score.toFixed(1)}/5
                       </Text>
                       <Text style={styles.calloutConfidence}>
-                        {Math.round(markerProps.confidence * 100)}% confident
+                        {Math.round((markerProps.confidence || 0) * 100)}%
+                        confident
                       </Text>
                       <Text style={styles.calloutNote}>
                         Based on similar locations and user demographics
@@ -802,9 +803,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
   },
-});
-
-const additionalStyles = StyleSheet.create({
   predictionCallout: {
     width: 200,
     padding: 10,
