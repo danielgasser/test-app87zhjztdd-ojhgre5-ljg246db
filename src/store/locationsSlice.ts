@@ -105,7 +105,7 @@ const initialState: LocationsState = {
   dangerZonesLoading: false,
   similarUsers: [],
   similarUsersLoading: false,
-  predictions: {} as Record<string, { score: number, confidence: number }>,
+  predictions: {},
   predictionsLoading: false,
 };
 
