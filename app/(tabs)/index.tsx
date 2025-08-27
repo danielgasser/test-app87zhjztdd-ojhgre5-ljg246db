@@ -28,16 +28,19 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { supabase } from "@/services/supabase";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
-    return "#007AFF"; // Blue for no reviews
+    return APP_CONFIG.MAP_MARKERS.COLOR_NO_REVIEWS;
   }
   const numRating = Number(rating) || 0;
 
-  if (numRating >= 4) return "#4CAF50";
-  if (numRating >= 3) return "#FFC107";
-  return "#F44336";
+  if (numRating >= APP_CONFIG.MAP_MARKERS.THRESHOLD_SAFE)
+    return APP_CONFIG.MAP_MARKERS.COLOR_SAFE;
+  if (numRating >= APP_CONFIG.MAP_MARKERS.THRESHOLD_MIXED)
+    return APP_CONFIG.MAP_MARKERS.COLOR_MIXED;
+  return APP_CONFIG.MAP_MARKERS.COLOR_UNSAFE;
 };
 
 interface SearchResult {
@@ -138,7 +141,7 @@ export default function MapScreen() {
           fetchNearbyLocations({
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
-            radius: 5000,
+            radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
           })
         );
       }
@@ -198,7 +201,7 @@ export default function MapScreen() {
         fetchHeatMapData({
           latitude: userLocation.latitude,
           longitude: userLocation.longitude,
-          radius: 10000,
+          radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
           userProfile,
         })
       );
@@ -549,7 +552,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4CAF50",
+    backgroundColor: APP_CONFIG.MAP_MARKERS.COLOR_SAFE,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 12,
@@ -560,7 +563,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   viewLocationButton: {
-    backgroundColor: "#2196F3",
+    backgroundColor: APP_CONFIG.MAP_MARKERS.COLOR_NO_REVIEWS,
   },
   addLocationText: {
     color: "#FFF",

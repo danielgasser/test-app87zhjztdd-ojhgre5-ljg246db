@@ -10,6 +10,7 @@ import {
   DangerZonesResponse
 } from '../types/supabase';
 import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
+import { APP_CONFIG } from '@/utils/appConfig';
 
 interface SearchLocation {
   id: string;
@@ -70,7 +71,7 @@ const initialState: LocationsState = {
   filters: {
     placeType: null,
     minSafetyScore: null,
-    radius: 5000,
+    radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS ,
   },
   searchResults: [],
   searchLoading: false,
@@ -88,7 +89,7 @@ const initialState: LocationsState = {
 
 export const fetchNearbyLocations = createAsyncThunk(
   'locations/fetchNearby',
-  async ({ latitude, longitude, radius = 5000 }: Coordinates & { radius?: number }, { getState }) => {
+  async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS  }: Coordinates & { radius?: number }, { getState }) => {
     // Get user profile from Redux state
     const state = getState() as any;
     const userProfile = state.user.profile;
