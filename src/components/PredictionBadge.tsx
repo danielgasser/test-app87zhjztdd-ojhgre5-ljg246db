@@ -28,13 +28,6 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
   // Convert decimal confidence to percentage properly
   const confidencePercent = Math.round(prediction.confidence * 100);
 
-  console.log(`🎯 PredictionBadge: Raw confidence:`, prediction.confidence);
-  console.log(
-    `🎯 PredictionBadge: Confidence type:`,
-    typeof prediction.confidence
-  );
-  console.log(`🎯 PredictionBadge: Calculated percentage:`, confidencePercent);
-
   // Determine badge color based on confidence
   const getBadgeColor = (confidence: number) => {
     if (confidence >= 70) return "#4CAF50"; // Green - High confidence
