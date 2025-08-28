@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { APP_CONFIG } from "@/utils/appConfig";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,7 +44,7 @@ serve(async (req: Request) => {
     })
 
     const { similar_users } = await similarUsersResponse.json()
-    
+
     // Filter to only highly similar users
     const highSimilarityUsers = similar_users
       .filter((u: any) => u.similarity_score >= min_confidence)
@@ -51,7 +52,7 @@ serve(async (req: Request) => {
 
     if (highSimilarityUsers.length === 0) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           user_id,
           recommendations: [],
           message: "No similar users found. Try visiting and reviewing more locations!"
@@ -110,7 +111,7 @@ serve(async (req: Request) => {
           comfort_sum: 0
         })
       }
-      
+
       const scores = locationScores.get(locId)!
       scores.total_rating += review.overall_rating
       scores.rating_count += 1
@@ -124,7 +125,7 @@ serve(async (req: Request) => {
         const avg_rating = data.total_rating / data.rating_count
         const confidence = Math.min(data.rating_count / 3, 1) // Confidence increases with more reviews, max at 3
         const predicted_score = avg_rating * confidence + 3.5 * (1 - confidence) // Blend with neutral score
-        
+
         return {
           location_id,
           location_name: data.location.name,
@@ -142,13 +143,13 @@ serve(async (req: Request) => {
       .slice(0, limit)
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         user_id,
         recommendations: finalRecommendations,
         based_on_similar_users: highSimilarityUsers.length,
         calculation_timestamp: new Date().toISOString()
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
@@ -156,7 +157,7 @@ serve(async (req: Request) => {
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
