@@ -577,12 +577,25 @@ export const fetchMLPredictions = createAsyncThunk(
   async (locationId: string, { getState }) => {
     const state = getState() as any;
     const userId = state.auth.user?.id;
+    const userProfile = state.user.profile; // Get the full profile
+
+    console.log(`🤖 [REDUX] Starting fetchMLPredictions for location: ${locationId}`);
+    console.log(`🤖 [REDUX] User ID: ${userId}`);
+    console.log(`🤖 [REDUX] User Profile:`, userProfile);
 
     if (!userId) {
+      console.error('🤖 [REDUX] ERROR: User must be logged in to get ML predictions');
       throw new Error('User must be logged in to get ML predictions');
     }
 
+    if (!userProfile) {
+      console.error('🤖 [REDUX] ERROR: User profile required for ML predictions');
+      throw new Error('User profile required for ML predictions');
+    }
+
     try {
+      console.log(`🤖 [REDUX] Making API call to safety-predictor...`);
+
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
         {
@@ -593,17 +606,38 @@ export const fetchMLPredictions = createAsyncThunk(
           },
           body: JSON.stringify({
             location_id: locationId,
-            user_id: userId
+            user_demographics: {
+              race_ethnicity: userProfile.race_ethnicity,
+              gender: userProfile.gender,
+              lgbtq_status: userProfile.lgbtq_status,
+              disability_status: userProfile.disability_status,
+              religion: userProfile.religion,
+              age_range: userProfile.age_range,
+            }
           }),
         }
       );
+
+      console.log(`🤖 [REDUX] API Response status:`, response.status);
+      console.log(`🤖 [REDUX] API Response ok:`, response.ok);
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`🤖 [REDUX] API Error response:`, errorText);
-        throw new Error(`ML API failed with status: ${response.status}`);
+        throw new Error(`ML API failed with status: ${response.status} - ${errorText}`);
       }
 
       const prediction = await response.json();
+
+      console.log(`🤖 [REDUX] ML API Response:`, prediction);
+      console.log(`🤖 [REDUX] Raw confidence from API:`, prediction.confidence, typeof prediction.confidence);
+
+      // Test for our specific location
+      //if (locationId === "143b52ad-1e4f-4a9b-b81d-64a2e8447d52") {
+      console.log("🎯 [REDUX] TARGET LOCATION API RESPONSE:");
+      console.log("   - confidence:", prediction.confidence);
+      console.log("   - predicted_safety_score:", prediction.predicted_safety_score);
+      // }
 
       return {
         locationId,
@@ -611,7 +645,6 @@ export const fetchMLPredictions = createAsyncThunk(
       };
     } catch (error) {
       console.error('🤖 [REDUX] fetchMLPredictions error:', error);
-
       throw error;
     }
   }
