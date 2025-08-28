@@ -1,200 +1,86 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface PredictionBadgeProps {
-  predictedScore: number;
-  confidence: number;
-  style?: any;
+  prediction: MLPrediction;
+  loading?: boolean;
 }
 
-export const PredictionBadge: React.FC<PredictionBadgeProps> = ({
-  predictedScore,
-  confidence,
-  style,
+const PredictionBadge: React.FC<PredictionBadgeProps> = ({
+  prediction,
+  loading,
 }) => {
-  const getBadgeColor = (score: number) => {
-    if (score >= 4) return "#4CAF50";
-    if (score >= 3) return "#FFC107";
-    return "#F44336";
-  };
-
-  const getConfidenceText = (conf: number) => {
-    if (conf >= 0.7) return "High";
-    if (conf >= 0.4) return "Medium";
-    return "Low";
-  };
-
-  return (
-    <View style={[styles.container, style]}>
-      <View
-        style={[
-          styles.badge,
-          { backgroundColor: getBadgeColor(predictedScore) },
-        ]}
-      >
-        <Text style={styles.scoreText}>{predictedScore.toFixed(1)}</Text>
-        <Text style={styles.aiLabel}>AI</Text>
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Ionicons name="hourglass-outline" size={16} color="#666" />
+        <Text style={styles.loadingText}>Getting AI prediction...</Text>
       </View>
-      <View style={styles.confidenceContainer}>
-        <Text style={styles.confidenceText}>
-          {Math.round(confidence * 100)}% confident
-        </Text>
-        <Text style={styles.confidenceLevel}>
-          {getConfidenceText(confidence)} confidence
-        </Text>
-      </View>
-    </View>
+    );
+  }
+
+  if (!prediction) {
+    return null;
+  }
+
+  // 🚨 CRITICAL: This is likely where the bug was!
+  // Convert decimal confidence to percentage properly
+  const confidencePercent = Math.round(prediction.confidence * 100);
+
+  console.log(`🎯 PredictionBadge: Raw confidence:`, prediction.confidence);
+  console.log(
+    `🎯 PredictionBadge: Confidence type:`,
+    typeof prediction.confidence
   );
-};
+  console.log(`🎯 PredictionBadge: Calculated percentage:`, confidencePercent);
 
-// Custom marker component for predicted locations
-interface PredictedMarkerProps {
-  coordinate: { latitude: number; longitude: number };
-  title: string;
-  predictedScore: number;
-  confidence?: number | undefined;
-  onPress?: () => void;
-}
+  // Determine badge color based on confidence
+  const getBadgeColor = (confidence: number) => {
+    if (confidence >= 70) return "#4CAF50"; // Green - High confidence
+    if (confidence >= 30) return "#FF9800"; // Orange - Medium confidence
+    return "#F44336"; // Red - Low confidence
+  };
 
-export const PredictedMarker: React.FC<PredictedMarkerProps> = ({
-  coordinate,
-  title,
-  predictedScore,
-  confidence,
-  onPress,
-}) => {
+  const badgeColor = getBadgeColor(confidencePercent);
+
   return (
-    <View style={styles.markerContainer}>
-      {/* Main marker pin */}
-      <View
-        style={[
-          styles.markerPin,
-          {
-            backgroundColor:
-              predictedScore >= 4
-                ? "#4CAF50"
-                : predictedScore >= 3
-                ? "#FFC107"
-                : "#F44336",
-          },
-        ]}
-      >
-        <Text style={styles.markerText}>{predictedScore.toFixed(1)}</Text>
-      </View>
-
-      {/* AI indicator */}
-      <View style={styles.aiIndicator}>
-        <Text style={styles.aiText}>🤖</Text>
-      </View>
-
-      {/* Confidence badge */}
-      <View style={styles.confidenceBadge}>
-        <Text style={styles.confidenceBadgeText}>
-          {Math.round((confidence || 0) * 100)}%
-        </Text>
-      </View>
+    <View style={[styles.container, { backgroundColor: badgeColor }]}>
+      <Ionicons name="bulb" size={16} color="#FFF" />
+      <Text style={styles.predictionText}>
+        AI Prediction: {prediction.predicted_safety_score.toFixed(1)}/5
+      </Text>
+      <Text style={styles.confidenceText}>
+        ({confidencePercent}% confident)
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 8,
+    gap: 6,
   },
-  badge: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    borderWidth: 2,
-    borderColor: "#FFF",
-  },
-  scoreText: {
-    fontSize: 16,
-    fontWeight: "bold",
+  predictionText: {
     color: "#FFF",
-  },
-  aiLabel: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: "600",
-    color: "#FFF",
-    opacity: 0.9,
-  },
-  confidenceContainer: {
-    marginTop: 4,
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.7)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
   },
   confidenceText: {
-    fontSize: 10,
     color: "#FFF",
-    fontWeight: "600",
-  },
-  confidenceLevel: {
-    fontSize: 8,
-    color: "#FFF",
-    opacity: 0.8,
-  },
-
-  // Marker styles
-  markerContainer: {
-    alignItems: "center",
-    position: "relative",
-  },
-  markerPin: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#FFF",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  markerText: {
     fontSize: 12,
-    fontWeight: "bold",
-    color: "#FFF",
+    opacity: 0.9,
   },
-  aiIndicator: {
-    position: "absolute",
-    top: -5,
-    right: -5,
-    width: 20,
-    height: 20,
-    backgroundColor: "#2196F3",
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#FFF",
-  },
-  aiText: {
-    fontSize: 10,
-  },
-  confidenceBadge: {
-    marginTop: 2,
-    backgroundColor: "rgba(33, 150, 243, 0.9)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  confidenceBadgeText: {
-    fontSize: 9,
-    color: "#FFF",
-    fontWeight: "600",
+  loadingText: {
+    color: "#666",
+    fontSize: 14,
   },
 });
+
+export default PredictionBadge;

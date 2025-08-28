@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { fetchLocationDetails } from "src/store/locationsSlice";
 import { supabase } from "src/services/supabase";
 import { ReviewWithUser } from "src/types/supabase";
+import PredictionBadge from "./PredictionBadge";
 
 interface LocationDetailsModalProps {
   visible: boolean;
@@ -34,6 +35,12 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const currentUser = useAppSelector((state) => state.auth.user);
   const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const mlPredictions = useAppSelector(
+    (state) => state.locations.mlPredictions
+  );
+  const mlPredictionsLoading = useAppSelector(
+    (state) => state.locations.mlPredictionsLoading
+  );
 
   useEffect(() => {
     if (locationId && visible) {
@@ -202,7 +209,13 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   </View>
                 )}
               </View>
-
+              {/* ML Prediction Badge for locations with no reviews */}
+              {selectedLocation && selectedLocation.review_count === 0 && (
+                <PredictionBadge
+                  prediction={mlPredictions[selectedLocation.id]}
+                  loading={mlPredictionsLoading[selectedLocation.id]}
+                />
+              )}
               {/* Write Review Button */}
               {currentUser && !userHasReviewed && (
                 <TouchableOpacity

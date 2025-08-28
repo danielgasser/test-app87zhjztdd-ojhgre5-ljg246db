@@ -20,6 +20,8 @@ import {
   toggleHeatMap,
   fetchDangerZones,
   toggleDangerZones,
+  mlPredictionsLoading,
+  mlPredictions,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -28,10 +30,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { APP_CONFIG } from "@/utils/appConfig";
-import {
-  PredictedMarker,
-  PredictionBadge,
-} from "src/components/PredictionBadge";
 import { fetchMLPredictions } from "src/store/locationsSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
@@ -88,8 +86,8 @@ export default function MapScreen() {
     dangerZones,
     dangerZonesVisible,
     dangerZonesLoading,
-    predictions, // Add this line
-    predictionsLoading,
+    mlPredictions, // Add this line
+    mlPredictionsLoading,
   } = useAppSelector((state) => state.locations);
 
   const userId = useAppSelector((state) => state.auth.user?.id);
@@ -141,7 +139,7 @@ export default function MapScreen() {
     console.log(
       "ML predictions will be loaded on-demand when markers are visible"
     );
-  }, [nearbyLocations, userProfile, predictions, dispatch]);
+  }, [nearbyLocations, userProfile, mlPredictions, dispatch]);
 
   // Refresh nearby locations on focus
   useFocusEffect(
@@ -161,7 +159,7 @@ export default function MapScreen() {
   const getMarkerProps = (location: any) => {
     const hasReviews =
       location.demographic_safety_score || location.avg_safety_score;
-    const prediction = predictions[location.id];
+    const prediction = mlPredictions[location.id];
 
     if (hasReviews) {
       // Location has actual reviews - use existing marker logic
@@ -211,16 +209,21 @@ export default function MapScreen() {
     if (location && userProfile) {
       const hasActualReviews =
         location.demographic_safety_score || location.avg_safety_score;
-      const hasPrediction = predictions[locationId];
+      const hasPrediction = mlPredictions[locationId];
 
       if (!hasActualReviews && !hasPrediction) {
         console.log("Fetching ML prediction for tapped location:", locationId);
-        dispatch(
-          fetchMLPredictions({
-            locationIds: [locationId],
-            userProfile,
-          })
-        );
+        if (!mlPredictions[locationId] && !mlPredictionsLoading[locationId]) {
+          console.log(
+            `🔥 No existing prediction - dispatching fetchMLPredictions`
+          );
+          dispatch(fetchMLPredictions(locationId));
+        } else {
+          console.log(
+            `🔥 Existing prediction found:`,
+            mlPredictions[locationId]
+          );
+        }
       }
     }
   };
@@ -395,7 +398,7 @@ export default function MapScreen() {
           nearbyLocations.length > 0 &&
           nearbyLocations.map((loc) => {
             const markerProps = getMarkerProps(loc);
-            const prediction = predictions[loc.id];
+            const prediction = mlPredictions[loc.id];
             if (loc.id === "143b52ad-1e4f-4a9b-b81d-64a2e8447d52") {
               console.log("Riverside B&B prediction data:", prediction);
             }
@@ -523,7 +526,7 @@ export default function MapScreen() {
             {dangerZonesLoading ? "Loading..." : "Danger Zones"}
           </Text>
         </TouchableOpacity>
-        {predictionsLoading && (
+        {mlPredictionsLoading && (
           <View style={styles.mlLoadingContainer}>
             <ActivityIndicator size="small" color="#2196F3" />
             <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>

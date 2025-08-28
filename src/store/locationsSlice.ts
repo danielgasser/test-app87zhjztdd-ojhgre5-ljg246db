@@ -52,8 +52,8 @@ interface LocationsState {
     shared_demographics: string[];
   }>;
   similarUsersLoading: boolean;
-  predictions: Record<string, MLPrediction>;
-  predictionsLoading: boolean;
+  mlPredictions: { [locationId: string]: MLPrediction };
+  mlPredictionsLoading: { [locationId: string]: boolean };
 }
 
 interface MLPrediction {
@@ -61,9 +61,14 @@ interface MLPrediction {
   location_name: string;
   predicted_safety_score: number;
   confidence: number;
-  source: 'ml_prediction';
-  calculation_timestamp: string;
+  prediction_factors: {
+    place_type_avg: number;
+    similar_locations_count: number;
+    demographic_matches: number;
+  };
   based_on_locations: number;
+  source: string;
+  calculation_timestamp: string;
 }
 
 interface HeatMapPoint {
@@ -105,8 +110,8 @@ const initialState: LocationsState = {
   dangerZonesLoading: false,
   similarUsers: [],
   similarUsersLoading: false,
-  predictions: {},
-  predictionsLoading: false,
+  mlPredictions: {},
+  mlPredictionsLoading: {},
 };
 
 export const fetchNearbyLocations = createAsyncThunk(
@@ -569,46 +574,49 @@ export const fetchSimilarUsers = createAsyncThunk(
 
 export const fetchMLPredictions = createAsyncThunk(
   'locations/fetchMLPredictions',
-  async ({
-    locationIds,
-    userProfile
-  }: {
-    locationIds: string[];
-    userProfile: any;
-  }) => {
-    const predictions: Record<string, MLPrediction> = {};
+  async (locationId: string, { getState }) => {
+    const state = getState() as any;
+    const userId = state.auth.user?.id;
 
-    // Call safety-predictor for each location that needs prediction
-    for (const locationId of locationIds) {
-      try {
-        const { data, error } = await supabase.functions.invoke('safety-predictor', {
-          body: {
-            location_id: locationId,
-            user_demographics: {
-              race_ethnicity: userProfile?.race_ethnicity || [],
-              gender: userProfile?.gender || null,
-              lgbtq_status: userProfile?.lgbtq_status || false,
-              disability_status: userProfile?.disability_status || [],
-              religion: userProfile?.religion || null,
-              age_range: userProfile?.age_range || null,
-            }
-          }
-        });
-
-        if (error) {
-          console.error(`Prediction error for location ${locationId}:`, error);
-          continue;
-        }
-
-        if (data && data.source === 'ml_prediction') {
-          predictions[locationId] = data;
-        }
-      } catch (err) {
-        console.error(`Failed to get prediction for ${locationId}:`, err);
-      }
+    if (!userId) {
+      throw new Error('User must be logged in to get ML predictions');
     }
 
-    return predictions;
+    console.log(`🤖 Fetching ML predictions for location: ${locationId}`);
+
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            location_id: locationId,
+            user_id: userId
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`ML API failed with status: ${response.status}`);
+      }
+
+      const prediction = await response.json();
+
+      console.log(`🤖 ML API Response:`, prediction);
+      console.log(`🤖 Raw confidence from API:`, prediction.confidence, typeof prediction.confidence);
+
+      return {
+        locationId,
+        prediction
+      };
+    } catch (error) {
+      console.error('🤖 fetchMLPredictions error:', error);
+      throw error;
+    }
   }
 );
 
@@ -654,12 +662,6 @@ const locationsSlice = createSlice({
     },
     setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
       state.dangerZonesVisible = action.payload
-    },
-    clearPredictions: (state) => {
-      state.predictions = {};
-    },
-    addPrediction: (state, action: PayloadAction<MLPrediction>) => {
-      state.predictions[action.payload.location_id] = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -825,16 +827,25 @@ const locationsSlice = createSlice({
         state.error = 'Failed to fetch similar users';
       })
     builder
-      .addCase(fetchMLPredictions.pending, (state) => {
-        state.predictionsLoading = true;
+      .addCase(fetchMLPredictions.pending, (state, action) => {
+        const locationId = action.meta.arg;
+        state.mlPredictionsLoading[locationId] = true;
       })
       .addCase(fetchMLPredictions.fulfilled, (state, action) => {
-        state.predictionsLoading = false;
-        state.predictions = { ...state.predictions, ...action.payload };
+        if (action.payload) {
+          const { locationId, prediction } = action.payload;
+          state.mlPredictions[locationId] = prediction;
+          state.mlPredictionsLoading[locationId] = false;
+
+          console.log(`🤖 Redux: Stored prediction for ${locationId}:`, prediction.confidence);
+        }
       })
-      .addCase(fetchMLPredictions.rejected, (state) => {
-        state.predictionsLoading = false;
+      .addCase(fetchMLPredictions.rejected, (state, action) => {
+        const locationId = action.meta.arg;
+        state.mlPredictionsLoading[locationId] = false;
+        console.error(`🤖 ML prediction failed for ${locationId}:`, action.error);
       });
+
   },
 });
 
@@ -850,8 +861,8 @@ export const {
   setHeatMapVisible,
   toggleDangerZones,
   setDangerZonesVisible,
-  clearPredictions,
-  addPrediction,
+  mlPredictions,
+  mlPredictionsLoading,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
