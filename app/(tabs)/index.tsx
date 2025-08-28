@@ -1,3 +1,4 @@
+console.log("🚨 INDEX.TSX FILE LOADED");
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -29,7 +30,14 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { fetchMLPredictions } from "src/store/locationsSlice";
 import PredictionBadge from "src/components/PredictionBadge";
-
+console.log("🚨 IMPORTS COMPLETED");
+console.log("🔍 Checking imports...");
+console.log("🔍 MapView:", typeof MapView);
+console.log("🔍 useAppDispatch:", typeof useAppDispatch);
+console.log("🔍 useAppSelector:", typeof useAppSelector);
+console.log("🔍 APP_CONFIG:", typeof APP_CONFIG);
+console.log("🔍 fetchMLPredictions:", typeof fetchMLPredictions);
+console.log("🔍 PredictionBadge:", typeof PredictionBadge);
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
     return APP_CONFIG.MAP_MARKERS.COLOR_NO_REVIEWS;
@@ -55,7 +63,7 @@ interface SearchResult {
 console.log("🗺️ Map component loading...");
 
 export default function MapScreen() {
-  console.log("🚨 COMPONENT STARTING");
+  console.log("🚨 COMPONENT FUNCTION CALLED");
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -275,8 +283,12 @@ export default function MapScreen() {
         dispatch(fetchDangerZones({ userId }));
       }
     };
+    console.log("🔍 locationPermission:", locationPermission);
+    console.log("🔍 loading:", loading);
+    console.log("🔍 nearbyLocations.length:", nearbyLocations.length);
 
     if (!locationPermission) {
+      console.log("❌ BLOCKED BY: No location permission");
       return (
         <View style={styles.centerContainer}>
           <Text style={styles.errorText}>
@@ -287,6 +299,7 @@ export default function MapScreen() {
     }
 
     if (loading && nearbyLocations.length === 0) {
+      console.log("❌ BLOCKED BY: Loading state");
       return (
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#007AFF" />
@@ -294,6 +307,7 @@ export default function MapScreen() {
         </View>
       );
     }
+    console.log("✅ SHOULD RENDER MAP NOW");
 
     return (
       <View style={styles.container}>
@@ -301,9 +315,6 @@ export default function MapScreen() {
           onLocationSelect={handleLocationSelected}
           userLocation={userLocation || undefined}
         />
-        {(() => {
-          return null;
-        })()}
 
         <MapView
           ref={mapRef}
