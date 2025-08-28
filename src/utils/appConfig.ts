@@ -41,7 +41,6 @@ export const APP_CONFIG = {
     CONFIDENCE_DATA_POINTS_DIVISOR: 10,        // Divide data points by this for confidence
     MIN_REVIEWS_FOR_PATTERNS: 2,               // Minimum reviews to detect patterns
 
-
     // NEW: Safety-Predictor Weights
     PREDICTION_WEIGHTS: {
       PLACE_TYPE_OVERALL: 0.3,           // 30% weight for place type averages
@@ -55,7 +54,9 @@ export const APP_CONFIG = {
       NEUTRAL_BASELINE: 0.15,            // 15% confidence for no-data predictions
       DATA_POINTS_DIVISOR: 15,           // Divide data sources by this for confidence
       MAX_CONFIDENCE: 0.8,               // Maximum confidence cap (80%)
-      MIN_CONFIDENCE: 0.05,              // Minimum confidence floor (5%)
+      MIN_CONFIDENCE: 0.05,     // Minimum confidence floor (5%)
+      MIN_CONFIDENCE_THRESHOLD: 0.5,
+      RATING_DIVISOR: 3,
     },
 
     // NEW: Nearby Location Search
@@ -128,6 +129,7 @@ export const APP_CONFIG = {
       ACCESSIBILITY_SCORE: 0.2,           // 20% weight for accessibility
       OVERALL_SCORE: 0.1,                 // 10% weight for overall rating
     },
+    DEFAULT_RECOMMENDATION_LIMIT: 10,
     MIN_RECOMMENDATION_SCORE: 3.5,        // Minimum score to recommend
     MAX_RECOMMENDATIONS: 10,               // Maximum recommendations to return
     PREFER_RECENT_REVIEWS: true,          // Prefer locations with recent reviews

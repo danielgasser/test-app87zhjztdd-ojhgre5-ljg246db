@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { APP_CONFIG } from "./@/utils/appConfig";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +15,7 @@ interface DangerZone {
   center_lng: number
   danger_level: 'high' | 'medium' | 'low'
   affected_demographics: string[]
-  polygon_points: Array<{lat: number, lng: number}>
+  polygon_points: Array<{ lat: number, lng: number }>
   reasons: string[]
   time_based: boolean
   active_times?: string[]
@@ -49,19 +50,19 @@ serve(async (req) => {
 
     // Build filter conditions for user's demographics
     const demographicFilters = []
-    
+
     // Add race/ethnicity filters
     if (userProfile.race_ethnicity && userProfile.race_ethnicity.length > 0) {
-      demographicFilters.push(...userProfile.race_ethnicity.map(race => 
+      demographicFilters.push(...userProfile.race_ethnicity.map(race =>
         `demographic_value.eq.${race}`
       ))
     }
-    
+
     // Add gender filter
     if (userProfile.gender) {
       demographicFilters.push(`demographic_value.eq.${userProfile.gender}`)
     }
-    
+
     // Add LGBTQ+ filter if applicable
     if (userProfile.lgbtq_status) {
       demographicFilters.push(`demographic_value.eq.LGBTQ+`)
@@ -106,28 +107,28 @@ serve(async (req) => {
       // Create danger zones
       for (const [locationId, data] of Object.entries(locationGroups)) {
         const { location, scores } = data
-        
+
         // Get location coordinates using PostGIS functions
         const { data: locationWithCoords, error: coordError } = await supabase
           .rpc('get_location_with_coords', { location_id: locationId })
           .single()
-          
+
         if (coordError || !locationWithCoords) {
           console.error('Failed to get coordinates for location:', locationId)
           continue
         }
-        
+
         // Check if this location is particularly dangerous for user's demographics
         const userDemoScores = scores.filter((s: any) => {
           return (userProfile.race_ethnicity?.includes(s.demographic_value) ||
-                  s.demographic_value === userProfile.gender ||
-                  (s.demographic_type === 'lgbtq_status' && userProfile.lgbtq_status && s.demographic_value === 'LGBTQ+'))
+            s.demographic_value === userProfile.gender ||
+            (s.demographic_type === 'lgbtq_status' && userProfile.lgbtq_status && s.demographic_value === 'LGBTQ+'))
         })
 
         if (userDemoScores.length === 0) continue
 
         // Calculate average danger level for user's demographics
-        const avgScore = userDemoScores.reduce((sum: number, s: any) => 
+        const avgScore = userDemoScores.reduce((sum: number, s: any) =>
           sum + Number(s.avg_overall_score), 0) / userDemoScores.length
 
         let dangerLevel: 'high' | 'medium' | 'low'
@@ -156,7 +157,7 @@ serve(async (req) => {
         userDemoScores.forEach((score: any) => {
           if (score.avg_overall_score < 3) {
             affectedDemographics.add(`${score.demographic_type}: ${score.demographic_value}`)
-            
+
             if (score.avg_overall_score < 2) {
               reasons.add(`Severe safety concerns for ${score.demographic_value}`)
             } else {
@@ -176,7 +177,7 @@ serve(async (req) => {
         let activeTimes: string[] = []
 
         if (patterns && patterns.length > 0) {
-          const timePattern = patterns.find((p: any) => 
+          const timePattern = patterns.find((p: any) =>
             p.pattern_type === 'time_based_discrimination'
           )
           if (timePattern) {
@@ -220,7 +221,7 @@ serve(async (req) => {
         },
         generated_at: new Date().toISOString()
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
@@ -228,7 +229,7 @@ serve(async (req) => {
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
