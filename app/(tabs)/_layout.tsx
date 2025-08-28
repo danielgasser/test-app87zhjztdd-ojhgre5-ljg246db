@@ -1,10 +1,3 @@
-console.log("🔍 Testing index import...");
-try {
-  const IndexComponent = require("./index");
-  console.log("✅ Index import successful:", typeof IndexComponent.default);
-} catch (error) {
-  console.log("❌ Full error:", error);
-}
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { theme } from "src/styles/theme";
