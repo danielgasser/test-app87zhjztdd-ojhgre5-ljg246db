@@ -582,8 +582,6 @@ export const fetchMLPredictions = createAsyncThunk(
       throw new Error('User must be logged in to get ML predictions');
     }
 
-    console.log(`🤖 Fetching ML predictions for location: ${locationId}`);
-
     try {
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
@@ -599,22 +597,21 @@ export const fetchMLPredictions = createAsyncThunk(
           }),
         }
       );
-
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`🤖 [REDUX] API Error response:`, errorText);
         throw new Error(`ML API failed with status: ${response.status}`);
       }
 
       const prediction = await response.json();
-
-      console.log(`🤖 ML API Response:`, prediction);
-      console.log(`🤖 Raw confidence from API:`, prediction.confidence, typeof prediction.confidence);
 
       return {
         locationId,
         prediction
       };
     } catch (error) {
-      console.error('🤖 fetchMLPredictions error:', error);
+      console.error('🤖 [REDUX] fetchMLPredictions error:', error);
+
       throw error;
     }
   }
@@ -836,14 +833,11 @@ const locationsSlice = createSlice({
           const { locationId, prediction } = action.payload;
           state.mlPredictions[locationId] = prediction;
           state.mlPredictionsLoading[locationId] = false;
-
-          console.log(`🤖 Redux: Stored prediction for ${locationId}:`, prediction.confidence);
         }
       })
       .addCase(fetchMLPredictions.rejected, (state, action) => {
         const locationId = action.meta.arg;
         state.mlPredictionsLoading[locationId] = false;
-        console.error(`🤖 ML prediction failed for ${locationId}:`, action.error);
       });
 
   },

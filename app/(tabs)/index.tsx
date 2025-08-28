@@ -14,7 +14,6 @@ import { useRouter } from "expo-router";
 import {
   fetchNearbyLocations,
   fetchLocationDetails,
-  clearSearchResults,
   setUserLocation,
   fetchHeatMapData,
   toggleHeatMap,
@@ -136,9 +135,6 @@ export default function MapScreen() {
   // REPLACE your existing useEffect with this:
   useEffect(() => {
     // We'll fetch predictions on-demand instead of bulk loading
-    console.log(
-      "ML predictions will be loaded on-demand when markers are visible"
-    );
   }, [nearbyLocations, userProfile, mlPredictions, dispatch]);
 
   // Refresh nearby locations on focus
@@ -160,7 +156,6 @@ export default function MapScreen() {
     const hasReviews =
       location.demographic_safety_score || location.avg_safety_score;
     const prediction = mlPredictions[location.id];
-
     if (hasReviews) {
       // Location has actual reviews - use existing marker logic
       return {
@@ -200,32 +195,23 @@ export default function MapScreen() {
   const handleMarkerPress = async (locationId: string) => {
     setSelectedLocationId(locationId);
     setModalVisible(true);
-
     // Fetch location details (existing functionality)
     await dispatch(fetchLocationDetails(locationId));
 
     // NEW: Fetch ML prediction on-demand if needed
     const location = nearbyLocations.find((loc) => loc.id === locationId);
+
     if (location && userProfile) {
       const hasActualReviews =
         location.demographic_safety_score || location.avg_safety_score;
       const hasPrediction = mlPredictions[locationId];
+      const isLoading = mlPredictionsLoading[locationId];
 
-      if (!hasActualReviews && !hasPrediction) {
-        console.log("Fetching ML prediction for tapped location:", locationId);
-        if (!mlPredictions[locationId] && !mlPredictionsLoading[locationId]) {
-          console.log(
-            `🔥 No existing prediction - dispatching fetchMLPredictions`
-          );
-          dispatch(fetchMLPredictions(locationId));
-        } else {
-          console.log(
-            `🔥 Existing prediction found:`,
-            mlPredictions[locationId]
-          );
-        }
-      }
-    }
+      
+      if (!hasActualReviews && !hasPrediction && !isLoading) {
+        dispatch(fetchMLPredictions(locationId));
+      } 
+    await dispatch(fetchLocationDetails(locationId));
   };
 
   const handleModalClose = () => {
@@ -399,9 +385,7 @@ export default function MapScreen() {
           nearbyLocations.map((loc) => {
             const markerProps = getMarkerProps(loc);
             const prediction = mlPredictions[loc.id];
-            if (loc.id === "143b52ad-1e4f-4a9b-b81d-64a2e8447d52") {
-              console.log("Riverside B&B prediction data:", prediction);
-            }
+
             if (markerProps.type === "predicted") {
               // Use custom predicted marker
               return (
@@ -413,7 +397,7 @@ export default function MapScreen() {
                   }}
                   onPress={() => handleMarkerPress(loc.id)}
                 >
-                  <PredictedMarker
+                  <PredictedBadge
                     coordinate={{
                       latitude: Number(loc.latitude),
                       longitude: Number(loc.longitude),
