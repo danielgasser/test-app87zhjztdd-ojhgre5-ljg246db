@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -223,7 +224,11 @@ export default function ProfileScreen() {
 
           <Text style={styles.email}>{user?.email}</Text>
           {profile?.full_name && (
-            <Text style={styles.fullName}>{profile.full_name}</Text>
+            <Text style={styles.fullName}>
+              {profile.full_name}
+
+              <TextInput value={profile.id} />
+            </Text>
           )}
         </View>
 

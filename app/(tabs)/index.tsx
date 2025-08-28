@@ -88,7 +88,7 @@ export default function MapScreen() {
     dangerZones,
     dangerZonesVisible,
     dangerZonesLoading,
-    predictions,
+    predictions, // Add this line
     predictionsLoading,
   } = useAppSelector((state) => state.locations);
 
@@ -135,53 +135,12 @@ export default function MapScreen() {
   // Debug danger zones
   useEffect(() => {}, [dangerZones, dangerZonesVisible]);
 
+  // REPLACE your existing useEffect with this:
   useEffect(() => {
-    const fetchPredictionsInBatches = async () => {
-      if (!userProfile || !nearbyLocations.length) return;
-
-      // Find locations that need predictions
-      const locationsNeedingPredictions = nearbyLocations.filter((location) => {
-        const hasNoScore =
-          !location.demographic_safety_score && !location.avg_safety_score;
-        const hasLowReviewCount = (location.review_count || 0) === 0;
-        const noPredictionYet = !predictions[location.id];
-        return (hasNoScore || hasLowReviewCount) && noPredictionYet;
-      });
-
-      if (locationsNeedingPredictions.length === 0) return;
-
-      console.log(
-        `Fetching ML predictions for ${locationsNeedingPredictions.length} locations in batches`
-      );
-
-      // Process in batches of 5
-      const BATCH_SIZE = 5;
-      const DELAY_MS = 500; // 500ms delay between batches
-
-      for (let i = 0; i < locationsNeedingPredictions.length; i += BATCH_SIZE) {
-        const batch = locationsNeedingPredictions.slice(i, i + BATCH_SIZE);
-        const batchIds = batch.map((loc) => loc.id);
-
-        console.log(
-          `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}: ${batchIds}`
-        );
-
-        // Dispatch batch prediction
-        await dispatch(
-          fetchMLPredictions({
-            locationIds: batchIds,
-            userProfile,
-          })
-        );
-
-        // Add delay between batches (except for the last one)
-        if (i + BATCH_SIZE < locationsNeedingPredictions.length) {
-          await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
-        }
-      }
-    };
-
-    fetchPredictionsInBatches();
+    // We'll fetch predictions on-demand instead of bulk loading
+    console.log(
+      "ML predictions will be loaded on-demand when markers are visible"
+    );
   }, [nearbyLocations, userProfile, predictions, dispatch]);
 
   // Refresh nearby locations on focus
@@ -243,7 +202,27 @@ export default function MapScreen() {
   const handleMarkerPress = async (locationId: string) => {
     setSelectedLocationId(locationId);
     setModalVisible(true);
+
+    // Fetch location details (existing functionality)
     await dispatch(fetchLocationDetails(locationId));
+
+    // NEW: Fetch ML prediction on-demand if needed
+    const location = nearbyLocations.find((loc) => loc.id === locationId);
+    if (location && userProfile) {
+      const hasActualReviews =
+        location.demographic_safety_score || location.avg_safety_score;
+      const hasPrediction = predictions[locationId];
+
+      if (!hasActualReviews && !hasPrediction) {
+        console.log("Fetching ML prediction for tapped location:", locationId);
+        dispatch(
+          fetchMLPredictions({
+            locationIds: [locationId],
+            userProfile,
+          })
+        );
+      }
+    }
   };
 
   const handleModalClose = () => {
@@ -416,7 +395,10 @@ export default function MapScreen() {
           nearbyLocations.length > 0 &&
           nearbyLocations.map((loc) => {
             const markerProps = getMarkerProps(loc);
-
+            const prediction = predictions[loc.id];
+            if (loc.id === "143b52ad-1e4f-4a9b-b81d-64a2e8447d52") {
+              console.log("Riverside B&B prediction data:", prediction);
+            }
             if (markerProps.type === "predicted") {
               // Use custom predicted marker
               return (
@@ -864,5 +846,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#2196F3",
     fontWeight: "600",
+  },
+  predictionBadge: {
+    position: "absolute",
+    top: -45,
+    left: -25,
+    backgroundColor: "rgba(0, 122, 255, 0.9)",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 4,
+  },
+  predictionText: {
+    color: "white",
+    fontSize: 9,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  confidenceText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 7,
+    textAlign: "center",
+  },
+  loadingBadge: {
+    position: "absolute",
+    top: -35,
+    left: -10,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 4,
+    borderRadius: 3,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 3,
   },
 });
