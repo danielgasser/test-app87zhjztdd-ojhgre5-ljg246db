@@ -2,6 +2,11 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+interface MLPrediction {
+  confidence: number;
+  predicted_safety_score: number;
+  based_on_locations: number;
+}
 interface PredictionBadgeProps {
   prediction: MLPrediction;
   loading?: boolean;
