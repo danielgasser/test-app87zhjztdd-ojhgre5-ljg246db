@@ -52,8 +52,6 @@ interface SearchResult {
 }
 
 export default function MapScreen() {
-  console.log("🚨 COMPONENT FUNCTION CALLED");
-
   // ============= STATE VARIABLES =============
   const [region, setRegion] = useState({
     latitude: 37.78825,
@@ -98,7 +96,18 @@ export default function MapScreen() {
     const hasReviews =
       location.demographic_safety_score || location.avg_safety_score;
     const prediction = mlPredictions[location.id];
-
+    /*
+    if (location.id === "4cb9c306-9a14-4fd5-a09d-79217145556e") {
+      console.log("🎯 getMarkerProps for test location:");
+      console.log("   - prediction object:", prediction);
+      console.log("   - prediction.confidence:", prediction?.confidence);
+      console.log("   - confidence type:", typeof prediction?.confidence);
+      console.log(
+        "   - Math.round(prediction.confidence * 100):",
+        Math.round((prediction?.confidence || 0) * 100)
+      );
+    }
+      */
     if (hasReviews) {
       return {
         type: "reviewed",
@@ -113,6 +122,8 @@ export default function MapScreen() {
         }/5`,
       };
     } else if (prediction) {
+      const confidencePercent = Math.round(prediction.confidence * 100);
+
       return {
         type: "predicted",
         score: prediction.predicted_safety_score,
@@ -268,12 +279,7 @@ export default function MapScreen() {
   );
 
   // ============= CONDITIONAL RENDERS =============
-  console.log("🔍 locationPermission:", locationPermission);
-  console.log("🔍 loading:", loading);
-  console.log("🔍 nearbyLocations.length:", nearbyLocations?.length || 0);
-
   if (!locationPermission) {
-    console.log("❌ BLOCKED BY: No location permission");
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>
@@ -284,7 +290,6 @@ export default function MapScreen() {
   }
 
   if (loading && nearbyLocations.length === 0) {
-    console.log("❌ BLOCKED BY: Loading state");
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
@@ -292,8 +297,6 @@ export default function MapScreen() {
       </View>
     );
   }
-
-  console.log("✅ SHOULD RENDER MAP NOW");
 
   // ============= MAIN RENDER =============
   return (
