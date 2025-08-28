@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { APP_CONFIG } from "@/utils/appConfig";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,8 +32,8 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const { 
-      location_id, 
+    const {
+      location_id,
       scan_all = false,
       threshold = 2.0 // Score difference threshold for flagging
     } = await req.json()
@@ -44,7 +45,7 @@ serve(async (req: Request) => {
       const { data: allLocations } = await supabase
         .from('locations')
         .select('id, name')
-      
+
       for (const location of allLocations || []) {
         const locationPatterns = await analyzeLocation(supabase, location.id, location.name, threshold)
         patterns.push(...locationPatterns)
@@ -79,7 +80,7 @@ serve(async (req: Request) => {
         threshold_used: threshold,
         timestamp: new Date().toISOString()
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
@@ -87,7 +88,7 @@ serve(async (req: Request) => {
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
@@ -96,8 +97,8 @@ serve(async (req: Request) => {
 })
 
 async function analyzeLocation(
-  supabase: any, 
-  locationId: string, 
+  supabase: any,
+  locationId: string,
   locationName: string,
   threshold: number
 ): Promise<DiscriminationPattern[]> {
@@ -121,14 +122,14 @@ async function analyzeLocation(
 
   // Pattern 1: Demographic Disparity
   const demographicScores = safetyScores.filter(s => s.demographic_type !== 'overall')
-  
+
   for (const score of demographicScores) {
     const scoreAvg = Number(score.avg_overall_score)
     const disparity = Math.abs(scoreAvg - overallAvg)
-    
+
     if (disparity >= threshold) {
       const affected = `${score.demographic_type}: ${score.demographic_value}`
-      
+
       patterns.push({
         location_id: locationId,
         location_name: locationName,
@@ -144,7 +145,7 @@ async function analyzeLocation(
             `Disparity of ${disparity.toFixed(1)} points`
           ]
         },
-        recommendation: scoreAvg < overallAvg 
+        recommendation: scoreAvg < overallAvg
           ? `Investigate why ${affected} users feel less safe at this location`
           : `This location is particularly welcoming to ${affected} users`
       })
@@ -161,15 +162,15 @@ async function analyzeLocation(
   if (reviews && reviews.length >= 5) {
     // Check for outlier reviews (1-2 stars when average is 4+, or vice versa)
     const avgRating = reviews.reduce((sum, r) => sum + r.overall_rating, 0) / reviews.length
-    
-    const outliers = reviews.filter(r => 
+
+    const outliers = reviews.filter(r =>
       Math.abs(r.overall_rating - avgRating) >= 2.5
     )
 
     if (outliers.length > 0) {
       // Check if outliers share demographics
       const outlierDemographics = new Map<string, number>()
-      
+
       outliers.forEach(review => {
         const demo = review.user_profiles
         if (demo.race_ethnicity?.length > 0) {
@@ -190,7 +191,7 @@ async function analyzeLocation(
 
       // If most outliers share a demographic, it's a pattern
       const commonDemographics = Array.from(outlierDemographics.entries())
-        .filter(([_, count]) => count >= outliers.length * 0.6) // 60% threshold
+        .filter(([_, count]) => count >= outliers.length * APP_CONFIG.PATTERN_DETECTION.COMMON_PATTERN_DEMOGRAHICS_THRESHOLD) // 60% threshold
         .map(([demo, _]) => demo)
 
       if (commonDemographics.length > 0) {
@@ -219,15 +220,15 @@ async function analyzeLocation(
     // Split reviews into old vs recent
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    
+
     const recentReviews = reviews.filter(r => new Date(r.created_at) > thirtyDaysAgo)
     const olderReviews = reviews.filter(r => new Date(r.created_at) <= thirtyDaysAgo)
-    
+
     if (recentReviews.length >= 3 && olderReviews.length >= 3) {
       const recentAvg = recentReviews.reduce((sum, r) => sum + r.overall_rating, 0) / recentReviews.length
       const olderAvg = olderReviews.reduce((sum, r) => sum + r.overall_rating, 0) / olderReviews.length
       const change = Math.abs(recentAvg - olderAvg)
-      
+
       if (change >= 1.5) {
         patterns.push({
           location_id: locationId,
@@ -244,7 +245,7 @@ async function analyzeLocation(
               recentAvg < olderAvg ? 'Significant decline in ratings' : 'Significant improvement in ratings'
             ]
           },
-          recommendation: recentAvg < olderAvg 
+          recommendation: recentAvg < olderAvg
             ? 'Investigate recent changes that may have affected customer experience'
             : 'Recent improvements are working - maintain current practices'
         })

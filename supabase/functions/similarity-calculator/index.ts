@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { APP_CONFIG } from "@/utils/appConfig";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,12 +78,12 @@ serve(async (req: { method: string; json: () => PromiseLike<{ user_id: any; limi
       .slice(0, limit)
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         target_user_id: user_id,
         similar_users: topSimilar,
         calculation_timestamp: new Date().toISOString()
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
@@ -90,7 +91,7 @@ serve(async (req: { method: string; json: () => PromiseLike<{ user_id: any; limi
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       }
@@ -102,12 +103,12 @@ function calculateSimilarity(user1: UserDemographics, user2: UserDemographics): 
   let score = 0
   const shared: string[] = []
   const weights = {
-    race_ethnicity: 0.25,
-    gender: 0.20,
-    lgbtq_status: 0.20,
-    disability_status: 0.15,
-    religion: 0.15,
-    age_range: 0.05
+    race_ethnicity: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.RACE_ETHNICITY,
+    gender: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.GENDER,
+    lgbtq_status: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.LGBTQ_STATUS,
+    disability_status: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.DISABILITY,
+    religion: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.RELIGION,
+    age_range: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.AGE_RANGE
   }
 
   // Race/ethnicity comparison (array)

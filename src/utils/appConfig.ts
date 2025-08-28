@@ -88,6 +88,7 @@ export const APP_CONFIG = {
     MAX_RADIUS: 2000,                          // Maximum circle radius
   },
   PATTERN_DETECTION: {
+    COMMON_PATTERN_DEMOGRAHICS_THRESHOLD: 0.6,
     MIN_REVIEWS_FOR_PATTERNS: 2,          // Already in your config
     DISPARITY_THRESHOLDS: {
       HIGH_SEVERITY: 3.0,                 // High severity disparity
@@ -115,6 +116,7 @@ export const APP_CONFIG = {
       LGBTQ_STATUS: 0.2,                  // Weight for LGBTQ status matching
       RELIGION: 0.15,                     // Weight for religion matching
       DISABILITY: 0.1,                    // Weight for disability status matching
+      AGE_RANGE: 0.05,
     },
     MIN_SIMILARITY_SCORE: 0.5,            // Minimum similarity to consider users similar
     MAX_SIMILAR_USERS: 20,                // Maximum similar users to return
