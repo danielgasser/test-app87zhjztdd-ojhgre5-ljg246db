@@ -45,7 +45,7 @@ export const APP_CONFIG = {
   // Time-Based Categories
   TIME_CATEGORIES: {
     MORNING: 'morning',
-    AFTERNOON: 'afternoon', 
+    AFTERNOON: 'afternoon',
     EVENING: 'evening',
     NIGHT: 'night',
   },
@@ -64,6 +64,7 @@ export const APP_CONFIG = {
     MIN_RADIUS: 200,                           // Minimum circle radius
     MAX_RADIUS: 2000,                          // Maximum circle radius
   },
+
 } as const;
 
 // Type-safe access to config values
