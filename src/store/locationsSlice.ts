@@ -855,8 +855,6 @@ export const {
   setHeatMapVisible,
   toggleDangerZones,
   setDangerZonesVisible,
-  mlPredictions,
-  mlPredictionsLoading,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

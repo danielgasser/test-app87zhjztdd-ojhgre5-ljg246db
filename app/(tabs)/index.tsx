@@ -19,8 +19,6 @@ import {
   toggleHeatMap,
   fetchDangerZones,
   toggleDangerZones,
-  mlPredictionsLoading,
-  mlPredictions,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
