@@ -40,6 +40,29 @@ export const APP_CONFIG = {
     LOCATION_CONFIDENCE_MAX: 0.8,              // Max confidence for location predictions
     CONFIDENCE_DATA_POINTS_DIVISOR: 10,        // Divide data points by this for confidence
     MIN_REVIEWS_FOR_PATTERNS: 2,               // Minimum reviews to detect patterns
+
+
+    // NEW: Safety-Predictor Weights
+    PREDICTION_WEIGHTS: {
+      PLACE_TYPE_OVERALL: 0.3,           // 30% weight for place type averages
+      DEMOGRAPHIC_MATCHES: 0.7,          // 70% weight for demographic-specific scores
+      NEARBY_OVERALL: 0.2,               // 20% weight for nearby location averages  
+      NEARBY_DEMOGRAPHIC: 0.4,           // 40% weight for nearby demographic matches
+    },
+
+    // NEW: Confidence Calculation
+    CONFIDENCE_SETTINGS: {
+      NEUTRAL_BASELINE: 0.15,            // 15% confidence for no-data predictions
+      DATA_POINTS_DIVISOR: 15,           // Divide data sources by this for confidence
+      MAX_CONFIDENCE: 0.8,               // Maximum confidence cap (80%)
+      MIN_CONFIDENCE: 0.05,              // Minimum confidence floor (5%)
+    },
+
+    // NEW: Nearby Location Search
+    NEARBY_SEARCH: {
+      RADIUS_METERS: 1000,               // 1km radius for nearby locations
+      MAX_NEARBY_LOCATIONS: 20,          // Maximum nearby locations to consider
+    }
   },
 
   // Time-Based Categories
@@ -63,6 +86,62 @@ export const APP_CONFIG = {
     ZOOM_RADIUS_MULTIPLIER: 50,               // Multiply by zoom level
     MIN_RADIUS: 200,                           // Minimum circle radius
     MAX_RADIUS: 2000,                          // Maximum circle radius
+  },
+  PATTERN_DETECTION: {
+    MIN_REVIEWS_FOR_PATTERNS: 2,          // Already in your config
+    DISPARITY_THRESHOLDS: {
+      HIGH_SEVERITY: 3.0,                 // High severity disparity
+      MEDIUM_SEVERITY: 2.0,               // Medium severity disparity  
+      LOW_SEVERITY: 1.0,                  // Low severity disparity
+    },
+    TIME_DISCRIMINATION_THRESHOLD: 1.5,   // Threshold for time-based patterns
+    SUNDOWN_TOWN_THRESHOLD: 2.5,          // Threshold for sundown town detection
+  },
+  DANGER_ZONES: {
+    SEARCH_RADIUS_MILES: 50,              // Already in your config
+    POLYGON_RADIUS_MILES: 2,              // Already in your config  
+    POLYGON_SIDES: 8,                     // Already in your config
+    MIN_INCIDENTS_FOR_ZONE: 3,            // Minimum incidents to create danger zone
+    SEVERITY_MULTIPLIERS: {
+      HIGH: 2.0,                          // High severity incident weight
+      MEDIUM: 1.5,                        // Medium severity incident weight
+      LOW: 1.0,                           // Low severity incident weight
+    }
+  },
+  SIMILARITY_CALCULATION: {
+    DEMOGRAPHIC_WEIGHTS: {
+      RACE_ETHNICITY: 0.3,                // Weight for race/ethnicity matching
+      GENDER: 0.25,                       // Weight for gender matching  
+      LGBTQ_STATUS: 0.2,                  // Weight for LGBTQ status matching
+      RELIGION: 0.15,                     // Weight for religion matching
+      DISABILITY: 0.1,                    // Weight for disability status matching
+    },
+    MIN_SIMILARITY_SCORE: 0.5,            // Minimum similarity to consider users similar
+    MAX_SIMILAR_USERS: 20,                // Maximum similar users to return
+  },
+  RECOMMENDATIONS: {
+    SCORING_WEIGHTS: {
+      SAFETY_SCORE: 0.4,                  // 40% weight for safety ratings
+      COMFORT_SCORE: 0.3,                 // 30% weight for comfort ratings
+      ACCESSIBILITY_SCORE: 0.2,           // 20% weight for accessibility
+      OVERALL_SCORE: 0.1,                 // 10% weight for overall rating
+    },
+    MIN_RECOMMENDATION_SCORE: 3.5,        // Minimum score to recommend
+    MAX_RECOMMENDATIONS: 10,               // Maximum recommendations to return
+    PREFER_RECENT_REVIEWS: true,          // Prefer locations with recent reviews
+    RECENCY_BONUS_DAYS: 30,               // Days to apply recency bonus
+  },
+  API_SETTINGS: {
+    DEFAULT_PAGE_SIZE: 20,                // Default pagination size
+    MAX_PAGE_SIZE: 100,                   // Maximum items per page
+    REQUEST_TIMEOUT_MS: 5000,             // API request timeout
+    RETRY_ATTEMPTS: 3,                    // Number of retry attempts
+  },
+
+  DATABASE: {
+    MAX_REVIEWS_PER_USER_LOCATION: 1,     // Already enforced by business rules
+    REVIEW_SOFT_DELETE: true,             // Use soft delete for reviews
+    LOCATION_CACHE_TTL_MINUTES: 30,       // Location data cache time-to-live
   },
 
 } as const;
