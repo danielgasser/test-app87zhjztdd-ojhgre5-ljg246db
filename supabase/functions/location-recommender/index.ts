@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { APP_CONFIG } from "@/utils/appConfig";
+import { EDGE_CONFIG } from '../_shared/config.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,7 +28,7 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const { user_id, limit = APP_CONFIG.ML_PARAMS.SIMILAR_USERS_FETCH_LIMIT, min_confidence = APP_CONFIG.ML_PARAMS.CONFIDENCE_SETTINGS.MIN_CONFIDENCE_THRESHOLD } = await req.json()
+    const { user_id, limit = EDGE_CONFIG.ML_PARAMS.SIMILAR_USERS_FETCH_LIMIT, min_confidence = EDGE_CONFIG.ML_PARAMS.CONFIDENCE_SETTINGS.MIN_CONFIDENCE_THRESHOLD } = await req.json()
 
     if (!user_id) {
       throw new Error('user_id is required')
@@ -40,7 +41,7 @@ serve(async (req: Request) => {
         'Authorization': `Bearer ${supabaseServiceKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ user_id, limit: APP_CONFIG.RECOMMENDATIONS.DEFAULT_RECOMMENDATION_LIMIT }) // Get more similar users for better recommendations
+      body: JSON.stringify({ user_id, limit: EDGE_CONFIG.RECOMMENDATIONS.DEFAULT_RECOMMENDATION_LIMIT }) // Get more similar users for better recommendations
     })
 
     const { similar_users } = await similarUsersResponse.json()
@@ -87,7 +88,7 @@ serve(async (req: Request) => {
       `)
       .in('user_id', highSimilarityUsers)
       .not('location_id', 'in', `(${visitedLocationIds.join(',')})`)
-      .gte('overall_rating', APP_CONFIG.SAFETY_THRESHOLDS.SAFE_MINIMUM) // Only recommend places rated 4+ by similar users
+      .gte('overall_rating', EDGE_CONFIG.SAFETY_THRESHOLDS.SAFE_MINIMUM) // Only recommend places rated 4+ by similar users
 
     if (recError) throw recError
 
@@ -123,8 +124,8 @@ serve(async (req: Request) => {
     const finalRecommendations: LocationRecommendation[] = Array.from(locationScores.entries())
       .map(([location_id, data]) => {
         const avg_rating = data.total_rating / data.rating_count
-        const confidence = Math.min(data.rating_count / APP_CONFIG.ML_PARAMS.CONFIDENCE_SETTINGS.RATING_DIVISOR, 1) // Confidence increases with more reviews, max at 3
-        const predicted_score = avg_rating * confidence + APP_CONFIG.ML_PARAMS.NEUTRAL_SCORE_BASELINE * (1 - confidence) // Blend with neutral score
+        const confidence = Math.min(data.rating_count / EDGE_CONFIG.ML_PARAMS.CONFIDENCE_SETTINGS.RATING_DIVISOR, 1) // Confidence increases with more reviews, max at 3
+        const predicted_score = avg_rating * confidence + EDGE_CONFIG.ML_PARAMS.NEUTRAL_SCORE_BASELINE * (1 - confidence) // Blend with neutral score
 
         return {
           location_id,
