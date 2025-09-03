@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-import { APP_CONFIG } from "./@/utils/appConfig";
+import { EDGE_CONFIG } from '../_shared/config.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -77,10 +78,10 @@ serve(async (req) => {
     placeTypeScores?.forEach((loc) => {
       loc.safety_scores.forEach((score) => {
         if (score.demographic_type === 'overall') {
-          safetySum += Number(score.avg_safety_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL
+          safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL
             ;
-          comfortSum += Number(score.avg_comfort_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-          overallSum += Number(score.avg_overall_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
+          comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
+          overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
           count += 0.3;
         }
       });
@@ -89,9 +90,9 @@ serve(async (req) => {
     demographicMatches.forEach((loc) => {
       loc.safety_scores.forEach((score) => {
         if (matchesDemographic(score, user_demographics)) {
-          safetySum += Number(score.avg_safety_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;// 70% weight
-          comfortSum += Number(score.avg_comfort_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
-          overallSum += Number(score.avg_overall_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
+          safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;// 70% weight
+          comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
+          overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
           count += 0.7;
         }
       });
@@ -102,16 +103,16 @@ serve(async (req) => {
       // Get safety scores for nearby locations
       loc.safety_scores?.forEach((score) => {
         if (score.demographic_type === 'overall') {
-          safetySum += Number(score.avg_safety_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL; // 20% weight
-          comfortSum += Number(score.avg_comfort_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
-          overallSum += Number(score.avg_overall_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
+          safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL; // 20% weight
+          comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
+          overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
           count += 0.2;
         }
         // If demographic-specific nearby data exists, weight it higher
         if (matchesDemographic(score, user_demographics)) {
-          safetySum += Number(score.avg_safety_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC; // 40% weight
-          comfortSum += Number(score.avg_comfort_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
-          overallSum += Number(score.avg_overall_score) * APP_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
+          safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC; // 40% weight
+          comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
+          overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
           count += 0.4;
         }
       });

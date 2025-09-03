@@ -15,7 +15,6 @@ export const APP_CONFIG = {
     DANGER_HIGH: 2.0,                          // Score < 2 = high danger
     DANGER_MEDIUM: 2.5,                        // Score < 2.5 = medium danger
     DANGER_CUTOFF: 3.0,                        // Score < 3 = dangerous location
-    SAFE_MINIMUM: 4.0,                         // Score >= 4 = safe location
     PATTERN_DETECTION_DEFAULT: 1.5,            // Default threshold for discrimination patterns
     PATTERN_DISPARITY_HIGH: 3.0,               // High severity disparity
     PATTERN_DISPARITY_MEDIUM: 2.0,             // Medium severity disparity
@@ -35,19 +34,10 @@ export const APP_CONFIG = {
   // ML/Algorithm Parameters
   ML_PARAMS: {
     SIMILARITY_MIN_CONFIDENCE: 0.5,            // Minimum confidence for similar users
-    SIMILAR_USERS_FETCH_LIMIT: 20,             // Max similar users to fetch
-    NEUTRAL_SCORE_BASELINE: 3.5,               // Neutral score for predictions
     LOCATION_CONFIDENCE_MAX: 0.8,              // Max confidence for location predictions
     CONFIDENCE_DATA_POINTS_DIVISOR: 10,        // Divide data points by this for confidence
     MIN_REVIEWS_FOR_PATTERNS: 2,               // Minimum reviews to detect patterns
 
-    // NEW: Safety-Predictor Weights
-    PREDICTION_WEIGHTS: {
-      PLACE_TYPE_OVERALL: 0.3,           // 30% weight for place type averages
-      DEMOGRAPHIC_MATCHES: 0.7,          // 70% weight for demographic-specific scores
-      NEARBY_OVERALL: 0.2,               // 20% weight for nearby location averages  
-      NEARBY_DEMOGRAPHIC: 0.4,           // 40% weight for nearby demographic matches
-    },
 
     // NEW: Confidence Calculation
     CONFIDENCE_SETTINGS: {
@@ -55,8 +45,6 @@ export const APP_CONFIG = {
       DATA_POINTS_DIVISOR: 15,           // Divide data sources by this for confidence
       MAX_CONFIDENCE: 0.8,               // Maximum confidence cap (80%)
       MIN_CONFIDENCE: 0.05,     // Minimum confidence floor (5%)
-      MIN_CONFIDENCE_THRESHOLD: 0.5,
-      RATING_DIVISOR: 3,
     },
 
     // NEW: Nearby Location Search
@@ -89,7 +77,6 @@ export const APP_CONFIG = {
     MAX_RADIUS: 2000,                          // Maximum circle radius
   },
   PATTERN_DETECTION: {
-    COMMON_PATTERN_DEMOGRAHICS_THRESHOLD: 0.6,
     MIN_REVIEWS_FOR_PATTERNS: 2,          // Already in your config
     DISPARITY_THRESHOLDS: {
       HIGH_SEVERITY: 3.0,                 // High severity disparity
@@ -110,18 +97,7 @@ export const APP_CONFIG = {
       LOW: 1.0,                           // Low severity incident weight
     }
   },
-  SIMILARITY_CALCULATION: {
-    DEMOGRAPHIC_WEIGHTS: {
-      RACE_ETHNICITY: 0.3,                // Weight for race/ethnicity matching
-      GENDER: 0.25,                       // Weight for gender matching  
-      LGBTQ_STATUS: 0.2,                  // Weight for LGBTQ status matching
-      RELIGION: 0.15,                     // Weight for religion matching
-      DISABILITY: 0.1,                    // Weight for disability status matching
-      AGE_RANGE: 0.05,
-    },
-    MIN_SIMILARITY_SCORE: 0.5,            // Minimum similarity to consider users similar
-    MAX_SIMILAR_USERS: 20,                // Maximum similar users to return
-  },
+
   RECOMMENDATIONS: {
     SCORING_WEIGHTS: {
       SAFETY_SCORE: 0.4,                  // 40% weight for safety ratings
@@ -129,7 +105,6 @@ export const APP_CONFIG = {
       ACCESSIBILITY_SCORE: 0.2,           // 20% weight for accessibility
       OVERALL_SCORE: 0.1,                 // 10% weight for overall rating
     },
-    DEFAULT_RECOMMENDATION_LIMIT: 10,
     MIN_RECOMMENDATION_SCORE: 3.5,        // Minimum score to recommend
     MAX_RECOMMENDATIONS: 10,               // Maximum recommendations to return
     PREFER_RECENT_REVIEWS: true,          // Prefer locations with recent reviews

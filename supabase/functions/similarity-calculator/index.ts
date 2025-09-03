@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-import { APP_CONFIG } from "./@/utils/appConfig";
+import { EDGE_CONFIG } from '../_shared/config.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -103,12 +104,12 @@ function calculateSimilarity(user1: UserDemographics, user2: UserDemographics): 
   let score = 0
   const shared: string[] = []
   const weights = {
-    race_ethnicity: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.RACE_ETHNICITY,
-    gender: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.GENDER,
-    lgbtq_status: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.LGBTQ_STATUS,
-    disability_status: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.DISABILITY,
-    religion: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.RELIGION,
-    age_range: APP_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.AGE_RANGE
+    race_ethnicity: EDGE_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.RACE_ETHNICITY,
+    gender: EDGE_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.GENDER,
+    lgbtq_status: EDGE_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.LGBTQ_STATUS,
+    disability_status: EDGE_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.DISABILITY,
+    religion: EDGE_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.RELIGION,
+    age_range: EDGE_CONFIG.SIMILARITY_CALCULATION.DEMOGRAPHIC_WEIGHTS.AGE_RANGE
   }
 
   // Race/ethnicity comparison (array)
