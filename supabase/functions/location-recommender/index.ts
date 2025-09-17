@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
+import { APP_CONFIG } from "@/utils/appConfig.js";
 
 
 const corsHeaders = {
@@ -41,7 +42,7 @@ serve(async (req: Request) => {
         'Authorization': `Bearer ${supabaseServiceKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ user_id, limit: EDGE_CONFIG.RECOMMENDATIONS.DEFAULT_RECOMMENDATION_LIMIT }) // Get more similar users for better recommendations
+      body: JSON.stringify({ user_id, limit: APP_CONFIG.RECOMMENDATIONS.MAX_RECOMMENDATIONS }) // Get more similar users for better recommendations
     })
 
     const { similar_users } = await similarUsersResponse.json()
