@@ -192,7 +192,7 @@ async function analyzeLocation(
 
       // If most outliers share a demographic, it's a pattern
       const commonDemographics = Array.from(outlierDemographics.entries())
-        .filter(([_, count]) => count >= outliers.length * EDGE_CONFIG.PATTERN_DETECTION.COMMON_PATTERN_DEMOGRAHICS_THRESHOLD) // 60% threshold
+        .filter(([_, count]) => count >= outliers.length * EDGE_CONFIG.PATTERN_DETECTION.COMMON_PATTERN_DEMOGRAPHICS_THRESHOLD) // 60% threshold
         .map(([demo, _]) => demo)
 
       if (commonDemographics.length > 0) {

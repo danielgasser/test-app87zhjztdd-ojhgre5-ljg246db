@@ -13,14 +13,11 @@ export const EDGE_CONFIG = {
             NEARBY_DEMOGRAPHIC: 0.4,           // 40% weight for nearby demographic matches
         },
     },
-    RECOMMENDATIONS: {
-        DEFAULT_RECOMMENDATION_LIMIT: 10,
-    },
     SAFETY_THRESHOLDS: {
         SAFE_MINIMUM: 4.0,
     },
     PATTERN_DETECTION: {
-        COMMON_PATTERN_DEMOGRAHICS_THRESHOLD: 0.6,
+        COMMON_PATTERN_DEMOGRAPHICS_THRESHOLD: 0.6,
 
     },
     SIMILARITY_CALCULATION: {
