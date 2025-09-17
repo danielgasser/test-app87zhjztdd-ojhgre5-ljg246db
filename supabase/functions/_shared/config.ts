@@ -18,7 +18,14 @@ export const EDGE_CONFIG = {
     },
     PATTERN_DETECTION: {
         COMMON_PATTERN_DEMOGRAPHICS_THRESHOLD: 0.6,
-
+        MIN_REVIEWS_FOR_PATTERNS: 2,          // Already in your config
+        DISPARITY_THRESHOLDS: {
+            HIGH_SEVERITY: 3.0,                 // High severity disparity
+            MEDIUM_SEVERITY: 2.0,               // Medium severity disparity  
+            LOW_SEVERITY: 1.0,                  // Low severity disparity
+        },
+        TIME_DISCRIMINATION_THRESHOLD: 1.5,   // Threshold for time-based patterns
+        SUNDOWN_TOWN_THRESHOLD: 2.5,          // Threshold for sundown town detection
     },
     SIMILARITY_CALCULATION: {
         DEMOGRAPHIC_WEIGHTS: {
@@ -31,6 +38,21 @@ export const EDGE_CONFIG = {
         },
         MIN_SIMILARITY_SCORE: 0.5,            // Minimum similarity to consider users similar
         MAX_SIMILAR_USERS: 20,                // Maximum similar users to return
+    },
+    DANGER_ZONES: {          // Minimum incidents to create danger zone
+        SEVERITY_MULTIPLIERS: {
+            HIGH: 2.0,                          // High severity incident weight
+            MEDIUM: 1.5,                        // Medium severity incident weight
+            LOW: 1.0,                           // Low severity incident weight
+        }
+    },
+    RECOMMENDATIONS: {
+        SCORING_WEIGHTS: {
+            SAFETY_SCORE: 0.4,                  // 40% weight for safety ratings
+            COMFORT_SCORE: 0.3,                 // 30% weight for comfort ratings
+            ACCESSIBILITY_SCORE: 0.2,           // 20% weight for accessibility
+            OVERALL_SCORE: 0.1,                 // 10% weight for overall rating
+        },
     },
 
 }

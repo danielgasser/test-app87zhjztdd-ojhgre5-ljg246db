@@ -77,34 +77,16 @@ export const APP_CONFIG = {
     MAX_RADIUS: 2000,                          // Maximum circle radius
   },
   PATTERN_DETECTION: {
-    MIN_REVIEWS_FOR_PATTERNS: 2,          // Already in your config
-    DISPARITY_THRESHOLDS: {
-      HIGH_SEVERITY: 3.0,                 // High severity disparity
-      MEDIUM_SEVERITY: 2.0,               // Medium severity disparity  
-      LOW_SEVERITY: 1.0,                  // Low severity disparity
-    },
-    TIME_DISCRIMINATION_THRESHOLD: 1.5,   // Threshold for time-based patterns
-    SUNDOWN_TOWN_THRESHOLD: 2.5,          // Threshold for sundown town detection
+    MIN_REVIEWS_FOR_PATTERNS: 2,                  // Threshold for sundown town detection
   },
   DANGER_ZONES: {
     SEARCH_RADIUS_MILES: 50,              // Already in your config
     POLYGON_RADIUS_MILES: 2,              // Already in your config  
     POLYGON_SIDES: 8,                     // Already in your config
     MIN_INCIDENTS_FOR_ZONE: 3,            // Minimum incidents to create danger zone
-    SEVERITY_MULTIPLIERS: {
-      HIGH: 2.0,                          // High severity incident weight
-      MEDIUM: 1.5,                        // Medium severity incident weight
-      LOW: 1.0,                           // Low severity incident weight
-    }
   },
 
   RECOMMENDATIONS: {
-    SCORING_WEIGHTS: {
-      SAFETY_SCORE: 0.4,                  // 40% weight for safety ratings
-      COMFORT_SCORE: 0.3,                 // 30% weight for comfort ratings
-      ACCESSIBILITY_SCORE: 0.2,           // 20% weight for accessibility
-      OVERALL_SCORE: 0.1,                 // 10% weight for overall rating
-    },
     MIN_RECOMMENDATION_SCORE: 3.5,        // Minimum score to recommend
     MAX_RECOMMENDATIONS: 10,               // Maximum recommendations to return
     PREFER_RECENT_REVIEWS: true,          // Prefer locations with recent reviews
