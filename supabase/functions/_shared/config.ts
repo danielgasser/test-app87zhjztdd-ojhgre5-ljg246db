@@ -39,7 +39,11 @@ export const EDGE_CONFIG = {
         MIN_SIMILARITY_SCORE: 0.5,            // Minimum similarity to consider users similar
         MAX_SIMILAR_USERS: 20,                // Maximum similar users to return
     },
-    DANGER_ZONES: {          // Minimum incidents to create danger zone
+    DANGER_ZONES: {
+        SEARCH_RADIUS_MILES: 50,              // Already in your config
+        POLYGON_RADIUS_MILES: 2,              // Already in your config  
+        POLYGON_SIDES: 8,                     // Already in your config
+        MIN_INCIDENTS_FOR_ZONE: 3,       // Minimum incidents to create danger zone
         SEVERITY_MULTIPLIERS: {
             HIGH: 2.0,                          // High severity incident weight
             MEDIUM: 1.5,                        // Medium severity incident weight
