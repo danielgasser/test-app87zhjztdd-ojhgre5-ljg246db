@@ -81,7 +81,7 @@ serve(async (req) => {
           safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
           comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
           overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-          count += 0.3;
+          count += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
         }
       });
     });
@@ -92,7 +92,7 @@ serve(async (req) => {
           safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;// 70% weight
           comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
           overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
-          count += 0.7;
+          count += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
         }
       });
     });
@@ -105,14 +105,14 @@ serve(async (req) => {
           safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL; // 20% weight
           comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
           overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
-          count += 0.2;
+          count += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_OVERALL;
         }
         // If demographic-specific nearby data exists, weight it higher
         if (matchesDemographic(score, user_demographics)) {
           safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC; // 40% weight
           comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
           overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
-          count += 0.4;
+          count += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.NEARBY_DEMOGRAPHIC;
         }
       });
     });

@@ -76,9 +76,6 @@ export const APP_CONFIG = {
     MIN_RADIUS: 200,                           // Minimum circle radius
     MAX_RADIUS: 2000,                          // Maximum circle radius
   },
-  PATTERN_DETECTION: {
-    MIN_REVIEWS_FOR_PATTERNS: 2,                  // Threshold for sundown town detection
-  },
   DANGER_ZONES: {
     SEARCH_RADIUS_MILES: 50,              // Already in your config
     POLYGON_RADIUS_MILES: 2,              // Already in your config  
