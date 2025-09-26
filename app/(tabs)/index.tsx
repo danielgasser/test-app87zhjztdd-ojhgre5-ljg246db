@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   },
   addLocationContainer: {
     position: "absolute",
-    bottom: 100,
+    bottom: 40,
     left: 16,
     right: 16,
     zIndex: 1000,

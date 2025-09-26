@@ -101,7 +101,9 @@ export default function DangerZoneOverlay({
                   <Text style={styles.sectionTitle}>Affected Groups:</Text>
                   {zone.affected_demographics.map((demo, idx) => (
                     <Text key={idx} style={styles.demographicItem}>
-                      • {demo}
+                      •{" "}
+                      {demo.charAt(0).toUpperCase() +
+                        demo.slice(1).replace(/_/g, ", ")}
                     </Text>
                   ))}
 
@@ -153,6 +155,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    width: 280,
   },
   calloutTitle: {
     fontSize: 18,
