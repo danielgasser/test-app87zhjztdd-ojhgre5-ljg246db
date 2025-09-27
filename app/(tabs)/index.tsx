@@ -20,7 +20,7 @@ import {
   fetchDangerZones,
   toggleDangerZones,
   fetchMLPredictions,
-  setSelectedRoute,
+  toggleRouteSegments,
   clearRoutes,
   RouteCoordinate,
 } from "src/store/locationsSlice";
@@ -310,7 +310,6 @@ export default function MapScreen() {
     }
   };
 
-  // NEW: Render route segments with color coding
   const renderRouteSegments = (route: any) => {
     if (!showRouteSegments || !route.safety_analysis?.segment_scores)
       return null;
@@ -560,6 +559,43 @@ export default function MapScreen() {
             pinColor="#2196F3"
           />
         )}
+        {routeOrigin && (
+          <Marker
+            coordinate={routeOrigin}
+            pinColor={APP_CONFIG.ROUTE_DISPLAY.MARKERS.START_COLOR}
+            title="Origin"
+            description="Route starting point"
+          />
+        )}
+        {routeDestination && (
+          <Marker
+            coordinate={routeDestination}
+            pinColor={APP_CONFIG.ROUTE_DISPLAY.MARKERS.END_COLOR}
+            title="Destination"
+            description="Route ending point"
+          />
+        )}
+        {selectedRoute && (
+          <>
+            <Polyline
+              coordinates={selectedRoute.coordinates}
+              strokeColor={getRouteLineColor(selectedRoute)}
+              strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+            />
+            {renderRouteSegments(selectedRoute)}
+          </>
+        )}
+        {routes
+          .filter((route) => route.id !== selectedRoute?.id)
+          .map((route) => (
+            <Polyline
+              key={route.id}
+              coordinates={route.coordinates}
+              strokeColor={APP_CONFIG.ROUTE_DISPLAY.COLORS.ALTERNATIVE_ROUTE}
+              strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.ALTERNATIVE}
+              lineDashPattern={[10, 5]}
+            />
+          ))}
       </MapView>
 
       {/* Map Controls */}
@@ -610,7 +646,18 @@ export default function MapScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
+      {selectedRoute && (
+        <TouchableOpacity
+          style={[styles.mapControlButton, { backgroundColor: "#F44336" }]}
+          onPress={() => {
+            dispatch(clearRoutes());
+            setRouteOrigin(null);
+            setRouteDestination(null);
+          }}
+        >
+          <Ionicons name="close" size={24} color="#FFF" />
+        </TouchableOpacity>
+      )}
       {/* ML Loading indicator */}
       {Object.values(mlPredictionsLoading).some((loading) => loading) && (
         <View style={styles.mlLoadingContainer}>
@@ -704,11 +751,89 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
       )}
+      {!searchMarker && ( // Only show when not showing search marker button
+        <View style={styles.routeControls}>
+          {routeMode === "none" ? (
+            <TouchableOpacity
+              style={styles.routeButton}
+              onPress={handleStartRouteSelection}
+            >
+              <Ionicons name="navigate" size={24} color="#FFF" />
+              <Text style={styles.routeButtonText}>Plan Route</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.routeModeControls}>
+              <Text style={styles.routeModeText}>
+                {routeMode === "select_origin"
+                  ? "Tap to set origin"
+                  : "Tap to set destination"}
+              </Text>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={handleCancelRouteSelection}
+              >
+                <Ionicons name="close" size={20} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      )}
+      {selectedRoute && (
+        <View style={styles.routeInfoPanel}>
+          <View style={styles.routeInfoHeader}>
+            <Text style={styles.routeInfoTitle}>{selectedRoute.name}</Text>
+            <TouchableOpacity
+              style={styles.segmentToggle}
+              onPress={() => dispatch(toggleRouteSegments())}
+            >
+              <Text style={styles.segmentToggleText}>
+                {showRouteSegments ? "Hide" : "Show"} Segments
+              </Text>
+            </TouchableOpacity>
+          </View>
 
+          <View style={styles.routeStats}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {selectedRoute.safety_analysis.overall_route_score.toFixed(1)}
+              </Text>
+              <Text style={styles.statLabel}>Safety Score</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {selectedRoute.estimated_duration_minutes}min
+              </Text>
+              <Text style={styles.statLabel}>Duration</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {(
+                  selectedRoute.safety_analysis.total_distance_meters / 1000
+                ).toFixed(1)}
+                km
+              </Text>
+              <Text style={styles.statLabel}>Distance</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.routeDetailsButton}
+            onPress={() => setShowRoutePlanning(true)}
+          >
+            <Text style={styles.routeDetailsButtonText}>View Details</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <LocationDetailsModal
         visible={modalVisible}
         locationId={selectedLocationId}
         onClose={handleModalClose}
+      />
+      <RoutePlanningModal
+        visible={showRoutePlanning}
+        onClose={() => setShowRoutePlanning(false)}
+        origin={routeOrigin || undefined}
+        destination={routeDestination || undefined}
       />
     </View>
   );
@@ -934,5 +1059,126 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#2196F3",
     fontWeight: "600",
+  },
+  routeControls: {
+    position: "absolute",
+    top: 0, // Adjust based on your layout
+    left: 20,
+    right: 20,
+    zIndex: 1000,
+  },
+  routeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#8E24AA",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+  },
+  routeButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+  },
+  routeModeControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#8E24AA",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+  },
+  routeModeText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 1,
+  },
+  cancelButton: {
+    padding: 4,
+  },
+  routeInfoPanel: {
+    position: "absolute",
+    top: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  routeInfoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  routeInfoTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    flex: 1,
+  },
+  segmentToggle: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#8E24AA",
+    borderRadius: 16,
+  },
+  segmentToggleText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  routeStats: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 12,
+  },
+  statItem: {
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#000",
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 2,
+  },
+  routeDetailsButton: {
+    backgroundColor: "#8E24AA",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  routeDetailsButtonText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  mapControlButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
