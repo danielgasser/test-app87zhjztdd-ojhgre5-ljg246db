@@ -235,11 +235,28 @@ const initialState: LocationsState = {
 
 export const fetchNearbyLocations = createAsyncThunk(
   'locations/fetchNearbyLocations',
-  async ({ latitude, longitude, radius = 10000 }: { latitude: number; longitude: number; radius?: number }) => {
+  async ({
+    latitude,
+    longitude,
+    radius = 10000,
+    userProfile
+  }: {
+    latitude: number;
+    longitude: number;
+    radius?: number;
+    userProfile: {
+      race_ethnicity: string;
+      gender: string;
+      lgbtq_status: string;
+    };
+  }) => {
     const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
-      user_lat: latitude,
-      user_lng: longitude,
+      lat: latitude,
+      lng: longitude,
       radius_meters: radius,
+      user_race_ethnicity: userProfile.race_ethnicity,
+      user_gender: userProfile.gender,
+      user_lgbtq_status: userProfile.lgbtq_status,
     });
 
     if (error) {
