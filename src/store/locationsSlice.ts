@@ -11,6 +11,7 @@ import {
 } from '../types/supabase';
 import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
 import { APP_CONFIG } from '@/utils/appConfig';
+import { ReactNode } from 'react';
 
 interface SearchLocation {
   id: string;
@@ -164,6 +165,7 @@ export interface RouteSegment {
 }
 
 export interface RouteSafetyAnalysis {
+  confidence_score: ReactNode;
   overall_route_safety: number;
   overall_route_comfort: number;
   overall_route_score: number;

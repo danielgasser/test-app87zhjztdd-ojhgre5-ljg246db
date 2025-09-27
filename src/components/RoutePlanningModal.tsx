@@ -1,7 +1,4 @@
-// Replace your existing RoutePlanningModal.tsx with this simplified version
-// src/components/RoutePlanningModal.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -22,11 +19,11 @@ import {
   setSelectedRoute,
   clearRoutes,
   updateRoutePreferences,
+  searchLocations,
   RouteCoordinate,
   RouteRequest,
   SafeRoute,
 } from "src/store/locationsSlice";
-import { APP_CONFIG } from "@/utils/appConfig";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -54,6 +51,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     routeLoading,
     routeError,
     routePreferences,
+    searchResults,
+    searchLoading,
   } = useAppSelector((state) => state.locations);
   const { userLocation } = useAppSelector((state) => state.locations);
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -66,8 +65,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Search state
   const [activeInput, setActiveInput] = useState<"from" | "to" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
 
   // Initialize from location with current location
   useEffect(() => {
@@ -90,55 +88,83 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       setToLocation(null);
       setActiveInput(null);
       setSearchQuery("");
-      setSearchResults([]);
+      setMapboxResults([]);
     }
   }, [visible]);
 
-  // Mock search function (replace with your existing SearchBar logic)
-  const performSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
+  // Mapbox search function (copied from existing SearchBar logic)
+  const searchMapbox = async (query: string): Promise<LocationResult[]> => {
+    const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
 
-    setSearchLoading(true);
+    if (!mapboxToken) {
+      console.warn("Mapbox token not found - using database search only");
+      return [];
+    }
 
     try {
-      // TODO: Replace with your existing search logic from SearchBar
-      // For now, mock some results
-      const mockResults: LocationResult[] = [
-        {
-          id: "search_1",
-          name: "San Francisco Airport",
-          address: "San Francisco, CA 94128, USA",
-          latitude: 37.6213,
-          longitude: -122.379,
-          place_type: "airport",
-          source: "mapbox" as "mapbox",
-        },
-        {
-          id: "search_2",
-          name: "Golden Gate Bridge",
-          address: "Golden Gate Bridge, San Francisco, CA, USA",
-          latitude: 37.8199,
-          longitude: -122.4783,
-          place_type: "landmark",
-          source: "mapbox" as "mapbox",
-        },
-      ].filter(
-        (result) =>
-          result.name.toLowerCase().includes(query.toLowerCase()) ||
-          result.address.toLowerCase().includes(query.toLowerCase())
-      );
+      let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+        query
+      )}.json?access_token=${mapboxToken}&types=poi,address&limit=5&country=us,ca`;
 
-      setSearchResults(mockResults);
+      if (userLocation) {
+        url += `&proximity=${userLocation.longitude},${userLocation.latitude}`;
+      }
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Mapbox API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.features) {
+        return data.features.map((feature: any) => ({
+          id: `mapbox_${feature.id}`,
+          name: feature.text || feature.place_name.split(",")[0],
+          address: feature.place_name,
+          latitude: feature.center[1],
+          longitude: feature.center[0],
+          place_type: feature.place_type?.[0] || "location",
+          source: "mapbox" as const,
+        }));
+      }
+
+      return [];
     } catch (error) {
-      console.error("Search error:", error);
-      setSearchResults([]);
-    } finally {
-      setSearchLoading(false);
+      console.error("Mapbox search error:", error);
+      Alert.alert(
+        "Search Error",
+        "Unable to search locations. Please check your internet connection."
+      );
+      return [];
     }
   };
+
+  // Combined search function (database + mapbox)
+  const performSearch = useCallback(
+    async (query: string) => {
+      if (query.length < 3) {
+        setMapboxResults([]);
+        return;
+      }
+
+      // Search database
+      dispatch(
+        searchLocations({
+          query,
+          userLocation: userLocation
+            ? { lat: userLocation.latitude, lng: userLocation.longitude }
+            : undefined,
+        })
+      );
+
+      // Search Mapbox
+      const mapboxResults = await searchMapbox(query);
+      setMapboxResults(mapboxResults);
+    },
+    [dispatch, userLocation]
+  );
 
   // Debounced search
   useEffect(() => {
@@ -149,7 +175,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     }, 300);
 
     return () => clearTimeout(searchTimeout);
-  }, [searchQuery, activeInput]);
+  }, [searchQuery, activeInput, performSearch]);
+
+  // Handle input focus
+  const handleInputFocus = (inputType: "from" | "to") => {
+    setActiveInput(inputType);
+    setSearchQuery("");
+    setMapboxResults([]);
+  };
 
   // Handle location selection
   const handleLocationSelect = (location: LocationResult) => {
@@ -161,14 +194,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     setActiveInput(null);
     setSearchQuery("");
-    setSearchResults([]);
-  };
-
-  // Handle input focus
-  const handleInputFocus = (inputType: "from" | "to") => {
-    setActiveInput(inputType);
-    setSearchQuery("");
-    setSearchResults([]);
+    setMapboxResults([]);
   };
 
   // Handle route generation
@@ -244,117 +270,134 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     onClose();
   };
 
-  // Render location input
+  // Get combined search results
+  const dbResultsWithSource = searchResults.map((result) => ({
+    ...result,
+    source: (result.source || "database") as "database" | "mapbox",
+  }));
+
+  const mapboxResultsWithSource = mapboxResults.map((result) => ({
+    ...result,
+    source: (result.source || "mapbox") as "database" | "mapbox",
+  }));
+
+  const allResults = [...dbResultsWithSource, ...mapboxResultsWithSource];
+
+  // Render location input field
   const renderLocationInput = (
     type: "from" | "to",
     location: LocationResult | null,
     placeholder: string
   ) => (
-    <TouchableOpacity
-      style={[
-        styles.locationInput,
-        activeInput === type && styles.activeLocationInput,
-      ]}
-      onPress={() => handleInputFocus(type)}
-    >
-      <View style={styles.locationInputIcon}>
-        <Ionicons
-          name={type === "from" ? "radio-button-on" : "location"}
-          size={20}
-          color={type === "from" ? "#4CAF50" : "#F44336"}
-        />
-      </View>
-      <View style={styles.locationInputContent}>
-        {location ? (
-          <>
-            <Text style={styles.locationName} numberOfLines={1}>
-              {location.name}
-            </Text>
-            <Text style={styles.locationAddress} numberOfLines={1}>
-              {location.address}
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.locationPlaceholder}>{placeholder}</Text>
-        )}
-      </View>
-      <Ionicons name="search" size={20} color="#999" />
-    </TouchableOpacity>
-  );
-
-  // Render search result item
-  const renderSearchResult = ({ item }: { item: LocationResult }) => (
-    <TouchableOpacity
-      style={styles.searchResultItem}
-      onPress={() => handleLocationSelect(item)}
-    >
-      <View style={styles.searchResultIcon}>
-        <Ionicons name="location" size={20} color="#666" />
-      </View>
-      <View style={styles.searchResultContent}>
-        <Text style={styles.searchResultName}>{item.name}</Text>
-        <Text style={styles.searchResultAddress}>{item.address}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  // Render route card (keep your existing implementation)
-  const renderRouteCard = (route: SafeRoute, isSelected: boolean = false) => {
-    const safety = route.safety_analysis;
-    const safetyColor = getSafetyColor(safety.overall_route_score);
-    const safetyLabel = getSafetyLabel(safety.overall_route_score);
-
-    return (
+    <View style={styles.inputContainer}>
       <TouchableOpacity
-        key={route.id}
-        style={[styles.routeCard, isSelected && styles.selectedRouteCard]}
-        onPress={() => handleSelectRoute(route)}
+        style={[
+          styles.locationInput,
+          activeInput === type && styles.activeLocationInput,
+        ]}
+        onPress={() => handleInputFocus(type)}
       >
-        {/* Route Header */}
-        <View style={styles.routeHeader}>
-          <View style={styles.routeInfo}>
-            <Text style={styles.routeName}>{route.name}</Text>
-            <Text style={styles.routeType}>
-              {route.route_type.toUpperCase()}
-            </Text>
-          </View>
-          <View style={[styles.safetyBadge, { backgroundColor: safetyColor }]}>
-            <Text style={styles.safetyScore}>
-              {safety.overall_route_score.toFixed(1)}
-            </Text>
-          </View>
+        <View style={styles.locationInputIcon}>
+          <Ionicons
+            name={type === "from" ? "radio-button-on" : "location"}
+            size={20}
+            color={type === "from" ? "#4CAF50" : "#F44336"}
+          />
         </View>
-
-        {/* Route Metrics */}
-        <View style={styles.routeMetrics}>
-          <View style={styles.metric}>
-            <Ionicons name="time-outline" size={16} color="#666" />
-            <Text style={styles.metricText}>
-              {route.estimated_duration_minutes} min
-            </Text>
-          </View>
-          <View style={styles.metric}>
-            <Ionicons name="speedometer-outline" size={16} color="#666" />
-            <Text style={styles.metricText}>
-              {(safety.total_distance_meters / 1000).toFixed(1)} km
-            </Text>
-          </View>
-          <View style={styles.metric}>
-            <Ionicons name="shield-outline" size={16} color={safetyColor} />
-            <Text style={[styles.metricText, { color: safetyColor }]}>
-              {safetyLabel}
-            </Text>
-          </View>
+        <View style={styles.locationInputContent}>
+          {location ? (
+            <View>
+              <Text style={styles.locationName}>{location.name}</Text>
+              <Text style={styles.locationAddress}>{location.address}</Text>
+            </View>
+          ) : (
+            <Text style={styles.placeholder}>{placeholder}</Text>
+          )}
         </View>
-
-        {isSelected && (
-          <View style={styles.selectedIndicator}>
-            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
-            <Text style={styles.selectedText}>Selected Route</Text>
-          </View>
+        {location && (
+          <TouchableOpacity
+            style={styles.clearLocationButton}
+            onPress={() => {
+              if (type === "from") setFromLocation(null);
+              else setToLocation(null);
+            }}
+          >
+            <Ionicons name="close-circle" size={20} color="#666" />
+          </TouchableOpacity>
         )}
       </TouchableOpacity>
-    );
+
+      {/* Search input when active */}
+      {activeInput === type && (
+        <View style={styles.searchInputContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search for places..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+            autoCorrect={false}
+            autoCapitalize="none"
+            returnKeyType="search"
+          />
+          {(searchLoading ||
+            (searchQuery.length > 0 && allResults.length === 0)) && (
+            <View style={styles.searchIndicator}>
+              {searchLoading ? (
+                <ActivityIndicator size="small" color="#666" />
+              ) : (
+                <Text style={styles.noResultsText}>No results found</Text>
+              )}
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* Search results */}
+      {activeInput === type && allResults.length > 0 && (
+        <View style={styles.resultsContainer}>
+          <FlatList
+            data={allResults}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.resultItem}
+                onPress={() => handleLocationSelect(item)}
+              >
+                <View style={styles.resultIconContainer}>
+                  <Ionicons
+                    name={
+                      item.source === "database"
+                        ? "storefront"
+                        : "location-outline"
+                    }
+                    size={20}
+                    color={item.source === "database" ? "#4CAF50" : "#666"}
+                  />
+                </View>
+                <View style={styles.resultTextContainer}>
+                  <Text style={styles.resultName}>{item.name}</Text>
+                  <Text style={styles.resultAddress}>{item.address}</Text>
+                  {item.source === "database" && (
+                    <Text style={styles.hasReviewsText}>• Has reviews</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.id}
+            style={styles.resultsList}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      )}
+    </View>
+  );
+
+  // Get safety badge color
+  const getSafetyBadgeColor = (score: number) => {
+    if (score >= 7) return "#4CAF50"; // Green
+    if (score >= 4) return "#FF9800"; // Orange
+    return "#F44336"; // Red
   };
 
   return (
@@ -366,188 +409,243 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Ionicons name="close" size={24} color="#000" />
           </TouchableOpacity>
           <Text style={styles.title}>Plan Route</Text>
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* Search Mode */}
-        {activeInput ? (
-          <View style={styles.searchMode}>
-            {/* Search Input */}
-            <View style={styles.searchInputContainer}>
-              <Ionicons name="search" size={20} color="#666" />
-              <TextInput
-                style={styles.searchInput}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder={`Search for ${
-                  activeInput === "from" ? "starting point" : "destination"
-                }`}
-                autoFocus
-              />
-              {searchLoading && (
-                <ActivityIndicator size="small" color="#8E24AA" />
-              )}
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          {/* Location Inputs */}
+          <View style={styles.locationsSection}>
+            <Text style={styles.sectionTitle}>Route</Text>
+
+            {renderLocationInput("from", fromLocation, "Choose starting point")}
+
+            <View style={styles.swapButtonContainer}>
+              <TouchableOpacity
+                style={styles.swapButton}
+                onPress={() => {
+                  const temp = fromLocation;
+                  setFromLocation(toLocation);
+                  setToLocation(temp);
+                }}
+                disabled={!fromLocation || !toLocation}
+              >
+                <Ionicons name="swap-vertical" size={20} color="#666" />
+              </TouchableOpacity>
             </View>
 
-            {/* Search Results */}
-            <FlatList
-              style={styles.searchResults}
-              data={searchResults}
-              renderItem={renderSearchResult}
-              keyExtractor={(item) => item.id}
-              ListEmptyComponent={
-                searchQuery.length > 0 && !searchLoading ? (
-                  <View style={styles.noResults}>
-                    <Text style={styles.noResultsText}>No results found</Text>
-                  </View>
-                ) : null
-              }
-            />
+            {renderLocationInput("to", toLocation, "Choose destination")}
           </View>
-        ) : (
-          /* Route Planning Mode */
-          <ScrollView style={styles.content}>
-            {/* Location Inputs */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Route Details</Text>
 
-              <View style={styles.locationInputs}>
-                {renderLocationInput(
-                  "from",
-                  fromLocation,
-                  "Choose starting point"
-                )}
-                {renderLocationInput("to", toLocation, "Choose destination")}
-              </View>
-            </View>
+          {/* Safety Preferences */}
+          <View style={styles.preferencesSection}>
+            <Text style={styles.sectionTitle}>Safety Preferences</Text>
 
-            {/* Safety Preferences (keep your existing implementation) */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Safety Preferences</Text>
-
-              <View style={styles.priorityButtons}>
-                {(["speed_focused", "balanced", "safety_focused"] as const).map(
-                  (priority) => (
-                    <TouchableOpacity
-                      key={priority}
-                      style={[
-                        styles.priorityButton,
-                        routePreferences.safetyPriority === priority &&
-                          styles.activePriorityButton,
-                      ]}
-                      onPress={() => handleSafetyPriorityChange(priority)}
-                    >
-                      <Text
-                        style={[
-                          styles.priorityButtonText,
-                          routePreferences.safetyPriority === priority &&
-                            styles.activePriorityButtonText,
-                        ]}
-                      >
-                        {priority.replace("_", " ").toUpperCase()}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>Avoid evening dangers</Text>
+            {/* Priority Buttons */}
+            <View style={styles.priorityButtons}>
+              {[
+                { key: "speed_focused", label: "Speed" },
+                { key: "balanced", label: "Balanced" },
+                { key: "safety_focused", label: "Safety" },
+              ].map((priority) => (
                 <TouchableOpacity
+                  key={priority.key}
                   style={[
-                    styles.toggle,
-                    routePreferences.avoidEveningDanger && styles.toggleActive,
+                    styles.priorityButton,
+                    routePreferences.safetyPriority === priority.key &&
+                      styles.activePriorityButton,
                   ]}
                   onPress={() =>
-                    dispatch(
-                      updateRoutePreferences({
-                        avoidEveningDanger:
-                          !routePreferences.avoidEveningDanger,
-                      })
+                    handleSafetyPriorityChange(
+                      priority.key as
+                        | "speed_focused"
+                        | "balanced"
+                        | "safety_focused"
                     )
                   }
                 >
-                  {routePreferences.avoidEveningDanger && (
-                    <Ionicons name="checkmark" size={16} color="#FFF" />
-                  )}
+                  <Text
+                    style={[
+                      styles.priorityButtonText,
+                      routePreferences.safetyPriority === priority.key &&
+                        styles.activePriorityButtonText,
+                    ]}
+                  >
+                    {priority.label}
+                  </Text>
                 </TouchableOpacity>
-              </View>
+              ))}
             </View>
 
-            {/* Generate Route Button */}
+            {/* Avoid Evening Dangers Toggle */}
             <TouchableOpacity
-              style={[
-                styles.generateButton,
-                routeLoading && styles.disabledButton,
-              ]}
-              onPress={handleGenerateRoute}
-              disabled={routeLoading || !fromLocation || !toLocation}
+              style={styles.toggleRow}
+              onPress={() =>
+                dispatch(
+                  updateRoutePreferences({
+                    avoidEveningDanger: !routePreferences.avoidEveningDanger,
+                  })
+                )
+              }
             >
-              {routeLoading ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <>
-                  <Ionicons name="navigate" size={20} color="#FFF" />
-                  <Text style={styles.generateButtonText}>
-                    Generate Safe Route
-                  </Text>
-                </>
-              )}
+              <Text style={styles.toggleLabel}>Avoid evening dangers</Text>
+              <View
+                style={[
+                  styles.toggle,
+                  routePreferences.avoidEveningDanger && styles.toggleActive,
+                ]}
+              >
+                {routePreferences.avoidEveningDanger && (
+                  <Ionicons name="checkmark" size={16} color="#FFF" />
+                )}
+              </View>
             </TouchableOpacity>
+          </View>
 
-            {/* Error Display */}
-            {routeError && (
-              <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={20} color="#F44336" />
-                <Text style={styles.errorText}>{routeError}</Text>
-              </View>
+          {/* Generate Route Button */}
+          <TouchableOpacity
+            style={[
+              styles.generateButton,
+              (!fromLocation || !toLocation || routeLoading) &&
+                styles.disabledButton,
+            ]}
+            onPress={handleGenerateRoute}
+            disabled={!fromLocation || !toLocation || routeLoading}
+          >
+            {routeLoading ? (
+              <ActivityIndicator size="small" color="#FFF" />
+            ) : (
+              <Ionicons name="navigate" size={20} color="#FFF" />
             )}
+            <Text style={styles.generateButtonText}>
+              {routeLoading ? "Finding safe route..." : "Generate Safe Route"}
+            </Text>
+          </TouchableOpacity>
 
-            {/* Primary Route */}
-            {selectedRoute && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Recommended Route</Text>
-                {renderRouteCard(selectedRoute, true)}
-              </View>
-            )}
+          {/* Error Display */}
+          {routeError && (
+            <View style={styles.errorContainer}>
+              <Ionicons name="warning" size={20} color="#F44336" />
+              <Text style={styles.errorText}>{routeError}</Text>
+            </View>
+          )}
 
-            {/* Alternative Routes */}
-            {routeAlternatives.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Alternative Routes</Text>
-                {routeAlternatives.map((route) => renderRouteCard(route))}
+          {/* Route Results */}
+          {selectedRoute && (
+            <View style={styles.routesSection}>
+              <Text style={styles.sectionTitle}>Primary Route</Text>
+              <View style={[styles.routeCard, styles.selectedRouteCard]}>
+                <View style={styles.routeHeader}>
+                  <View style={styles.routeInfo}>
+                    <Text style={styles.routeName}>{selectedRoute.name}</Text>
+                    <Text style={styles.routeType}>
+                      {selectedRoute.route_type} route
+                    </Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.safetyBadge,
+                      {
+                        backgroundColor: getSafetyBadgeColor(
+                          selectedRoute.safety_analysis?.overall_route_score ||
+                            0
+                        ),
+                      },
+                    ]}
+                  >
+                    <Text style={styles.safetyScore}>
+                      {Math.round(
+                        selectedRoute.safety_analysis?.overall_route_score || 0
+                      )}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.routeMetrics}>
+                  <View style={styles.metric}>
+                    <Ionicons name="time" size={16} color="#666" />
+                    <Text style={styles.metricText}>
+                      {selectedRoute.estimated_duration_minutes} min
+                    </Text>
+                  </View>
+                  <View style={styles.metric}>
+                    <Ionicons name="shield-checkmark" size={16} color="#666" />
+                    <Text style={styles.metricText}>
+                      {selectedRoute.safety_analysis?.confidence_score}%
+                      confident
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.selectedIndicator}>
+                  <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                  <Text style={styles.selectedText}>Selected Route</Text>
+                </View>
               </View>
-            )}
-          </ScrollView>
-        )}
+            </View>
+          )}
+
+          {/* Alternative Routes */}
+          {routeAlternatives.length > 0 && (
+            <View style={styles.routesSection}>
+              <Text style={styles.sectionTitle}>Alternative Routes</Text>
+              {routeAlternatives.map((route) => (
+                <TouchableOpacity
+                  key={route.id}
+                  style={styles.routeCard}
+                  onPress={() => handleSelectRoute(route)}
+                >
+                  <View style={styles.routeHeader}>
+                    <View style={styles.routeInfo}>
+                      <Text style={styles.routeName}>{route.name}</Text>
+                      <Text style={styles.routeType}>
+                        {route.route_type} route
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.safetyBadge,
+                        {
+                          backgroundColor: getSafetyBadgeColor(
+                            route.safety_analysis?.overall_route_score || 0
+                          ),
+                        },
+                      ]}
+                    >
+                      <Text style={styles.safetyScore}>
+                        {Math.round(
+                          route.safety_analysis?.overall_route_score || 0
+                        )}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.routeMetrics}>
+                    <View style={styles.metric}>
+                      <Ionicons name="time" size={16} color="#666" />
+                      <Text style={styles.metricText}>
+                        {route.estimated_duration_minutes} min
+                      </Text>
+                    </View>
+                    <View style={styles.metric}>
+                      <Ionicons
+                        name="shield-checkmark"
+                        size={16}
+                        color="#666"
+                      />
+                      <Text style={styles.metricText}>
+                        {route.safety_analysis?.confidence_score}% confident
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </ScrollView>
       </View>
     </Modal>
   );
-};
-
-// Helper functions (keep your existing ones)
-const getSafetyColor = (score: number): string => {
-  if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
-    return APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE;
-  } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
-    return APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE;
-  } else {
-    return APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
-  }
-};
-
-const getSafetyLabel = (score: number): string => {
-  if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
-    return "Safe";
-  } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
-    return "Mixed";
-  } else {
-    return "Caution";
-  }
 };
 
 const styles = StyleSheet.create({
@@ -558,20 +656,23 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingTop: 50,
     backgroundColor: "#FFF",
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
   },
   closeButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
-    flex: 1,
     fontSize: 18,
     fontWeight: "600",
-    textAlign: "center",
     color: "#000",
   },
   headerSpacer: {
@@ -579,97 +680,37 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
-  },
-
-  // Search Mode
-  searchMode: {
-    flex: 1,
-    backgroundColor: "#FFF",
-  },
-  searchInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 12,
-    color: "#000",
-  },
-  searchResults: {
-    flex: 1,
-  },
-  searchResultItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-  searchResultIcon: {
-    width: 40,
-    alignItems: "center",
-  },
-  searchResultContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  searchResultName: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#000",
-    marginBottom: 2,
-  },
-  searchResultAddress: {
-    fontSize: 14,
-    color: "#666",
-  },
-  noResults: {
-    padding: 32,
-    alignItems: "center",
-  },
-  noResultsText: {
-    fontSize: 16,
-    color: "#666",
-  },
-
-  // Location Inputs
-  section: {
-    marginBottom: 24,
+  locationsSection: {
+    marginTop: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     color: "#000",
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  locationInputs: {
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    overflow: "hidden",
+  inputContainer: {
+    marginBottom: 16,
   },
   locationInput: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 12,
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderWidth: 2,
+    borderColor: "transparent",
   },
   activeLocationInput: {
-    backgroundColor: "#F8F9FA",
+    borderColor: "#8E24AA",
   },
   locationInputIcon: {
-    width: 24,
-    alignItems: "center",
+    marginRight: 12,
   },
   locationInputContent: {
     flex: 1,
-    marginLeft: 12,
   },
   locationName: {
     fontSize: 16,
@@ -681,12 +722,89 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
-  locationPlaceholder: {
+  placeholder: {
     fontSize: 16,
     color: "#999",
   },
-
-  // Keep all your existing styles for route cards, buttons, etc.
+  clearLocationButton: {
+    marginLeft: 8,
+  },
+  searchInputContainer: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    marginTop: 8,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  searchInput: {
+    fontSize: 16,
+    color: "#000",
+  },
+  searchIndicator: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  noResultsText: {
+    fontSize: 14,
+    color: "#666",
+  },
+  resultsContainer: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  resultsList: {
+    maxHeight: 200,
+  },
+  resultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  resultIconContainer: {
+    marginRight: 12,
+  },
+  resultTextContainer: {
+    flex: 1,
+  },
+  resultName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#000",
+    marginBottom: 2,
+  },
+  resultAddress: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 2,
+  },
+  hasReviewsText: {
+    fontSize: 12,
+    color: "#4CAF50",
+    fontWeight: "500",
+  },
+  swapButtonContainer: {
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  swapButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  preferencesSection: {
+    marginTop: 32,
+  },
   priorityButtons: {
     flexDirection: "row",
     backgroundColor: "#FFF",
@@ -743,6 +861,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
+    marginTop: 24,
     marginBottom: 16,
   },
   disabledButton: {
@@ -768,8 +887,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
   },
-
-  // Route Card styles (keep your existing ones)
+  routesSection: {
+    marginTop: 24,
+    marginBottom: 32,
+  },
   routeCard: {
     backgroundColor: "#FFF",
     borderRadius: 12,
