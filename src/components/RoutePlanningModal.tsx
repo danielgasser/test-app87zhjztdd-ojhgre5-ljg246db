@@ -290,46 +290,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     placeholder: string
   ) => (
     <View style={styles.inputContainer}>
-      <TouchableOpacity
-        style={[
-          styles.locationInput,
-          activeInput === type && styles.activeLocationInput,
-        ]}
-        onPress={() => handleInputFocus(type)}
-      >
-        <View style={styles.locationInputIcon}>
-          <Ionicons
-            name={type === "from" ? "radio-button-on" : "location"}
-            size={20}
-            color={type === "from" ? "#4CAF50" : "#F44336"}
-          />
-        </View>
-        <View style={styles.locationInputContent}>
-          {location ? (
-            <View>
-              <Text style={styles.locationName}>{location.name}</Text>
-              <Text style={styles.locationAddress}>{location.address}</Text>
-            </View>
-          ) : (
-            <Text style={styles.placeholder}>{placeholder}</Text>
-          )}
-        </View>
-        {location && (
-          <TouchableOpacity
-            style={styles.clearLocationButton}
-            onPress={() => {
-              if (type === "from") setFromLocation(null);
-              else setToLocation(null);
-            }}
-          >
-            <Ionicons name="close-circle" size={20} color="#666" />
-          </TouchableOpacity>
-        )}
-      </TouchableOpacity>
-
-      {/* Search input when active */}
-      {activeInput === type && (
-        <View style={styles.searchInputContainer}>
+      {/* Main input field - becomes TextInput when active */}
+      {activeInput === type ? (
+        <View style={[styles.locationInput, styles.activeLocationInput]}>
+          <View style={styles.locationInputIcon}>
+            <Ionicons
+              name={type === "from" ? "radio-button-on" : "location"}
+              size={20}
+              color={type === "from" ? "#4CAF50" : "#F44336"}
+            />
+          </View>
           <TextInput
             style={styles.searchInput}
             placeholder="Search for places..."
@@ -340,18 +310,63 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             autoCapitalize="none"
             returnKeyType="search"
           />
-          {(searchLoading ||
-            (searchQuery.length > 0 && allResults.length === 0)) && (
-            <View style={styles.searchIndicator}>
-              {searchLoading ? (
-                <ActivityIndicator size="small" color="#666" />
-              ) : (
-                <Text style={styles.noResultsText}>No results found</Text>
-              )}
-            </View>
-          )}
+          <TouchableOpacity
+            style={styles.clearLocationButton}
+            onPress={() => {
+              setActiveInput(null);
+              setSearchQuery("");
+              setMapboxResults([]);
+            }}
+          ></TouchableOpacity>
         </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.locationInput}
+          onPress={() => handleInputFocus(type)}
+        >
+          <View style={styles.locationInputIcon}>
+            <Ionicons
+              name={type === "from" ? "radio-button-on" : "location"}
+              size={20}
+              color={type === "from" ? "#4CAF50" : "#F44336"}
+            />
+          </View>
+          <View style={styles.locationInputContent}>
+            {location ? (
+              <View>
+                <Text style={styles.locationName}>{location.name}</Text>
+                <Text style={styles.locationAddress}>{location.address}</Text>
+              </View>
+            ) : (
+              <Text style={styles.placeholder}>{placeholder}</Text>
+            )}
+          </View>
+          {location && (
+            <TouchableOpacity
+              style={styles.clearLocationButton}
+              onPress={() => {
+                if (type === "from") setFromLocation(null);
+                else setToLocation(null);
+              }}
+            >
+              <Ionicons name="close-circle" size={20} color="#666" />
+            </TouchableOpacity>
+          )}
+        </TouchableOpacity>
       )}
+
+      {/* Loading indicator */}
+      {activeInput === type &&
+        (searchLoading ||
+          (searchQuery.length > 0 && allResults.length === 0)) && (
+          <View style={styles.searchIndicator}>
+            {searchLoading ? (
+              <ActivityIndicator size="small" color="#666" />
+            ) : searchQuery.length > 0 ? (
+              <Text style={styles.noResultsText}>No results found</Text>
+            ) : null}
+          </View>
+        )}
 
       {/* Search results */}
       {activeInput === type && allResults.length > 0 && (
@@ -416,7 +431,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           <View style={styles.headerSpacer} />
         </View>
 
-        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.content}>
           {/* Location Inputs */}
           <View style={styles.locationsSection}>
             <Text style={styles.sectionTitle}>Route</Text>
@@ -642,7 +657,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               ))}
             </View>
           )}
-        </ScrollView>
+        </View>
       </View>
     </Modal>
   );
@@ -681,6 +696,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 16,
+    paddingBottom: 32,
   },
   locationsSection: {
     marginTop: 20,
@@ -729,15 +745,8 @@ const styles = StyleSheet.create({
   clearLocationButton: {
     marginLeft: 8,
   },
-  searchInputContainer: {
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    marginTop: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
   searchInput: {
+    flex: 1,
     fontSize: 16,
     color: "#000",
   },
