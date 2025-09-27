@@ -54,6 +54,22 @@ interface LocationsState {
   similarUsersLoading: boolean;
   mlPredictions: { [locationId: string]: MLPrediction };
   mlPredictionsLoading: { [locationId: string]: boolean };
+  routes: SafeRoute[];
+  selectedRoute: SafeRoute | null;
+  routeRequest: RouteRequest | null;
+  routeLoading: boolean;
+  routeError: string | null;
+  routeSafetyAnalysis: RouteSafetyAnalysis | null;
+  routeAlternatives: SafeRoute[];
+
+  // Route Display State
+  showRouteSegments: boolean;
+  selectedSegment: RouteSegment | null;
+  routePreferences: {
+    safetyPriority: 'speed_focused' | 'balanced' | 'safety_focused';
+    avoidEveningDanger: boolean;
+    maxDetourMinutes: number;
+  };
 }
 
 interface MLPrediction {
@@ -112,7 +128,271 @@ const initialState: LocationsState = {
   similarUsersLoading: false,
   mlPredictions: {},
   mlPredictionsLoading: {},
+  routes: [],
+  selectedRoute: null,
+  routeRequest: null,
+  routeLoading: false,
+  routeError: null,
+  routeSafetyAnalysis: null,
+  routeAlternatives: [],
+  showRouteSegments: false,
+  selectedSegment: null,
+  routePreferences: {
+    safetyPriority: 'balanced' as const,
+    avoidEveningDanger: true,
+    maxDetourMinutes: 15,
+  },
 };
+
+export interface RouteCoordinate {
+  latitude: number;
+  longitude: number;
+}
+
+export interface RouteSegment {
+  start: RouteCoordinate;
+  end: RouteCoordinate;
+  center: RouteCoordinate;
+  distance_meters: number;
+  safety_score: number;
+  comfort_score: number;
+  overall_score: number;
+  confidence: number;
+  risk_factors: string[];
+  nearby_locations: any[];
+  danger_zones: any[];
+}
+
+export interface RouteSafetyAnalysis {
+  overall_route_safety: number;
+  overall_route_comfort: number;
+  overall_route_score: number;
+  total_distance_meters: number;
+  confidence: number;
+  segment_scores: RouteSegment[];
+  danger_zone_intersections: any[];
+  high_risk_segments: RouteSegment[];
+  improvement_suggestions: string[];
+  route_summary: {
+    safe_segments: number;
+    mixed_segments: number;
+    unsafe_segments: number;
+    danger_zones_count: number;
+  };
+}
+
+export interface SafeRoute {
+  id: string;
+  name: string;
+  coordinates: RouteCoordinate[];
+  safety_analysis: RouteSafetyAnalysis;
+  estimated_duration_minutes: number;
+  is_primary_route: boolean;
+  route_type: 'fastest' | 'safest' | 'balanced';
+  created_at: string;
+}
+
+export interface RouteRequest {
+  origin: RouteCoordinate;
+  destination: RouteCoordinate;
+  waypoints?: RouteCoordinate[];
+  user_demographics: any;
+  route_preferences: {
+    prioritize_safety: boolean;
+    avoid_evening_danger: boolean;
+    max_detour_minutes: number;
+    required_waypoint_types?: string[];
+  };
+}
+
+export const calculateRouteSafety = createAsyncThunk(
+  'locations/calculateRouteSafety',
+  async (payload: {
+    route_coordinates: RouteCoordinate[];
+    user_demographics: any;
+    waypoints?: RouteCoordinate[];
+  }) => {
+    console.log('🔍 Calculating route safety scores...');
+
+    const { data, error } = await supabase.functions.invoke('route-safety-scorer', {
+      body: payload
+    });
+
+    if (error) {
+      console.error('❌ Route safety calculation failed:', error);
+      throw new Error(`Route safety calculation failed: ${error.message}`);
+    }
+
+    console.log('✅ Route safety analysis complete:', data);
+    return data as RouteSafetyAnalysis;
+  }
+);
+
+// Get route from Mapbox Directions API
+export const getMapboxRoute = createAsyncThunk(
+  'locations/getMapboxRoute',
+  async (payload: {
+    origin: RouteCoordinate;
+    destination: RouteCoordinate;
+    waypoints?: RouteCoordinate[];
+    profile?: string;
+  }) => {
+    const { origin, destination, waypoints = [], profile = APP_CONFIG.ROUTE_PLANNING.MAPBOX.DEFAULT_PROFILE } = payload;
+
+    // Build coordinates string for Mapbox API
+    const allCoordinates = [origin, ...waypoints, destination];
+    const coordinatesString = allCoordinates
+      .map(coord => `${coord.longitude},${coord.latitude}`)
+      .join(';');
+
+    // Build Mapbox Directions API URL
+    const baseUrl = APP_CONFIG.ROUTE_PLANNING.MAPBOX.BASE_URL;
+    const url = `${baseUrl}/${profile}/${coordinatesString}`;
+
+    const params = new URLSearchParams({
+      access_token: process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || '',
+      geometries: APP_CONFIG.ROUTE_PLANNING.MAPBOX.GEOMETRIES,
+      overview: APP_CONFIG.ROUTE_PLANNING.MAPBOX.OVERVIEW,
+      steps: APP_CONFIG.ROUTE_PLANNING.MAPBOX.STEPS.toString(),
+      alternatives: APP_CONFIG.ROUTE_PLANNING.MAPBOX.ALTERNATIVES.toString(),
+    });
+
+    console.log('🗺️ Fetching route from Mapbox:', url);
+
+    const response = await fetch(`${url}?${params}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Mapbox API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.routes || data.routes.length === 0) {
+      throw new Error('No routes found for the given coordinates');
+    }
+
+    console.log('✅ Mapbox route retrieved successfully');
+    return data;
+  }
+);
+
+// Generate complete safe route with safety analysis
+export const generateSafeRoute = createAsyncThunk(
+  'locations/generateSafeRoute',
+  async (routeRequest: RouteRequest, { dispatch, getState }) => {
+    console.log('🚀 Generating safe route...');
+
+    try {
+      // Step 1: Get basic route from Mapbox
+      const mapboxResult = await dispatch(getMapboxRoute({
+        origin: routeRequest.origin,
+        destination: routeRequest.destination,
+        waypoints: routeRequest.waypoints,
+      })).unwrap();
+
+      // Step 2: Extract route coordinates from Mapbox response
+      const primaryRoute = mapboxResult.routes[0];
+      const routeCoordinates: RouteCoordinate[] = primaryRoute.geometry.coordinates.map(
+        (coord: [number, number]) => ({
+          latitude: coord[1],
+          longitude: coord[0],
+        })
+      );
+
+      // Step 3: Calculate safety scores for the route
+      const safetyAnalysis = await dispatch(calculateRouteSafety({
+        route_coordinates: routeCoordinates,
+        user_demographics: routeRequest.user_demographics,
+        waypoints: routeRequest.waypoints,
+      })).unwrap();
+
+      // Step 4: Create SafeRoute object
+      const safeRoute: SafeRoute = {
+        id: `route_${Date.now()}`,
+        name: determineBestRouteName(safetyAnalysis),
+        coordinates: routeCoordinates,
+        safety_analysis: safetyAnalysis,
+        estimated_duration_minutes: Math.round(primaryRoute.duration / 60),
+        is_primary_route: true,
+        route_type: determineRouteType(safetyAnalysis, routeRequest.route_preferences),
+        created_at: new Date().toISOString(),
+      };
+
+      console.log('✅ Safe route generated successfully');
+      return {
+        route: safeRoute,
+        mapbox_data: mapboxResult,
+        alternatives: mapboxResult.routes.slice(1), // Additional routes for future processing
+      };
+
+    } catch (error) {
+      console.error('❌ Safe route generation failed:', error);
+      throw error;
+    }
+  }
+);
+
+// Generate multiple route alternatives with different priorities
+export const generateRouteAlternatives = createAsyncThunk(
+  'locations/generateRouteAlternatives',
+  async (routeRequest: RouteRequest, { dispatch }) => {
+    console.log('🔀 Generating route alternatives...');
+
+    const alternatives: SafeRoute[] = [];
+
+    // Generate routes with different profiles/priorities
+    const profiles = [
+      { name: 'fastest', profile: 'mapbox/driving-traffic', type: 'fastest' as const },
+      { name: 'balanced', profile: 'mapbox/driving', type: 'balanced' as const },
+    ];
+
+    for (const profileConfig of profiles) {
+      try {
+        const mapboxResult = await dispatch(getMapboxRoute({
+          origin: routeRequest.origin,
+          destination: routeRequest.destination,
+          waypoints: routeRequest.waypoints,
+          profile: profileConfig.profile,
+        })).unwrap();
+
+        const routeCoordinates: RouteCoordinate[] = mapboxResult.routes[0].geometry.coordinates.map(
+          (coord: [number, number]) => ({
+            latitude: coord[1],
+            longitude: coord[0],
+          })
+        );
+
+        const safetyAnalysis = await dispatch(calculateRouteSafety({
+          route_coordinates: routeCoordinates,
+          user_demographics: routeRequest.user_demographics,
+          waypoints: routeRequest.waypoints,
+        })).unwrap();
+
+        alternatives.push({
+          id: `route_${profileConfig.name}_${Date.now()}`,
+          name: `${profileConfig.name.charAt(0).toUpperCase() + profileConfig.name.slice(1)} Route`,
+          coordinates: routeCoordinates,
+          safety_analysis: safetyAnalysis,
+          estimated_duration_minutes: Math.round(mapboxResult.routes[0].duration / 60),
+          is_primary_route: false,
+          route_type: profileConfig.type,
+          created_at: new Date().toISOString(),
+        });
+
+      } catch (error) {
+        console.warn(`⚠️ Failed to generate ${profileConfig.name} alternative:`, error);
+      }
+    }
+
+    console.log(`✅ Generated ${alternatives.length} route alternatives`);
+    return alternatives;
+  }
+);
 
 export const fetchNearbyLocations = createAsyncThunk(
   'locations/fetchNearby',
@@ -635,6 +915,33 @@ const locationsSlice = createSlice({
   name: 'locations',
   initialState,
   reducers: {
+    setSelectedRoute: (state, action: PayloadAction<SafeRoute | null>) => {
+      state.selectedRoute = action.payload;
+    },
+
+    setRouteRequest: (state, action: PayloadAction<RouteRequest | null>) => {
+      state.routeRequest = action.payload;
+    },
+
+    toggleRouteSegments: (state) => {
+      state.showRouteSegments = !state.showRouteSegments;
+    },
+
+    setSelectedSegment: (state, action: PayloadAction<RouteSegment | null>) => {
+      state.selectedSegment = action.payload;
+    },
+
+    updateRoutePreferences: (state, action: PayloadAction<Partial<typeof state.routePreferences>>) => {
+      state.routePreferences = { ...state.routePreferences, ...action.payload };
+    },
+
+    clearRoutes: (state) => {
+      state.routes = [];
+      state.selectedRoute = null;
+      state.routeAlternatives = [];
+      state.routeSafetyAnalysis = null;
+      state.routeError = null;
+    },
     setSelectedLocation: (state, action: PayloadAction<LocationWithScores | null>) => {
       state.selectedLocation = action.payload;
     },
@@ -853,10 +1160,88 @@ const locationsSlice = createSlice({
         const locationId = action.meta.arg;
         state.mlPredictionsLoading[locationId] = false;
       });
+    builder
+      .addCase(calculateRouteSafety.pending, (state) => {
+        state.routeLoading = true;
+        state.routeError = null;
+      })
+      .addCase(calculateRouteSafety.fulfilled, (state, action) => {
+        state.routeLoading = false;
+        state.routeSafetyAnalysis = action.payload;
+      })
+      .addCase(calculateRouteSafety.rejected, (state, action) => {
+        state.routeLoading = false;
+        state.routeError = action.error.message || 'Failed to calculate route safety';
+      })
 
+      // Get Mapbox Route
+      .addCase(getMapboxRoute.pending, (state) => {
+        state.routeLoading = true;
+        state.routeError = null;
+      })
+      .addCase(getMapboxRoute.fulfilled, (state) => {
+        state.routeLoading = false;
+      })
+      .addCase(getMapboxRoute.rejected, (state, action) => {
+        state.routeLoading = false;
+        state.routeError = action.error.message || 'Failed to get route from Mapbox';
+      })
+
+      // Generate Safe Route
+      .addCase(generateSafeRoute.pending, (state) => {
+        state.routeLoading = true;
+        state.routeError = null;
+      })
+      .addCase(generateSafeRoute.fulfilled, (state, action) => {
+        state.routeLoading = false;
+        state.selectedRoute = action.payload.route;
+        state.routeSafetyAnalysis = action.payload.route.safety_analysis;
+        state.routes = [action.payload.route];
+      })
+      .addCase(generateSafeRoute.rejected, (state, action) => {
+        state.routeLoading = false;
+        state.routeError = action.error.message || 'Failed to generate safe route';
+      })
+
+      // Generate Route Alternatives
+      .addCase(generateRouteAlternatives.pending, (state) => {
+        state.routeLoading = true;
+      })
+      .addCase(generateRouteAlternatives.fulfilled, (state, action) => {
+        state.routeLoading = false;
+        state.routeAlternatives = action.payload;
+      })
+      .addCase(generateRouteAlternatives.rejected, (state, action) => {
+        state.routeLoading = false;
+        state.routeError = action.error.message || 'Failed to generate route alternatives';
+      });
   },
 });
 
+function determineBestRouteName(safetyAnalysis: RouteSafetyAnalysis): string {
+  const { overall_route_score, route_summary } = safetyAnalysis;
+
+  if (overall_route_score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
+    return 'Safe Route';
+  } else if (overall_route_score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
+    return 'Moderate Safety Route';
+  } else {
+    return 'Caution Advised Route';
+  }
+}
+
+function determineRouteType(
+  safetyAnalysis: RouteSafetyAnalysis,
+  preferences: RouteRequest['route_preferences']
+): 'fastest' | 'safest' | 'balanced' {
+  if (preferences.prioritize_safety) {
+    return 'safest';
+  } else if (safetyAnalysis.overall_route_score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
+    return 'balanced';
+  } else {
+    return 'fastest';
+  }
+}
 export const {
   setSelectedLocation,
   setFilters,
@@ -869,6 +1254,12 @@ export const {
   setHeatMapVisible,
   toggleDangerZones,
   setDangerZonesVisible,
+  setSelectedRoute,
+  setRouteRequest,
+  toggleRouteSegments,
+  setSelectedSegment,
+  updateRoutePreferences,
+  clearRoutes,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

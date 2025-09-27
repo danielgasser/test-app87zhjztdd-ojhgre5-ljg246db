@@ -226,8 +226,7 @@ export default function ProfileScreen() {
           {profile?.full_name && (
             <Text style={styles.fullName}>
               {profile.full_name}
-
-              <TextInput value={profile.id} />
+              uid: <TextInput value={profile.id} />
             </Text>
           )}
         </View>

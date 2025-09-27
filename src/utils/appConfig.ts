@@ -101,6 +101,138 @@ export const APP_CONFIG = {
     REVIEW_SOFT_DELETE: true,             // Use soft delete for reviews
     LOCATION_CACHE_TTL_MINUTES: 30,       // Location data cache time-to-live
   },
+  ROUTE_PLANNING: {
+    // Route Segmentation
+    SEGMENT_LENGTH_METERS: 1000,                    // Divide routes into 1km segments for safety scoring
+    SCORING_RADIUS_METERS: 500,                     // Radius around each segment to find nearby locations
+    MAX_NEARBY_LOCATIONS: 20,                       // Maximum locations to consider per segment
+
+    // Route Generation
+    MAX_ALTERNATIVE_ROUTES: 5,                      // Maximum alternative routes to generate
+    MAX_DETOUR_MULTIPLIER: 1.5,                     // Max detour: 1.5x fastest route time
+
+    // Safety Priority Weights (for user preferences)
+    SAFETY_PRIORITY_WEIGHTS: {
+      SPEED_FOCUSED: 0.2,                           // 20% safety, 80% speed
+      BALANCED: 0.5,                                // 50% safety, 50% speed  
+      SAFETY_FOCUSED: 0.8,                          // 80% safety, 20% speed
+    },
+
+    // Route Safety Thresholds
+    SAFE_ROUTE_THRESHOLD: 4.0,                      // Overall route score >= 4.0 considered safe
+    MIXED_ROUTE_THRESHOLD: 3.0,                     // Overall route score >= 3.0 considered mixed
+    UNSAFE_ROUTE_THRESHOLD: 2.0,                    // Overall route score < 2.0 considered unsafe
+
+    // Danger Zone Penalties for Route Scoring
+    DANGER_ZONE_PENALTIES: {
+      HIGH_DANGER: 2.0,                             // Heavy penalty for high danger zones
+      MEDIUM_DANGER: 1.0,                           // Medium penalty
+      LOW_DANGER: 0.5,                              // Light penalty
+    },
+
+    // Time-Based Safety Adjustments
+    TIME_BASED_PENALTIES: {
+      EVENING_MULTIPLIER: 1.2,                      // 20% higher danger in evening
+      NIGHT_MULTIPLIER: 1.5,                        // 50% higher danger at night
+      EVENING_START_HOUR: 18,                       // 6 PM
+      NIGHT_START_HOUR: 22,                         // 10 PM
+    },
+
+    // Route Recommendations
+    MIN_CONFIDENCE_FOR_RECOMMENDATIONS: 0.6,        // Minimum confidence to make route suggestions
+    MAX_UNSAFE_SEGMENT_PERCENTAGE: 30,              // Max % of unsafe segments before recommending alternative
+
+    // Mapbox Directions API Settings
+    MAPBOX: {
+      BASE_URL: 'https://api.mapbox.com/directions/v5',
+      PROFILES: {
+        DRIVING: 'mapbox/driving',                   // Standard driving profile
+        DRIVING_TRAFFIC: 'mapbox/driving-traffic',   // Driving with real-time traffic
+        WALKING: 'mapbox/walking',                   // Walking profile
+        CYCLING: 'mapbox/cycling',                   // Cycling profile
+      },
+      DEFAULT_PROFILE: 'mapbox/driving-traffic',     // Default routing profile
+      MAX_WAYPOINTS: 25,                             // Maximum waypoints per request
+      GEOMETRIES: 'geojson',                         // Response geometry format
+      OVERVIEW: 'full',                              // Include full route geometry
+      STEPS: true,                                   // Include turn-by-turn instructions
+      ALTERNATIVES: true,                            // Request alternative routes
+    },
+
+    // Performance & Caching
+    ROUTE_CACHE_TTL_MINUTES: 15,                     // Cache route calculations for 15 minutes
+    MAX_CONCURRENT_ROUTE_REQUESTS: 3,                // Limit concurrent external API requests
+    REQUEST_TIMEOUT_MS: 10000,                       // 10 second timeout for route requests
+  },
+
+  // Route Display & UI Configuration
+  ROUTE_DISPLAY: {
+    // Route Line Colors
+    COLORS: {
+      SAFE_ROUTE: '#4CAF50',                         // Green for safe routes
+      MIXED_ROUTE: '#FFC107',                        // Yellow for mixed safety routes  
+      UNSAFE_ROUTE: '#F44336',                       // Red for unsafe routes
+      SELECTED_ROUTE: '#8E24AA',                     // Purple for selected route
+      ALTERNATIVE_ROUTE: '#757575',                  // Gray for alternative routes
+    },
+
+    // Route Line Styling
+    LINE_WIDTH: {
+      SELECTED: 6,                                   // Width of selected route line
+      ALTERNATIVE: 4,                                // Width of alternative route lines
+      SEGMENT_HIGHLIGHT: 8,                          // Width when highlighting specific segment
+    },
+
+    // Route Markers
+    MARKERS: {
+      START_COLOR: '#2E7D32',                        // Start point marker color
+      END_COLOR: '#C62828',                          // End point marker color
+      WAYPOINT_COLOR: '#1976D2',                     // Waypoint marker color
+      DANGER_WARNING_COLOR: '#FF5722',               // Danger zone warning marker color
+    },
+
+    // Animation & Interaction
+    ANIMATION_DURATION_MS: 300,                      // Route selection animation duration
+    SEGMENT_HOVER_DELAY_MS: 200,                     // Delay before showing segment details on hover
+  },
+
+  // Navigation Configuration
+  NAVIGATION: {
+    // Real-time Navigation
+    LOCATION_UPDATE_INTERVAL_MS: 1000,               // GPS location update frequency
+    ROUTE_RECALCULATION_THRESHOLD_METERS: 100,      // Distance off-route before recalculating
+    AHEAD_WARNING_DISTANCE_METERS: 2000,            // Distance to warn about upcoming dangers (2km)
+
+    // Safety Alerts
+    SAFETY_ALERTS: {
+      DANGER_ZONE_WARNING_DISTANCE: 1000,           // Warn 1km before entering danger zone
+      LOW_SAFETY_AREA_WARNING_DISTANCE: 500,        // Warn 500m before low safety area
+      ALTERNATIVE_ROUTE_SUGGESTION_THRESHOLD: 2.5,   // Suggest alternatives when route score < 2.5
+    },
+
+    // Voice Navigation
+    VOICE_INSTRUCTIONS: {
+      ENABLED_BY_DEFAULT: true,                      // Enable voice instructions by default
+      INCLUDE_SAFETY_WARNINGS: true,                 // Include safety context in voice instructions
+      LANGUAGE: 'en',                                // Default voice instruction language
+    },
+  },
+
+  // External API Rate Limiting
+  API_RATE_LIMITS: {
+    MAPBOX_DIRECTIONS_PER_HOUR: 2000,                // Conservative rate limit for Mapbox Directions API
+    MAPBOX_DIRECTIONS_PER_MINUTE: 60,                // Per-minute rate limit
+    SAFETY_SCORER_PER_HOUR: 1000,                    // Rate limit for our safety scoring function
+    DANGER_ZONES_PER_HOUR: 2000,                     // Rate limit for danger zone lookups
+  },
+
+  // Development & Testing
+  DEVELOPMENT: {
+    ENABLE_ROUTE_DEBUG_LOGS: true,                   // Enable detailed route calculation logging
+    MOCK_EXTERNAL_APIs: false,                       // Use mock data instead of external APIs (testing)
+    BYPASS_RATE_LIMITS: false,                       // Bypass rate limits in development
+    SHOW_SEGMENT_BOUNDARIES: false,                  // Visualize route segments on map (debug)
+  },
 
 } as const;
 
