@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Circle, Callout } from "react-native-maps";
+import MapView, { Marker, Circle, Callout, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -20,12 +20,16 @@ import {
   fetchDangerZones,
   toggleDangerZones,
   fetchMLPredictions,
+  setSelectedRoute,
+  clearRoutes,
+  RouteCoordinate,
 } from "src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
 import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import RoutePlanningModal from "src/components/RoutePlanningModal";
 import { APP_CONFIG } from "@/utils/appConfig";
 
 const getMarkerColor = (rating: number | string | null) => {
@@ -66,6 +70,13 @@ export default function MapScreen() {
     null
   );
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
+  const [showRoutePlanning, setShowRoutePlanning] = useState(false);
+  const [routeOrigin, setRouteOrigin] = useState<RouteCoordinate | null>(null);
+  const [routeDestination, setRouteDestination] =
+    useState<RouteCoordinate | null>(null);
+  const [routeMode, setRouteMode] = useState<
+    "select_origin" | "select_destination" | "none"
+  >("none");
 
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
@@ -86,6 +97,11 @@ export default function MapScreen() {
     dangerZonesLoading,
     mlPredictions,
     mlPredictionsLoading,
+    selectedRoute,
+    routes,
+    routeLoading,
+    showRouteSegments,
+    selectedSegment,
   } = useAppSelector((state) => state.locations);
 
   const userId = useAppSelector((state) => state.auth.user?.id);
@@ -225,8 +241,107 @@ export default function MapScreen() {
     }
   };
 
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      setLocationPermission(status === "granted");
+
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({});
+        const newRegion = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        };
+        setRegion(newRegion);
+        dispatch(
+          setUserLocation({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Location permission error:", error);
+      setLocationPermission(false);
+    }
+  };
+  const handleStartRouteSelection = () => {
+    setRouteMode("select_origin");
+    setRouteOrigin(null);
+    setRouteDestination(null);
+    dispatch(clearRoutes());
+    Alert.alert("Route Planning", "Tap on the map to set your starting point");
+  };
+  const handleMapPress = (event: any) => {
+    const coordinate = event.nativeEvent.coordinate;
+
+    if (routeMode === "select_origin") {
+      setRouteOrigin(coordinate);
+      setRouteMode("select_destination");
+      Alert.alert("Origin Set", "Now tap on the map to set your destination");
+    } else if (routeMode === "select_destination") {
+      setRouteDestination(coordinate);
+      setRouteMode("none");
+      Alert.alert("Destination Set", "Ready to plan your route!", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Plan Route", onPress: () => setShowRoutePlanning(true) },
+      ]);
+    }
+  };
+
+  const handleCancelRouteSelection = () => {
+    setRouteMode("none");
+    setRouteOrigin(null);
+    setRouteDestination(null);
+  };
+  const getRouteLineColor = (route: any) => {
+    if (!route.safety_analysis)
+      return APP_CONFIG.ROUTE_DISPLAY.COLORS.SELECTED_ROUTE;
+
+    const score = route.safety_analysis.overall_route_score;
+    if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
+      return APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE;
+    } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
+      return APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE;
+    } else {
+      return APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+    }
+  };
+
+  // NEW: Render route segments with color coding
+  const renderRouteSegments = (route: any) => {
+    if (!showRouteSegments || !route.safety_analysis?.segment_scores)
+      return null;
+
+    return route.safety_analysis.segment_scores.map(
+      (segment: any, index: number) => {
+        const segmentColor =
+          segment.overall_score >=
+          APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
+            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
+            : segment.overall_score >=
+              APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
+            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
+            : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+
+        return (
+          <Polyline
+            key={`segment-${index}`}
+            coordinates={[segment.start, segment.end]}
+            strokeColor={segmentColor}
+            strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SEGMENT_HIGHLIGHT}
+            lineDashPattern={[5, 5]}
+          />
+        );
+      }
+    );
+  };
   // ============= EFFECTS =============
-  // Request location permission
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();

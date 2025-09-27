@@ -13,6 +13,7 @@
     "@react-native-community/cli": "^20.0.2",
     "@react-native-community/datetimepicker": "8.4.1",
     "@react-native-picker/picker": "2.11.1",
+    "@react-navigation/native": "^7.1.17",
     "@reduxjs/toolkit": "^2.8.2",
     "@supabase/supabase-js": "^2.52.0",
     "base64-arraybuffer": "^1.0.2",
