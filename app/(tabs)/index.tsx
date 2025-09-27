@@ -77,6 +77,7 @@ export default function MapScreen() {
   const [routeMode, setRouteMode] = useState<
     "select_origin" | "select_destination" | "none"
   >("none");
+  const [showRoutePlanningModal, setShowRoutePlanningModal] = useState(false);
 
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
@@ -268,34 +269,12 @@ export default function MapScreen() {
     }
   };
   const handleStartRouteSelection = () => {
-    setRouteMode("select_origin");
-    setRouteOrigin(null);
-    setRouteDestination(null);
-    dispatch(clearRoutes());
-    Alert.alert("Route Planning", "Tap on the map to set your starting point");
+    setShowRoutePlanningModal(true);
   };
-  const handleMapPress = (event: any) => {
-    const coordinate = event.nativeEvent.coordinate;
-
-    if (routeMode === "select_origin") {
-      setRouteOrigin(coordinate);
-      setRouteMode("select_destination");
-      Alert.alert("Origin Set", "Now tap on the map to set your destination");
-    } else if (routeMode === "select_destination") {
-      setRouteDestination(coordinate);
-      setRouteMode("none");
-      Alert.alert("Destination Set", "Ready to plan your route!", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Plan Route", onPress: () => setShowRoutePlanning(true) },
-      ]);
-    }
+  const handleCloseRoutePlanning = () => {
+    setShowRoutePlanningModal(false);
   };
 
-  const handleCancelRouteSelection = () => {
-    setRouteMode("none");
-    setRouteOrigin(null);
-    setRouteDestination(null);
-  };
   const getRouteLineColor = (route: any) => {
     if (!route.safety_analysis)
       return APP_CONFIG.ROUTE_DISPLAY.COLORS.SELECTED_ROUTE;
@@ -427,7 +406,6 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
-        //onPress={handleMapPress}
         onMapReady={() => {
           setMapReady(true);
         }}
@@ -757,7 +735,7 @@ export default function MapScreen() {
           {routeMode === "none" ? (
             <TouchableOpacity
               style={styles.routeButton}
-              //onPress={handleStartRouteSelection}
+              onPress={handleStartRouteSelection}
             >
               <Ionicons name="navigate" size={24} color="#FFF" />
               <Text style={styles.routeButtonText}>Plan Route</Text>
@@ -771,12 +749,16 @@ export default function MapScreen() {
               </Text>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={handleCancelRouteSelection}
+                onPress={handleCloseRoutePlanning}
               >
                 <Ionicons name="close" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>
           )}
+          <RoutePlanningModal
+            visible={showRoutePlanningModal}
+            onClose={handleCloseRoutePlanning}
+          />
         </View>
       )}
       {selectedRoute && (
