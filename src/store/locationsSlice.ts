@@ -13,6 +13,10 @@ import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { ReactNode } from 'react';
 
+// ================================
+// INTERFACES AND TYPES
+// ================================
+
 interface SearchLocation {
   id: string;
   name: string;
@@ -22,6 +26,110 @@ interface SearchLocation {
   place_type?: string;
   source?: 'database' | 'mapbox';
 }
+
+interface HeatMapPoint {
+  latitude: number;
+  longitude: number;
+  weight: number;
+  safety_score: number;
+}
+
+interface CommunityReview {
+  id: string;
+  user_id: string;
+  location_id: string;
+  location_name: string;
+  safety_rating: number;
+  overall_rating: number;
+  comment: string;
+  created_at: string;
+  user_demographics: {
+    race_ethnicity: string[];
+    gender: string;
+    lgbtq_status: string;
+  };
+}
+
+interface MLPrediction {
+  predicted_safety: number;
+  confidence: number;
+  similar_users_count: number;
+  risk_factors: string[];
+}
+
+// Route Planning Types
+export interface RouteCoordinate {
+  latitude: number;
+  longitude: number;
+}
+
+export interface RouteRequest {
+  origin: RouteCoordinate;
+  destination: RouteCoordinate;
+  user_demographics: {
+    race_ethnicity: string;
+    gender: string;
+    lgbtq_status: string;
+    religion: string;
+    disability_status: string;
+    age_range: string;
+  };
+  route_preferences: {
+    prioritize_safety: boolean;
+    avoid_evening_danger: boolean;
+    max_detour_minutes: number;
+    required_waypoint_types?: string[];
+  };
+}
+
+interface RouteSegment {
+  start_lat: number;
+  start_lng: number;
+  end_lat: number;
+  end_lng: number;
+  safety_score: number;
+  distance_meters: number;
+  duration_seconds: number;
+}
+
+interface RouteSafetyAnalysis {
+  overall_route_score: number;
+  overall_confidence?: number;
+  segment_scores?: RouteSegment[];
+  danger_zones_intersected?: number;
+  high_risk_segments?: number;
+  total_segments?: number;
+  safety_summary?: {
+    safe_segments: number;
+    mixed_segments: number;
+    unsafe_segments: number;
+  };
+  safety_notes: string[];
+  analysis_timestamp?: string;
+  route_summary?: string;
+  confidence?: number;
+  risk_factors?: string[];
+}
+
+export interface SafeRoute {
+  id: string;
+  name: string;
+  route_type: 'fastest' | 'safest' | 'balanced';
+  coordinates: RouteCoordinate[];
+  estimated_duration_minutes: number;
+  distance_kilometers: number;
+  safety_analysis: RouteSafetyAnalysis;
+  created_at: string;
+  mapbox_data?: {
+    duration: number;
+    distance: number;
+    geometry: any;
+  };
+}
+
+// ================================
+// STATE INTERFACE
+// ================================
 
 interface LocationsState {
   locations: LocationWithScores[];
@@ -44,9 +152,9 @@ interface LocationsState {
   heatMapLoading: boolean;
   communityReviews: CommunityReview[];
   communityLoading: boolean;
-  dangerZones: DangerZone[]
-  dangerZonesVisible: boolean
-  dangerZonesLoading: boolean
+  dangerZones: DangerZone[];
+  dangerZonesVisible: boolean;
+  dangerZonesLoading: boolean;
   similarUsers: Array<{
     user_id: string;
     similarity_score: number;
@@ -73,33 +181,9 @@ interface LocationsState {
   };
 }
 
-interface MLPrediction {
-  location_id: string;
-  location_name: string;
-  predicted_safety_score: number;
-  confidence: number;
-  prediction_factors: {
-    place_type_avg: number;
-    similar_locations_count: number;
-    demographic_matches: number;
-  };
-  based_on_locations: number;
-  source: string;
-  calculation_timestamp: string;
-}
-
-interface HeatMapPoint {
-  latitude: number;
-  longitude: number;
-  safety_score: number;
-  review_count: number;
-  heat_weight: number;
-}
-
-interface CommunityReview extends Review {
-  location_name: string;
-  location_address: string;
-}
+// ================================
+// INITIAL STATE
+// ================================
 
 const initialState: LocationsState = {
   locations: [],
@@ -111,7 +195,7 @@ const initialState: LocationsState = {
   filters: {
     placeType: null,
     minSafetyScore: null,
-    radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+    radius: 10000,
   },
   searchResults: [],
   searchLoading: false,
@@ -139,484 +223,89 @@ const initialState: LocationsState = {
   showRouteSegments: false,
   selectedSegment: null,
   routePreferences: {
-    safetyPriority: 'balanced' as const,
+    safetyPriority: 'balanced',
     avoidEveningDanger: true,
     maxDetourMinutes: 15,
   },
 };
 
-export interface RouteCoordinate {
-  latitude: number;
-  longitude: number;
-}
+// ================================
+// ASYNC THUNKS - EXISTING ONES
+// ================================
 
-export interface RouteSegment {
-  start: RouteCoordinate;
-  end: RouteCoordinate;
-  center: RouteCoordinate;
-  distance_meters: number;
-  safety_score: number;
-  comfort_score: number;
-  overall_score: number;
-  confidence: number;
-  risk_factors: string[];
-  nearby_locations: any[];
-  danger_zones: any[];
-}
-
-export interface RouteSafetyAnalysis {
-  confidence_score: ReactNode;
-  overall_route_safety: number;
-  overall_route_comfort: number;
-  overall_route_score: number;
-  total_distance_meters: number;
-  confidence: number;
-  segment_scores: RouteSegment[];
-  danger_zone_intersections: any[];
-  high_risk_segments: RouteSegment[];
-  improvement_suggestions: string[];
-  route_summary: {
-    safe_segments: number;
-    mixed_segments: number;
-    unsafe_segments: number;
-    danger_zones_count: number;
-  };
-}
-
-export interface SafeRoute {
-  id: string;
-  name: string;
-  coordinates: RouteCoordinate[];
-  safety_analysis: RouteSafetyAnalysis;
-  estimated_duration_minutes: number;
-  is_primary_route: boolean;
-  route_type: 'fastest' | 'safest' | 'balanced';
-  created_at: string;
-}
-
-export interface RouteRequest {
-  origin: RouteCoordinate;
-  destination: RouteCoordinate;
-  waypoints?: RouteCoordinate[];
-  user_demographics: any;
-  route_preferences: {
-    prioritize_safety: boolean;
-    avoid_evening_danger: boolean;
-    max_detour_minutes: number;
-    required_waypoint_types?: string[];
-  };
-}
-
-export const calculateRouteSafety = createAsyncThunk(
-  'locations/calculateRouteSafety',
-  async (payload: {
-    route_coordinates: RouteCoordinate[];
-    user_demographics: any;
-    waypoints?: RouteCoordinate[];
-  }) => {
-    console.log('🔍 Calculating route safety scores...');
-
-    const { data, error } = await supabase.functions.invoke('route-safety-scorer', {
-      body: payload
+export const fetchNearbyLocations = createAsyncThunk(
+  'locations/fetchNearbyLocations',
+  async ({ latitude, longitude, radius = 10000 }: { latitude: number; longitude: number; radius?: number }) => {
+    const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
+      user_lat: latitude,
+      user_lng: longitude,
+      radius_meters: radius,
     });
 
     if (error) {
-      console.error('❌ Route safety calculation failed:', error);
-      throw new Error(`Route safety calculation failed: ${error.message}`);
-    }
-
-    console.log('✅ Route safety analysis complete:', data);
-    return data as RouteSafetyAnalysis;
-  }
-);
-
-// Get route from Mapbox Directions API
-export const getMapboxRoute = createAsyncThunk(
-  'locations/getMapboxRoute',
-  async (payload: {
-    origin: RouteCoordinate;
-    destination: RouteCoordinate;
-    waypoints?: RouteCoordinate[];
-    profile?: string;
-  }) => {
-    const { origin, destination, waypoints = [], profile = APP_CONFIG.ROUTE_PLANNING.MAPBOX.DEFAULT_PROFILE } = payload;
-
-    // Build coordinates string for Mapbox API
-    const allCoordinates = [origin, ...waypoints, destination];
-    const coordinatesString = allCoordinates
-      .map(coord => `${coord.longitude},${coord.latitude}`)
-      .join(';');
-
-    // Build Mapbox Directions API URL
-    const baseUrl = APP_CONFIG.ROUTE_PLANNING.MAPBOX.BASE_URL;
-    const url = `${baseUrl}/${profile}/${coordinatesString}`;
-
-    const params = new URLSearchParams({
-      access_token: process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || '',
-      geometries: APP_CONFIG.ROUTE_PLANNING.MAPBOX.GEOMETRIES,
-      overview: APP_CONFIG.ROUTE_PLANNING.MAPBOX.OVERVIEW,
-      steps: APP_CONFIG.ROUTE_PLANNING.MAPBOX.STEPS.toString(),
-      alternatives: APP_CONFIG.ROUTE_PLANNING.MAPBOX.ALTERNATIVES.toString(),
-    });
-
-    console.log('🗺️ Fetching route from Mapbox:', url);
-
-    const response = await fetch(`${url}?${params}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Mapbox API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.routes || data.routes.length === 0) {
-      throw new Error('No routes found for the given coordinates');
-    }
-
-    console.log('✅ Mapbox route retrieved successfully');
-    return data;
-  }
-);
-
-// Generate complete safe route with safety analysis
-export const generateSafeRoute = createAsyncThunk(
-  'locations/generateSafeRoute',
-  async (routeRequest: RouteRequest, { dispatch, getState }) => {
-    console.log('🚀 Generating safe route...');
-
-    try {
-      // Step 1: Get basic route from Mapbox
-      const mapboxResult = await dispatch(getMapboxRoute({
-        origin: routeRequest.origin,
-        destination: routeRequest.destination,
-        waypoints: routeRequest.waypoints,
-      })).unwrap();
-
-      // Step 2: Extract route coordinates from Mapbox response
-      const primaryRoute = mapboxResult.routes[0];
-      const routeCoordinates: RouteCoordinate[] = primaryRoute.geometry.coordinates.map(
-        (coord: [number, number]) => ({
-          latitude: coord[1],
-          longitude: coord[0],
-        })
-      );
-
-      // Step 3: Calculate safety scores for the route
-      const safetyAnalysis = await dispatch(calculateRouteSafety({
-        route_coordinates: routeCoordinates,
-        user_demographics: routeRequest.user_demographics,
-        waypoints: routeRequest.waypoints,
-      })).unwrap();
-
-      // Step 4: Create SafeRoute object
-      const safeRoute: SafeRoute = {
-        id: `route_${Date.now()}`,
-        name: determineBestRouteName(safetyAnalysis),
-        coordinates: routeCoordinates,
-        safety_analysis: safetyAnalysis,
-        estimated_duration_minutes: Math.round(primaryRoute.duration / 60),
-        is_primary_route: true,
-        route_type: determineRouteType(safetyAnalysis, routeRequest.route_preferences),
-        created_at: new Date().toISOString(),
-      };
-
-      console.log('✅ Safe route generated successfully');
-      return {
-        route: safeRoute,
-        mapbox_data: mapboxResult,
-        alternatives: mapboxResult.routes.slice(1), // Additional routes for future processing
-      };
-
-    } catch (error) {
-      console.error('❌ Safe route generation failed:', error);
+      console.error('Error fetching nearby locations:', error);
       throw error;
     }
-  }
-);
 
-// Generate multiple route alternatives with different priorities
-export const generateRouteAlternatives = createAsyncThunk(
-  'locations/generateRouteAlternatives',
-  async (routeRequest: RouteRequest, { dispatch }) => {
-    console.log('🔀 Generating route alternatives...');
-
-    const alternatives: SafeRoute[] = [];
-
-    // Generate routes with different profiles/priorities
-    const profiles = [
-      { name: 'fastest', profile: 'mapbox/driving-traffic', type: 'fastest' as const },
-      { name: 'balanced', profile: 'mapbox/driving', type: 'balanced' as const },
-    ];
-
-    for (const profileConfig of profiles) {
-      try {
-        const mapboxResult = await dispatch(getMapboxRoute({
-          origin: routeRequest.origin,
-          destination: routeRequest.destination,
-          waypoints: routeRequest.waypoints,
-          profile: profileConfig.profile,
-        })).unwrap();
-
-        const routeCoordinates: RouteCoordinate[] = mapboxResult.routes[0].geometry.coordinates.map(
-          (coord: [number, number]) => ({
-            latitude: coord[1],
-            longitude: coord[0],
-          })
-        );
-
-        const safetyAnalysis = await dispatch(calculateRouteSafety({
-          route_coordinates: routeCoordinates,
-          user_demographics: routeRequest.user_demographics,
-          waypoints: routeRequest.waypoints,
-        })).unwrap();
-
-        alternatives.push({
-          id: `route_${profileConfig.name}_${Date.now()}`,
-          name: `${profileConfig.name.charAt(0).toUpperCase() + profileConfig.name.slice(1)} Route`,
-          coordinates: routeCoordinates,
-          safety_analysis: safetyAnalysis,
-          estimated_duration_minutes: Math.round(mapboxResult.routes[0].duration / 60),
-          is_primary_route: false,
-          route_type: profileConfig.type,
-          created_at: new Date().toISOString(),
-        });
-
-      } catch (error) {
-        console.warn(`⚠️ Failed to generate ${profileConfig.name} alternative:`, error);
-      }
-    }
-
-    console.log(`✅ Generated ${alternatives.length} route alternatives`);
-    return alternatives;
-  }
-);
-
-export const fetchNearbyLocations = createAsyncThunk(
-  'locations/fetchNearby',
-  async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS }: Coordinates & { radius?: number }, { getState }) => {
-    // Get user profile from Redux state
-    const state = getState() as any;
-    const userProfile = state.user.profile;
-
-    // Use demographic-aware function if user has profile, otherwise fallback
-    if (userProfile && userProfile.race_ethnicity) {
-
-      const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
-        lat: latitude,
-        lng: longitude,
-        user_race_ethnicity: userProfile.race_ethnicity,
-        user_gender: userProfile.gender,
-        user_lgbtq_status: userProfile.lgbtq_status,
-        radius_meters: radius,
-      });
-
-      if (error) throw error;
-      return data || [];
-    } else {
-      // Fallback to standard function if no profile
-
-      const { data, error } = await supabase.rpc('get_nearby_locations', {
-        lat: latitude,
-        lng: longitude,
-        radius_meters: radius,
-      });
-
-      if (error) throw error;
-      return data || [];
-    }
+    return data || [];
   }
 );
 
 export const fetchLocationDetails = createAsyncThunk(
-  'locations/fetchDetails',
+  'locations/fetchLocationDetails',
   async (locationId: string) => {
-    // Get location with coordinates using our dedicated function
-    const { data: locationData, error: locationError } = await supabase
-      .rpc('get_location_with_coords', { location_id: locationId });
+    const { data, error } = await supabase.rpc('get_location_with_scores', {
+      location_id: locationId,
+    });
 
-    if (locationError || !locationData || locationData.length === 0) {
-      throw new Error(`Location not found: ${locationError?.message}`);
+    if (error) {
+      console.error('Error fetching location details:', error);
+      throw error;
     }
 
-    const location = locationData[0];
-
-    // Get safety scores separately
-    const { data: safetyScores, error: scoresError } = await supabase
-      .from('safety_scores')
-      .select('*')
-      .eq('location_id', locationId);
-
-    if (scoresError) {
-      console.warn('Error fetching safety scores:', scoresError);
-    }
-
-    const overallScore = safetyScores?.find(
-      (score: any) => score.demographic_type === 'overall'
-    );
-
-    return {
-      ...location,
-      safety_scores: safetyScores || [],
-      overall_safety_score: overallScore?.avg_safety_score || null,
-      review_count: overallScore?.review_count || 0,
-    };
+    return data;
   }
 );
 
-export const fetchDangerZones = createAsyncThunk(
-  'locations/fetchDangerZones',
-  async ({ userId, radiusMiles = 50 }: { userId: string; radiusMiles?: number }) => {
-    const supabaseUrl = (supabase as any).supabaseUrl
-    const supabaseAnonKey = (supabase as any).supabaseKey
+export const createLocation = createAsyncThunk(
+  'locations/createLocation',
+  async (locationData: CreateLocationForm) => {
+    const { data, error } = await supabase.from('locations').insert(locationData).select().single();
 
-    const response = await fetch(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ user_id: userId, radius_miles: radiusMiles }),
-      }
-    )
-
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error('Failed to fetch danger zones')
+    if (error) {
+      console.error('Error creating location:', error);
+      throw error;
     }
 
-    const data: DangerZonesResponse = await response.json()
-    return data.danger_zones
-  }
-)
-
-export const createLocation = createAsyncThunk(
-  'locations/create',
-  async (locationData: CreateLocationForm, { getState }) => {
-    const state = getState() as any;
-    const userId = state.auth.user?.id;
-
-    if (!userId) throw new Error('User must be logged in to create locations');
-
-    const { latitude, longitude, ...rest } = locationData;
-
-    const { data, error } = await supabase
-      .from('locations')
-      .insert({
-        ...rest,
-        coordinates: `POINT(${longitude} ${latitude})`,
-        created_by: userId,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
     return data;
   }
 );
 
 export const submitReview = createAsyncThunk(
   'locations/submitReview',
-  async (reviewData: CreateReviewForm, { getState, dispatch }) => {
-    const state = getState() as any;
-    const userId = state.auth.user?.id;
+  async (reviewData: CreateReviewForm) => {
+    const { data, error } = await supabase.from('reviews').insert(reviewData).select().single();
 
-    if (!userId) throw new Error('User must be logged in to submit reviews');
-    const { data: existingReview } = await supabase
-      .from('reviews')
-      .select('id')
-      .eq('location_id', reviewData.location_id)
-      .eq('user_id', userId)
-      .single();
-
-    if (existingReview) {
-      throw new Error('You have already reviewed this location');
+    if (error) {
+      console.error('Error submitting review:', error);
+      throw error;
     }
-    const { data: review, error } = await supabase
-      .from('reviews')
-      .insert({
-        ...reviewData,
-        user_id: userId,
-      })
-      .select()
-      .single();
 
-    if (error) throw error;
-
-    await supabase.rpc('calculate_location_safety_scores', {
-      p_location_id: reviewData.location_id,
-    });
-
-    dispatch(fetchLocationDetails(reviewData.location_id));
-
-    return review;
-  }
-);
-
-export const fetchRecentReviews = createAsyncThunk(
-  'locations/fetchRecentReviews',
-  async () => {
-    const { data, error } = await supabase
-      .from('reviews')
-      .select(`
-        *,
-        locations (
-          name,
-          address
-        )
-      `)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) throw error;
-
-    // Transform the data to include location info at top level
-    const transformedReviews = data?.map(review => ({
-      ...review,
-      location_name: review.locations?.name || 'Unknown Location',
-      location_address: review.locations?.address || '',
-    })) || [];
-
-    return transformedReviews;
+    return data;
   }
 );
 
 export const updateReview = createAsyncThunk(
   'locations/updateReview',
-  async ({ reviewId, reviewData }: { reviewId: string; reviewData: Partial<CreateReviewForm> }, { getState, dispatch }) => {
-    const state = getState() as any;
-    const userId = state.auth.user?.id;
+  async ({ id, ...updateData }: { id: string } & Partial<CreateReviewForm>) => {
+    const { data, error } = await supabase.from('reviews').update(updateData).eq('id', id).select().single();
 
-    if (!userId) throw new Error('User must be logged in to update reviews');
-
-    const { data: review, error } = await supabase
-      .from('reviews')
-      .update({
-        ...reviewData,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', reviewId)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    if (reviewData.location_id) {
-      await supabase.rpc('calculate_location_safety_scores', {
-        p_location_id: reviewData.location_id,
-      });
-
-      dispatch(fetchLocationDetails(reviewData.location_id));
+    if (error) {
+      console.error('Error updating review:', error);
+      throw error;
     }
 
-    return review;
+    return data;
   }
 );
 
@@ -631,94 +320,80 @@ export const fetchUserReviews = createAsyncThunk(
           id,
           name,
           address,
-          place_type
+          latitude,
+          longitude
         )
       `)
       .eq('user_id', userId)
+      .eq('status', 'active')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching user reviews:', error);
+      throw error;
+    }
+
     return data || [];
   }
 );
 
-export const voteReview = createAsyncThunk(
-  'locations/voteReview',
-  async ({ reviewId, voteType }: { reviewId: string; voteType: 'helpful' | 'unhelpful' }, { getState }) => {
-    const state = getState() as any;
-    const userId = state.auth.user?.id;
-
-    if (!userId) throw new Error('User must be logged in to vote');
-
-    const { data: existingVote } = await supabase
-      .from('review_votes')
-      .select()
-      .eq('review_id', reviewId)
-      .eq('user_id', userId)
-      .single();
-
-    if (existingVote) {
-      const { error } = await supabase
-        .from('review_votes')
-        .update({ vote_type: voteType })
-        .eq('id', existingVote.id);
-
-      if (error) throw error;
-    } else {
-      const { error } = await supabase
-        .from('review_votes')
-        .insert({
-          review_id: reviewId,
-          user_id: userId,
-          vote_type: voteType,
-        });
-
-      if (error) throw error;
-    }
-
-    const { error: updateError } = await supabase.rpc(
-      voteType === 'helpful' ? 'increment_helpful_count' : 'increment_unhelpful_count',
-      { review_id: reviewId }
-    );
-
-    if (updateError) throw updateError;
-
-    return { reviewId, voteType };
-  }
-);
-
-
 export const searchLocations = createAsyncThunk(
   'locations/searchLocations',
-  async ({ query, userLocation }: { query: string; userLocation?: { lat: number; lng: number } }) => {
-    if (query.length < 3) {
+  async ({ query, latitude, longitude }: { query: string; latitude?: number; longitude?: number }) => {
+    if (query.trim().length < 2) {
       return [];
     }
 
     try {
-      const { data: existingLocations, error: dbError } = await supabase
-        .rpc('search_locations_with_coords', {
-          search_query: query,
-          result_limit: 5
-        });
+      const { data: dbResults, error: dbError } = await supabase
+        .from('locations')
+        .select('*')
+        .or(`name.ilike.%${query}%,address.ilike.%${query}%`)
+        .eq('active', true)
+        .limit(5);
 
-      let results: SearchLocation[] = [];
-
-      if (existingLocations && !dbError) {
-        results = existingLocations.map((loc: { id: any; name: any; address: any; city: any; state_province: any; latitude: any; longitude: any; place_type: any; }) => ({
-          id: loc.id,
-          name: loc.name,
-          address: `${loc.address}, ${loc.city}, ${loc.state_province}`,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          place_type: loc.place_type,
-          source: 'database' as const,
-        }));
-      } else if (dbError) {
+      if (dbError) {
         console.error('Database search error:', dbError);
       }
 
-      return results;
+      const searchResults: SearchLocation[] = (dbResults || []).map(location => ({
+        id: location.id,
+        name: location.name,
+        address: location.address,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        place_type: location.place_type,
+        source: 'database' as const,
+      }));
+
+      const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
+      if (mapboxToken && searchResults.length < 5) {
+        try {
+          const proximity = latitude && longitude ? `${longitude},${latitude}` : '';
+          const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&limit=${5 - searchResults.length}&proximity=${proximity}`;
+
+          const mapboxResponse = await fetch(mapboxUrl);
+          const mapboxData = await mapboxResponse.json();
+
+          if (mapboxData.features) {
+            mapboxData.features.forEach((feature: any) => {
+              searchResults.push({
+                id: feature.id,
+                name: feature.place_name.split(',')[0],
+                address: feature.place_name,
+                latitude: feature.center[1],
+                longitude: feature.center[0],
+                place_type: feature.place_type?.[0],
+                source: 'mapbox' as const,
+              });
+            });
+          }
+        } catch (mapboxError) {
+          console.error('Mapbox search error:', mapboxError);
+        }
+      }
+
+      return searchResults;
     } catch (error) {
       console.error('Search error:', error);
       throw error;
@@ -728,35 +403,17 @@ export const searchLocations = createAsyncThunk(
 
 export const createLocationFromSearch = createAsyncThunk(
   'locations/createLocationFromSearch',
-  async (searchLocation: SearchLocation, { getState, dispatch }) => {
-    const state = getState() as any;
-    const userId = state.auth.user?.id;
-
-    if (!userId) throw new Error('User must be logged in');
-
-    const { data: existingLocation } = await supabase
-      .from('locations')
-      .select('id')
-      .eq('name', searchLocation.name)
-      .ilike('address', `%${searchLocation.address.split(',')[0]}%`)
-      .single();
-
-    if (existingLocation) {
-      return existingLocation.id;
+  async ({ searchLocation, userId }: { searchLocation: SearchLocation; userId: string }) => {
+    if (searchLocation.source === 'database') {
+      return searchLocation.id;
     }
 
-    const addressParts = searchLocation.address.split(',').map(part => part.trim());
-    const streetAddress = addressParts[0] || searchLocation.address;
-    const city = addressParts[1] || 'Unknown';
-    const stateProvince = addressParts[2] || 'Unknown';
-    const country = addressParts[3] || 'US';
-
-    const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type);
+    const [city, stateProvince, country] = searchLocation.address.split(',').map(s => s.trim());
+    const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type || 'poi');
 
     const locationData = {
       name: searchLocation.name,
-      description: null,
-      address: streetAddress,
+      address: city,
       city: city,
       state_province: stateProvince,
       country: country,
@@ -780,17 +437,6 @@ export const createLocationFromSearch = createAsyncThunk(
       throw error;
     }
 
-    const newLocationWithScores = {
-      ...data,
-      latitude: searchLocation.latitude,
-      longitude: searchLocation.longitude,
-      avg_safety_score: null,
-      overall_safety_score: null,
-      review_count: 0,
-      safety_scores: [],
-    };
-
-    // Add to Redux state immediately
     return data.id;
   }
 );
@@ -809,23 +455,128 @@ export const fetchHeatMapData = createAsyncThunk(
     userProfile?: any;
   }) => {
     try {
-      const { data, error } = await supabase.rpc('get_heatmap_data', {
-        center_lat: latitude,
-        center_lng: longitude,
+      const { data, error } = await supabase.rpc('', {
+        user_lat: latitude,
+        user_lng: longitude,
         radius_meters: radius,
-        user_race_ethnicity: userProfile?.race_ethnicity || null,
-        user_gender: userProfile?.gender || null,
-        user_lgbtq_status: userProfile?.lgbtq_status || null,
-        user_disability_status: userProfile?.disability_status || null,
-        user_religion: userProfile?.religion || null,
-        user_age_range: userProfile?.age_range || null,
       });
+
       if (error) {
+        console.error('Error fetching heat map data:', error);
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      const heatMapPoints: HeatMapPoint[] = data.map((location: any) => ({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        weight: Math.max(0.1, Math.min(1.0, (location.overall_safety_score || 3) / 5)),
+        safety_score: location.overall_safety_score || 3,
+      }));
+
+      return heatMapPoints;
+    } catch (error) {
+      console.error('Heat map data fetch error:', error);
+      return [];
+    }
+  }
+);
+
+export const fetchRecentReviews = createAsyncThunk(
+  'locations/fetchRecentReviews',
+  async (limit: number = 10) => {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          user_id,
+          location_id,
+          safety_rating,
+          overall_rating,
+          comment,
+          created_at,
+          user_profiles!inner (
+            race_ethnicity,
+            gender,
+            lgbtq_status
+          ),
+          locations!inner (
+            name
+          )
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching recent reviews:', error);
         throw error;
       }
-      return data || [];
-    } catch (err) {
-      throw err;
+
+      return (data || []).map(review => ({
+        id: review.id,
+        user_id: review.user_id,
+        location_id: review.location_id,
+        location_name: Array.isArray(review.locations) && review.locations.length > 0 ? review.locations[0].name : 'Unknown Location',
+        safety_rating: review.safety_rating,
+        overall_rating: review.overall_rating,
+        comment: review.comment,
+        created_at: review.created_at,
+        user_demographics: {
+          race_ethnicity: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].race_ethnicity : undefined,
+          gender: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].gender : undefined,
+          lgbtq_status: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].lgbtq_status : undefined,
+        },
+      }));
+    } catch (error) {
+      console.error('Recent reviews fetch error:', error);
+      throw error;
+    }
+  }
+);
+
+export const fetchDangerZones = createAsyncThunk(
+  'locations/fetchDangerZones',
+  async ({
+    latitude,
+    longitude,
+    radius = 10000,
+    userDemographics
+  }: {
+    latitude: number;
+    longitude: number;
+    radius?: number;
+    userDemographics?: any;
+  }) => {
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          latitude,
+          longitude,
+          radius_miles: radius / 1609.34,
+          user_demographics: userDemographics
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Danger zones API error:', response.status);
+        return [];
+      }
+
+      const data: DangerZonesResponse = await response.json();
+      return data.zones || [];
+    } catch (error) {
+      console.error('Error fetching danger zones:', error);
+      return [];
     }
   }
 );
@@ -833,52 +584,49 @@ export const fetchHeatMapData = createAsyncThunk(
 export const fetchSimilarUsers = createAsyncThunk(
   'locations/fetchSimilarUsers',
   async (userId: string) => {
-    const response = await fetch(
-      `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/similarity-calculator`,
-      {
+    try {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/similarity-calculator`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
         },
-        body: JSON.stringify({ user_id: userId, limit: 10 }),
+        body: JSON.stringify({ user_id: userId })
+      });
+
+      if (!response.ok) {
+        console.error('Similar users API error:', response.status);
+        return [];
       }
-    );
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch similar users');
+      const data = await response.json();
+      return data.similar_users || [];
+    } catch (error) {
+      console.error('Error fetching similar users:', error);
+      return [];
     }
-
-    const data = await response.json();
-    return data.similar_users;
   }
 );
-
-// Replace your fetchMLPredictions in locationsSlice.ts:
 
 export const fetchMLPredictions = createAsyncThunk(
   'locations/fetchMLPredictions',
   async (locationId: string, { getState }) => {
-    const state = getState() as any;
-    const userId = state.auth.user?.id;
-    const userProfile = state.user.profile;
-
-    if (!userId) {
-      throw new Error('User must be logged in to get ML predictions');
-    }
-
-    if (!userProfile) {
-      throw new Error('User profile required for ML predictions');
-    }
-
     try {
+      const state = getState() as any;
+      const userId = state.auth.user?.id;
+      const userProfile = state.user.profile;
+
+      if (!userId || !userProfile) {
+        throw new Error('User not authenticated or profile not loaded');
+      }
+
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify({
             location_id: locationId,
@@ -913,6 +661,361 @@ export const fetchMLPredictions = createAsyncThunk(
   }
 );
 
+// ================================
+// ROUTE PLANNING ASYNC THUNKS
+// ================================
+
+export const calculateRouteSafety = createAsyncThunk(
+  'locations/calculateRouteSafety',
+  async (payload: {
+    route_coordinates: RouteCoordinate[];
+    user_demographics: any;
+    waypoints?: RouteCoordinate[];
+  }) => {
+    console.log('🔍 Calculating route safety scores...');
+
+    // Try the route-safety-scorer Edge Function first
+    try {
+      const { data, error } = await supabase.functions.invoke('route-safety-scorer', {
+        body: payload
+      });
+
+      if (error) {
+        console.warn('❌ Route safety scorer failed, using fallback method:', error);
+        throw error;
+      }
+
+      console.log('✅ Route safety analysis complete:', data);
+      return data as RouteSafetyAnalysis;
+    } catch (error) {
+      // Fallback to simplified safety analysis
+      console.log('🔄 Using fallback route safety analysis...');
+
+      const coordinates = payload.route_coordinates;
+      const samplePoints = coordinates.filter((_, index) =>
+        index % Math.max(1, Math.floor(coordinates.length / 5)) === 0
+      );
+
+      let totalSafety = 0;
+      let validPoints = 0;
+      let highRiskSegments = 0;
+      const safetyNotes: string[] = [];
+
+      // Sample a few points for basic safety analysis
+      for (const point of samplePoints) {
+        try {
+          const safetyResponse = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              latitude: point.latitude,
+              longitude: point.longitude,
+              user_demographics: payload.user_demographics,
+              place_type: 'route_point'
+            })
+          });
+
+          let pointSafety = 3.0;
+          if (safetyResponse.ok) {
+            const safetyData = await safetyResponse.json();
+            pointSafety = safetyData.predicted_safety || 3.0;
+
+            if (pointSafety < 2.5) {
+              highRiskSegments++;
+            }
+          }
+
+          totalSafety += pointSafety;
+          validPoints++;
+        } catch (pointError) {
+          console.error('Error analyzing point:', pointError);
+          totalSafety += 3.0;
+          validPoints++;
+        }
+      }
+
+      const overallScore = validPoints > 0 ? totalSafety / validPoints : 3.0;
+
+      if (overallScore >= 4.0) {
+        safetyNotes.push('This route is generally considered safe');
+      } else if (overallScore >= 3.0) {
+        safetyNotes.push('This route has mixed safety characteristics');
+      } else {
+        safetyNotes.push('This route may have safety concerns');
+      }
+
+      if (highRiskSegments > 0) {
+        safetyNotes.push(`${highRiskSegments} area(s) require extra caution`);
+      }
+
+      return {
+        overall_route_score: Math.round(overallScore * 10) / 10,
+        safety_notes: safetyNotes.slice(0, 3),
+        confidence: Math.min(0.9, validPoints * 0.15),
+        analysis_timestamp: new Date().toISOString()
+      };
+    }
+  }
+);
+
+export const getMapboxRoute = createAsyncThunk(
+  'locations/getMapboxRoute',
+  async (payload: {
+    origin: RouteCoordinate;
+    destination: RouteCoordinate;
+    waypoints?: RouteCoordinate[];
+    profile?: string;
+  }) => {
+    const { origin, destination, waypoints, profile = 'driving' } = payload;
+
+    const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
+    if (!mapboxToken) {
+      throw new Error('Mapbox token not configured');
+    }
+
+    // Build coordinates string
+    let coordinates = `${origin.longitude},${origin.latitude}`;
+
+    // Add waypoints if provided
+    if (waypoints && waypoints.length > 0) {
+      waypoints.forEach(waypoint => {
+        coordinates += `;${waypoint.longitude},${waypoint.latitude}`;
+      });
+    }
+
+    coordinates += `;${destination.longitude},${destination.latitude}`;
+
+    const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?` +
+      new URLSearchParams({
+        access_token: mapboxToken,
+        alternatives: 'true',
+        geometries: 'geojson',
+        steps: 'false',
+        overview: 'full'
+      });
+
+    console.log('🗺️ Calling Mapbox Directions API...');
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Mapbox API Error:', response.status, errorText);
+      throw new Error(`Mapbox API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+      throw new Error(`No routes found: ${data.code}`);
+    }
+
+    console.log(`✅ Got ${data.routes.length} route(s) from Mapbox`);
+    return data.routes;
+  }
+);
+
+export const generateSafeRoute = createAsyncThunk(
+  'locations/generateSafeRoute',
+  async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
+    try {
+      console.log('🚀 Starting safe route generation...');
+
+      // Step 1: Get route from Mapbox
+      const mapboxRoutes = await dispatch(getMapboxRoute({
+        origin: routeRequest.origin,
+        destination: routeRequest.destination,
+        profile: 'driving'
+      })).unwrap();
+
+      if (!mapboxRoutes || mapboxRoutes.length === 0) {
+        throw new Error('No routes found from Mapbox');
+      }
+
+      const primaryRoute = mapboxRoutes[0];
+      console.log(`🗺️ Got primary route: ${Math.round(primaryRoute.duration / 60)} min, ${Math.round(primaryRoute.distance / 1000)} km`);
+
+      // Step 2: Convert coordinates for safety analysis
+      const routeCoordinates: RouteCoordinate[] = primaryRoute.geometry.coordinates.map(
+        ([lng, lat]: [number, number]) => ({
+          latitude: lat,
+          longitude: lng
+        })
+      );
+
+      // Step 3: Calculate route safety
+      console.log('🔍 Analyzing route safety...');
+      const safetyAnalysis = await dispatch(calculateRouteSafety({
+        route_coordinates: routeCoordinates,
+        user_demographics: routeRequest.user_demographics
+      })).unwrap();
+
+      // Step 4: Create SafeRoute object
+      const routeName = determineBestRouteName(safetyAnalysis);
+      const routeType = determineRouteType(safetyAnalysis, routeRequest.route_preferences);
+
+      const safeRoute: SafeRoute = {
+        id: `route_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: routeName,
+        route_type: routeType,
+        coordinates: routeCoordinates,
+        estimated_duration_minutes: Math.round(primaryRoute.duration / 60),
+        distance_kilometers: Math.round(primaryRoute.distance / 1000 * 10) / 10,
+        safety_analysis: safetyAnalysis,
+        created_at: new Date().toISOString(),
+        mapbox_data: {
+          duration: primaryRoute.duration,
+          distance: primaryRoute.distance,
+          geometry: primaryRoute.geometry
+        }
+      };
+
+      console.log(`✅ Generated route: ${safeRoute.name} (${safeRoute.estimated_duration_minutes} min, Safety: ${safetyAnalysis.overall_route_score.toFixed(1)})`);
+
+      return {
+        route: safeRoute,
+        mapbox_routes: mapboxRoutes
+      };
+
+    } catch (error) {
+      console.error('❌ Route generation failed:', error);
+      return rejectWithValue(error instanceof Error ? error.message : 'Unknown error occurred');
+    }
+  }
+);
+
+export const generateRouteAlternatives = createAsyncThunk(
+  'locations/generateRouteAlternatives',
+  async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
+    try {
+      console.log('🔄 Generating route alternatives...');
+
+      // Get Mapbox routes (with alternatives)
+      const mapboxRoutes = await dispatch(getMapboxRoute({
+        origin: routeRequest.origin,
+        destination: routeRequest.destination,
+        profile: 'driving'
+      })).unwrap();
+
+      if (!mapboxRoutes || mapboxRoutes.length <= 1) {
+        console.log('⚠️ No alternative routes available from Mapbox');
+        return [];
+      }
+
+      const alternatives: SafeRoute[] = [];
+
+      // Process alternative routes (skip the first one as it's the primary)
+      for (let i = 1; i < Math.min(mapboxRoutes.length, 4); i++) {
+        const route = mapboxRoutes[i];
+
+        try {
+          console.log(`🔍 Analyzing alternative route ${i}...`);
+
+          const routeCoordinates: RouteCoordinate[] = route.geometry.coordinates.map(
+            ([lng, lat]: [number, number]) => ({
+              latitude: lat,
+              longitude: lng
+            })
+          );
+
+          const safetyAnalysis = await dispatch(calculateRouteSafety({
+            route_coordinates: routeCoordinates,
+            user_demographics: routeRequest.user_demographics
+          })).unwrap();
+
+          // Determine route characteristics
+          let routeType: 'fastest' | 'safest' | 'balanced' = 'balanced';
+          let routeName = `Alternative ${i}`;
+
+          // Check if this is the fastest route
+          const isFastest = mapboxRoutes.every((r: { duration: number; }, idx: number) => idx === i || r.duration >= route.duration);
+          if (isFastest) {
+            routeType = 'fastest';
+            routeName = 'Fastest Route';
+          }
+
+          // Check if this is the safest route
+          const isSafest = safetyAnalysis.overall_route_score >= 4.0;
+          if (isSafest && routeType !== 'fastest') {
+            routeType = 'safest';
+            routeName = 'Safest Route';
+          }
+
+          const safeRoute: SafeRoute = {
+            id: `alt_route_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+            name: routeName,
+            route_type: routeType,
+            coordinates: routeCoordinates,
+            estimated_duration_minutes: Math.round(route.duration / 60),
+            distance_kilometers: Math.round(route.distance / 1000 * 10) / 10,
+            safety_analysis: safetyAnalysis,
+            created_at: new Date().toISOString(),
+            mapbox_data: {
+              duration: route.duration,
+              distance: route.distance,
+              geometry: route.geometry
+            }
+          };
+
+          alternatives.push(safeRoute);
+
+        } catch (error) {
+          console.error(`Error analyzing alternative route ${i}:`, error);
+          // Continue with other routes even if one fails
+        }
+      }
+
+      // Sort alternatives by safety score (highest first)
+      alternatives.sort((a, b) =>
+        b.safety_analysis.overall_route_score - a.safety_analysis.overall_route_score
+      );
+
+      console.log(`✅ Generated ${alternatives.length} alternative routes`);
+      return alternatives;
+
+    } catch (error) {
+      console.error('❌ Alternative route generation failed:', error);
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to generate alternatives');
+    }
+  }
+);
+
+// ================================
+// HELPER FUNCTIONS
+// ================================
+
+function determineBestRouteName(safetyAnalysis: RouteSafetyAnalysis): string {
+  const { overall_route_score } = safetyAnalysis;
+
+  if (overall_route_score >= 4.0) {
+    return 'Safe Route';
+  } else if (overall_route_score >= 3.0) {
+    return 'Moderate Safety Route';
+  } else {
+    return 'Caution Advised Route';
+  }
+}
+
+function determineRouteType(
+  safetyAnalysis: RouteSafetyAnalysis,
+  preferences: RouteRequest['route_preferences']
+): 'fastest' | 'safest' | 'balanced' {
+  if (preferences.prioritize_safety) {
+    return 'safest';
+  } else if (safetyAnalysis.overall_route_score >= 4.0) {
+    return 'balanced';
+  } else {
+    return 'fastest';
+  }
+}
+
+// ================================
+// SLICE DEFINITION
+// ================================
+
 const locationsSlice = createSlice({
   name: 'locations',
   initialState,
@@ -944,63 +1047,72 @@ const locationsSlice = createSlice({
       state.routeSafetyAnalysis = null;
       state.routeError = null;
     },
+
     setSelectedLocation: (state, action: PayloadAction<LocationWithScores | null>) => {
       state.selectedLocation = action.payload;
     },
+
     setFilters: (state, action: PayloadAction<Partial<LocationsState['filters']>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
+
     clearError: (state) => {
       state.error = null;
     },
+
     clearSearchResults: (state) => {
       state.searchResults = [];
       state.showSearchResults = false;
     },
+
     setShowSearchResults: (state, action: PayloadAction<boolean>) => {
       state.showSearchResults = action.payload;
     },
+
     setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
       state.userLocation = action.payload;
     },
-    addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
 
-      // Add location to nearby if not already present
+    addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
       if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
         state.nearbyLocations.push(action.payload);
       }
     },
+
     toggleHeatMap: (state) => {
       state.heatMapVisible = !state.heatMapVisible;
     },
+
     setHeatMapVisible: (state, action: PayloadAction<boolean>) => {
       state.heatMapVisible = action.payload;
     },
-    toggleDangerZones: (state) => {
 
-      state.dangerZonesVisible = !state.dangerZonesVisible
+    toggleDangerZones: (state) => {
+      state.dangerZonesVisible = !state.dangerZonesVisible;
     },
+
     setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
-      state.dangerZonesVisible = action.payload
+      state.dangerZonesVisible = action.payload;
     },
   },
+
   extraReducers: (builder) => {
     builder
+      // Fetch Nearby Locations
       .addCase(fetchNearbyLocations.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchNearbyLocations.fulfilled, (state, action) => {
-
         state.loading = false;
         state.nearbyLocations = action.payload;
       })
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch nearby locations';
-      });
+      })
 
-    builder
+      // Fetch Location Details
       .addCase(fetchLocationDetails.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -1012,9 +1124,9 @@ const locationsSlice = createSlice({
       .addCase(fetchLocationDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch location details';
-      });
+      })
 
-    builder
+      // Create Location
       .addCase(createLocation.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -1026,9 +1138,9 @@ const locationsSlice = createSlice({
       .addCase(createLocation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to create location';
-      });
+      })
 
-    builder
+      // Submit Review
       .addCase(submitReview.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -1040,9 +1152,9 @@ const locationsSlice = createSlice({
       .addCase(submitReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to submit review';
-      });
+      })
 
-    builder
+      // Update Review
       .addCase(updateReview.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -1057,9 +1169,9 @@ const locationsSlice = createSlice({
       .addCase(updateReview.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to update review';
-      });
+      })
 
-    builder
+      // Fetch User Reviews
       .addCase(fetchUserReviews.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -1071,9 +1183,9 @@ const locationsSlice = createSlice({
       .addCase(fetchUserReviews.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch user reviews';
-      });
+      })
 
-    builder
+      // Search Locations
       .addCase(searchLocations.pending, (state) => {
         state.searchLoading = true;
       })
@@ -1085,9 +1197,9 @@ const locationsSlice = createSlice({
       .addCase(searchLocations.rejected, (state, action) => {
         state.searchLoading = false;
         state.error = action.error.message || 'Search failed';
-      });
+      })
 
-    builder
+      // Create Location from Search
       .addCase(createLocationFromSearch.pending, (state) => {
         state.loading = true;
       })
@@ -1097,8 +1209,9 @@ const locationsSlice = createSlice({
       .addCase(createLocationFromSearch.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to create location';
-      });
-    builder
+      })
+
+      // Heat Map Data
       .addCase(fetchHeatMapData.pending, (state) => {
         state.heatMapLoading = true;
       })
@@ -1110,7 +1223,8 @@ const locationsSlice = createSlice({
         state.heatMapLoading = false;
         state.heatMapData = [];
       })
-    builder
+
+      // Recent Reviews
       .addCase(fetchRecentReviews.pending, (state) => {
         state.communityLoading = true;
         state.error = null;
@@ -1122,19 +1236,22 @@ const locationsSlice = createSlice({
       .addCase(fetchRecentReviews.rejected, (state, action) => {
         state.communityLoading = false;
         state.error = action.error.message || 'Failed to fetch community reviews';
-      });
-    builder
+      })
+
+      // Danger Zones
       .addCase(fetchDangerZones.pending, (state) => {
-        state.dangerZonesLoading = true
+        state.dangerZonesLoading = true;
       })
       .addCase(fetchDangerZones.fulfilled, (state, action) => {
-        state.dangerZonesLoading = false
-        state.dangerZones = action.payload
+        state.dangerZonesLoading = false;
+        state.dangerZones = action.payload;
       })
       .addCase(fetchDangerZones.rejected, (state, action) => {
-        state.dangerZonesLoading = false
-        state.dangerZones = []
+        state.dangerZonesLoading = false;
+        state.dangerZones = [];
       })
+
+      // Similar Users
       .addCase(fetchSimilarUsers.pending, (state) => {
         state.similarUsersLoading = true;
       })
@@ -1146,7 +1263,8 @@ const locationsSlice = createSlice({
         state.similarUsersLoading = false;
         state.error = 'Failed to fetch similar users';
       })
-    builder
+
+      // ML Predictions
       .addCase(fetchMLPredictions.pending, (state, action) => {
         const locationId = action.meta.arg;
         state.mlPredictionsLoading[locationId] = true;
@@ -1161,8 +1279,9 @@ const locationsSlice = createSlice({
       .addCase(fetchMLPredictions.rejected, (state, action) => {
         const locationId = action.meta.arg;
         state.mlPredictionsLoading[locationId] = false;
-      });
-    builder
+      })
+
+      // Route Safety Calculation
       .addCase(calculateRouteSafety.pending, (state) => {
         state.routeLoading = true;
         state.routeError = null;
@@ -1202,48 +1321,26 @@ const locationsSlice = createSlice({
       })
       .addCase(generateSafeRoute.rejected, (state, action) => {
         state.routeLoading = false;
-        state.routeError = action.error.message || 'Failed to generate safe route';
+        state.routeError = action.payload as string || 'Failed to generate safe route';
       })
 
       // Generate Route Alternatives
       .addCase(generateRouteAlternatives.pending, (state) => {
-        state.routeLoading = true;
+        // Don't show loading for alternatives
       })
       .addCase(generateRouteAlternatives.fulfilled, (state, action) => {
-        state.routeLoading = false;
         state.routeAlternatives = action.payload;
       })
       .addCase(generateRouteAlternatives.rejected, (state, action) => {
-        state.routeLoading = false;
-        state.routeError = action.error.message || 'Failed to generate route alternatives';
+        console.error('Failed to generate alternatives:', action.payload);
       });
   },
 });
 
-function determineBestRouteName(safetyAnalysis: RouteSafetyAnalysis): string {
-  const { overall_route_score, route_summary } = safetyAnalysis;
+// ================================
+// EXPORTS
+// ================================
 
-  if (overall_route_score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
-    return 'Safe Route';
-  } else if (overall_route_score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
-    return 'Moderate Safety Route';
-  } else {
-    return 'Caution Advised Route';
-  }
-}
-
-function determineRouteType(
-  safetyAnalysis: RouteSafetyAnalysis,
-  preferences: RouteRequest['route_preferences']
-): 'fastest' | 'safest' | 'balanced' {
-  if (preferences.prioritize_safety) {
-    return 'safest';
-  } else if (safetyAnalysis.overall_route_score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
-    return 'balanced';
-  } else {
-    return 'fastest';
-  }
-}
 export const {
   setSelectedLocation,
   setFilters,

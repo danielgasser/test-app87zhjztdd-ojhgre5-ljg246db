@@ -75,27 +75,27 @@ export interface Database {
           state_province: string
           country: string
           postal_code: string | null
-          coordinates: unknown 
-place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
-           'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
-           'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
-           'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' | 
-           'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' | 
-           'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' | 
-           'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' | 
-           'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' | 
-           'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' | 
-           'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' | 
-           'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' | 
-           'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' | 
-           'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' | 
-           'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' | 
-           'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' | 
-           'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' | 
-           'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' | 
-           'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' | 
-           'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' | 
-           'country' | 'poi' | 'place' | 'other'
+          coordinates: unknown
+          place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' |
+          'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' |
+          'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' |
+          'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' |
+          'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' |
+          'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' |
+          'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' |
+          'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' |
+          'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' |
+          'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' |
+          'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' |
+          'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' |
+          'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' |
+          'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' |
+          'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' |
+          'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' |
+          'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' |
+          'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' |
+          'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' |
+          'country' | 'poi' | 'place' | 'other'
           tags: string[] | null
           google_place_id: string | null
           created_by: string | null
@@ -114,26 +114,26 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
           country?: string
           postal_code?: string | null
           coordinates: unknown
-place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
-           'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
-           'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
-           'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' | 
-           'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' | 
-           'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' | 
-           'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' | 
-           'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' | 
-           'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' | 
-           'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' | 
-           'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' | 
-           'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' | 
-           'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' | 
-           'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' | 
-           'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' | 
-           'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' | 
-           'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' | 
-           'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' | 
-           'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' | 
-           'country' | 'poi' | 'place' | 'other'
+          place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' |
+          'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' |
+          'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' |
+          'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' |
+          'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' |
+          'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' |
+          'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' |
+          'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' |
+          'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' |
+          'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' |
+          'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' |
+          'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' |
+          'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' |
+          'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' |
+          'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' |
+          'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' |
+          'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' |
+          'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' |
+          'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' |
+          'country' | 'poi' | 'place' | 'other'
           tags?: string[] | null
           google_place_id?: string | null
           created_by?: string | null
@@ -152,26 +152,26 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
           country?: string
           postal_code?: string | null
           coordinates?: unknown
-place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
-           'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
-           'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
-           'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' | 
-           'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' | 
-           'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' | 
-           'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' | 
-           'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' | 
-           'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' | 
-           'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' | 
-           'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' | 
-           'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' | 
-           'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' | 
-           'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' | 
-           'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' | 
-           'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' | 
-           'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' | 
-           'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' | 
-           'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' | 
-           'country' | 'poi' | 'place' | 'other'
+          place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' |
+          'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' |
+          'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' |
+          'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' |
+          'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' |
+          'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' |
+          'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' |
+          'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' |
+          'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' |
+          'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' |
+          'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' |
+          'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' |
+          'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' |
+          'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' |
+          'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' |
+          'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' |
+          'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' |
+          'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' |
+          'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' |
+          'country' | 'poi' | 'place' | 'other'
           tags?: string[] | null
           google_place_id?: string | null
           created_by?: string | null
@@ -252,8 +252,8 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
         Row: {
           id: string
           location_id: string
-          demographic_type: 'race_ethnicity' | 'gender' | 'lgbtq' | 
-                           'disability' | 'religion' | 'age' | 'overall'
+          demographic_type: 'race_ethnicity' | 'gender' | 'lgbtq' |
+          'disability' | 'religion' | 'age' | 'overall'
           demographic_value: string | null
           avg_safety_score: number | null
           avg_comfort_score: number | null
@@ -265,8 +265,8 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
         Insert: {
           id?: string
           location_id: string
-          demographic_type: 'race_ethnicity' | 'gender' | 'lgbtq' | 
-                           'disability' | 'religion' | 'age' | 'overall'
+          demographic_type: 'race_ethnicity' | 'gender' | 'lgbtq' |
+          'disability' | 'religion' | 'age' | 'overall'
           demographic_value?: string | null
           avg_safety_score?: number | null
           avg_comfort_score?: number | null
@@ -278,8 +278,8 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
         Update: {
           id?: string
           location_id?: string
-          demographic_type?: 'race_ethnicity' | 'gender' | 'lgbtq' | 
-                            'disability' | 'religion' | 'age' | 'overall'
+          demographic_type?: 'race_ethnicity' | 'gender' | 'lgbtq' |
+          'disability' | 'religion' | 'age' | 'overall'
           demographic_value?: string | null
           avg_safety_score?: number | null
           avg_comfort_score?: number | null
@@ -347,13 +347,13 @@ place_type: 'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gall
   }
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = 
+export type Tables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row']
-  
-export type InsertTables<T extends keyof Database['public']['Tables']> = 
+
+export type InsertTables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Insert']
-  
-export type UpdateTables<T extends keyof Database['public']['Tables']> = 
+
+export type UpdateTables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Update']
 
 export type UserProfile = Tables<'user_profiles'>
@@ -402,7 +402,7 @@ export interface UpdateReviewForm {
   service_rating?: number | null
   visited_at?: string
   visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business' | null
-  location_id?: string 
+  location_id?: string
 }
 
 export interface CreateLocationForm {
@@ -447,13 +447,14 @@ export interface DangerZone {
   center_lng: number
   danger_level: 'high' | 'medium' | 'low'
   affected_demographics: string[]
-  polygon_points: Array<{lat: number, lng: number}>
+  polygon_points: Array<{ lat: number, lng: number }>
   reasons: string[]
   time_based: boolean
   active_times?: string[]
 }
 
 export interface DangerZonesResponse {
+  zones: never[]
   user_id: string
   danger_zones: DangerZone[]
   total_zones: number

@@ -1,7 +1,8 @@
 // supabase/functions/route-safety-scorer/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { EDGE_CONFIG } from '../_shared/config.ts';
+// New Edge Function for comprehensive route safety analysis
+
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Types
 interface RouteCoordinate {
@@ -9,282 +10,94 @@ interface RouteCoordinate {
   longitude: number;
 }
 
-interface UserDemographics {
-  race_ethnicity?: string[];
-  gender?: string;
-  lgbtq_status?: string[];
-  religion?: string;
-  disability_status?: string[];
-  age_range?: string;
-}
-
 interface RouteSegment {
   start: RouteCoordinate;
   end: RouteCoordinate;
   center: RouteCoordinate;
   distance_meters: number;
-  safety_score: number;
-  comfort_score: number;
-  overall_score: number;
-  confidence: number;
-  risk_factors: string[];
-  nearby_locations: any[];
-  danger_zones: any[];
+  duration_seconds: number;
 }
 
-interface RouteSafetyResponse {
-  overall_route_safety: number;
-  overall_route_comfort: number;
-  overall_route_score: number;
-  total_distance_meters: number;
-  confidence: number;
-  segment_scores: RouteSegment[];
-  danger_zone_intersections: any[];
-  high_risk_segments: RouteSegment[];
-  improvement_suggestions: string[];
-  route_summary: {
-    safe_segments: number;
-    mixed_segments: number;
-    unsafe_segments: number;
-    danger_zones_count: number;
+interface UserDemographics {
+  race_ethnicity: string;
+  gender: string;
+  lgbtq_status: string;
+  religion: string;
+  disability_status: string;
+  age_range: string;
+}
+
+interface RouteSafetyRequest {
+  route_coordinates: RouteCoordinate[];
+  user_demographics: UserDemographics;
+  route_preferences?: {
+    avoid_evening_danger?: boolean;
+    safety_priority?: 'speed_focused' | 'balanced' | 'safety_focused';
   };
 }
 
-// Route configuration from appConfig equivalent
-const ROUTE_CONFIG = {
-  SEGMENT_LENGTH_METERS: 1000,              // 1km segments for scoring
-  SCORING_RADIUS_METERS: 500,               // 500m radius for nearby location scoring
-  MAX_NEARBY_LOCATIONS: 20,                 // Max locations to consider per segment
-  DANGER_ZONE_PENALTY: 2.0,                 // Penalty for intersecting danger zones
-  SAFE_SCORE_THRESHOLD: 4.0,                // Score >= 4.0 considered safe
-  MIXED_SCORE_THRESHOLD: 3.0,               // Score >= 3.0 considered mixed
-  MIN_CONFIDENCE_FOR_RECOMMENDATIONS: 0.6,  // Minimum confidence for suggestions
+interface RouteSegmentScore {
+  segment_index: number;
+  start_lat: number;
+  start_lng: number;
+  end_lat: number;
+  end_lng: number;
+  safety_score: number;
+  confidence: number;
+  danger_zones: number;
+  risk_factors: string[];
+  distance_meters: number;
+  duration_seconds: number;
+}
+
+interface RouteSafetyResponse {
+  overall_route_score: number;
+  overall_confidence: number;
+  segment_scores: RouteSegmentScore[];
+  danger_zones_intersected: number;
+  high_risk_segments: number;
+  total_segments: number;
+  safety_summary: {
+    safe_segments: number;
+    mixed_segments: number;
+    unsafe_segments: number;
+  };
+  safety_notes: string[];
+  analysis_timestamp: string;
+}
+
+// Configuration
+const CONFIG = {
+  SEGMENT_LENGTH_MILES: 1.0,
+  SCORING_RADIUS_MILES: 0.5,
+  SAFE_THRESHOLD: 4.0,
+  MIXED_THRESHOLD: 3.0,
+  UNSAFE_THRESHOLD: 2.5,
+
+  TIME_PENALTIES: {
+    EVENING_MULTIPLIER: 1.2,
+    NIGHT_MULTIPLIER: 1.5,
+    EVENING_START: 18,
+    NIGHT_START: 22,
+    MORNING_END: 6,
+  },
+
+  DANGER_ZONE_PENALTIES: {
+    HIGH: 2.0,
+    MEDIUM: 1.0,
+    LOW: 0.5,
+  }
 };
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
-  try {
-    // Initialize Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    );
-
-    const { route_coordinates, user_demographics, waypoints } = await req.json();
-
-    // Validate input
-    if (!route_coordinates || !Array.isArray(route_coordinates) || route_coordinates.length < 2) {
-      throw new Error('Invalid route_coordinates: must be array with at least 2 points');
-    }
-
-    if (!user_demographics) {
-      throw new Error('user_demographics is required');
-    }
-
-    console.log(`🗺️ Processing route with ${route_coordinates.length} coordinates`);
-    console.log(`👤 User demographics:`, user_demographics);
-
-    // Step 1: Divide route into segments
-    const segments = divideRouteIntoSegments(route_coordinates);
-    console.log(`📊 Created ${segments.length} route segments`);
-
-    // Step 2: Score each segment
-    const scoredSegments: RouteSegment[] = [];
-    let totalSafety = 0;
-    let totalComfort = 0;
-    let totalOverall = 0;
-    let totalDistance = 0;
-    let totalConfidence = 0;
-    const allDangerZones: any[] = [];
-
-    for (const segment of segments) {
-      console.log(`🔍 Scoring segment: ${segment.center.latitude}, ${segment.center.longitude}`);
-
-      // Get nearby locations for this segment
-      const nearbyLocations = await getNearbyLocationsForSegment(
-        supabaseClient,
-        segment.center,
-        ROUTE_CONFIG.SCORING_RADIUS_METERS
-      );
-
-      // Get danger zones intersecting this segment
-      const dangerZones = await getDangerZonesForSegment(
-        supabaseClient,
-        segment.center,
-        ROUTE_CONFIG.SCORING_RADIUS_METERS
-      );
-
-      // Score the segment using safety-predictor logic
-      const segmentScore = await scoreRouteSegment(
-        supabaseClient,
-        segment,
-        nearbyLocations,
-        dangerZones,
-        user_demographics
-      );
-
-      scoredSegments.push(segmentScore);
-      totalSafety += segmentScore.safety_score;
-      totalComfort += segmentScore.comfort_score;
-      totalOverall += segmentScore.overall_score;
-      totalDistance += segment.distance_meters;
-      totalConfidence += segmentScore.confidence;
-      allDangerZones.push(...dangerZones);
-    }
-
-    // Step 3: Calculate overall route scores
-    const segmentCount = scoredSegments.length;
-    const overallSafety = totalSafety / segmentCount;
-    const overallComfort = totalComfort / segmentCount;
-    const overallScore = totalOverall / segmentCount;
-    const overallConfidence = totalConfidence / segmentCount;
-
-    // Step 4: Identify high-risk segments and generate recommendations
-    const highRiskSegments = scoredSegments.filter(
-      seg => seg.overall_score < ROUTE_CONFIG.MIXED_SCORE_THRESHOLD
-    );
-
-    const uniqueDangerZones = removeDuplicateDangerZones(allDangerZones);
-
-    const improvementSuggestions = generateImprovementSuggestions(
-      scoredSegments,
-      highRiskSegments,
-      uniqueDangerZones,
-      overallConfidence
-    );
-
-    // Step 5: Create route summary
-    const routeSummary = {
-      safe_segments: scoredSegments.filter(s => s.overall_score >= ROUTE_CONFIG.SAFE_SCORE_THRESHOLD).length,
-      mixed_segments: scoredSegments.filter(s =>
-        s.overall_score >= ROUTE_CONFIG.MIXED_SCORE_THRESHOLD &&
-        s.overall_score < ROUTE_CONFIG.SAFE_SCORE_THRESHOLD
-      ).length,
-      unsafe_segments: scoredSegments.filter(s => s.overall_score < ROUTE_CONFIG.MIXED_SCORE_THRESHOLD).length,
-      danger_zones_count: uniqueDangerZones.length,
-    };
-
-    const response: RouteSafetyResponse = {
-      overall_route_safety: Number(overallSafety.toFixed(2)),
-      overall_route_comfort: Number(overallComfort.toFixed(2)),
-      overall_route_score: Number(overallScore.toFixed(2)),
-      total_distance_meters: Math.round(totalDistance),
-      confidence: Number(overallConfidence.toFixed(2)),
-      segment_scores: scoredSegments,
-      danger_zone_intersections: uniqueDangerZones,
-      high_risk_segments: highRiskSegments,
-      improvement_suggestions: improvementSuggestions,
-      route_summary: routeSummary,
-    };
-
-    console.log(`✅ Route analysis complete. Overall safety: ${overallSafety.toFixed(2)}, High-risk segments: ${highRiskSegments.length}`);
-
-    return new Response(JSON.stringify(response), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
-
-  } catch (error) {
-    console.error('❌ Error in route-safety-scorer:', error);
-    return new Response(JSON.stringify({
-      error: error.message,
-      details: 'Failed to analyze route safety'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    });
-  }
-});
-
-// Helper Functions
-
-function divideRouteIntoSegments(coordinates: RouteCoordinate[]): any[] {
-  const segments = [];
-
-  for (let i = 0; i < coordinates.length - 1; i++) {
-    const start = coordinates[i];
-    const end = coordinates[i + 1];
-
-    // Calculate distance between points
-    const distance = calculateDistance(start, end);
-
-    // If segment is longer than max length, subdivide it
-    if (distance > ROUTE_CONFIG.SEGMENT_LENGTH_METERS) {
-      const subSegments = subdivideSegment(start, end, ROUTE_CONFIG.SEGMENT_LENGTH_METERS);
-      segments.push(...subSegments);
-    } else {
-      // Create single segment
-      const center = {
-        latitude: (start.latitude + end.latitude) / 2,
-        longitude: (start.longitude + end.longitude) / 2,
-      };
-
-      segments.push({
-        start,
-        end,
-        center,
-        distance_meters: distance,
-      });
-    }
-  }
-
-  return segments;
-}
-
-function subdivideSegment(start: RouteCoordinate, end: RouteCoordinate, maxLength: number): any[] {
-  const totalDistance = calculateDistance(start, end);
-  const numSegments = Math.ceil(totalDistance / maxLength);
-  const segments = [];
-
-  for (let i = 0; i < numSegments; i++) {
-    const ratio1 = i / numSegments;
-    const ratio2 = (i + 1) / numSegments;
-
-    const segStart = {
-      latitude: start.latitude + (end.latitude - start.latitude) * ratio1,
-      longitude: start.longitude + (end.longitude - start.longitude) * ratio1,
-    };
-
-    const segEnd = {
-      latitude: start.latitude + (end.latitude - start.latitude) * ratio2,
-      longitude: start.longitude + (end.longitude - start.longitude) * ratio2,
-    };
-
-    const center = {
-      latitude: (segStart.latitude + segEnd.latitude) / 2,
-      longitude: (segStart.longitude + segEnd.longitude) / 2,
-    };
-
-    segments.push({
-      start: segStart,
-      end: segEnd,
-      center,
-      distance_meters: calculateDistance(segStart, segEnd),
-    });
-  }
-
-  return segments;
-}
-
-function calculateDistance(point1: RouteCoordinate, point2: RouteCoordinate): number {
+/**
+ * Calculate distance between two coordinates in meters
+ */
+function calculateDistance(coord1: RouteCoordinate, coord2: RouteCoordinate): number {
   const R = 6371e3; // Earth's radius in meters
-  const φ1 = point1.latitude * Math.PI / 180;
-  const φ2 = point2.latitude * Math.PI / 180;
-  const Δφ = (point2.latitude - point1.latitude) * Math.PI / 180;
-  const Δλ = (point2.longitude - point1.longitude) * Math.PI / 180;
+  const φ1 = coord1.latitude * Math.PI / 180;
+  const φ2 = coord2.latitude * Math.PI / 180;
+  const Δφ = (coord2.latitude - coord1.latitude) * Math.PI / 180;
+  const Δλ = (coord2.longitude - coord1.longitude) * Math.PI / 180;
 
   const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
     Math.cos(φ1) * Math.cos(φ2) *
@@ -294,209 +107,394 @@ function calculateDistance(point1: RouteCoordinate, point2: RouteCoordinate): nu
   return R * c;
 }
 
-async function getNearbyLocationsForSegment(
-  supabaseClient: any,
-  center: RouteCoordinate,
-  radiusMeters: number
-): Promise<any[]> {
-  try {
-    const { data, error } = await supabaseClient.rpc('get_nearby_locations_with_scores', {
-      lat: center.latitude,
-      lng: center.longitude,
-      radius_meters: radiusMeters,
-      limit_count: ROUTE_CONFIG.MAX_NEARBY_LOCATIONS
-    });
+/**
+ * Segment route into analysis chunks
+ */
+function segmentRoute(coordinates: RouteCoordinate[]): RouteSegment[] {
+  const segments: RouteSegment[] = [];
+  const targetDistanceMeters = CONFIG.SEGMENT_LENGTH_MILES * 1609.34;
 
-    if (error) {
-      console.warn(`⚠️ Error fetching nearby locations: ${error.message}`);
-      return [];
+  let currentDistance = 0;
+  let segmentStart = coordinates[0];
+
+  for (let i = 1; i < coordinates.length; i++) {
+    const segmentDistance = calculateDistance(coordinates[i - 1], coordinates[i]);
+    currentDistance += segmentDistance;
+
+    // Create segment when we've traveled the target distance or reached the end
+    if (currentDistance >= targetDistanceMeters || i === coordinates.length - 1) {
+      const segmentEnd = coordinates[i];
+      const center: RouteCoordinate = {
+        latitude: (segmentStart.latitude + segmentEnd.latitude) / 2,
+        longitude: (segmentStart.longitude + segmentEnd.longitude) / 2
+      };
+
+      segments.push({
+        start: segmentStart,
+        end: segmentEnd,
+        center,
+        distance_meters: currentDistance,
+        duration_seconds: Math.round(currentDistance / 13.4) // ~30 mph average
+      });
+
+      segmentStart = segmentEnd;
+      currentDistance = 0;
     }
-
-    return data || [];
-  } catch (error) {
-    console.warn(`⚠️ Exception fetching nearby locations: ${error.message}`);
-    return [];
   }
+
+  return segments;
 }
 
-async function getDangerZonesForSegment(
-  supabaseClient: any,
-  center: RouteCoordinate,
-  radiusMeters: number
-): Promise<any[]> {
-  try {
-    const { data, error } = await supabaseClient.rpc('get_danger_zones', {
-      lat: center.latitude,
-      lng: center.longitude,
-      radius_miles: radiusMeters / 1609.34 // Convert meters to miles
-    });
-
-    if (error) {
-      console.warn(`⚠️ Error fetching danger zones: ${error.message}`);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.warn(`⚠️ Exception fetching danger zones: ${error.message}`);
-    return [];
-  }
-}
-
-async function scoreRouteSegment(
-  supabaseClient: any,
-  segment: any,
-  nearbyLocations: any[],
-  dangerZones: any[],
-  userDemographics: UserDemographics
-): Promise<RouteSegment> {
-
-  // Base scores - start with neutral
-  let safetyScore = EDGE_CONFIG.ML_PARAMS.NEUTRAL_SCORE_BASELINE;
-  let comfortScore = EDGE_CONFIG.ML_PARAMS.NEUTRAL_SCORE_BASELINE;
-  let overallScore = EDGE_CONFIG.ML_PARAMS.NEUTRAL_SCORE_BASELINE;
-  let confidence = 0.15; // Base confidence
+/**
+ * Analyze safety for a single route segment
+ */
+async function analyzeSegmentSafety(
+  segment: RouteSegment,
+  userDemographics: UserDemographics,
+  segmentIndex: number,
+  supabase: any
+): Promise<RouteSegmentScore> {
   const riskFactors: string[] = [];
+  let baseSafety = 3.0; // Default neutral score
+  let confidence = 0.3;
+  let dangerZoneCount = 0;
 
-  // Apply scoring based on nearby locations (use existing safety-predictor logic)
-  if (nearbyLocations.length > 0) {
-    let locationSafetySum = 0;
-    let locationComfortSum = 0;
-    let locationOverallSum = 0;
-    let locationCount = 0;
-
-    nearbyLocations.forEach(location => {
-      if (location.safety_scores && location.safety_scores.length > 0) {
-        location.safety_scores.forEach((score: any) => {
-          // Prioritize demographic-specific scores
-          if (matchesDemographic(score, userDemographics)) {
-            locationSafetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
-            locationComfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
-            locationOverallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
-            locationCount += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.DEMOGRAPHIC_MATCHES;
-          } else if (score.demographic_type === 'overall') {
-            locationSafetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-            locationComfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-            locationOverallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-            locationCount += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-          }
-        });
-      }
+  try {
+    // Call safety-predictor for this segment center
+    const safetyResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/safety-predictor`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+      },
+      body: JSON.stringify({
+        latitude: segment.center.latitude,
+        longitude: segment.center.longitude,
+        user_demographics: userDemographics,
+        place_type: 'route_segment'
+      })
     });
 
-    if (locationCount > 0) {
-      safetyScore = locationSafetySum / locationCount;
-      comfortScore = locationComfortSum / locationCount;
-      overallScore = locationOverallSum / locationCount;
-      confidence = Math.min(0.8, 0.15 + (locationCount / 10)); // Increase confidence based on data
+    if (safetyResponse.ok) {
+      const safetyData = await safetyResponse.json();
+      baseSafety = safetyData.predicted_safety || 3.0;
+      confidence = safetyData.confidence || 0.3;
+
+      if (safetyData.risk_factors) {
+        riskFactors.push(...safetyData.risk_factors);
+      }
+    }
+
+    // Check for danger zones
+    const dangerResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/danger-zones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+      },
+      body: JSON.stringify({
+        latitude: segment.center.latitude,
+        longitude: segment.center.longitude,
+        radius_miles: CONFIG.SCORING_RADIUS_MILES,
+        user_demographics: userDemographics
+      })
+    });
+
+    let dangerPenalty = 0;
+    if (dangerResponse.ok) {
+      const dangerData = await dangerResponse.json();
+      if (dangerData.zones && dangerData.zones.length > 0) {
+        dangerZoneCount = dangerData.zones.length;
+
+        for (const zone of dangerData.zones) {
+          const severity = zone.severity_level || 1;
+          if (severity >= 3) {
+            dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.HIGH;
+            riskFactors.push(`High danger zone: ${zone.reason || 'Unknown'}`);
+          } else if (severity >= 2) {
+            dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.MEDIUM;
+            riskFactors.push(`Moderate danger zone: ${zone.reason || 'Unknown'}`);
+          } else {
+            dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.LOW;
+            riskFactors.push(`Low danger zone: ${zone.reason || 'Unknown'}`);
+          }
+        }
+      }
+    }
+
+    // Apply time-based penalties
+    let timePenalty = 0;
+    const currentHour = new Date().getHours();
+
+    if (currentHour >= CONFIG.TIME_PENALTIES.EVENING_START && currentHour < CONFIG.TIME_PENALTIES.NIGHT_START) {
+      timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.EVENING_MULTIPLIER - 1);
+      riskFactors.push('Evening travel time');
+    } else if (currentHour >= CONFIG.TIME_PENALTIES.NIGHT_START || currentHour < CONFIG.TIME_PENALTIES.MORNING_END) {
+      timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
+      riskFactors.push('Night travel time');
+    }
+
+    // Calculate final safety score
+    const finalScore = Math.max(1.0, Math.min(5.0, baseSafety - dangerPenalty - timePenalty));
+
+    return {
+      segment_index: segmentIndex,
+      start_lat: segment.start.latitude,
+      start_lng: segment.start.longitude,
+      end_lat: segment.end.latitude,
+      end_lng: segment.end.longitude,
+      safety_score: finalScore,
+      confidence,
+      danger_zones: dangerZoneCount,
+      risk_factors: riskFactors,
+      distance_meters: segment.distance_meters,
+      duration_seconds: segment.duration_seconds
+    };
+
+  } catch (error) {
+    console.error(`Error analyzing segment ${segmentIndex}:`, error);
+
+    return {
+      segment_index: segmentIndex,
+      start_lat: segment.start.latitude,
+      start_lng: segment.start.longitude,
+      end_lat: segment.end.latitude,
+      end_lng: segment.end.longitude,
+      safety_score: 3.0,
+      confidence: 0.1,
+      danger_zones: 0,
+      risk_factors: ['Analysis unavailable'],
+      distance_meters: segment.distance_meters,
+      duration_seconds: segment.duration_seconds
+    };
+  }
+}
+
+/**
+ * Generate safety summary and notes
+ */
+function generateSafetySummary(segmentScores: RouteSegmentScore[]): {
+  summary: { safe_segments: number; mixed_segments: number; unsafe_segments: number; };
+  notes: string[];
+} {
+  let safeSegments = 0;
+  let mixedSegments = 0;
+  let unsafeSegments = 0;
+  const notes: string[] = [];
+
+  for (const segment of segmentScores) {
+    if (segment.safety_score >= CONFIG.SAFE_THRESHOLD) {
+      safeSegments++;
+    } else if (segment.safety_score >= CONFIG.MIXED_THRESHOLD) {
+      mixedSegments++;
+    } else {
+      unsafeSegments++;
     }
   }
 
-  // Apply danger zone penalties
-  if (dangerZones.length > 0) {
-    dangerZones.forEach(zone => {
-      const penalty = ROUTE_CONFIG.DANGER_ZONE_PENALTY * (zone.severity_multiplier || 1);
-      safetyScore = Math.max(1, safetyScore - penalty);
-      overallScore = Math.max(1, overallScore - penalty);
-      riskFactors.push(`Danger zone: ${zone.description || 'High-risk area'}`);
-    });
+  // Generate contextual notes
+  const totalSegments = segmentScores.length;
+  const safePercentage = Math.round((safeSegments / totalSegments) * 100);
+  const unsafePercentage = Math.round((unsafeSegments / totalSegments) * 100);
 
-    riskFactors.push(`${dangerZones.length} danger zone(s) detected`);
+  if (safePercentage >= 80) {
+    notes.push('This route is predominantly through safe areas');
+  } else if (safePercentage >= 60) {
+    notes.push('This route has mostly safe areas with some mixed zones');
+  } else if (unsafePercentage >= 30) {
+    notes.push('This route passes through several areas requiring caution');
+  } else {
+    notes.push('This route has mixed safety characteristics');
   }
 
-  // Identify additional risk factors based on scores
-  if (safetyScore < ROUTE_CONFIG.MIXED_SCORE_THRESHOLD) {
-    riskFactors.push('Below-average safety rating');
+  // Add specific warnings
+  if (unsafeSegments > 0) {
+    notes.push(`${unsafeSegments} segment(s) require extra caution`);
   }
-  if (confidence < 0.5) {
-    riskFactors.push('Limited safety data available');
+
+  const totalDangerZones = segmentScores.reduce((sum, seg) => sum + seg.danger_zones, 0);
+  if (totalDangerZones > 0) {
+    notes.push(`Route intersects ${totalDangerZones} danger zone(s)`);
+  }
+
+  // Check for specific risk patterns
+  const commonRisks = segmentScores
+    .flatMap(seg => seg.risk_factors)
+    .reduce((acc: { [key: string]: number }, risk) => {
+      acc[risk] = (acc[risk] || 0) + 1;
+      return acc;
+    }, {});
+
+  const frequentRisks = Object.entries(commonRisks)
+    .filter(([_, count]) => count >= Math.ceil(totalSegments * 0.3))
+    .map(([risk, _]) => risk);
+
+  if (frequentRisks.length > 0) {
+    notes.push(`Common concerns: ${frequentRisks.slice(0, 2).join(', ')}`);
   }
 
   return {
-    start: segment.start,
-    end: segment.end,
-    center: segment.center,
-    distance_meters: segment.distance_meters,
-    safety_score: Number(safetyScore.toFixed(2)),
-    comfort_score: Number(comfortScore.toFixed(2)),
-    overall_score: Number(overallScore.toFixed(2)),
-    confidence: Number(confidence.toFixed(2)),
-    risk_factors: riskFactors,
-    nearby_locations: nearbyLocations.map(loc => ({
-      id: loc.id,
-      name: loc.name,
-      place_type: loc.place_type,
-      distance_meters: calculateDistance(segment.center, { latitude: loc.latitude, longitude: loc.longitude })
-    })),
-    danger_zones: dangerZones.map(zone => ({
-      id: zone.id,
-      description: zone.description,
-      severity_multiplier: zone.severity_multiplier
-    }))
+    summary: {
+      safe_segments: safeSegments,
+      mixed_segments: mixedSegments,
+      unsafe_segments: unsafeSegments
+    },
+    notes: notes.slice(0, 5) // Limit to 5 most important notes
   };
 }
 
-function matchesDemographic(score: any, userDemographics: UserDemographics): boolean {
-  // Check if the score matches any of the user's demographics
-  if (score.demographic_type === 'race_ethnicity' && userDemographics.race_ethnicity) {
-    return userDemographics.race_ethnicity.includes(score.demographic_value);
-  }
-  if (score.demographic_type === 'gender' && userDemographics.gender) {
-    return userDemographics.gender === score.demographic_value;
-  }
-  if (score.demographic_type === 'lgbtq_status' && userDemographics.lgbtq_status) {
-    return userDemographics.lgbtq_status.includes(score.demographic_value);
-  }
-  if (score.demographic_type === 'religion' && userDemographics.religion) {
-    return userDemographics.religion === score.demographic_value;
-  }
-  if (score.demographic_type === 'disability_status' && userDemographics.disability_status) {
-    return userDemographics.disability_status.includes(score.demographic_value);
-  }
-  return false;
+/**
+ * Main route safety analysis function
+ */
+async function analyzeRouteSafety(request: RouteSafetyRequest): Promise<RouteSafetyResponse> {
+  console.log(`🔍 Analyzing route safety for ${request.route_coordinates.length} coordinates`);
+
+  // Initialize Supabase client
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+  );
+
+  // Segment the route
+  const segments = segmentRoute(request.route_coordinates);
+  console.log(`📍 Created ${segments.length} segments for analysis`);
+
+  // Analyze each segment
+  const segmentPromises = segments.map((segment, index) =>
+    analyzeSegmentSafety(segment, request.user_demographics, index, supabase)
+  );
+
+  const segmentScores = await Promise.all(segmentPromises);
+
+  // Calculate overall metrics
+  const totalScore = segmentScores.reduce((sum, seg) => sum + seg.safety_score, 0);
+  const overallScore = segments.length > 0 ? totalScore / segments.length : 3.0;
+
+  const totalConfidence = segmentScores.reduce((sum, seg) => sum + seg.confidence, 0);
+  const overallConfidence = Math.min(0.95, totalConfidence / segments.length);
+
+  const dangerZonesIntersected = segmentScores.reduce((sum, seg) => sum + seg.danger_zones, 0);
+  const highRiskSegments = segmentScores.filter(seg => seg.safety_score < CONFIG.UNSAFE_THRESHOLD).length;
+
+  // Generate summary
+  const { summary, notes } = generateSafetySummary(segmentScores);
+
+  const result: RouteSafetyResponse = {
+    overall_route_score: Math.round(overallScore * 10) / 10,
+    overall_confidence: Math.round(overallConfidence * 100) / 100,
+    segment_scores: segmentScores,
+    danger_zones_intersected: dangerZonesIntersected,
+    high_risk_segments: highRiskSegments,
+    total_segments: segments.length,
+    safety_summary: summary,
+    safety_notes: notes,
+    analysis_timestamp: new Date().toISOString()
+  };
+
+  console.log(`✅ Route analysis complete: Score ${result.overall_route_score}, ${result.total_segments} segments`);
+  return result;
 }
 
-function removeDuplicateDangerZones(zones: any[]): any[] {
-  const seen = new Set();
-  return zones.filter(zone => {
-    if (seen.has(zone.id)) {
-      return false;
+/**
+ * Supabase Edge Function handler
+ */
+serve(async (req) => {
+  // Handle CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      },
+    });
+  }
+
+  try {
+    if (req.method !== 'POST') {
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        {
+          status: 405,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        }
+      );
     }
-    seen.add(zone.id);
-    return true;
-  });
-}
 
-function generateImprovementSuggestions(
-  allSegments: RouteSegment[],
-  highRiskSegments: RouteSegment[],
-  dangerZones: any[],
-  overallConfidence: number
-): string[] {
-  const suggestions: string[] = [];
+    const request: RouteSafetyRequest = await req.json();
 
-  if (highRiskSegments.length > 0) {
-    suggestions.push(`Route contains ${highRiskSegments.length} high-risk segment(s). Consider alternative routes.`);
+    // Validate request
+    if (!request.route_coordinates || !Array.isArray(request.route_coordinates)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid route coordinates' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        }
+      );
+    }
+
+    if (request.route_coordinates.length < 2) {
+      return new Response(
+        JSON.stringify({ error: 'Route must have at least 2 coordinates' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        }
+      );
+    }
+
+    if (!request.user_demographics) {
+      return new Response(
+        JSON.stringify({ error: 'User demographics required' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        }
+      );
+    }
+
+    // Analyze route safety
+    const result = await analyzeRouteSafety(request);
+
+    return new Response(
+      JSON.stringify(result),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
+    );
+
+  } catch (error) {
+    console.error('Route safety analysis error:', error);
+
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
+    );
   }
-
-  if (dangerZones.length > 0) {
-    suggestions.push(`Route passes through ${dangerZones.length} danger zone(s). Extra caution recommended.`);
-  }
-
-  if (overallConfidence < ROUTE_CONFIG.MIN_CONFIDENCE_FOR_RECOMMENDATIONS) {
-    suggestions.push('Limited safety data available for this route. Consider well-traveled alternatives.');
-  }
-
-  const unsafeSegmentPercentage = (highRiskSegments.length / allSegments.length) * 100;
-  if (unsafeSegmentPercentage > 30) {
-    suggestions.push('More than 30% of route segments have safety concerns. Strong recommendation to find alternative route.');
-  } else if (unsafeSegmentPercentage > 10) {
-    suggestions.push('Some route segments have safety concerns. Consider avoiding during evening/night hours.');
-  }
-
-  if (suggestions.length === 0) {
-    suggestions.push('Route appears safe based on available data. Enjoy your trip!');
-  }
-
-  return suggestions;
-}
+});
