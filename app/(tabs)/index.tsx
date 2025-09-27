@@ -427,6 +427,7 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
+        onPress={handleMapPress}
         onMapReady={() => {
           setMapReady(true);
         }}
@@ -832,8 +833,6 @@ export default function MapScreen() {
       <RoutePlanningModal
         visible={showRoutePlanning}
         onClose={() => setShowRoutePlanning(false)}
-        origin={routeOrigin || undefined}
-        destination={routeDestination || undefined}
       />
     </View>
   );
