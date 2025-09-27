@@ -427,7 +427,7 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
-        onPress={handleMapPress}
+        //onPress={handleMapPress}
         onMapReady={() => {
           setMapReady(true);
         }}
@@ -757,7 +757,7 @@ export default function MapScreen() {
           {routeMode === "none" ? (
             <TouchableOpacity
               style={styles.routeButton}
-              onPress={handleStartRouteSelection}
+              //onPress={handleStartRouteSelection}
             >
               <Ionicons name="navigate" size={24} color="#FFF" />
               <Text style={styles.routeButtonText}>Plan Route</Text>
