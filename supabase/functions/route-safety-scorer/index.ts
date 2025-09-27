@@ -1,7 +1,6 @@
 // supabase/functions/route-safety-scorer/index.ts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { corsHeaders } from '../_shared/cors.ts';
 import { EDGE_CONFIG } from '../_shared/config.ts';
 
 // Types
@@ -62,6 +61,10 @@ const ROUTE_CONFIG = {
   MIN_CONFIDENCE_FOR_RECOMMENDATIONS: 0.6,  // Minimum confidence for suggestions
 };
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
