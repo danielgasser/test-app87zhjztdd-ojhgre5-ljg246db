@@ -1,5 +1,5 @@
-// Enhanced Route Planning Modal with Search Integration
-// src/components/RoutePlanning/ImprovedRoutePlanningModal.tsx
+// Replace your existing RoutePlanningModal.tsx with this simplified version
+// src/components/RoutePlanningModal.tsx
 
 import React, { useState, useEffect } from "react";
 import {
@@ -16,9 +16,24 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
+import {
+  generateSafeRoute,
+  generateRouteAlternatives,
+  setSelectedRoute,
+  clearRoutes,
+  updateRoutePreferences,
+  RouteCoordinate,
+  RouteRequest,
+  SafeRoute,
+} from "src/store/locationsSlice";
 import { APP_CONFIG } from "@/utils/appConfig";
 
-interface RouteLocation {
+interface RoutePlanningModalProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+interface LocationResult {
   id: string;
   name: string;
   address: string;
@@ -28,42 +43,33 @@ interface RouteLocation {
   source: "database" | "mapbox" | "current_location";
 }
 
-interface ImprovedRoutePlanningModalProps {
-  visible: boolean;
-  onClose: () => void;
-}
-
-const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
+const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   visible,
   onClose,
 }) => {
   const dispatch = useAppDispatch();
+  const {
+    selectedRoute,
+    routeAlternatives,
+    routeLoading,
+    routeError,
+    routePreferences,
+  } = useAppSelector((state) => state.locations);
   const { userLocation } = useAppSelector((state) => state.locations);
   const currentUser = useAppSelector((state) => state.auth.user);
   const userProfile = useAppSelector((state) => state.user.profile);
 
-  // Route planning state
-  const [fromLocation, setFromLocation] = useState<RouteLocation | null>(null);
-  const [toLocation, setToLocation] = useState<RouteLocation | null>(null);
-  const [activeInput, setActiveInput] = useState<"from" | "to" | null>(null);
+  // Location state
+  const [fromLocation, setFromLocation] = useState<LocationResult | null>(null);
+  const [toLocation, setToLocation] = useState<LocationResult | null>(null);
 
   // Search state
+  const [activeInput, setActiveInput] = useState<"from" | "to" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<RouteLocation[]>([]);
+  const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<RouteLocation[]>([]);
 
-  // Route preferences
-  const [routePreferences, setRoutePreferences] = useState({
-    safetyPriority: "balanced" as
-      | "speed_focused"
-      | "balanced"
-      | "safety_focused",
-    avoidEveningDanger: true,
-    maxDetourMinutes: 15,
-  });
-
-  // Initialize with current location as "from"
+  // Initialize from location with current location
   useEffect(() => {
     if (visible && userLocation && !fromLocation) {
       setFromLocation({
@@ -77,7 +83,18 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
     }
   }, [visible, userLocation, fromLocation]);
 
-  // Mock search function (you'll replace this with actual Mapbox search)
+  // Clear state when modal closes
+  useEffect(() => {
+    if (!visible) {
+      setFromLocation(null);
+      setToLocation(null);
+      setActiveInput(null);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  }, [visible]);
+
+  // Mock search function (replace with your existing SearchBar logic)
   const performSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -87,8 +104,9 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
     setSearchLoading(true);
 
     try {
-      // TODO: Replace with actual Mapbox Geocoding API call
-      const mockResults: RouteLocation[] = [
+      // TODO: Replace with your existing search logic from SearchBar
+      // For now, mock some results
+      const mockResults: LocationResult[] = [
         {
           id: "search_1",
           name: "San Francisco Airport",
@@ -105,15 +123,6 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
           latitude: 37.8199,
           longitude: -122.4783,
           place_type: "landmark",
-          source: "mapbox" as "mapbox",
-        },
-        {
-          id: "search_3",
-          name: "Union Square",
-          address: "Union Square, San Francisco, CA, USA",
-          latitude: 37.7879,
-          longitude: -122.4075,
-          place_type: "plaza",
           source: "mapbox" as "mapbox",
         },
       ].filter(
@@ -143,18 +152,12 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
   }, [searchQuery, activeInput]);
 
   // Handle location selection
-  const handleLocationSelect = (location: RouteLocation) => {
+  const handleLocationSelect = (location: LocationResult) => {
     if (activeInput === "from") {
       setFromLocation(location);
     } else if (activeInput === "to") {
       setToLocation(location);
     }
-
-    // Add to recent searches
-    setRecentSearches((prev) => {
-      const filtered = prev.filter((item) => item.id !== location.id);
-      return [location, ...filtered].slice(0, 5);
-    });
 
     setActiveInput(null);
     setSearchQuery("");
@@ -168,14 +171,7 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
     setSearchResults([]);
   };
 
-  // Swap locations
-  const handleSwapLocations = () => {
-    const temp = fromLocation;
-    setFromLocation(toLocation);
-    setToLocation(temp);
-  };
-
-  // Start route generation
+  // Handle route generation
   const handleGenerateRoute = async () => {
     if (!fromLocation || !toLocation) {
       Alert.alert(
@@ -193,23 +189,65 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
       return;
     }
 
-    // TODO: Implement actual route generation
-    console.log(
-      "🚀 Generating route from",
-      fromLocation.name,
-      "to",
-      toLocation.name
-    );
-    Alert.alert(
-      "Route Generation",
-      "This will integrate with Mapbox API and our safety scoring system"
-    );
+    const routeRequest: RouteRequest = {
+      origin: {
+        latitude: fromLocation.latitude,
+        longitude: fromLocation.longitude,
+      },
+      destination: {
+        latitude: toLocation.latitude,
+        longitude: toLocation.longitude,
+      },
+      user_demographics: {
+        race_ethnicity: userProfile.race_ethnicity,
+        gender: userProfile.gender,
+        lgbtq_status: userProfile.lgbtq_status,
+        religion: userProfile.religion,
+        disability_status: userProfile.disability_status,
+        age_range: userProfile.age_range,
+      },
+      route_preferences: {
+        prioritize_safety: routePreferences.safetyPriority === "safety_focused",
+        avoid_evening_danger: routePreferences.avoidEveningDanger,
+        max_detour_minutes: routePreferences.maxDetourMinutes,
+      },
+    };
+
+    try {
+      console.log("🚀 Generating safe route...");
+      await dispatch(generateSafeRoute(routeRequest)).unwrap();
+
+      // Generate alternatives after main route
+      dispatch(generateRouteAlternatives(routeRequest));
+    } catch (error) {
+      console.error("❌ Route generation failed:", error);
+      Alert.alert("Route Error", "Failed to generate route. Please try again.");
+    }
+  };
+
+  // Handle route selection
+  const handleSelectRoute = (route: SafeRoute) => {
+    dispatch(setSelectedRoute(route));
+    Alert.alert("Route Selected", `Selected: ${route.name}`);
+  };
+
+  // Handle safety priority change
+  const handleSafetyPriorityChange = (
+    priority: "speed_focused" | "balanced" | "safety_focused"
+  ) => {
+    dispatch(updateRoutePreferences({ safetyPriority: priority }));
+  };
+
+  // Close modal and clear routes
+  const handleClose = () => {
+    dispatch(clearRoutes());
+    onClose();
   };
 
   // Render location input
   const renderLocationInput = (
     type: "from" | "to",
-    location: RouteLocation | null,
+    location: LocationResult | null,
     placeholder: string
   ) => (
     <TouchableOpacity
@@ -240,39 +278,84 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
           <Text style={styles.locationPlaceholder}>{placeholder}</Text>
         )}
       </View>
-      {location && (
-        <TouchableOpacity
-          style={styles.clearButton}
-          onPress={() =>
-            type === "from" ? setFromLocation(null) : setToLocation(null)
-          }
-        >
-          <Ionicons name="close-circle" size={20} color="#999" />
-        </TouchableOpacity>
-      )}
+      <Ionicons name="search" size={20} color="#999" />
     </TouchableOpacity>
   );
 
   // Render search result item
-  const renderSearchResult = ({ item }: { item: RouteLocation }) => (
+  const renderSearchResult = ({ item }: { item: LocationResult }) => (
     <TouchableOpacity
       style={styles.searchResultItem}
       onPress={() => handleLocationSelect(item)}
     >
       <View style={styles.searchResultIcon}>
-        <Ionicons
-          name={getLocationIcon(item.place_type)}
-          size={20}
-          color="#666"
-        />
+        <Ionicons name="location" size={20} color="#666" />
       </View>
       <View style={styles.searchResultContent}>
         <Text style={styles.searchResultName}>{item.name}</Text>
         <Text style={styles.searchResultAddress}>{item.address}</Text>
       </View>
-      <Ionicons name="arrow-back" size={16} color="#999" />
     </TouchableOpacity>
   );
+
+  // Render route card (keep your existing implementation)
+  const renderRouteCard = (route: SafeRoute, isSelected: boolean = false) => {
+    const safety = route.safety_analysis;
+    const safetyColor = getSafetyColor(safety.overall_route_score);
+    const safetyLabel = getSafetyLabel(safety.overall_route_score);
+
+    return (
+      <TouchableOpacity
+        key={route.id}
+        style={[styles.routeCard, isSelected && styles.selectedRouteCard]}
+        onPress={() => handleSelectRoute(route)}
+      >
+        {/* Route Header */}
+        <View style={styles.routeHeader}>
+          <View style={styles.routeInfo}>
+            <Text style={styles.routeName}>{route.name}</Text>
+            <Text style={styles.routeType}>
+              {route.route_type.toUpperCase()}
+            </Text>
+          </View>
+          <View style={[styles.safetyBadge, { backgroundColor: safetyColor }]}>
+            <Text style={styles.safetyScore}>
+              {safety.overall_route_score.toFixed(1)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Route Metrics */}
+        <View style={styles.routeMetrics}>
+          <View style={styles.metric}>
+            <Ionicons name="time-outline" size={16} color="#666" />
+            <Text style={styles.metricText}>
+              {route.estimated_duration_minutes} min
+            </Text>
+          </View>
+          <View style={styles.metric}>
+            <Ionicons name="speedometer-outline" size={16} color="#666" />
+            <Text style={styles.metricText}>
+              {(safety.total_distance_meters / 1000).toFixed(1)} km
+            </Text>
+          </View>
+          <View style={styles.metric}>
+            <Ionicons name="shield-outline" size={16} color={safetyColor} />
+            <Text style={[styles.metricText, { color: safetyColor }]}>
+              {safetyLabel}
+            </Text>
+          </View>
+        </View>
+
+        {isSelected && (
+          <View style={styles.selectedIndicator}>
+            <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            <Text style={styles.selectedText}>Selected Route</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Modal
@@ -283,10 +366,10 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.title}>Plan Your Route</Text>
+          <Text style={styles.title}>Plan Route</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -304,7 +387,6 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
                   activeInput === "from" ? "starting point" : "destination"
                 }`}
                 autoFocus
-                onSubmitEditing={() => performSearch(searchQuery)}
               />
               {searchLoading && (
                 <ActivityIndicator size="small" color="#8E24AA" />
@@ -312,91 +394,40 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
             </View>
 
             {/* Search Results */}
-            <ScrollView style={styles.searchResults}>
-              {searchQuery.length > 0 ? (
-                searchResults.length > 0 ? (
-                  <FlatList
-                    data={searchResults}
-                    renderItem={renderSearchResult}
-                    keyExtractor={(item) => item.id}
-                    scrollEnabled={false}
-                  />
-                ) : (
-                  !searchLoading && (
-                    <View style={styles.noResults}>
-                      <Text style={styles.noResultsText}>No results found</Text>
-                    </View>
-                  )
-                )
-              ) : (
-                /* Recent Searches */
-                recentSearches.length > 0 && (
-                  <View>
-                    <Text style={styles.sectionTitle}>Recent Searches</Text>
-                    <FlatList
-                      data={recentSearches}
-                      renderItem={renderSearchResult}
-                      keyExtractor={(item) => item.id}
-                      scrollEnabled={false}
-                    />
+            <FlatList
+              style={styles.searchResults}
+              data={searchResults}
+              renderItem={renderSearchResult}
+              keyExtractor={(item) => item.id}
+              ListEmptyComponent={
+                searchQuery.length > 0 && !searchLoading ? (
+                  <View style={styles.noResults}>
+                    <Text style={styles.noResultsText}>No results found</Text>
                   </View>
-                )
-              )}
-
-              {/* Quick Options */}
-              {searchQuery.length === 0 && (
-                <View style={styles.quickOptions}>
-                  <Text style={styles.sectionTitle}>Quick Options</Text>
-                  <TouchableOpacity
-                    style={styles.quickOption}
-                    onPress={() =>
-                      handleLocationSelect({
-                        id: "current_location",
-                        name: "Current Location",
-                        address: "Your current location",
-                        latitude: userLocation?.latitude || 0,
-                        longitude: userLocation?.longitude || 0,
-                        source: "current_location",
-                      })
-                    }
-                  >
-                    <Ionicons name="locate" size={20} color="#4CAF50" />
-                    <Text style={styles.quickOptionText}>
-                      Use Current Location
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </ScrollView>
+                ) : null
+              }
+            />
           </View>
         ) : (
           /* Route Planning Mode */
           <ScrollView style={styles.content}>
             {/* Location Inputs */}
-            <View style={styles.locationInputs}>
-              {renderLocationInput(
-                "from",
-                fromLocation,
-                "Choose starting point"
-              )}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Route Details</Text>
 
-              {/* Swap Button */}
-              <View style={styles.swapButtonContainer}>
-                <TouchableOpacity
-                  style={styles.swapButton}
-                  onPress={handleSwapLocations}
-                  disabled={!fromLocation || !toLocation}
-                >
-                  <Ionicons name="swap-vertical" size={20} color="#8E24AA" />
-                </TouchableOpacity>
+              <View style={styles.locationInputs}>
+                {renderLocationInput(
+                  "from",
+                  fromLocation,
+                  "Choose starting point"
+                )}
+                {renderLocationInput("to", toLocation, "Choose destination")}
               </View>
-
-              {renderLocationInput("to", toLocation, "Choose destination")}
             </View>
 
-            {/* Route Options */}
+            {/* Safety Preferences (keep your existing implementation) */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Route Preferences</Text>
+              <Text style={styles.sectionTitle}>Safety Preferences</Text>
 
               <View style={styles.priorityButtons}>
                 {(["speed_focused", "balanced", "safety_focused"] as const).map(
@@ -408,12 +439,7 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
                         routePreferences.safetyPriority === priority &&
                           styles.activePriorityButton,
                       ]}
-                      onPress={() =>
-                        setRoutePreferences((prev) => ({
-                          ...prev,
-                          safetyPriority: priority,
-                        }))
-                      }
+                      onPress={() => handleSafetyPriorityChange(priority)}
                     >
                       <Text
                         style={[
@@ -437,10 +463,12 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
                     routePreferences.avoidEveningDanger && styles.toggleActive,
                   ]}
                   onPress={() =>
-                    setRoutePreferences((prev) => ({
-                      ...prev,
-                      avoidEveningDanger: !prev.avoidEveningDanger,
-                    }))
+                    dispatch(
+                      updateRoutePreferences({
+                        avoidEveningDanger:
+                          !routePreferences.avoidEveningDanger,
+                      })
+                    )
                   }
                 >
                   {routePreferences.avoidEveningDanger && (
@@ -454,14 +482,46 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
             <TouchableOpacity
               style={[
                 styles.generateButton,
-                (!fromLocation || !toLocation) && styles.disabledButton,
+                routeLoading && styles.disabledButton,
               ]}
               onPress={handleGenerateRoute}
-              disabled={!fromLocation || !toLocation}
+              disabled={routeLoading || !fromLocation || !toLocation}
             >
-              <Ionicons name="navigate" size={20} color="#FFF" />
-              <Text style={styles.generateButtonText}>Generate Safe Route</Text>
+              {routeLoading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <>
+                  <Ionicons name="navigate" size={20} color="#FFF" />
+                  <Text style={styles.generateButtonText}>
+                    Generate Safe Route
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
+
+            {/* Error Display */}
+            {routeError && (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={20} color="#F44336" />
+                <Text style={styles.errorText}>{routeError}</Text>
+              </View>
+            )}
+
+            {/* Primary Route */}
+            {selectedRoute && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Recommended Route</Text>
+                {renderRouteCard(selectedRoute, true)}
+              </View>
+            )}
+
+            {/* Alternative Routes */}
+            {routeAlternatives.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Alternative Routes</Text>
+                {routeAlternatives.map((route) => renderRouteCard(route))}
+              </View>
+            )}
           </ScrollView>
         )}
       </View>
@@ -469,29 +529,24 @@ const ImprovedRoutePlanningModal: React.FC<ImprovedRoutePlanningModalProps> = ({
   );
 };
 
-// Helper function to get appropriate icon for location type
-const getLocationIcon = (
-  placeType?: string
-): keyof typeof Ionicons.glyphMap => {
-  switch (placeType) {
-    case "airport":
-      return "airplane";
-    case "restaurant":
-      return "restaurant";
-    case "gas_station":
-      return "car";
-    case "hotel":
-      return "bed";
-    case "hospital":
-      return "medical";
-    case "school":
-      return "school";
-    case "landmark":
-      return "flag";
-    case "plaza":
-      return "business";
-    default:
-      return "location";
+// Helper functions (keep your existing ones)
+const getSafetyColor = (score: number): string => {
+  if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
+    return APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE;
+  } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
+    return APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE;
+  } else {
+    return APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+  }
+};
+
+const getSafetyLabel = (score: number): string => {
+  if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
+    return "Safe";
+  } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
+    return "Mixed";
+  } else {
+    return "Caution";
   }
 };
 
@@ -527,7 +582,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 
-  // Search Mode Styles
+  // Search Mode
   searchMode: {
     flex: 1,
     backgroundColor: "#FFF",
@@ -583,11 +638,19 @@ const styles = StyleSheet.create({
     color: "#666",
   },
 
-  // Location Input Styles
+  // Location Inputs
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 12,
+  },
   locationInputs: {
     backgroundColor: "#FFF",
     borderRadius: 12,
-    marginBottom: 24,
     overflow: "hidden",
   },
   locationInput: {
@@ -622,59 +685,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#999",
   },
-  clearButton: {
-    padding: 4,
-  },
-  swapButtonContainer: {
-    position: "absolute",
-    right: 16,
-    top: "45%",
-    zIndex: 10,
-  },
-  swapButton: {
-    backgroundColor: "#FFF",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
 
-  // Quick Options
-  quickOptions: {
-    padding: 16,
-  },
-  quickOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: "#F8F9FA",
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  quickOptionText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: "#000",
-  },
-
-  // Section Styles
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 12,
-  },
-
-  // Priority Buttons
+  // Keep all your existing styles for route cards, buttons, etc.
   priorityButtons: {
     flexDirection: "row",
     backgroundColor: "#FFF",
@@ -700,8 +712,6 @@ const styles = StyleSheet.create({
   activePriorityButtonText: {
     color: "#FFF",
   },
-
-  // Toggle
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -725,8 +735,6 @@ const styles = StyleSheet.create({
   toggleActive: {
     backgroundColor: "#4CAF50",
   },
-
-  // Generate Button
   generateButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -735,7 +743,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
-    marginTop: 16,
+    marginBottom: 16,
   },
   disabledButton: {
     opacity: 0.6,
@@ -746,6 +754,95 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 8,
   },
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFEBEE",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: "#F44336",
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+  },
+
+  // Route Card styles (keep your existing ones)
+  routeCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  selectedRouteCard: {
+    borderColor: "#4CAF50",
+    backgroundColor: "#F8FFF8",
+  },
+  routeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  routeInfo: {
+    flex: 1,
+  },
+  routeName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 2,
+  },
+  routeType: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: "500",
+  },
+  safetyBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  safetyScore: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  routeMetrics: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  metric: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  metricText: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 4,
+  },
+  selectedIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+  },
+  selectedText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4CAF50",
+    marginLeft: 4,
+  },
 });
 
-export default ImprovedRoutePlanningModal;
+export default RoutePlanningModal;
