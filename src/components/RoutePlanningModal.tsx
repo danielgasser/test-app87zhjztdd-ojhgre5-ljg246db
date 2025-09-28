@@ -17,10 +17,8 @@ import {
   generateSafeRoute,
   generateRouteAlternatives,
   setSelectedRoute,
-  clearRoutes,
   updateRoutePreferences,
   searchLocations,
-  RouteCoordinate,
   RouteRequest,
   SafeRoute,
 } from "../store/locationsSlice";
@@ -273,7 +271,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Close modal and clear routes
   const handleClose = () => {
-    //dispatch(clearRoutes());
     onClose();
   };
 
