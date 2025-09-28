@@ -84,6 +84,7 @@ export default function MapScreen() {
     "select_origin" | "select_destination" | "none"
   >("none");
   const [showRoutePlanningModal, setShowRoutePlanningModal] = useState(false);
+  const [mapKey, setMapKey] = useState(0);
 
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
@@ -418,6 +419,7 @@ export default function MapScreen() {
       />
 
       <MapView
+        key={mapKey}
         ref={mapRef}
         style={styles.map}
         region={region}
@@ -707,6 +709,7 @@ export default function MapScreen() {
               dispatch(clearRoutes());
               setRouteOrigin(null);
               setRouteDestination(null);
+              setMapKey((prev) => prev + 1);
             }}
           >
             <Ionicons name="close" size={24} color="#FFF" />

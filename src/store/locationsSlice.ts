@@ -1078,6 +1078,7 @@ const locationsSlice = createSlice({
       state.routeAlternatives = [];
       state.routeSafetyAnalysis = null;
       state.routeError = null;
+      state.routeRequest = null;
     },
 
     setSelectedLocation: (state, action: PayloadAction<LocationWithScores | null>) => {
