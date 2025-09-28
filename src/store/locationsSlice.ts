@@ -93,6 +93,7 @@ interface RouteSegment {
 }
 
 interface RouteSafetyAnalysis {
+  confidence_score: ReactNode;
   overall_route_score: number;
   overall_confidence?: number;
   segment_scores?: RouteSegment[];
@@ -772,7 +773,20 @@ export const calculateRouteSafety = createAsyncThunk(
         overall_route_score: Math.round(overallScore * 10) / 10,
         safety_notes: safetyNotes.slice(0, 3),
         confidence: Math.min(0.9, validPoints * 0.15),
-        analysis_timestamp: new Date().toISOString()
+        analysis_timestamp: new Date().toISOString(),
+        confidence_score: null, // fallback value, adjust as needed
+        overall_confidence: Math.min(0.9, validPoints * 0.15),
+        segment_scores: [],
+        danger_zones_intersected: 0,
+        high_risk_segments: highRiskSegments,
+        total_segments: validPoints,
+        safety_summary: {
+          safe_segments: overallScore >= 4.0 ? validPoints : 0,
+          mixed_segments: overallScore >= 3.0 && overallScore < 4.0 ? validPoints : 0,
+          unsafe_segments: overallScore < 3.0 ? validPoints : 0,
+        },
+        route_summary: '',
+        risk_factors: [],
       };
     }
   }
