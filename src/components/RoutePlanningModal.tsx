@@ -260,7 +260,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Handle route selection
   const handleSelectRoute = (route: SafeRoute) => {
     dispatch(setSelectedRoute(route));
-    Alert.alert("Route Selected", `Selected: ${route.name}`);
+    onClose();
+    //Alert.alert("Route Selected", `Selected: ${route.name}`);
   };
 
   // Handle safety priority change
@@ -272,7 +273,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Close modal and clear routes
   const handleClose = () => {
-    dispatch(clearRoutes());
+    //dispatch(clearRoutes());
     onClose();
   };
 
@@ -405,7 +406,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               </TouchableOpacity>
             )}
             keyExtractor={(item) => item.id}
-            style={styles.resultsList}
+            style={[styles.resultsList, { maxHeight: 200 }]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           />
@@ -427,7 +428,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       animationType="slide"
       presentationStyle="pageSheet"
     >
-      <View style={styles.container}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 100, // ✅ This is key for bottom content visibility
+        }}
+        showsVerticalScrollIndicator={true}
+      >
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
@@ -603,6 +611,15 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
                   <Text style={styles.selectedText}>Selected Route</Text>
                 </View>
+                <TouchableOpacity
+                  style={styles.selectAndCloseButton}
+                  onPress={() => {
+                    // Route is already selected, just close the modal
+                    onClose();
+                  }}
+                >
+                  <Text style={styles.selectAndCloseText}>Use This Route</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -664,7 +681,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             </View>
           )}
         </View>
-      </View>
+      </ScrollView>
     </Modal>
   );
 };
@@ -690,6 +707,22 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: "center",
     justifyContent: "center",
+  },
+  selectAndCloseButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginTop: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
+  selectAndCloseText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   title: {
     fontSize: 18,
