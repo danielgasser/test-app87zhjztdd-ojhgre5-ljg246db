@@ -213,7 +213,7 @@ const getStyles = (isDark: boolean) =>
     logoImage: {
       width: 150,
       height: 150,
-      marginBottom: 20,
+      marginBottom: 10,
     },
     container: {
       flex: 1,
@@ -233,9 +233,9 @@ const getStyles = (isDark: boolean) =>
       alignItems: "center",
     },
     logoContainer: {
-      marginBottom: 40,
+      marginBottom: 24,
       position: "relative",
-      top: 50,
+      top: 30,
       left: 0,
     },
     logoPlaceholder: {
@@ -254,10 +254,10 @@ const getStyles = (isDark: boolean) =>
     },
     heroSection: {
       alignItems: "center",
-      marginBottom: 40,
+      marginBottom: 30,
     },
     heroTitle: {
-      fontSize: 36,
+      fontSize: 33,
       fontWeight: "bold",
       color: "#FFFFFF",
       textAlign: "center",
@@ -265,7 +265,7 @@ const getStyles = (isDark: boolean) =>
       marginBottom: 16,
     },
     heroAccent: {
-      fontSize: 36,
+      fontSize: 24,
       fontWeight: "bold",
       color: "#FFD700",
     },
@@ -315,7 +315,7 @@ const getStyles = (isDark: boolean) =>
       marginBottom: 4,
     },
     pinLabel: {
-      fontSize: 10,
+      fontSize: 15,
       color: "#FFFFFF",
       fontWeight: "600",
     },
@@ -325,7 +325,7 @@ const getStyles = (isDark: boolean) =>
     benefit: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 16,
+      marginBottom: 4,
       paddingHorizontal: 20,
     },
     benefitIcon: {
@@ -340,7 +340,7 @@ const getStyles = (isDark: boolean) =>
     },
     ctaContainer: {
       paddingHorizontal: 24,
-      paddingBottom: 40,
+      paddingBottom: 20,
       width: "100%",
     },
     primaryButton: {
