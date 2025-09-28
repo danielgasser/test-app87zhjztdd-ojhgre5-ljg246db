@@ -905,6 +905,7 @@ const styles = StyleSheet.create({
   routesSection: {
     marginTop: 24,
     marginBottom: 32,
+    overflow: "scroll",
   },
   routeCard: {
     backgroundColor: "#FFF",
