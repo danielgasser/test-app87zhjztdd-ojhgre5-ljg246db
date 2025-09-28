@@ -383,11 +383,6 @@ export default function MapScreen() {
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
             radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
-            userProfile: {
-              race_ethnicity: "",
-              gender: "",
-              lgbtq_status: "",
-            },
           })
         );
       }
@@ -454,11 +449,6 @@ export default function MapScreen() {
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
                 radius: dynamicRadius,
-                userProfile: {
-                  race_ethnicity: "",
-                  gender: "",
-                  lgbtq_status: "",
-                },
               })
             );
           }
@@ -702,16 +692,37 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
       {selectedRoute && (
-        <TouchableOpacity
-          style={[styles.mapControlButton, { backgroundColor: "#F44336" }]}
-          onPress={() => {
-            dispatch(clearRoutes());
-            setRouteOrigin(null);
-            setRouteDestination(null);
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingLeft: 16,
+            paddingTop: 16,
+            backgroundColor: "#fff",
           }}
         >
-          <Ionicons name="close" size={24} color="#FFF" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.mapControlButton, { backgroundColor: "#F44336" }]}
+            onPress={() => {
+              dispatch(clearRoutes());
+              setRouteOrigin(null);
+              setRouteDestination(null);
+            }}
+          >
+            <Ionicons name="close" size={24} color="#FFF" />
+          </TouchableOpacity>
+          <Text
+            style={{
+              color: "#000",
+              fontSize: 18,
+              fontWeight: "600",
+              marginLeft: 14, // Spacing between button and text
+              paddingBottom: 8,
+            }}
+          >
+            Delete Route
+          </Text>
+        </View>
       )}
       {/* ML Loading indicator */}
       {Object.values(mlPredictionsLoading).some((loading) => loading) && (
