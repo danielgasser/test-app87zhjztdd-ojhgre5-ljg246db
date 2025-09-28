@@ -235,37 +235,38 @@ const initialState: LocationsState = {
 // ================================
 
 export const fetchNearbyLocations = createAsyncThunk(
-  'locations/fetchNearbyLocations',
-  async ({
-    latitude,
-    longitude,
-    radius = 10000,
-    userProfile
-  }: {
-    latitude: number;
-    longitude: number;
-    radius?: number;
-    userProfile: {
-      race_ethnicity: string;
-      gender: string;
-      lgbtq_status: string;
-    };
-  }) => {
-    const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
-      lat: latitude,
-      lng: longitude,
-      radius_meters: radius,
-      user_race_ethnicity: userProfile.race_ethnicity,
-      user_gender: userProfile.gender,
-      user_lgbtq_status: userProfile.lgbtq_status,
-    });
+  'locations/fetchNearby',
+  async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS }: Coordinates & { radius?: number }, { getState }) => {
+    // Get user profile from Redux state
+    const state = getState() as any;
+    const userProfile = state.user.profile;
 
-    if (error) {
-      console.error('Error fetching nearby locations:', error);
-      throw error;
+    // Use demographic-aware function if user has profile, otherwise fallback
+    if (userProfile && userProfile.race_ethnicity) {
+
+      const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
+        lat: latitude,
+        lng: longitude,
+        user_race_ethnicity: userProfile.race_ethnicity,
+        user_gender: userProfile.gender,
+        user_lgbtq_status: userProfile.lgbtq_status,
+        radius_meters: radius,
+      });
+
+      if (error) throw error;
+      return data || [];
+    } else {
+      // Fallback to standard function if no profile
+
+      const { data, error } = await supabase.rpc('get_nearby_locations', {
+        lat: latitude,
+        lng: longitude,
+        radius_meters: radius,
+      });
+
+      if (error) throw error;
+      return data || [];
     }
-
-    return data || [];
   }
 );
 

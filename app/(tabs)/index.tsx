@@ -7,7 +7,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Circle, Callout, Polyline } from "react-native-maps";
+import MapView, {
+  Marker,
+  Circle,
+  Callout,
+  Polyline,
+  LatLng,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -23,7 +29,7 @@ import {
   toggleRouteSegments,
   clearRoutes,
   RouteCoordinate,
-} from "src/store/locationsSlice";
+} from "../../src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
 import DangerZoneOverlay from "src/components/DangerZoneOverlay";
@@ -103,10 +109,10 @@ export default function MapScreen() {
     routeLoading,
     showRouteSegments,
     selectedSegment,
-  } = useAppSelector((state) => state.locations);
+  } = useAppSelector((state: any) => state.locations);
 
-  const userId = useAppSelector((state) => state.auth.user?.id);
-  const userProfile = useAppSelector((state) => state.user.profile);
+  const userId = useAppSelector((state: any) => state.auth.user?.id);
+  const userProfile = useAppSelector((state: any) => state.user.profile);
 
   // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
@@ -168,7 +174,9 @@ export default function MapScreen() {
     await dispatch(fetchLocationDetails(locationId));
 
     // NEW: Fetch ML prediction on-demand if needed
-    const location = nearbyLocations.find((loc) => loc.id === locationId);
+    const location = nearbyLocations.find(
+      (loc: { id: string }) => loc.id === locationId
+    );
     if (location && userProfile) {
       const hasActualReviews =
         location.demographic_safety_score || location.avg_safety_score;
@@ -238,7 +246,12 @@ export default function MapScreen() {
   const handleToggleDangerZones = () => {
     dispatch(toggleDangerZones());
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
-      dispatch(fetchDangerZones({ userId }));
+      dispatch(
+        fetchDangerZones({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        })
+      );
     }
   };
 
@@ -352,7 +365,12 @@ export default function MapScreen() {
   // Fetch danger zones when user location is available
   useEffect(() => {
     if (userId && userLocation) {
-      dispatch(fetchDangerZones({ userId }));
+      dispatch(
+        fetchDangerZones({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        })
+      );
     }
   }, [userId, userLocation, dispatch]);
 
@@ -365,6 +383,11 @@ export default function MapScreen() {
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
             radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+            userProfile: {
+              race_ethnicity: "",
+              gender: "",
+              lgbtq_status: "",
+            },
           })
         );
       }
@@ -431,6 +454,11 @@ export default function MapScreen() {
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
                 radius: dynamicRadius,
+                userProfile: {
+                  race_ethnicity: "",
+                  gender: "",
+                  lgbtq_status: "",
+                },
               })
             );
           }
@@ -439,31 +467,36 @@ export default function MapScreen() {
         {/* Heat Map Overlay */}
         {heatMapVisible &&
           heatMapData.length > 0 &&
-          heatMapData.map((point, index) => {
-            const getHeatColor = (weight: number) => {
-              if (weight >= 4.5) return "#4CAF5060";
-              if (weight >= 3.5) return "#8BC34A60";
-              if (weight >= 2.5) return "#FFC10760";
-              if (weight >= 1.5) return "#FF572260";
-              return "#F4433660";
-            };
+          heatMapData.map(
+            (
+              point: { heat_weight: number; latitude: any; longitude: any },
+              index: any
+            ) => {
+              const getHeatColor = (weight: number) => {
+                if (weight >= 4.5) return "#4CAF5060";
+                if (weight >= 3.5) return "#8BC34A60";
+                if (weight >= 2.5) return "#FFC10760";
+                if (weight >= 1.5) return "#FF572260";
+                return "#F4433660";
+              };
 
-            const baseRadius = 200 + point.heat_weight * 100;
+              const baseRadius = 200 + point.heat_weight * 100;
 
-            return (
-              <Circle
-                key={`heat-${index}`}
-                center={{
-                  latitude: point.latitude,
-                  longitude: point.longitude,
-                }}
-                radius={baseRadius}
-                fillColor={getHeatColor(point.heat_weight)}
-                strokeColor="transparent"
-                strokeWidth={0}
-              />
-            );
-          })}
+              return (
+                <Circle
+                  key={`heat-${index}`}
+                  center={{
+                    latitude: point.latitude,
+                    longitude: point.longitude,
+                  }}
+                  radius={baseRadius}
+                  fillColor={getHeatColor(point.heat_weight)}
+                  strokeColor="transparent"
+                  strokeWidth={0}
+                />
+              );
+            }
+          )}
 
         <DangerZoneOverlay
           dangerZones={dangerZones}
@@ -474,52 +507,90 @@ export default function MapScreen() {
         {mapReady &&
           nearbyLocations &&
           nearbyLocations.length > 0 &&
-          nearbyLocations.map((loc) => {
-            const markerProps = getMarkerProps(loc);
+          nearbyLocations.map(
+            (loc: {
+              id: string;
+              latitude: any;
+              longitude: any;
+              name:
+                | string
+                | number
+                | bigint
+                | boolean
+                | React.ReactElement<
+                    unknown,
+                    string | React.JSXElementConstructor<any>
+                  >
+                | Iterable<React.ReactNode>
+                | Promise<
+                    | string
+                    | number
+                    | bigint
+                    | boolean
+                    | React.ReactPortal
+                    | React.ReactElement<
+                        unknown,
+                        string | React.JSXElementConstructor<any>
+                      >
+                    | Iterable<React.ReactNode>
+                    | null
+                    | undefined
+                  >
+                | null
+                | undefined;
+            }) => {
+              const markerProps = getMarkerProps(loc);
 
-            if (markerProps.type === "predicted") {
-              return (
-                <Marker
-                  key={`predicted-${loc.id}`}
-                  coordinate={{
-                    latitude: Number(loc.latitude),
-                    longitude: Number(loc.longitude),
-                  }}
-                  onPress={() => handleMarkerPress(loc.id)}
-                >
-                  <Callout>
-                    <View style={styles.predictionCallout}>
-                      <Text style={styles.calloutTitle}>{loc.name}</Text>
-                      <Text style={styles.calloutPrediction}>
-                        🤖 AI Prediction: {markerProps.score.toFixed(1)}/5
-                      </Text>
-                      <Text style={styles.calloutConfidence}>
-                        {Math.round((markerProps.confidence || 0) * 100)}%
-                        confident
-                      </Text>
-                      <Text style={styles.calloutNote}>
-                        Based on similar locations and user demographics
-                      </Text>
-                    </View>
-                  </Callout>
-                </Marker>
-              );
-            } else {
-              return (
-                <Marker
-                  key={`db-${loc.id}`}
-                  coordinate={{
-                    latitude: Number(loc.latitude),
-                    longitude: Number(loc.longitude),
-                  }}
-                  title={loc.name}
-                  description={markerProps.description}
-                  pinColor={markerProps.color}
-                  onPress={() => handleMarkerPress(loc.id)}
-                />
-              );
+              if (markerProps.type === "predicted") {
+                return (
+                  <Marker
+                    key={`predicted-${loc.id}`}
+                    coordinate={{
+                      latitude: Number(loc.latitude),
+                      longitude: Number(loc.longitude),
+                    }}
+                    onPress={() => handleMarkerPress(loc.id)}
+                  >
+                    <Callout>
+                      <View style={styles.predictionCallout}>
+                        <Text style={styles.calloutTitle}>{loc.name}</Text>
+                        <Text style={styles.calloutPrediction}>
+                          🤖 AI Prediction: {markerProps.score.toFixed(1)}/5
+                        </Text>
+                        <Text style={styles.calloutConfidence}>
+                          {Math.round((markerProps.confidence || 0) * 100)}%
+                          confident
+                        </Text>
+                        <Text style={styles.calloutNote}>
+                          Based on similar locations and user demographics
+                        </Text>
+                      </View>
+                    </Callout>
+                  </Marker>
+                );
+              } else {
+                return (
+                  <Marker
+                    key={`db-${loc.id}`}
+                    coordinate={{
+                      latitude: Number(loc.latitude),
+                      longitude: Number(loc.longitude),
+                    }}
+                    title={
+                      typeof loc.name === "string"
+                        ? loc.name
+                        : loc.name != null
+                        ? String(loc.name)
+                        : ""
+                    }
+                    description={markerProps.description}
+                    pinColor={markerProps.color}
+                    onPress={() => handleMarkerPress(loc.id)}
+                  />
+                );
+              }
             }
-          })}
+          )}
 
         {/* Search result marker */}
         {searchMarker && (
@@ -565,16 +636,21 @@ export default function MapScreen() {
           </>
         )}
         {routes
-          .filter((route) => route.id !== selectedRoute?.id)
-          .map((route) => (
-            <Polyline
-              key={route.id}
-              coordinates={route.coordinates}
-              strokeColor={APP_CONFIG.ROUTE_DISPLAY.COLORS.ALTERNATIVE_ROUTE}
-              strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.ALTERNATIVE}
-              lineDashPattern={[10, 5]}
-            />
-          ))}
+          .filter((route: { id: any }) => route.id !== selectedRoute?.id)
+          .map(
+            (route: {
+              id: React.Key | null | undefined;
+              coordinates: LatLng[];
+            }) => (
+              <Polyline
+                key={route.id}
+                coordinates={route.coordinates}
+                strokeColor={APP_CONFIG.ROUTE_DISPLAY.COLORS.ALTERNATIVE_ROUTE}
+                strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.ALTERNATIVE}
+                lineDashPattern={[10, 5]}
+              />
+            )
+          )}
       </MapView>
 
       {/* Map Controls */}
