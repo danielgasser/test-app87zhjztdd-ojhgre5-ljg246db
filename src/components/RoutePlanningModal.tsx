@@ -23,7 +23,7 @@ import {
   RouteCoordinate,
   RouteRequest,
   SafeRoute,
-} from "src/store/locationsSlice";
+} from "../store/locationsSlice";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -53,8 +53,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     routePreferences,
     searchResults,
     searchLoading,
-  } = useAppSelector((state) => state.locations);
-  const { userLocation } = useAppSelector((state) => state.locations);
+  } = useAppSelector((state: any) => state.locations);
+  const { userLocation } = useAppSelector((state: any) => state.locations);
   const currentUser = useAppSelector((state) => state.auth.user);
   const userProfile = useAppSelector((state) => state.user.profile);
 
@@ -153,9 +153,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       dispatch(
         searchLocations({
           query,
-          userLocation: userLocation
-            ? { lat: userLocation.latitude, lng: userLocation.longitude }
-            : undefined,
+          latitude: userLocation ? userLocation.latitude : undefined,
+          longitude: userLocation ? userLocation.longitude : undefined,
         })
       );
 
@@ -225,12 +224,19 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         longitude: toLocation.longitude,
       },
       user_demographics: {
-        race_ethnicity: userProfile.race_ethnicity,
-        gender: userProfile.gender,
-        lgbtq_status: userProfile.lgbtq_status,
-        religion: userProfile.religion,
-        disability_status: userProfile.disability_status,
-        age_range: userProfile.age_range,
+        race_ethnicity: Array.isArray(userProfile.race_ethnicity)
+          ? userProfile.race_ethnicity.join(", ")
+          : userProfile.race_ethnicity || "",
+        gender: userProfile.gender ?? "",
+        lgbtq_status:
+          userProfile.lgbtq_status !== undefined
+            ? String(userProfile.lgbtq_status)
+            : "",
+        religion: userProfile.religion ?? "",
+        disability_status: Array.isArray(userProfile.disability_status)
+          ? userProfile.disability_status.join(", ")
+          : userProfile.disability_status || "",
+        age_range: userProfile.age_range ?? "",
       },
       route_preferences: {
         prioritize_safety: routePreferences.safetyPriority === "safety_focused",
@@ -271,7 +277,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   };
 
   // Get combined search results
-  const dbResultsWithSource = searchResults.map((result) => ({
+  const dbResultsWithSource = searchResults.map((result: { source: any }) => ({
     ...result,
     source: (result.source || "database") as "database" | "mapbox",
   }));
@@ -605,7 +611,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           {routeAlternatives.length > 0 && (
             <View style={styles.routesSection}>
               <Text style={styles.sectionTitle}>Alternative Routes</Text>
-              {routeAlternatives.map((route) => (
+              {routeAlternatives.map((route: SafeRoute) => (
                 <TouchableOpacity
                   key={route.id}
                   style={styles.routeCard}
