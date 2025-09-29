@@ -249,8 +249,9 @@ export default function MapScreen() {
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
       dispatch(
         fetchDangerZones({
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
+          userId: userId,
+          radius: 10000,
+          userDemographics: userProfile,
         })
       );
     }
@@ -368,8 +369,9 @@ export default function MapScreen() {
     if (userId && userLocation) {
       dispatch(
         fetchDangerZones({
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
+          userId: userId,
+          radius: 10000,
+          userDemographics: userProfile,
         })
       );
     }
