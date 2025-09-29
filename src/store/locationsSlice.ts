@@ -17,6 +17,14 @@ import { ReactNode } from 'react';
 // INTERFACES AND TYPES
 // ================================
 
+// Helper function to get the current auth token
+async function getAuthToken(): Promise<string> {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error || !session) {
+    throw new Error('User not authenticated');
+  }
+  return session.access_token;
+}
 interface SearchLocation {
   id: string;
   name: string;
@@ -561,38 +569,38 @@ export const fetchRecentReviews = createAsyncThunk(
 export const fetchDangerZones = createAsyncThunk(
   'locations/fetchDangerZones',
   async ({
-    latitude,
-    longitude,
+    userId,
     radius = 10000,
     userDemographics
   }: {
-    latitude: number;
-    longitude: number;
+    userId: string;
     radius?: number;
     userDemographics?: any;
   }) => {
     try {
+      const token = await getAuthToken();
+
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          latitude,
-          longitude,
+          user_id: userId,
           radius_miles: radius / 1609.34,
           user_demographics: userDemographics
         })
       });
 
       if (!response.ok) {
-        console.error('Danger zones API error:', response.status);
+        const errorText = await response.text();
+        console.error('Danger zones API error:', response.status, errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
-      return data.zones || [];
+      return data.danger_zones || [];
     } catch (error) {
       console.error('Error fetching danger zones:', error);
       return [];
@@ -604,11 +612,13 @@ export const fetchSimilarUsers = createAsyncThunk(
   'locations/fetchSimilarUsers',
   async (userId: string) => {
     try {
+      const token = await getAuthToken();
+
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/similarity-calculator`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ user_id: userId })
       });
@@ -638,6 +648,7 @@ export const fetchMLPredictions = createAsyncThunk(
       if (!userId || !userProfile) {
         throw new Error('User not authenticated or profile not loaded');
       }
+      const token = await getAuthToken();
 
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
@@ -645,7 +656,7 @@ export const fetchMLPredictions = createAsyncThunk(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
             location_id: locationId,
@@ -723,11 +734,13 @@ export const calculateRouteSafety = createAsyncThunk(
       // Sample a few points for basic safety analysis
       for (const point of samplePoints) {
         try {
+          const token = await getAuthToken();
+
           const safetyResponse = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+              'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
               latitude: point.latitude,
