@@ -22,6 +22,7 @@ import {
   RouteRequest,
   SafeRoute,
 } from "../store/locationsSlice";
+import { setLoading } from "@/store/authSlice";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -212,48 +213,74 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       return;
     }
 
-    const routeRequest: RouteRequest = {
-      origin: {
-        latitude: fromLocation.latitude,
-        longitude: fromLocation.longitude,
-      },
-      destination: {
-        latitude: toLocation.latitude,
-        longitude: toLocation.longitude,
-      },
-      user_demographics: {
-        race_ethnicity: Array.isArray(userProfile.race_ethnicity)
-          ? userProfile.race_ethnicity.join(", ")
-          : userProfile.race_ethnicity || "",
-        gender: userProfile.gender ?? "",
-        lgbtq_status:
-          userProfile.lgbtq_status !== undefined
-            ? String(userProfile.lgbtq_status)
-            : "",
-        religion: userProfile.religion ?? "",
-        disability_status: Array.isArray(userProfile.disability_status)
-          ? userProfile.disability_status.join(", ")
-          : userProfile.disability_status || "",
-        age_range: userProfile.age_range ?? "",
-      },
-      route_preferences: {
-        prioritize_safety: routePreferences.safetyPriority === "safety_focused",
-        avoid_evening_danger: routePreferences.avoidEveningDanger,
-        max_detour_minutes: routePreferences.maxDetourMinutes,
-      },
-    };
-
-    try {
-      console.log("🚀 Generating safe route...");
-      await dispatch(generateSafeRoute(routeRequest)).unwrap();
-
-      // Generate alternatives after main route
-      dispatch(generateRouteAlternatives(routeRequest));
-    } catch (error) {
-      console.error("❌ Route generation failed:", error);
-      Alert.alert("Route Error", "Failed to generate route. Please try again.");
-    }
+    onst routeRequest: RouteRequest = {
+    origin: {
+      latitude: originLocation.latitude,
+      longitude: originLocation.longitude,
+    },
+    destination: {
+      latitude: destinationLocation.latitude,
+      longitude: destinationLocation.longitude,
+    },
+    user_demographics: {
+      race_ethnicity: userProfile.race_ethnicity?.[0] || '',
+      gender: userProfile.gender || '',
+      lgbtq_status: userProfile.lgbtq_status || '',
+      religion: userProfile.religion || '',
+      disability_status: userProfile.disability_status || '',
+      age_range: userProfile.age_range || '',
+    },
+    route_preferences: {
+      prioritize_safety: routePriority === 'safety',
+      avoid_evening_danger: avoidEvening,
+      max_detour_minutes: 30, // Can make this configurable later
+    },
   };
+
+  try {
+    // 🆕 NEW: Use smart route generation instead of basic routing
+    console.log('🧠 Requesting SMART safe route...');
+    
+    const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
+
+    if (result.optimized_route && result.original_route) {
+      console.log('✅ Smart route comparison available');
+      console.log(`   Safest: ${result.optimized_route.name} (${result.optimized_route.safety_analysis.overall_route_score.toFixed(1)}/5)`);
+      console.log(`   Fastest: ${result.original_route.name} (${result.original_route.safety_analysis.overall_route_score.toFixed(1)}/5)`);
+      
+      // Automatically select the safer route
+      dispatch(setSelectedRoute(result.optimized_route));
+      
+      // Show success with improvement details
+      if (result.improvement_summary.safety_improvement > 0) {
+        Alert.alert(
+          '✅ Safer Route Found!',
+          `We found a route that's ${result.improvement_summary.safety_improvement.toFixed(1)} points safer.\n\n` +
+          `🛡️ Safety: ${result.improvement_summary.original_safety_score.toFixed(1)} → ${result.improvement_summary.optimized_safety_score.toFixed(1)}\n` +
+          `⏱️ Time: +${result.improvement_summary.time_added_minutes} minutes\n` +
+          `🚫 Avoids ${result.improvement_summary.danger_zones_avoided} danger zone(s)`,
+          [{ text: 'Great!', style: 'default' }]
+        );
+      }
+    } else {
+      console.log('ℹ️ Original route is already optimal');
+    }
+
+  } catch (error) {
+    console.error('Route generation error:', error);
+    Alert.alert(error instanceof Error ? error.message : 'Failed to generate route');
+    
+    // Fallback: try basic route generation if smart routing fails
+    console.log('⚠️ Falling back to basic route generation...');
+    try {
+      await dispatch(generateSafeRoute(routeRequest)).unwrap();
+    } catch (fallbackError) {
+      Alert.alert('Unable to generate route. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Handle route selection
   const handleSelectRoute = (route: SafeRoute) => {

@@ -134,6 +134,7 @@ export interface SafeRoute {
     distance: number;
     geometry: any;
   };
+  waypoints_added?: any; // NEW: track why route was modified
 }
 
 // ================================
@@ -187,6 +188,14 @@ interface LocationsState {
     safetyPriority: 'speed_focused' | 'balanced' | 'safety_focused';
     avoidEveningDanger: boolean;
     maxDetourMinutes: number;
+  };
+  routeImprovementSummary?: {
+    original_safety_score: number;
+    optimized_safety_score: number;
+    safety_improvement: number;
+    time_added_minutes: number;
+    distance_added_km: number;
+    danger_zones_avoided: number;
   };
 }
 
@@ -1028,6 +1037,128 @@ export const generateRouteAlternatives = createAsyncThunk(
   }
 );
 
+export const generateSmartRoute = createAsyncThunk(
+  'locations/generateSmartRoute',
+  async (routeRequest: RouteRequest, { rejectWithValue }) => {
+    try {
+      console.log('🧠 Starting SMART route generation...');
+
+      // Call the NEW smart-route-generator edge function
+      const { data, error } = await supabase.functions.invoke('smart-route-generator', {
+        body: {
+          origin: routeRequest.origin,
+          destination: routeRequest.destination,
+          user_demographics: routeRequest.user_demographics,
+          route_preferences: routeRequest.route_preferences
+        }
+      });
+
+      if (error) {
+        console.error('❌ Smart route generation failed:', error);
+        throw error;
+      }
+
+      if (!data.success) {
+        console.log('⚠️ Smart route not better than original:', data.message);
+        // Still return the data so UI can show the comparison
+        return data;
+      }
+
+      console.log('✅ Smart route generated successfully!');
+      console.log(`   Safety improvement: +${data.improvement_summary.safety_improvement.toFixed(2)}`);
+      console.log(`   Time added: +${data.improvement_summary.time_added_minutes} min`);
+      console.log(`   Danger zones avoided: ${data.improvement_summary.danger_zones_avoided}`);
+
+      // Convert the optimized route to SafeRoute format
+      const optimizedCoords: RouteCoordinate[] = data.optimized_route.geometry.coordinates.map(
+        ([lng, lat]: [number, number]) => ({
+          latitude: lat,
+          longitude: lng
+        })
+      );
+
+      const optimizedSafeRoute: SafeRoute = {
+        id: `smart_route_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: 'Smart Safe Route',
+        route_type: 'safest',
+        coordinates: optimizedCoords,
+        estimated_duration_minutes: Math.round(data.optimized_route.duration / 60),
+        distance_kilometers: Math.round(data.optimized_route.distance / 1000 * 10) / 10,
+        safety_analysis: {
+          overall_route_score: data.improvement_summary.optimized_safety_score,
+          confidence: 0.85,
+          danger_zones_intersected: 0, // Update from actual data if available
+          high_risk_segments: 0,
+          safety_notes: [
+            `Safety improved by ${data.improvement_summary.safety_improvement.toFixed(1)} points`,
+            `Avoids ${data.improvement_summary.danger_zones_avoided} danger zone(s)`,
+            `Adds ${data.improvement_summary.time_added_minutes} minutes to journey`
+          ],
+          safety_summary: {
+            safe_segments: 0,
+            mixed_segments: 0,
+            unsafe_segments: 0
+          },
+          confidence_score: 0.85,
+          route_summary: data.message
+        },
+        created_at: new Date().toISOString(),
+        mapbox_data: {
+          duration: data.optimized_route.duration,
+          distance: data.optimized_route.distance,
+          geometry: data.optimized_route.geometry
+        },
+        waypoints_added: data.waypoints_added  // NEW: track why route was modified
+      };
+
+      // Also convert original route for comparison
+      const originalCoords: RouteCoordinate[] = data.original_route.geometry.coordinates.map(
+        ([lng, lat]: [number, number]) => ({
+          latitude: lat,
+          longitude: lng
+        })
+      );
+
+      const originalSafeRoute: SafeRoute = {
+        id: `original_route_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: 'Fastest Route',
+        route_type: 'fastest',
+        coordinates: originalCoords,
+        estimated_duration_minutes: Math.round(data.original_route.duration / 60),
+        distance_kilometers: Math.round(data.original_route.distance / 1000 * 10) / 10,
+        safety_analysis: {
+          overall_route_score: data.improvement_summary.original_safety_score,
+          confidence: 0.85,
+          safety_notes: ['Standard fastest route - may pass through danger zones'],
+          safety_summary: {
+            safe_segments: 0,
+            mixed_segments: 0,
+            unsafe_segments: 0
+          },
+          confidence_score: 0.85,
+          route_summary: 'Fastest route without safety optimization'
+        },
+        created_at: new Date().toISOString(),
+        mapbox_data: {
+          duration: data.original_route.duration,
+          distance: data.original_route.distance,
+          geometry: data.original_route.geometry
+        }
+      };
+
+      return {
+        optimized_route: optimizedSafeRoute,
+        original_route: originalSafeRoute,
+        improvement_summary: data.improvement_summary,
+        smart_route_data: data
+      };
+
+    } catch (error) {
+      console.error('❌ Smart route generation error:', error);
+      return rejectWithValue(error instanceof Error ? error.message : 'Unknown error occurred');
+    }
+  }
+);
 // ================================
 // HELPER FUNCTIONS
 // ================================
@@ -1379,7 +1510,51 @@ const locationsSlice = createSlice({
       })
       .addCase(generateRouteAlternatives.rejected, (state, action) => {
         console.error('Failed to generate alternatives:', action.payload);
-      });
+      })
+      // Generate Smart Route
+      .addCase(generateSmartRoute.pending, (state) => {
+        state.routeLoading = true;
+        state.routeError = null;
+      })
+      .addCase(generateSmartRoute.fulfilled, (state, action) => {
+        state.routeLoading = false;
+
+        const result = action.payload;
+
+        // Store both routes for comparison
+        if (result.optimized_route && result.original_route) {
+          // Convert to SafeRoute format (simplified)
+          const optimizedRoute: SafeRoute = {
+            id: `smart_${Date.now()}`,
+            name: 'Safest Route',
+            route_type: 'safest',
+            coordinates: result.optimized_route.geometry.coordinates.map(([lng, lat]: [number, number]) => ({
+              latitude: lat,
+              longitude: lng
+            })),
+            estimated_duration_minutes: Math.round(result.optimized_route.duration / 60),
+            distance_kilometers: Math.round(result.optimized_route.distance / 1000 * 10) / 10,
+            safety_analysis: {
+              overall_route_score: result.improvement_summary.optimized_safety_score,
+              confidence: 0.85,
+              danger_zones_intersected: 0,
+              high_risk_segments: 0,
+              safety_notes: [`Improved safety by ${result.improvement_summary.safety_improvement.toFixed(1)} points`],
+              total_segments: 0,
+              safety_summary: { safe_segments: 0, mixed_segments: 0, unsafe_segments: 0 },
+              confidence_score: undefined
+            },
+            created_at: new Date().toISOString()
+          };
+
+          state.selectedRoute = optimizedRoute;
+          state.routes = [optimizedRoute];
+        }
+      })
+      .addCase(generateSmartRoute.rejected, (state, action) => {
+        state.routeLoading = false;
+        state.routeError = action.payload as string || 'Failed to generate smart route';
+      })
   },
 });
 
