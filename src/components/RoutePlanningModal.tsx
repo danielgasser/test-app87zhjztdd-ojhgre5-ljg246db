@@ -15,7 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   generateSafeRoute,
-  generateRouteAlternatives,
   setSelectedRoute,
   updateRoutePreferences,
   searchLocations,
@@ -23,6 +22,8 @@ import {
   SafeRoute,
 } from "../store/locationsSlice";
 import { setLoading } from "@/store/authSlice";
+import RouteComparisonCard from "./RouteComparisonCard";
+import { setSmartRouteComparison } from "../store/locationsSlice";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -53,6 +54,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     searchResults,
     searchLoading,
   } = useAppSelector((state: any) => state.locations);
+  const { smartRouteComparison, showSmartRouteComparison } = useAppSelector(
+    (state) => state.locations
+  );
   const { userLocation } = useAppSelector((state: any) => state.locations);
   const currentUser = useAppSelector((state) => state.auth.user);
   const userProfile = useAppSelector((state) => state.user.profile);
@@ -164,17 +168,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     [dispatch, userLocation]
   );
 
-  // Debounced search
-  useEffect(() => {
-    const searchTimeout = setTimeout(() => {
-      if (activeInput && searchQuery) {
-        performSearch(searchQuery);
-      }
-    }, 300);
-
-    return () => clearTimeout(searchTimeout);
-  }, [searchQuery, activeInput, performSearch]);
-
   // Handle input focus
   const handleInputFocus = (inputType: "from" | "to") => {
     setActiveInput(inputType);
@@ -194,7 +187,29 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     setSearchQuery("");
     setMapboxResults([]);
   };
+  // Handle selecting original (faster) route
+  const handleSelectOriginalRoute = () => {
+    if (smartRouteComparison?.original_route) {
+      dispatch(setSelectedRoute(smartRouteComparison.original_route));
+      dispatch(setSmartRouteComparison(null)); // Hide comparison
+      Alert.alert(
+        "Route Selected",
+        "Using fastest route. Please note: this route may pass through danger zones."
+      );
+    }
+  };
 
+  // Handle selecting optimized (safer) route
+  const handleSelectOptimizedRoute = () => {
+    if (smartRouteComparison?.optimized_route) {
+      dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
+      dispatch(setSmartRouteComparison(null)); // Hide comparison
+      Alert.alert(
+        "Route Selected",
+        "Using safer route with danger zone avoidance."
+      );
+    }
+  };
   // Handle route generation
   const handleGenerateRoute = async () => {
     if (!fromLocation || !toLocation) {
@@ -213,74 +228,93 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       return;
     }
 
-    onst routeRequest: RouteRequest = {
-    origin: {
-      latitude: originLocation.latitude,
-      longitude: originLocation.longitude,
-    },
-    destination: {
-      latitude: destinationLocation.latitude,
-      longitude: destinationLocation.longitude,
-    },
-    user_demographics: {
-      race_ethnicity: userProfile.race_ethnicity?.[0] || '',
-      gender: userProfile.gender || '',
-      lgbtq_status: userProfile.lgbtq_status || '',
-      religion: userProfile.religion || '',
-      disability_status: userProfile.disability_status || '',
-      age_range: userProfile.age_range || '',
-    },
-    route_preferences: {
-      prioritize_safety: routePriority === 'safety',
-      avoid_evening_danger: avoidEvening,
-      max_detour_minutes: 30, // Can make this configurable later
-    },
-  };
+    const routeRequest: RouteRequest = {
+      origin: {
+        latitude: originLocation.latitude,
+        longitude: originLocation.longitude,
+      },
+      destination: {
+        latitude: destinationLocation.latitude,
+        longitude: destinationLocation.longitude,
+      },
+      user_demographics: {
+        race_ethnicity: userProfile.race_ethnicity?.[0] || "",
+        gender: userProfile.gender || "",
+        lgbtq_status: userProfile.lgbtq_status || "",
+        religion: userProfile.religion || "",
+        disability_status: userProfile.disability_status || "",
+        age_range: userProfile.age_range || "",
+      },
+      route_preferences: {
+        prioritize_safety: routePriority === "safety",
+        avoid_evening_danger: avoidEvening,
+        max_detour_minutes: 30, // Can make this configurable later
+      },
+    };
 
-  try {
-    // 🆕 NEW: Use smart route generation instead of basic routing
-    console.log('🧠 Requesting SMART safe route...');
-    
-    const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
-
-    if (result.optimized_route && result.original_route) {
-      console.log('✅ Smart route comparison available');
-      console.log(`   Safest: ${result.optimized_route.name} (${result.optimized_route.safety_analysis.overall_route_score.toFixed(1)}/5)`);
-      console.log(`   Fastest: ${result.original_route.name} (${result.original_route.safety_analysis.overall_route_score.toFixed(1)}/5)`);
-      
-      // Automatically select the safer route
-      dispatch(setSelectedRoute(result.optimized_route));
-      
-      // Show success with improvement details
-      if (result.improvement_summary.safety_improvement > 0) {
-        Alert.alert(
-          '✅ Safer Route Found!',
-          `We found a route that's ${result.improvement_summary.safety_improvement.toFixed(1)} points safer.\n\n` +
-          `🛡️ Safety: ${result.improvement_summary.original_safety_score.toFixed(1)} → ${result.improvement_summary.optimized_safety_score.toFixed(1)}\n` +
-          `⏱️ Time: +${result.improvement_summary.time_added_minutes} minutes\n` +
-          `🚫 Avoids ${result.improvement_summary.danger_zones_avoided} danger zone(s)`,
-          [{ text: 'Great!', style: 'default' }]
-        );
-      }
-    } else {
-      console.log('ℹ️ Original route is already optimal');
-    }
-
-  } catch (error) {
-    console.error('Route generation error:', error);
-    Alert.alert(error instanceof Error ? error.message : 'Failed to generate route');
-    
-    // Fallback: try basic route generation if smart routing fails
-    console.log('⚠️ Falling back to basic route generation...');
     try {
-      await dispatch(generateSafeRoute(routeRequest)).unwrap();
-    } catch (fallbackError) {
-      Alert.alert('Unable to generate route. Please try again.');
+      // 🆕 NEW: Use smart route generation instead of basic routing
+      console.log("🧠 Requesting SMART safe route...");
+
+      const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
+
+      if (result.optimized_route && result.original_route) {
+        console.log("✅ Smart route comparison available");
+        console.log(
+          `   Safest: ${
+            result.optimized_route.name
+          } (${result.optimized_route.safety_analysis.overall_route_score.toFixed(
+            1
+          )}/5)`
+        );
+        console.log(
+          `   Fastest: ${
+            result.original_route.name
+          } (${result.original_route.safety_analysis.overall_route_score.toFixed(
+            1
+          )}/5)`
+        );
+
+        // Automatically select the safer route
+        dispatch(setSelectedRoute(result.optimized_route));
+
+        // Show success with improvement details
+        if (result.improvement_summary.safety_improvement > 0) {
+          Alert.alert(
+            "✅ Safer Route Found!",
+            `We found a route that's ${result.improvement_summary.safety_improvement.toFixed(
+              1
+            )} points safer.\n\n` +
+              `🛡️ Safety: ${result.improvement_summary.original_safety_score.toFixed(
+                1
+              )} → ${result.improvement_summary.optimized_safety_score.toFixed(
+                1
+              )}\n` +
+              `⏱️ Time: +${result.improvement_summary.time_added_minutes} minutes\n` +
+              `🚫 Avoids ${result.improvement_summary.danger_zones_avoided} danger zone(s)`,
+            [{ text: "Great!", style: "default" }]
+          );
+        }
+      } else {
+        console.log("ℹ️ Original route is already optimal");
+      }
+    } catch (error) {
+      console.error("Route generation error:", error);
+      Alert.alert(
+        error instanceof Error ? error.message : "Failed to generate route"
+      );
+
+      // Fallback: try basic route generation if smart routing fails
+      console.log("⚠️ Falling back to basic route generation...");
+      try {
+        await dispatch(generateSafeRoute(routeRequest)).unwrap();
+      } catch (fallbackError) {
+        Alert.alert("Unable to generate route. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Handle route selection
   const handleSelectRoute = (route: SafeRoute) => {
@@ -313,6 +347,15 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   }));
 
   const allResults = [...dbResultsWithSource, ...mapboxResultsWithSource];
+  useEffect(() => {
+    const searchTimeout = setTimeout(() => {
+      if (activeInput && searchQuery) {
+        performSearch(searchQuery);
+      }
+    }, 300);
+
+    return () => clearTimeout(searchTimeout);
+  }, [searchQuery, activeInput, performSearch]);
 
   // Render location input field
   const renderLocationInput = (
@@ -585,7 +628,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               <Text style={styles.errorText}>{routeError}</Text>
             </View>
           )}
-
+          {/* Smart Route Comparison - Show if available */}
+          {showSmartRouteComparison && smartRouteComparison && (
+            <RouteComparisonCard
+              comparison={smartRouteComparison}
+              onSelectOriginal={handleSelectOriginalRoute}
+              onSelectOptimized={handleSelectOptimizedRoute}
+            />
+          )}
           {/* Route Results */}
           {selectedRoute && (
             <View style={styles.routesSection}>
