@@ -332,7 +332,13 @@ export const fetchLocationDetails = createAsyncThunk(
 export const createLocation = createAsyncThunk(
   'locations/createLocation',
   async (locationData: CreateLocationForm) => {
-    const { data, error } = await supabase.from('locations').insert(locationData).select().single();
+    const transformedData = {
+      ...locationData,
+      coordinates: `POINT(${locationData.longitude} ${locationData.latitude})`
+    };
+    // Remove latitude/longitude fields
+    const { latitude, longitude, ...dbData } = transformedData;
+    const { data, error } = await supabase.from('locations').insert(dbData).select().single();
 
     if (error) {
       console.error('Error creating location:', error);
@@ -346,7 +352,15 @@ export const createLocation = createAsyncThunk(
 export const submitReview = createAsyncThunk(
   'locations/submitReview',
   async (reviewData: CreateReviewForm) => {
-    const { data, error } = await supabase.from('reviews').insert(reviewData).select().single();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { time_of_day, ...dbReviewData } = reviewData;
+
+    const { data, error } = await supabase.from('reviews').insert({
+      ...dbReviewData,
+      user_id: user.id
+    }).select().single();
 
     if (error) {
       console.error('Error submitting review:', error);
@@ -407,18 +421,16 @@ export const searchLocations = createAsyncThunk(
     }
 
     try {
-      const { data: dbResults, error: dbError } = await supabase
-        .from('locations')
-        .select('*')
-        .or(`name.ilike.%${query}%,address.ilike.%${query}%`)
-        .eq('active', true)
-        .limit(5);
+      const { data: dbResults, error: dbError } = await (supabase.rpc as any)('search_locations_with_coords', {
+        search_query: query,
+        result_limit: 5
+      });
 
       if (dbError) {
         console.error('Database search error:', dbError);
       }
 
-      const searchResults: SearchLocation[] = (dbResults || []).map(location => ({
+      const searchResults: SearchLocation[] = (dbResults || []).map((location: any) => ({
         id: location.id,
         name: location.name,
         address: location.address,
@@ -517,9 +529,9 @@ export const fetchHeatMapData = createAsyncThunk(
     userProfile?: any;
   }) => {
     try {
-      const { data, error } = await supabase.rpc('', {
-        user_lat: latitude,
-        user_lng: longitude,
+      const { data, error } = await (supabase.rpc as any)('get_heat_map_data', {
+        center_lat: latitude,
+        center_lng: longitude,
         radius_meters: radius,
       });
 
@@ -559,7 +571,7 @@ export const fetchRecentReviews = createAsyncThunk(
           location_id,
           safety_rating,
           overall_rating,
-          comment,
+          content,
           created_at,
           user_profiles!inner (
             race_ethnicity,
@@ -586,7 +598,7 @@ export const fetchRecentReviews = createAsyncThunk(
         location_name: Array.isArray(review.locations) && review.locations.length > 0 ? review.locations[0].name : 'Unknown Location',
         safety_rating: review.safety_rating,
         overall_rating: review.overall_rating,
-        comment: review.comment,
+        comment: review.content,
         created_at: review.created_at,
         user_demographics: {
           race_ethnicity: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].race_ethnicity : undefined,
@@ -1345,7 +1357,7 @@ const locationsSlice = createSlice({
       })
       .addCase(createLocation.fulfilled, (state, action) => {
         state.loading = false;
-        state.locations.push(action.payload);
+        state.locations.push(action.payload as any);
       })
       .addCase(createLocation.rejected, (state, action) => {
         state.loading = false;
@@ -1359,7 +1371,7 @@ const locationsSlice = createSlice({
       })
       .addCase(submitReview.fulfilled, (state, action) => {
         state.loading = false;
-        state.userReviews.unshift(action.payload);
+        state.userReviews.unshift(action.payload as any);
       })
       .addCase(submitReview.rejected, (state, action) => {
         state.loading = false;
@@ -1375,7 +1387,7 @@ const locationsSlice = createSlice({
         state.loading = false;
         const index = state.userReviews.findIndex(review => review.id === action.payload.id);
         if (index !== -1) {
-          state.userReviews[index] = action.payload;
+          state.userReviews[index] = action.payload as any;
         }
       })
       .addCase(updateReview.rejected, (state, action) => {
@@ -1390,7 +1402,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchUserReviews.fulfilled, (state, action) => {
         state.loading = false;
-        state.userReviews = action.payload;
+        state.userReviews = action.payload as any;
       })
       .addCase(fetchUserReviews.rejected, (state, action) => {
         state.loading = false;
@@ -1443,7 +1455,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchRecentReviews.fulfilled, (state, action) => {
         state.communityLoading = false;
-        state.communityReviews = action.payload;
+        state.communityReviews = action.payload as any;
       })
       .addCase(fetchRecentReviews.rejected, (state, action) => {
         state.communityLoading = false;
