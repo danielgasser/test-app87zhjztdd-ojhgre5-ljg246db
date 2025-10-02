@@ -197,8 +197,31 @@ interface LocationsState {
     distance_added_km: number;
     danger_zones_avoided: number;
   };
+  smartRouteComparison: SmartRouteComparison | null;
+  showSmartRouteComparison: boolean;
+}
+export interface RouteImprovementSummary {
+  original_safety_score: number;
+  optimized_safety_score: number;
+  safety_improvement: number;
+  time_added_minutes: number;
+  distance_added_km: number;
+  danger_zones_avoided: number;
 }
 
+export interface SafeWaypoint {
+  coordinate: RouteCoordinate;
+  reason: string;
+  safety_score: number;
+}
+
+export interface SmartRouteComparison {
+  original_route: SafeRoute;
+  optimized_route: SafeRoute;
+  improvement_summary: RouteImprovementSummary;
+  waypoints_added: SafeWaypoint[];
+  message: string;
+}
 // ================================
 // INITIAL STATE
 // ================================
@@ -245,6 +268,8 @@ const initialState: LocationsState = {
     avoidEveningDanger: true,
     maxDetourMinutes: 15,
   },
+  smartRouteComparison: null,
+  showSmartRouteComparison: false,
 };
 
 // ================================
@@ -1215,7 +1240,14 @@ const locationsSlice = createSlice({
     updateRoutePreferences: (state, action: PayloadAction<Partial<typeof state.routePreferences>>) => {
       state.routePreferences = { ...state.routePreferences, ...action.payload };
     },
+    setSmartRouteComparison: (state, action: PayloadAction<SmartRouteComparison | null>) => {
+      state.smartRouteComparison = action.payload;
+      state.showSmartRouteComparison = action.payload !== null;
+    },
 
+    toggleSmartRouteComparison: (state) => {
+      state.showSmartRouteComparison = !state.showSmartRouteComparison;
+    },
     clearRoutes: (state) => {
       state.routes = [];
       state.selectedRoute = null;
@@ -1223,6 +1255,8 @@ const locationsSlice = createSlice({
       state.routeSafetyAnalysis = null;
       state.routeError = null;
       state.routeRequest = null;
+      state.smartRouteComparison = null;
+      state.showSmartRouteComparison = false;
     },
 
     setSelectedLocation: (state, action: PayloadAction<LocationWithScores | null>) => {
@@ -1521,34 +1555,31 @@ const locationsSlice = createSlice({
 
         const result = action.payload;
 
-        // Store both routes for comparison
-        if (result.optimized_route && result.original_route) {
-          // Convert to SafeRoute format (simplified)
-          const optimizedRoute: SafeRoute = {
-            id: `smart_${Date.now()}`,
-            name: 'Safest Route',
-            route_type: 'safest',
-            coordinates: result.optimized_route.geometry.coordinates.map(([lng, lat]: [number, number]) => ({
-              latitude: lat,
-              longitude: lng
-            })),
-            estimated_duration_minutes: Math.round(result.optimized_route.duration / 60),
-            distance_kilometers: Math.round(result.optimized_route.distance / 1000 * 10) / 10,
-            safety_analysis: {
-              overall_route_score: result.improvement_summary.optimized_safety_score,
-              confidence: 0.85,
-              danger_zones_intersected: 0,
-              high_risk_segments: 0,
-              safety_notes: [`Improved safety by ${result.improvement_summary.safety_improvement.toFixed(1)} points`],
-              total_segments: 0,
-              safety_summary: { safe_segments: 0, mixed_segments: 0, unsafe_segments: 0 },
-              confidence_score: undefined
-            },
-            created_at: new Date().toISOString()
+        // Check if we have a valid smart route result
+        if (result && result.optimized_route && result.original_route) {
+
+          // Store the optimized route as the selected route
+          state.selectedRoute = result.optimized_route;
+          state.routes = [result.optimized_route];
+
+          // Store the full comparison data
+          state.smartRouteComparison = {
+            original_route: result.original_route,
+            optimized_route: result.optimized_route,
+            improvement_summary: result.improvement_summary,
+            waypoints_added: result.smart_route_data?.waypoints_added || [],
+            message: result.smart_route_data?.message || 'Route optimized for safety'
           };
 
-          state.selectedRoute = optimizedRoute;
-          state.routes = [optimizedRoute];
+          // Show comparison UI
+          state.showSmartRouteComparison = true;
+
+          console.log('✅ Smart route comparison data stored in state');
+        } else {
+          // If smart routing didn't improve anything, just store basic route
+          console.log('ℹ️ Smart routing did not produce improvement');
+          state.smartRouteComparison = null;
+          state.showSmartRouteComparison = false;
         }
       })
       .addCase(generateSmartRoute.rejected, (state, action) => {
@@ -1580,6 +1611,8 @@ export const {
   setSelectedSegment,
   updateRoutePreferences,
   clearRoutes,
+  setSmartRouteComparison,
+  toggleSmartRouteComparison,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
