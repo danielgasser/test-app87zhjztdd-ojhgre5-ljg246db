@@ -59,9 +59,10 @@ interface CommunityReview {
 }
 
 interface MLPrediction {
-  predicted_safety: number;
+  predicted_safety_score: number;
   confidence: number;
   similar_users_count: number;
+  based_on_locations: number;
   risk_factors: string[];
 }
 
