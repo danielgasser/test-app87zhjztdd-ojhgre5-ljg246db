@@ -21,10 +21,8 @@
       "@store/*": ["src/store/*"],
       "@types/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"]
-    },
-    "types": ["react", "react-native"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js"],
-  "extends": "@expo/tsconfig.base"
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules"]
 }

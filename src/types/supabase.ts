@@ -340,6 +340,27 @@ export interface Database {
           longitude: number
         }[]
       }
+      get_nearby_locations_for_user: {
+        Args: {
+          lat: number
+          lng: number
+          user_race_ethnicity?: string[] | null
+          user_gender?: string | null
+          user_lgbtq_status?: boolean | null
+          radius_meters?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          address: string
+          place_type: string
+          distance_meters: number
+          avg_safety_score: number | null
+          demographic_safety_score: number | null
+          latitude: number
+          longitude: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -388,7 +409,8 @@ export interface CreateReviewForm {
   comfort_rating: number
   accessibility_rating?: number
   service_rating?: number
-  visited_at?: string
+  visited_at?: string | null
+  time_of_day?: 'morning' | 'afternoon' | 'evening' | 'night' | null
   visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business'
 }
 

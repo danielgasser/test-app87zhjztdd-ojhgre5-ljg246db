@@ -287,7 +287,7 @@ export const fetchNearbyLocations = createAsyncThunk(
     // Use demographic-aware function if user has profile, otherwise fallback
     if (userProfile && userProfile.race_ethnicity) {
 
-      const { data, error } = await supabase.rpc('get_nearby_locations_for_user', {
+      const { data, error } = await (supabase.rpc as any)('get_nearby_locations_for_user', {
         lat: latitude,
         lng: longitude,
         user_race_ethnicity: userProfile.race_ethnicity,
@@ -301,7 +301,7 @@ export const fetchNearbyLocations = createAsyncThunk(
     } else {
       // Fallback to standard function if no profile
 
-      const { data, error } = await supabase.rpc('get_nearby_locations', {
+      const { data, error } = await (supabase.rpc as any)('get_nearby_locations', {
         lat: latitude,
         lng: longitude,
         radius_meters: radius,
@@ -316,7 +316,7 @@ export const fetchNearbyLocations = createAsyncThunk(
 export const fetchLocationDetails = createAsyncThunk(
   'locations/fetchLocationDetails',
   async (locationId: string) => {
-    const { data, error } = await supabase.rpc('get_location_with_scores', {
+    const { data, error } = await (supabase.rpc as any)('get_location_with_scores', {
       location_id: locationId,
     });
 
