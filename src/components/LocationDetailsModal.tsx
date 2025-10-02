@@ -76,9 +76,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           user_profiles: profiles?.find((p) => p.id === review.user_id),
         }));
 
-        setReviews(reviewsWithProfiles);
+        setReviews(reviewsWithProfiles as ReviewWithUser[]);
       } else {
-        setReviews(data || []);
+        setReviews((data || []) as ReviewWithUser[]);
       }
     } catch (error) {
       console.error("Error fetching reviews:", error);

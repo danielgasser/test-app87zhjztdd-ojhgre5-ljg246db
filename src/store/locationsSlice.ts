@@ -529,7 +529,7 @@ export const fetchHeatMapData = createAsyncThunk(
     userProfile?: any;
   }) => {
     try {
-      const { data, error } = await (supabase.rpc as any)('get_heat_map_data', {
+      const { data, error } = await (supabase.rpc as any)('get_heatmap_data', {
         center_lat: latitude,
         center_lng: longitude,
         radius_meters: radius,
