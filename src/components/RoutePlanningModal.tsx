@@ -198,10 +198,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (smartRouteComparison?.original_route) {
       dispatch(setSelectedRoute(smartRouteComparison.original_route));
       dispatch(setSmartRouteComparison(null));
-      Alert.alert(
-        "Route Selected",
-        "Using fastest route. Please note: this route may pass through danger zones."
-      );
+      onClose();
     }
   };
 
@@ -210,10 +207,13 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (smartRouteComparison?.optimized_route) {
       dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
       dispatch(setSmartRouteComparison(null));
+      /*
       Alert.alert(
         "Route Selected",
         "Using safer route with danger zone avoidance."
       );
+      */
+      onClose();
     }
   };
 
