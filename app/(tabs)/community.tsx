@@ -9,18 +9,24 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { format, formatDistanceToNow } from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
+import { formatDistanceToNow } from "date-fns";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { fetchRecentReviews } from "src/store/locationsSlice";
+import {
+  fetchRecentReviews,
+  fetchTrendingLocations,
+} from "src/store/locationsSlice";
 import { theme } from "src/styles/theme";
 import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
-  const { communityReviews, communityLoading } = useAppSelector(
-    (state) => state.locations
-  );
+  const {
+    communityReviews,
+    communityLoading,
+    trendingLocations,
+    trendingLoading,
+  } = useAppSelector((state) => state.locations);
   const [refreshing, setRefreshing] = React.useState(false);
   useRealtimeReviews();
   useEffect(() => {
@@ -29,7 +35,12 @@ export default function CommunityScreen() {
 
   const loadCommunityData = async () => {
     try {
-      await dispatch(fetchRecentReviews(10)).unwrap();
+      await Promise.all([
+        dispatch(fetchRecentReviews(10)).unwrap(),
+        dispatch(
+          fetchTrendingLocations({ daysWindow: 7, maxResults: 10 })
+        ).unwrap(),
+      ]);
     } catch (error) {
       console.error("Error loading community data:", error);
     }
@@ -177,9 +188,21 @@ export default function CommunityScreen() {
               <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
           </View>
-          {renderTrendingLocation("Central Park", "up", 47)}
-          {renderTrendingLocation("Times Square Station", "down", 23)}
-          {renderTrendingLocation("Brooklyn Bridge", "up", 31)}
+          {trendingLoading ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : trendingLocations.length > 0 ? (
+            trendingLocations.map((location) =>
+              renderTrendingLocation(
+                location.location_name,
+                location.trend_direction,
+                location.review_count_current
+              )
+            )
+          ) : (
+            <Text style={styles.emptyText}>
+              No trending locations yet. Be the first to review!
+            </Text>
+          )}
         </View>
 
         {/* Recent Reviews Section */}

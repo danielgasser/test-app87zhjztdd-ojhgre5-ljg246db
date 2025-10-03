@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { useAppDispatch } from '../store/hooks';
-import { addReviewToFeed } from '../store/locationsSlice';
+import { addReviewToFeed, fetchTrendingLocations } from '../store/locationsSlice';
 
 export const useRealtimeReviews = () => {
     const dispatch = useAppDispatch();
@@ -44,6 +44,9 @@ export const useRealtimeReviews = () => {
 
                     // Dispatch to Redux
                     dispatch(addReviewToFeed(formattedReview));
+
+                    // Refetch trending locations since a new review affects trending
+                    dispatch(fetchTrendingLocations({}));
                 }
             )
             .subscribe();
