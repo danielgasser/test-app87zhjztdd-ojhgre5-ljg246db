@@ -27,6 +27,13 @@
     "plugins": [
       "expo-router",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "667de704-dadd-4f11-b52a-176c9c6e4d9b"
+      }
+    },
+    "owner": "toesslab"
   }
 }

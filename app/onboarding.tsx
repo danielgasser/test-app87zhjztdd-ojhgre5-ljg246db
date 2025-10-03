@@ -18,6 +18,7 @@ import { router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
+import { notificationService } from "src/services/notificationService";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -201,7 +202,18 @@ export default function OnboardingScreen() {
         [
           {
             text: isEditing ? "Done" : "Get Started",
-            onPress: () => router.replace("/(tabs)"),
+            onPress: async () => {
+              router.replace("/(tabs)");
+
+              // Register for notifications after onboarding (only for new users, not editing)
+              if (!isEditing && user?.id) {
+                const pushToken =
+                  await notificationService.registerForPushNotifications();
+                if (pushToken) {
+                  await notificationService.savePushToken(user.id, pushToken);
+                }
+              }
+            },
           },
         ]
       );
