@@ -14,6 +14,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { fetchRecentReviews } from "src/store/locationsSlice";
 import { theme } from "src/styles/theme";
+import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -21,14 +22,14 @@ export default function CommunityScreen() {
     (state) => state.locations
   );
   const [refreshing, setRefreshing] = React.useState(false);
-
+  useRealtimeReviews();
   useEffect(() => {
     loadCommunityData();
   }, []);
 
   const loadCommunityData = async () => {
     try {
-      await dispatch(fetchRecentReviews()).unwrap();
+      await dispatch(fetchRecentReviews(10)).unwrap();
     } catch (error) {
       console.error("Error loading community data:", error);
     }
