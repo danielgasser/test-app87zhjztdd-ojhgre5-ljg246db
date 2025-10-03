@@ -569,17 +569,14 @@ export const fetchRecentReviews = createAsyncThunk(
           id,
           user_id,
           location_id,
+          title,
           safety_rating,
           overall_rating,
           content,
           created_at,
-          user_profiles!inner (
-            race_ethnicity,
-            gender,
-            lgbtq_status
-          ),
           locations!inner (
-            name
+            name,
+            address
           )
         `)
         .eq('status', 'active')
@@ -595,16 +592,13 @@ export const fetchRecentReviews = createAsyncThunk(
         id: review.id,
         user_id: review.user_id,
         location_id: review.location_id,
+        title: review.title,
         location_name: Array.isArray(review.locations) && review.locations.length > 0 ? review.locations[0].name : 'Unknown Location',
+        location_address: Array.isArray(review.locations) && review.locations.length > 0 ? review.locations[0].address : '',
         safety_rating: review.safety_rating,
         overall_rating: review.overall_rating,
-        comment: review.content,
+        content: review.content,
         created_at: review.created_at,
-        user_demographics: {
-          race_ethnicity: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].race_ethnicity : undefined,
-          gender: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].gender : undefined,
-          lgbtq_status: Array.isArray(review.user_profiles) && review.user_profiles.length > 0 ? review.user_profiles[0].lgbtq_status : undefined,
-        },
       }));
     } catch (error) {
       console.error('Recent reviews fetch error:', error);
@@ -1283,7 +1277,10 @@ const locationsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-
+    addReviewToFeed: (state, action: PayloadAction<any>) => {
+      // Prepend new review to the beginning of the community feed
+      state.communityReviews.unshift(action.payload);
+    },
     clearSearchResults: (state) => {
       state.searchResults = [];
       state.showSearchResults = false;
@@ -1610,6 +1607,7 @@ export const {
   setSelectedLocation,
   setFilters,
   clearError,
+  addReviewToFeed,
   clearSearchResults,
   setShowSearchResults,
   setUserLocation,
