@@ -163,6 +163,8 @@ interface LocationsState {
   heatMapLoading: boolean;
   communityReviews: CommunityReview[];
   communityLoading: boolean;
+  trendingLocations: any[];
+  trendingLoading: boolean;
   dangerZones: DangerZone[];
   dangerZonesVisible: boolean;
   dangerZonesLoading: boolean;
@@ -248,6 +250,8 @@ const initialState: LocationsState = {
   heatMapLoading: false,
   communityReviews: [],
   communityLoading: false,
+  trendingLocations: [],
+  trendingLoading: false,
   dangerZones: [],
   dangerZonesVisible: false,
   dangerZonesLoading: false,
@@ -593,8 +597,8 @@ export const fetchRecentReviews = createAsyncThunk(
         user_id: review.user_id,
         location_id: review.location_id,
         title: review.title,
-        location_name: Array.isArray(review.locations) && review.locations.length > 0 ? review.locations[0].name : 'Unknown Location',
-        location_address: Array.isArray(review.locations) && review.locations.length > 0 ? review.locations[0].address : '',
+        location_name: review.locations?.name || 'Unknown Location',
+        location_address: review.locations?.address || '',
         safety_rating: review.safety_rating,
         overall_rating: review.overall_rating,
         content: review.content,
@@ -607,6 +611,27 @@ export const fetchRecentReviews = createAsyncThunk(
   }
 );
 
+export const fetchTrendingLocations = createAsyncThunk(
+  'locations/fetchTrendingLocations',
+  async ({ daysWindow = 7, maxResults = 10 }: { daysWindow?: number; maxResults?: number } = {}) => {
+    try {
+      const { data, error } = await (supabase.rpc as any)('get_trending_locations', {
+        days_window: daysWindow,
+        max_results: maxResults,
+      });
+
+      if (error) {
+        console.error('Error fetching trending locations:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Trending locations fetch error:', error);
+      throw error;
+    }
+  }
+);
 export const fetchDangerZones = createAsyncThunk(
   'locations/fetchDangerZones',
   async ({
@@ -1458,7 +1483,19 @@ const locationsSlice = createSlice({
         state.communityLoading = false;
         state.error = action.error.message || 'Failed to fetch community reviews';
       })
-
+      // Trending Locations
+      .addCase(fetchTrendingLocations.pending, (state) => {
+        state.trendingLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchTrendingLocations.fulfilled, (state, action) => {
+        state.trendingLoading = false;
+        state.trendingLocations = action.payload as any;
+      })
+      .addCase(fetchTrendingLocations.rejected, (state, action) => {
+        state.trendingLoading = false;
+        state.error = action.error.message || 'Failed to fetch trending locations';
+      })
       // Danger Zones
       .addCase(fetchDangerZones.pending, (state) => {
         state.dangerZonesLoading = true;
