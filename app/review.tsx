@@ -148,7 +148,7 @@ export default function ReviewScreen() {
 
         // Create the location
         finalLocationId = await dispatch(
-          createLocationFromSearch(searchLocation)
+          createLocationFromSearch({ searchLocation, userId: user!.id })
         ).unwrap();
         setCurrentLocationId(finalLocationId);
 
