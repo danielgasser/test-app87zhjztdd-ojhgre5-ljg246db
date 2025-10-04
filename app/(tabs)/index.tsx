@@ -218,16 +218,45 @@ export default function MapScreen() {
       await handleMarkerPress(searchMarker.id);
     } else {
       router.push({
-        pathname: "/add-location",
+        pathname: "/review",
         params: {
-          name: searchMarker.name,
-          address: searchMarker.address,
-          latitude: searchMarker.latitude,
-          longitude: searchMarker.longitude,
-          placeType: searchMarker.place_type || "other",
+          isNewLocation: "true",
+          locationData: JSON.stringify({
+            name: searchMarker.name,
+            address: searchMarker.address,
+            latitude: searchMarker.latitude,
+            longitude: searchMarker.longitude,
+            place_type: searchMarker.place_type || "other",
+          }),
         },
       });
     }
+  };
+  const handleMapLongPress = async (event: any) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+
+    // Set as search marker (same UX as search results)
+    const newMarker = {
+      id: `longpress-${Date.now()}`,
+      name: "New Location",
+      address: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+      latitude: latitude,
+      longitude: longitude,
+      place_type: "other",
+      source: "mapbox" as const,
+    };
+
+    setSearchMarker(newMarker);
+
+    // Optionally animate to that location
+    const newRegion = {
+      latitude: latitude,
+      longitude: longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+    setRegion(newRegion);
+    mapRef.current?.animateToRegion(newRegion, 1500);
   };
 
   const handleToggleHeatMap = () => {
@@ -428,6 +457,7 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
+        onLongPress={handleMapLongPress}
         onMapReady={() => {
           setMapReady(true);
         }}
@@ -798,11 +828,7 @@ export default function MapScreen() {
       {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
-            style={[
-              styles.addLocationButton,
-              (searchMarker.source || "database") === "database" &&
-                styles.viewLocationButton,
-            ]}
+            style={styles.addLocationButton}
             onPress={handleAddLocation}
           >
             <Ionicons
@@ -819,6 +845,12 @@ export default function MapScreen() {
                 ? "View Location"
                 : "Add & Review Location"}
             </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.closeSearchButton}
+            onPress={() => setSearchMarker(null)}
+          >
+            <Ionicons name="close-circle" size={28} color="#F44336" />
           </TouchableOpacity>
         </View>
       )}
@@ -941,7 +973,14 @@ const styles = StyleSheet.create({
     bottom: 40,
     left: 16,
     right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     zIndex: 1000,
+  },
+  closeSearchButton: {
+    marginLeft: 12,
+    padding: 8,
   },
   addLocationButton: {
     flexDirection: "row",
