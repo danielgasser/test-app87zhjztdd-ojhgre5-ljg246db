@@ -320,7 +320,7 @@ export const fetchNearbyLocations = createAsyncThunk(
 export const fetchLocationDetails = createAsyncThunk(
   'locations/fetchLocationDetails',
   async (locationId: string) => {
-    const { data, error } = await (supabase.rpc as any)('get_location_with_scores', {
+    const { data, error } = await (supabase.rpc as any)('get_location_with_coords', {
       location_id: locationId,
     });
 
