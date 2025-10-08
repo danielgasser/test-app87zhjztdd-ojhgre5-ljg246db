@@ -21,6 +21,7 @@ import {
   fetchNearbyLocations,
   fetchLocationDetails,
   setUserLocation,
+  setUserCountry,
   fetchHeatMapData,
   toggleHeatMap,
   fetchDangerZones,
@@ -37,6 +38,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import RoutePlanningModal from "src/components/RoutePlanningModal";
 import { setMapCenter } from "src/store/locationsSlice";
+import { getUserCountry } from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/utils/appConfig";
 
@@ -319,6 +321,11 @@ export default function MapScreen() {
             longitude: location.coords.longitude,
           })
         );
+        const countryCode = await getUserCountry({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        dispatch(setUserCountry(countryCode));
       }
     } catch (error) {
       console.error("Location permission error:", error);

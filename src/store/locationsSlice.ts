@@ -162,6 +162,7 @@ interface LocationsState {
   searchLoading: boolean;
   showSearchResults: boolean;
   userLocation: { latitude: number; longitude: number } | null;
+  userCountry: string | null;
   mapCenter: { latitude: number; longitude: number } | null;
   communityFeedMode: 'near_me' | 'map_area';
   heatMapData: HeatMapPoint[];
@@ -251,6 +252,7 @@ const initialState: LocationsState = {
   searchLoading: false,
   showSearchResults: false,
   userLocation: null,
+  userCountry: null,
   mapCenter: null,
   communityFeedMode: 'near_me',
   heatMapData: [],
@@ -424,7 +426,7 @@ export const fetchUserReviews = createAsyncThunk(
 
 export const searchLocations = createAsyncThunk(
   'locations/searchLocations',
-  async ({ query, latitude, longitude }: { query: string; latitude?: number; longitude?: number }) => {
+  async ({ query, latitude, longitude }: { query: string; latitude?: number; longitude?: number }, { getState }) => {
     if (query.trim().length < 2) {
       return [];
     }
@@ -451,8 +453,10 @@ export const searchLocations = createAsyncThunk(
 
       const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
       if (googleApiKey && searchResults.length < 5) {
+        const state = getState() as any;
+        const userCountry = state.locations.userCountry || 'us';
         try {
-          let googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}`;
+          let googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}&region=${userCountry}&components=country:${userCountry}`;
 
           if (latitude && longitude) {
             googleUrl += `&location=${latitude},${longitude}`;
@@ -1466,7 +1470,9 @@ const locationsSlice = createSlice({
     setUserLocation: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
       state.userLocation = action.payload;
     },
-
+    setUserCountry: (state, action: PayloadAction<string | null>) => {
+      state.userCountry = action.payload;
+    },
     addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
       if (!state.nearbyLocations.find((loc: LocationWithScores) => loc.id === action.payload.id)) {
         state.nearbyLocations.push(action.payload);
@@ -1808,6 +1814,7 @@ export const {
   clearSearchResults,
   setShowSearchResults,
   setUserLocation,
+  setUserCountry,
   addLocationToNearby,
   toggleHeatMap,
   setHeatMapVisible,
