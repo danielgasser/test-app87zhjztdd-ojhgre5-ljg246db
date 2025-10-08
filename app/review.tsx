@@ -15,7 +15,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { submitReview } from "src/store/locationsSlice";
+import { fetchNearbyLocations, submitReview } from "src/store/locationsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
@@ -70,7 +70,6 @@ export default function ReviewScreen() {
   const { locationId, locationName, locationData, isNewLocation } =
     useLocalSearchParams();
   const typedLocationId = locationId as string | undefined;
-  const typedLocationName = locationName as string | undefined;
   const typedLocationData = locationData as string | undefined;
   const typedIsNewLocation = isNewLocation as string | undefined;
   const [showVisitTypePicker, setShowVisitTypePicker] = useState(false);
@@ -208,6 +207,13 @@ export default function ReviewScreen() {
         };
 
         dispatch(addLocationToNearby(newLocationWithScores));
+        dispatch(
+          fetchNearbyLocations({
+            latitude: parsedLocationData.latitude,
+            longitude: parsedLocationData.longitude,
+            radius: 10000,
+          })
+        );
       }
       Alert.alert("Success", "Review submitted successfully!", [
         { text: "OK", onPress: () => router.back() },

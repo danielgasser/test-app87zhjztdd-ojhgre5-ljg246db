@@ -257,16 +257,6 @@ export default function MapScreen() {
     };
 
     setSearchMarker(newMarker);
-
-    // Optionally animate to that location
-    const newRegion = {
-      latitude: latitude,
-      longitude: longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    };
-    setRegion(newRegion);
-    mapRef.current?.animateToRegion(newRegion, 1500);
   };
 
   const handleToggleHeatMap = () => {
