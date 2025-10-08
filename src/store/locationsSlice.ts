@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
+import { Database } from '../types/database.types';
+
 import {
   LocationWithScores,
-  Review,
   CreateReviewForm,
   CreateLocationForm,
   Coordinates,
@@ -15,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { ReactNode } from 'react';
 
+type Review = Database['public']['Tables']['reviews']['Row'];
 // ================================
 // INTERFACES AND TYPES
 // ================================
@@ -662,7 +664,9 @@ export const fetchTrendingLocations = createAsyncThunk(
       });
 
       if (error) {
-        console.error('Error fetching trending locations:', error);
+        console.error('Error fetching trending locations:', error.message, error.code, error.details);
+
+        //console.error('Error fetching trending locations:', error);
         throw error;
       }
 
@@ -1418,7 +1422,7 @@ const locationsSlice = createSlice({
     },
 
     addLocationToNearby: (state, action: PayloadAction<LocationWithScores>) => {
-      if (!state.nearbyLocations.find(loc => loc.id === action.payload.id)) {
+      if (!state.nearbyLocations.find((loc: LocationWithScores) => loc.id === action.payload.id)) {
         state.nearbyLocations.push(action.payload);
       }
     },
@@ -1573,8 +1577,10 @@ const locationsSlice = createSlice({
         state.heatMapLoading = false;
         state.heatMapData = action.payload;
       })
-      .addCase(fetchHeatMapData.rejected, (state) => {
+      .addCase(fetchHeatMapData.rejected, (state, action) => {
         state.heatMapLoading = false;
+        console.error('❌ Heatmap fetch FAILED:', action.error.message, action.error);
+
         state.heatMapData = [];
       })
 
