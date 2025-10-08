@@ -120,7 +120,18 @@ export default function OnboardingScreen() {
         // Parse gender and religion
         const parsedGender = parseOtherValue(profile.gender || "");
         const parsedReligion = parseOtherValue(profile.religion || "");
-
+        const getValidPrivacyLevel = (
+          level: string | null | undefined
+        ): "public" | "anonymous" | "private" => {
+          if (
+            level === "public" ||
+            level === "anonymous" ||
+            level === "private"
+          ) {
+            return level;
+          }
+          return "public"; // Default fallback
+        };
         setFormData({
           race_ethnicity: parsedRaceEthnicity,
           gender: parsedGender.mainValue,
@@ -128,7 +139,7 @@ export default function OnboardingScreen() {
           disability_status: parsedDisabilityStatus,
           religion: parsedReligion.mainValue,
           age_range: profile.age_range || "",
-          privacy_level: profile.privacy_level || "public",
+          privacy_level: getValidPrivacyLevel(profile.privacy_level),
           show_demographics: profile.show_demographics !== false, // Default to true
         });
 

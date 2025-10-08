@@ -514,7 +514,7 @@ export default function MapScreen() {
           heatMapData.length > 0 &&
           heatMapData.map(
             (
-              point: { heat_weight: number; latitude: any; longitude: any },
+              point: { weight: number; latitude: any; longitude: any },
               index: any
             ) => {
               const getHeatColor = (weight: number) => {
@@ -525,7 +525,7 @@ export default function MapScreen() {
                 return "#F4433660";
               };
 
-              const baseRadius = 200 + point.heat_weight * 100;
+              const baseRadius = 200 + point.weight * 100;
 
               return (
                 <Circle
@@ -535,7 +535,7 @@ export default function MapScreen() {
                     longitude: point.longitude,
                   }}
                   radius={baseRadius}
-                  fillColor={getHeatColor(point.heat_weight)}
+                  fillColor={getHeatColor(point.weight)}
                   strokeColor="transparent"
                   strokeWidth={0}
                 />

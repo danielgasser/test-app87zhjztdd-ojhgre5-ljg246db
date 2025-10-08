@@ -108,7 +108,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     try {
       let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
         query
-      )}&key=${googleApiKey}&components=country:us|country:ca`;
+      )}&key=${googleApiKey}`;
 
       if (userLocation) {
         url += `&location=${userLocation.latitude},${userLocation.longitude}`;
@@ -127,17 +127,39 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       }
 
       if (data.results && data.results.length > 0) {
-        return data.results.slice(0, 5).map((result: any) => ({
-          id: `google_${result.place_id}`,
-          name:
-            result.address_components?.[0]?.long_name ||
-            result.formatted_address.split(",")[0],
-          address: result.formatted_address,
-          latitude: result.geometry.location.lat,
-          longitude: result.geometry.location.lng,
-          place_type: result.types?.[0] || "location",
-          source: "mapbox" as const, // Keep as "mapbox" for now to avoid breaking existing code
-        }));
+        return data.results.slice(0, 5).map((result: any) => {
+          // Better name extraction logic
+          let name = result.formatted_address.split(",")[0];
+
+          const addressComponents = result.address_components;
+          if (addressComponents && addressComponents.length > 0) {
+            const locality = addressComponents.find((c: any) =>
+              c.types.includes("locality")
+            );
+            const adminArea = addressComponents.find((c: any) =>
+              c.types.includes("administrative_area_level_1")
+            );
+            const country = addressComponents.find((c: any) =>
+              c.types.includes("country")
+            );
+
+            name =
+              locality?.long_name ||
+              adminArea?.long_name ||
+              country?.long_name ||
+              name;
+          }
+
+          return {
+            id: `google_${result.place_id}`,
+            name: name,
+            address: result.formatted_address,
+            latitude: result.geometry.location.lat,
+            longitude: result.geometry.location.lng,
+            place_type: result.types?.[0] || "location",
+            source: "mapbox" as const,
+          };
+        });
       }
 
       return [];
