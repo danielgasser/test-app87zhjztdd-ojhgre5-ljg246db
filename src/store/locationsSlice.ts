@@ -452,7 +452,7 @@ export const searchLocations = createAsyncThunk(
       const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
       if (googleApiKey && searchResults.length < 5) {
         try {
-          let googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}&components=country:us|country:ca`;
+          let googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}`;
 
           if (latitude && longitude) {
             googleUrl += `&location=${latitude},${longitude}`;
@@ -463,6 +463,16 @@ export const searchLocations = createAsyncThunk(
 
           if (googleData.status === 'OK' && googleData.results) {
             googleData.results.slice(0, 5 - searchResults.length).forEach((result: any) => {
+              let name = result.formatted_address.split(',')[0];
+              const addressComponents = result.address_components;
+              if (addressComponents && addressComponents.length > 0) {
+                // Priority: locality > administrative_area_level_1 > country
+                const locality = addressComponents.find((c: any) => c.types.includes('locality'));
+                const adminArea = addressComponents.find((c: any) => c.types.includes('administrative_area_level_1'));
+                const country = addressComponents.find((c: any) => c.types.includes('country'));
+
+                name = locality?.long_name || adminArea?.long_name || country?.long_name || name;
+              }
               searchResults.push({
                 id: result.place_id,
                 name: result.address_components?.[0]?.long_name || result.formatted_address.split(',')[0],
@@ -558,7 +568,7 @@ export const fetchHeatMapData = createAsyncThunk(
   async ({
     latitude,
     longitude,
-    radius = 10000,
+    radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
     userProfile
   }: {
     latitude: number;
@@ -567,6 +577,18 @@ export const fetchHeatMapData = createAsyncThunk(
     userProfile?: any;
   }) => {
     try {
+      console.log('🔥 fetchHeatMapData START');
+      console.log('🔥 Parameters:', {
+        center_lat: latitude,
+        center_lng: longitude,
+        radius_meters: radius,
+        user_race_ethnicity: userProfile?.race_ethnicity,
+        user_gender: userProfile?.gender,
+        user_lgbtq_status: userProfile?.lgbtq_status,
+        user_disability_status: userProfile?.disability_status,
+        user_religion: userProfile?.religion,
+        user_age_range: userProfile?.age_range,
+      });
       const { data, error } = await (supabase.rpc as any)('get_heatmap_data', {
         center_lat: latitude,
         center_lng: longitude,
@@ -578,13 +600,29 @@ export const fetchHeatMapData = createAsyncThunk(
         user_religion: userProfile?.religion || null,
         user_age_range: userProfile?.age_range || null,
       });
-
+      console.log('🔥 RPC Response:', {
+        hasError: !!error,
+        errorMessage: error?.message,
+        errorDetails: error?.details,
+        errorHint: error?.hint,
+        errorCode: error?.code,
+        dataIsNull: data === null,
+        dataLength: data?.length || 0,
+        firstDataItem: data?.[0]
+      });
       if (error) {
         console.error('Error fetching heat map data:', error);
         return [];
       }
 
       if (!data || data.length === 0) {
+        return [];
+      }
+      if (!data || data.length === 0) {
+        console.log('⚠️ No heatmap data returned - possible reasons:');
+        console.log('   - No locations with reviews in the area');
+        console.log('   - Locations exist but have review_count = 0');
+        console.log('   - Radius too small');
         return [];
       }
 
@@ -594,6 +632,8 @@ export const fetchHeatMapData = createAsyncThunk(
         weight: Math.max(0.1, Math.min(1.0, (location.safety_score || 3) / 5)),
         safety_score: location.safety_score || 3,
       }));
+      console.log('✅ Mapped heatmap points:', heatMapPoints);
+      console.log('🔥 fetchHeatMapData END - returning', heatMapPoints.length, 'points');
 
       return heatMapPoints;
     } catch (error) {

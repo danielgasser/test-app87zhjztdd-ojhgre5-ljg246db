@@ -186,11 +186,12 @@ export default function CommunityScreen() {
   );
 
   const renderTrendingLocation = (
+    id: string,
     name: string,
     trend: string,
     reviews: number
   ) => (
-    <TouchableOpacity style={styles.trendingCard}>
+    <TouchableOpacity key={id} style={styles.trendingCard}>
       <View>
         <Text style={styles.trendingName}>{name}</Text>
         <Text style={styles.trendingStats}>{reviews} reviews this week</Text>
@@ -343,8 +344,9 @@ export default function CommunityScreen() {
           {trendingLoading ? (
             <ActivityIndicator size="small" color={theme.colors.primary} />
           ) : trendingLocations.length > 0 ? (
-            trendingLocations.map((location) =>
+            trendingLocations.map((location, index) =>
               renderTrendingLocation(
+                location.location_id || `trending-${index}`,
                 location.location_name,
                 location.trend_direction,
                 location.review_count_current
