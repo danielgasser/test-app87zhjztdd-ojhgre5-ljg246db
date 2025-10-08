@@ -1,5 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, Draft } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
+import { Database } from '../types/database.types';
 
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;
@@ -14,24 +15,9 @@ const isProfileComplete = (profile: UserProfile | null): boolean => {
     profile.age_range
   );
 };
-export interface UserProfile {
-  id: string;
-  username?: string;
-  full_name?: string;
-  avatar_url?: string;
-  race_ethnicity?: string[];
-  gender?: string;
-  lgbtq_status?: boolean;
-  disability_status?: string[];
-  religion?: string;
-  age_range?: string;
-  privacy_level?: 'public' | 'anonymous' | 'private';
-  show_demographics?: boolean;
-  total_reviews?: number;
-  helpful_votes?: number;
-  created_at?: string;
-  updated_at?: string;
-}
+
+export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
+
 
 interface UserState {
   profile: UserProfile | null;
