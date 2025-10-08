@@ -3,7 +3,7 @@ import { supabase } from '../services/supabase';
 
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;
-  
+
   // Profile is complete if user has filled at least some demographic info
   return !!(
     (profile.race_ethnicity && profile.race_ethnicity.length > 0) ||
@@ -60,7 +60,9 @@ export const fetchUserProfile = createAsyncThunk(
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       throw error;
     }
-
+    if (!data) {
+      throw new Error('Profile not found');
+    }
     return data;
   }
 );
@@ -104,6 +106,8 @@ export const updateUserProfile = createAsyncThunk(
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to create profile');
+
       return data;
     }
   }
@@ -134,7 +138,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
-        
+
       })
 
       .addCase(fetchUserProfile.rejected, (state, action) => {
@@ -150,7 +154,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload;
         // Set onboarding complete after successful profile update
-      state.onboardingComplete = isProfileComplete(action.payload);
+        state.onboardingComplete = isProfileComplete(action.payload);
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
