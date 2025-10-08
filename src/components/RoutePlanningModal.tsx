@@ -55,6 +55,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     searchResults,
     searchLoading,
     userLocation,
+    userCountry,
   } = useAppSelector((state) => state.locations);
 
   const currentUser = useAppSelector((state) => state.auth.user);
@@ -106,9 +107,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     }
 
     try {
+      const country = userCountry || "us";
+
       let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
         query
-      )}&key=${googleApiKey}`;
+      )}&key=${googleApiKey}&region=${country}&components=country:${country}`;
 
       if (userLocation) {
         url += `&location=${userLocation.latitude},${userLocation.longitude}`;

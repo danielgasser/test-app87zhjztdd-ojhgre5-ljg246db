@@ -37,7 +37,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   userLocation,
 }) => {
   const dispatch = useAppDispatch();
-  const { searchResults, searchLoading } = useAppSelector(
+  const { searchResults, searchLoading, userCountry } = useAppSelector(
     (state) => state.locations
   );
 
@@ -56,9 +56,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
 
     try {
+      const country = userCountry || "us";
       let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
         query
-      )}&key=${googleApiKey}`;
+      )}&key=${googleApiKey}&region=${country}&components=country:${country}`;
 
       if (userLocation) {
         url += `&location=${userLocation.latitude},${userLocation.longitude}`;
