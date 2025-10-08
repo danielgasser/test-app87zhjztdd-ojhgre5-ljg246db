@@ -181,8 +181,12 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   {selectedLocation.address}
                 </Text>
                 <Text style={styles.locationType}>
-                  {selectedLocation.place_type.charAt(0).toUpperCase() +
-                    selectedLocation.place_type.slice(1).replace("_", " ")}
+                  {(selectedLocation.place_type || "unknown")
+                    .charAt(0)
+                    .toUpperCase() +
+                    (selectedLocation.place_type || "unknown")
+                      .slice(1)
+                      .replace("_", " ")}{" "}
                 </Text>
 
                 {/* Overall Safety Score */}
