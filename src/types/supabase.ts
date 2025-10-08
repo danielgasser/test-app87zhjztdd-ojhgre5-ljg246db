@@ -409,7 +409,7 @@ export interface CreateReviewForm {
     comfort_rating: number
     accessibility_rating?: number
     service_rating?: number
-    visit_date?: string | null
+    visited_at?: string | null
     time_of_day?: 'morning' | 'afternoon' | 'evening' | 'night' | null
     visit_type?: 'solo' | 'couple' | 'family' | 'group' | 'business'
 }

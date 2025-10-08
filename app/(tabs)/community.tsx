@@ -17,10 +17,14 @@ import {
   fetchTrendingLocations,
   loadCommunityFeedMode,
   saveCommunityFeedMode,
+  fetchLocationDetails,
+  setMapCenter,
+  setNavigationIntent,
 } from "src/store/locationsSlice";
 import { theme } from "src/styles/theme";
 import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { router } from "expo-router";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -135,8 +139,26 @@ export default function CommunityScreen() {
     // Parse the overall_rating string to float
     const rating = parseFloat(review.overall_rating) || 0;
 
+    const handleReviewPress = () => {
+      // Set navigation intent for map tab
+      dispatch(
+        setNavigationIntent({
+          targetTab: "map",
+          locationId: review.location_id,
+          action: "view_location",
+        })
+      );
+
+      // Navigate to map tab
+      router.push("/(tabs)");
+    };
+
     return (
-      <TouchableOpacity key={review.id} style={styles.reviewCard}>
+      <TouchableOpacity
+        key={review.id}
+        style={styles.reviewCard}
+        onPress={handleReviewPress}
+      >
         <View style={styles.reviewHeader}>
           <View style={styles.locationInfo}>
             <Text style={styles.locationName}>{review.location_name}</Text>

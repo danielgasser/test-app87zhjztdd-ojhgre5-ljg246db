@@ -209,6 +209,12 @@ interface LocationsState {
   };
   smartRouteComparison: SmartRouteComparison | null;
   showSmartRouteComparison: boolean;
+  navigationIntent: {
+    targetTab: 'map' | 'community' | 'profile';
+    locationId?: string;
+    action: 'view_location' | 'center_map' | 'show_reviews';
+    data?: any; // For future flexibility
+  } | null;
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -285,6 +291,7 @@ const initialState: LocationsState = {
   },
   smartRouteComparison: null,
   showSmartRouteComparison: false,
+  navigationIntent: null,
 };
 
 
@@ -739,7 +746,10 @@ export const fetchDangerZones = createAsyncThunk(
     userDemographics?: any;
   }) => {
     try {
+      console.log('🛡️ fetchDangerZones START', { userId, radius });
+
       const token = await getAuthToken();
+      console.log('🛡️ Got auth token:', token ? `${token.substring(0, 20)}...` : 'NULL');
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
         method: 'POST',
@@ -753,14 +763,16 @@ export const fetchDangerZones = createAsyncThunk(
           user_demographics: userDemographics
         })
       });
+      console.log('🛡️ Response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Danger zones API error:', response.status, errorText);
+        console.error('🛡️ Danger zones API error:', response.status, errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
+      console.log('🛡️ Success! Danger zones count:', data.danger_zones?.length || 0);
       return data.danger_zones || [];
     } catch (error) {
       console.error('Error fetching danger zones:', error);
@@ -1494,6 +1506,13 @@ const locationsSlice = createSlice({
     setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
       state.dangerZonesVisible = action.payload;
     },
+    setNavigationIntent: (state, action: PayloadAction<LocationsState['navigationIntent']>) => {
+      state.navigationIntent = action.payload;
+    },
+
+    clearNavigationIntent: (state) => {
+      state.navigationIntent = null;
+    },
   },
 
   extraReducers: (builder) => {
@@ -1830,6 +1849,8 @@ export const {
   clearRoutes,
   setSmartRouteComparison,
   toggleSmartRouteComparison,
+  setNavigationIntent,
+  clearNavigationIntent,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
