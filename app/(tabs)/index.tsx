@@ -268,8 +268,13 @@ export default function MapScreen() {
   };
 
   const handleToggleHeatMap = () => {
+    console.log("🔥 Toggling heatmap, current visible:", heatMapVisible);
+    console.log("🔥 User location:", userLocation);
+    console.log("🔥 User profile:", userProfile);
+    console.log("🔥 Current heatmap data length:", heatMapData.length);
     dispatch(toggleHeatMap());
-    if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
+    if (!heatMapVisible && heatMapData.length > 0 && userLocation) {
+      console.log("🔥 Fetching heatmap data...");
       dispatch(
         fetchHeatMapData({
           latitude: userLocation.latitude,
