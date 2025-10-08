@@ -30,6 +30,8 @@ import {
   toggleRouteSegments,
   clearRoutes,
   RouteCoordinate,
+  setNavigationIntent,
+  clearNavigationIntent,
 } from "../../src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -111,9 +113,8 @@ export default function MapScreen() {
     mlPredictionsLoading,
     selectedRoute,
     routes,
-    routeLoading,
     showRouteSegments,
-    selectedSegment,
+    navigationIntent,
   } = useAppSelector((state: any) => state.locations);
 
   const userId = useAppSelector((state: any) => state.auth.user?.id);
@@ -260,10 +261,6 @@ export default function MapScreen() {
   };
 
   const handleToggleHeatMap = () => {
-    console.log("🔥 Toggling heatmap, current visible:", heatMapVisible);
-    console.log("🔥 User location:", userLocation);
-    console.log("🔥 User profile:", userProfile);
-    console.log("🔥 Current heatmap data length:", heatMapData.length);
     dispatch(toggleHeatMap());
     if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
       console.log("🔥 Fetching heatmap data...");
@@ -374,6 +371,7 @@ export default function MapScreen() {
   useEffect(() => {
     requestLocationPermission();
   }, []);
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -430,6 +428,52 @@ export default function MapScreen() {
       }
     }, [dispatch, userLocation, mapReady])
   );
+  // Handle navigation intents from other tabs
+  useEffect(() => {
+    if (navigationIntent && navigationIntent.targetTab === "map") {
+      const handleIntent = async () => {
+        if (
+          navigationIntent.action === "view_location" &&
+          navigationIntent.locationId
+        ) {
+          try {
+            // Fetch location details to get coordinates
+            const locationDetails = await dispatch(
+              fetchLocationDetails(navigationIntent.locationId)
+            ).unwrap();
+
+            if (
+              locationDetails &&
+              locationDetails.latitude &&
+              locationDetails.longitude
+            ) {
+              // Center map on location
+              const newRegion = {
+                latitude: locationDetails.latitude,
+                longitude: locationDetails.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              };
+              setRegion(newRegion);
+              mapRef.current?.animateToRegion(newRegion, 1000);
+
+              // Open location modal
+              setSelectedLocationId(navigationIntent.locationId);
+              setModalVisible(true);
+            }
+
+            // Clear the intent after handling
+            dispatch(clearNavigationIntent());
+          } catch (error) {
+            console.error("Error handling navigation intent:", error);
+            dispatch(clearNavigationIntent());
+          }
+        }
+      };
+
+      handleIntent();
+    }
+  }, [navigationIntent, dispatch]);
 
   // ============= CONDITIONAL RENDERS =============
   if (!locationPermission) {

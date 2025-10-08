@@ -147,14 +147,12 @@ export default function EditReviewScreen() {
     try {
       await dispatch(
         updateReview({
-          reviewId: reviewId as string,
-          reviewData: {
-            ...formData,
-            visited_at: visitDateTime.toISOString(),
-            accessibility_rating: formData.accessibility_rating || undefined,
-            service_rating: formData.service_rating || undefined,
-            location_id: originalReview?.location_id,
-          },
+          id: reviewId as string,
+          ...formData,
+          visited_at: visitDateTime.toISOString(),
+          accessibility_rating: formData.accessibility_rating || undefined,
+          service_rating: formData.service_rating || undefined,
+          location_id: originalReview?.location_id,
         })
       ).unwrap();
 
