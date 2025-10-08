@@ -89,6 +89,14 @@ export const APP_CONFIG = {
     PREFER_RECENT_REVIEWS: true,          // Prefer locations with recent reviews
     RECENCY_BONUS_DAYS: 30,               // Days to apply recency bonus
   },
+
+  COMMUNITY: {
+    FEED_RADIUS_METERS: 50000,            // 50km radius for community feed
+    REVIEWS_PER_PAGE: 10,                  // Pagination size for reviews
+    TRENDING_TIMEFRAME_DAYS: 7,           // Days to consider for trending locations
+    TRENDING_MIN_REVIEWS: 5,              // Minimum reviews to be considered trending
+  },
+
   API_SETTINGS: {
     DEFAULT_PAGE_SIZE: 20,                // Default pagination size
     MAX_PAGE_SIZE: 100,                   // Maximum items per page
