@@ -447,30 +447,33 @@ export const searchLocations = createAsyncThunk(
         source: 'database' as const,
       }));
 
-      const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
-      if (mapboxToken && searchResults.length < 5) {
+      const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (googleApiKey && searchResults.length < 5) {
         try {
-          const proximity = latitude && longitude ? `${longitude},${latitude}` : '';
-          const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&limit=${5 - searchResults.length}&proximity=${proximity}`;
+          let googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}&components=country:us|country:ca`;
 
-          const mapboxResponse = await fetch(mapboxUrl);
-          const mapboxData = await mapboxResponse.json();
+          if (latitude && longitude) {
+            googleUrl += `&location=${latitude},${longitude}`;
+          }
 
-          if (mapboxData.features) {
-            mapboxData.features.forEach((feature: any) => {
+          const googleResponse = await fetch(googleUrl);
+          const googleData = await googleResponse.json();
+
+          if (googleData.status === 'OK' && googleData.results) {
+            googleData.results.slice(0, 5 - searchResults.length).forEach((result: any) => {
               searchResults.push({
-                id: feature.id,
-                name: feature.place_name.split(',')[0],
-                address: feature.place_name,
-                latitude: feature.center[1],
-                longitude: feature.center[0],
-                place_type: feature.place_type?.[0],
+                id: result.place_id,
+                name: result.address_components?.[0]?.long_name || result.formatted_address.split(',')[0],
+                address: result.formatted_address,
+                latitude: result.geometry.location.lat,
+                longitude: result.geometry.location.lng,
+                place_type: result.types?.[0] || "location",
                 source: 'mapbox' as const,
               });
             });
           }
-        } catch (mapboxError) {
-          console.error('Mapbox search error:', mapboxError);
+        } catch (error) {
+          console.error('Google Maps geocoding error:', error);
         }
       }
 
@@ -910,62 +913,111 @@ export const calculateRouteSafety = createAsyncThunk(
   }
 );
 
-export const getMapboxRoute = createAsyncThunk(
-  'locations/getMapboxRoute',
+export const getGoogleRoute = createAsyncThunk(
+  'locations/getGoogleRoute',
   async (payload: {
     origin: RouteCoordinate;
     destination: RouteCoordinate;
     waypoints?: RouteCoordinate[];
     profile?: string;
   }) => {
-    const { origin, destination, waypoints, profile = 'driving' } = payload;
+    const { origin, destination, waypoints } = payload;
 
-    const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
-    if (!mapboxToken) {
-      throw new Error('Mapbox token not configured');
+    const googleApiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!googleApiKey) {
+      throw new Error('Google Maps API key not configured');
     }
 
-    // Build coordinates string
-    let coordinates = `${origin.longitude},${origin.latitude}`;
-
-    // Add waypoints if provided
+    // Build waypoints string if provided
+    let waypointsParam = '';
     if (waypoints && waypoints.length > 0) {
-      waypoints.forEach(waypoint => {
-        coordinates += `;${waypoint.longitude},${waypoint.latitude}`;
-      });
+      const waypointCoords = waypoints
+        .map(wp => `${wp.latitude},${wp.longitude}`)
+        .join('|');
+      waypointsParam = `&waypoints=${waypointCoords}`;
     }
 
-    coordinates += `;${destination.longitude},${destination.latitude}`;
+    const url = `https://maps.googleapis.com/maps/api/directions/json?` +
+      `origin=${origin.latitude},${origin.longitude}` +
+      `&destination=${destination.latitude},${destination.longitude}` +
+      waypointsParam +
+      `&alternatives=true` +
+      `&key=${googleApiKey}`;
 
-    const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?` +
-      new URLSearchParams({
-        access_token: mapboxToken,
-        alternatives: 'true',
-        geometries: 'geojson',
-        steps: 'false',
-        overview: 'full'
-      });
-
-    console.log('🗺️ Calling Mapbox Directions API...');
+    console.log('🗺️ Calling Google Directions API...');
 
     const response = await fetch(url);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Mapbox API Error:', response.status, errorText);
-      throw new Error(`Mapbox API error: ${response.status}`);
+      console.error('❌ Google API Error:', response.status, errorText);
+      throw new Error(`Google API error: ${response.status}`);
     }
 
     const data = await response.json();
 
-    if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
-      throw new Error(`No routes found: ${data.code}`);
+    if (data.status !== 'OK' || !data.routes || data.routes.length === 0) {
+      throw new Error(`No routes found: ${data.status}`);
     }
 
-    console.log(`✅ Got ${data.routes.length} route(s) from Mapbox`);
-    return data.routes;
+    // Transform Google routes to match our expected format
+    const transformedRoutes = data.routes.map((route: any) => {
+      // Decode polyline to get coordinates
+      const coordinates = decodePolyline(route.overview_polyline.points);
+
+      return {
+        duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
+        distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
+        geometry: {
+          coordinates: coordinates,
+          type: 'LineString'
+        }
+      };
+    });
+
+    console.log(`✅ Got ${transformedRoutes.length} route(s) from Google`);
+    return transformedRoutes;
   }
 );
+
+// Helper function to decode Google's polyline format
+function decodePolyline(encoded: string): [number, number][] {
+  const coordinates: [number, number][] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const deltaLat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += deltaLat;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const deltaLng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += deltaLng;
+
+    coordinates.push([lng / 1e5, lat / 1e5]); // [longitude, latitude] format
+  }
+
+  return coordinates;
+}
 
 export const generateSafeRoute = createAsyncThunk(
   'locations/generateSafeRoute',
@@ -974,7 +1026,7 @@ export const generateSafeRoute = createAsyncThunk(
       console.log('🚀 Starting safe route generation...');
 
       // Step 1: Get route from Mapbox
-      const mapboxRoutes = await dispatch(getMapboxRoute({
+      const mapboxRoutes = await dispatch(getGoogleRoute({
         origin: routeRequest.origin,
         destination: routeRequest.destination,
         profile: 'driving'
@@ -1043,7 +1095,7 @@ export const generateRouteAlternatives = createAsyncThunk(
       console.log('🔄 Generating route alternatives...');
 
       // Get Mapbox routes (with alternatives)
-      const mapboxRoutes = await dispatch(getMapboxRoute({
+      const mapboxRoutes = await dispatch(getGoogleRoute({
         origin: routeRequest.origin,
         destination: routeRequest.destination,
         profile: 'driving'
@@ -1610,14 +1662,14 @@ const locationsSlice = createSlice({
       })
 
       // Get Mapbox Route
-      .addCase(getMapboxRoute.pending, (state) => {
+      .addCase(getGoogleRoute.pending, (state) => {
         state.routeLoading = true;
         state.routeError = null;
       })
-      .addCase(getMapboxRoute.fulfilled, (state) => {
+      .addCase(getGoogleRoute.fulfilled, (state) => {
         state.routeLoading = false;
       })
-      .addCase(getMapboxRoute.rejected, (state, action) => {
+      .addCase(getGoogleRoute.rejected, (state, action) => {
         state.routeLoading = false;
         state.routeError = action.error.message || 'Failed to get route from Mapbox';
       })

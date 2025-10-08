@@ -85,47 +85,93 @@ const CONFIG = {
 /**
  * Call Mapbox Directions API to get route
  */
-async function getMapboxRoute(
+async function getGoogleRoute(
   origin: RouteCoordinate,
   destination: RouteCoordinate,
   waypoints: RouteCoordinate[] = []
 ): Promise<any> {
-  const mapboxToken = Deno.env.get('EXPO_PUBLIC_MAPBOX_TOKEN');
-  if (!mapboxToken) {
-    throw new Error('Mapbox token not configured');
+  const googleApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+  if (!googleApiKey) {
+    throw new Error('Google Maps API key not configured');
   }
 
-  // Build coordinates string: origin, waypoints, destination
-  let coordinates = `${origin.longitude},${origin.latitude}`;
-
-  for (const wp of waypoints) {
-    coordinates += `;${wp.longitude},${wp.latitude}`;
+  // Build waypoints string if provided
+  let waypointsParam = '';
+  if (waypoints.length > 0) {
+    const waypointCoords = waypoints
+      .map(wp => `${wp.latitude},${wp.longitude}`)
+      .join('|');
+    waypointsParam = `&waypoints=${waypointCoords}`;
   }
 
-  coordinates += `;${destination.longitude},${destination.latitude}`;
+  const url = `https://maps.googleapis.com/maps/api/directions/json?` +
+    `origin=${origin.latitude},${origin.longitude}` +
+    `&destination=${destination.latitude},${destination.longitude}` +
+    waypointsParam +
+    `&key=${googleApiKey}`;
 
-  const url = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coordinates}?` +
-    new URLSearchParams({
-      access_token: mapboxToken,
-      geometries: 'geojson',
-      overview: 'full',
-      alternatives: 'false'  // We generate our own alternatives
-    });
-
-  console.log('🗺️ Calling Mapbox API with waypoints...');
+  console.log('🗺️ Calling Google Directions API with waypoints...');
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`Mapbox API error: ${response.status}`);
+    throw new Error(`Google API error: ${response.status}`);
   }
 
   const data = await response.json();
 
-  if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
-    throw new Error('No routes found from Mapbox');
+  if (data.status !== 'OK' || !data.routes || data.routes.length === 0) {
+    throw new Error(`No routes found: ${data.status}`);
   }
 
-  return data.routes[0];
+  // Transform to match expected format
+  const route = data.routes[0];
+  return {
+    duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
+    distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
+    geometry: {
+      coordinates: decodePolyline(route.overview_polyline.points),
+      type: 'LineString'
+    }
+  };
+}
+
+// Helper function to decode Google's polyline
+function decodePolyline(encoded: string): [number, number][] {
+  const coordinates: [number, number][] = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const deltaLat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += deltaLat;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      byte = encoded.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const deltaLng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += deltaLng;
+
+    coordinates.push([lng / 1e5, lat / 1e5]);
+  }
+
+  return coordinates;
 }
 
 /**
@@ -271,7 +317,7 @@ async function generateOptimizedRoute(
 
   // Step 1: Get original route from Mapbox
   console.log('📍 Step 1: Getting original route...');
-  const originalRoute = await getMapboxRoute(request.origin, request.destination);
+  const originalRoute = await getGoogleRoute(request.origin, request.destination);
   const originalCoords = geometryToCoordinates(originalRoute.geometry);
 
   // Step 2: Score the original route
@@ -373,7 +419,7 @@ async function generateOptimizedRoute(
   // Step 6: Generate new route with waypoints
   console.log('🗺️ Step 5: Generating optimized route with waypoints...');
   const waypointCoords = safeWaypoints.map(wp => wp.coordinate);
-  const optimizedRoute = await getMapboxRoute(request.origin, request.destination, waypointCoords);
+  const optimizedRoute = await getGoogleRoute(request.origin, request.destination, waypointCoords);
   const optimizedCoords = geometryToCoordinates(optimizedRoute.geometry);
 
   // Step 7: Score the optimized route

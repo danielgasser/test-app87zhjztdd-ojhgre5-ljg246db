@@ -45,46 +45,54 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [showResults, setShowResults] = useState(false);
   const [mapboxResults, setMapboxResults] = useState<SearchResult[]>([]);
 
-  const searchMapbox = async (query: string): Promise<SearchResult[]> => {
-    const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_TOKEN;
+  const searchGoogle = async (query: string): Promise<SearchResult[]> => {
+    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-    if (!mapboxToken) {
-      console.warn("Mapbox token not found - using database search only");
+    if (!googleApiKey) {
+      console.warn(
+        "Google Maps API key not found - using database search only"
+      );
       return [];
     }
 
     try {
-      let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+      let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
         query
-      )}.json?access_token=${mapboxToken}&types=poi,address&limit=5&country=us,ca`;
+      )}&key=${googleApiKey}&components=country:us|country:ca`;
 
       if (userLocation) {
-        url += `&proximity=${userLocation.longitude},${userLocation.latitude}`;
+        url += `&location=${userLocation.latitude},${userLocation.longitude}`;
       }
 
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Mapbox API error: ${response.status}`);
+        throw new Error(`Google Maps API error: ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (data.features) {
-        return data.features.map((feature: any) => ({
-          id: `mapbox_${feature.id}`,
-          name: feature.text || feature.place_name.split(",")[0],
-          address: feature.place_name,
-          latitude: feature.center[1],
-          longitude: feature.center[0],
-          place_type: feature.place_type?.[0] || "location",
-          source: "mapbox" as const,
+      if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
+        throw new Error(`Google Maps API status: ${data.status}`);
+      }
+
+      if (data.results && data.results.length > 0) {
+        return data.results.slice(0, 5).map((result: any) => ({
+          id: `google_${result.place_id}`,
+          name:
+            result.address_components?.[0]?.long_name ||
+            result.formatted_address.split(",")[0],
+          address: result.formatted_address,
+          latitude: result.geometry.location.lat,
+          longitude: result.geometry.location.lng,
+          place_type: result.types?.[0] || "location",
+          source: "mapbox" as const, // Keep as "mapbox" for now to avoid breaking existing code
         }));
       }
 
       return [];
     } catch (error) {
-      console.error("Mapbox search error:", error);
+      console.error("Google Maps search error:", error);
       Alert.alert(
         "Search Error",
         "Unable to search locations. Please check your internet connection."
@@ -106,13 +114,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       dispatch(
         searchLocations({
           query,
-          userLocation: userLocation
-            ? { lat: userLocation.latitude, lng: userLocation.longitude }
-            : undefined,
+          latitude: userLocation?.latitude,
+          longitude: userLocation?.longitude,
         })
       );
 
-      const mapboxResults = await searchMapbox(query);
+      const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
     },
     [dispatch, userLocation]
