@@ -273,7 +273,7 @@ export default function MapScreen() {
     console.log("🔥 User profile:", userProfile);
     console.log("🔥 Current heatmap data length:", heatMapData.length);
     dispatch(toggleHeatMap());
-    if (!heatMapVisible && heatMapData.length > 0 && userLocation) {
+    if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
       console.log("🔥 Fetching heatmap data...");
       dispatch(
         fetchHeatMapData({

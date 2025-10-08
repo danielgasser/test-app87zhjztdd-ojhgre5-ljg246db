@@ -571,6 +571,12 @@ export const fetchHeatMapData = createAsyncThunk(
         center_lat: latitude,
         center_lng: longitude,
         radius_meters: radius,
+        user_race_ethnicity: userProfile?.race_ethnicity || null,
+        user_gender: userProfile?.gender || null,
+        user_lgbtq_status: userProfile?.lgbtq_status || null,
+        user_disability_status: userProfile?.disability_status || null,
+        user_religion: userProfile?.religion || null,
+        user_age_range: userProfile?.age_range || null,
       });
 
       if (error) {
@@ -585,8 +591,8 @@ export const fetchHeatMapData = createAsyncThunk(
       const heatMapPoints: HeatMapPoint[] = data.map((location: any) => ({
         latitude: location.latitude,
         longitude: location.longitude,
-        weight: Math.max(0.1, Math.min(1.0, (location.overall_safety_score || 3) / 5)),
-        safety_score: location.overall_safety_score || 3,
+        weight: Math.max(0.1, Math.min(1.0, (location.safety_score || 3) / 5)),
+        safety_score: location.safety_score || 3,
       }));
 
       return heatMapPoints;
