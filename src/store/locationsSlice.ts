@@ -10,6 +10,8 @@ import {
   DangerZonesResponse
 } from '../types/supabase';
 import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { APP_CONFIG } from '@/utils/appConfig';
 import { ReactNode } from 'react';
 
@@ -158,6 +160,8 @@ interface LocationsState {
   searchLoading: boolean;
   showSearchResults: boolean;
   userLocation: { latitude: number; longitude: number } | null;
+  mapCenter: { latitude: number; longitude: number } | null;
+  communityFeedMode: 'near_me' | 'map_area';
   heatMapData: HeatMapPoint[];
   heatMapVisible: boolean;
   heatMapLoading: boolean;
@@ -245,6 +249,8 @@ const initialState: LocationsState = {
   searchLoading: false,
   showSearchResults: false,
   userLocation: null,
+  mapCenter: null,
+  communityFeedMode: 'near_me',
   heatMapData: [],
   heatMapVisible: false,
   heatMapLoading: false,
@@ -277,9 +283,6 @@ const initialState: LocationsState = {
   showSmartRouteComparison: false,
 };
 
-// ================================
-// ASYNC THUNKS - EXISTING ONES
-// ================================
 
 export const fetchNearbyLocations = createAsyncThunk(
   'locations/fetchNearby',
@@ -519,6 +522,32 @@ export const createLocationFromSearch = createAsyncThunk(
   }
 );
 
+export const loadCommunityFeedMode = createAsyncThunk(
+  'locations/loadCommunityFeedMode',
+  async () => {
+    try {
+      const savedMode = await AsyncStorage.getItem('communityFeedMode');
+      return savedMode === 'map_area' ? 'map_area' : 'near_me';
+    } catch (error) {
+      console.error('Error loading community feed mode:', error);
+      return 'near_me'; // Default fallback
+    }
+  }
+);
+
+export const saveCommunityFeedMode = createAsyncThunk(
+  'locations/saveCommunityFeedMode',
+  async (mode: 'near_me' | 'map_area') => {
+    try {
+      await AsyncStorage.setItem('communityFeedMode', mode);
+      return mode;
+    } catch (error) {
+      console.error('Error saving community feed mode:', error);
+      return mode;
+    }
+  }
+);
+
 export const fetchHeatMapData = createAsyncThunk(
   'locations/fetchHeatMapData',
   async ({
@@ -565,30 +594,38 @@ export const fetchHeatMapData = createAsyncThunk(
 
 export const fetchRecentReviews = createAsyncThunk(
   'locations/fetchRecentReviews',
-  async (limit: number = 10) => {
+  async ({
+    limit = 10,
+    latitude,
+    longitude,
+    radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS
+  }: {
+    limit?: number;
+    latitude?: number;
+    longitude?: number;
+    radius?: number;
+  } = {}) => {
     try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select(`
-          id,
-          user_id,
-          location_id,
-          title,
-          safety_rating,
-          overall_rating,
-          content,
-          created_at,
-          locations!inner (
-            name,
-            address
-          )
-        `)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      // Only fetch reviews if location is provided
+      if (latitude === undefined || longitude === undefined) {
+        console.log('No location provided for community reviews');
+        return []; // Return empty array instead of fetching all reviews
+      }
 
+      const { data, error } = await supabase.rpc('get_nearby_reviews', {
+        lat: latitude,
+        lng: longitude,
+        radius_meters: radius,
+        review_limit: limit
+      });
+      console.log('📍 Nearby reviews search:', {
+        lat: latitude,
+        lng: longitude,
+        radius_km: radius / 1000,
+        results_count: data?.length || 0
+      });
       if (error) {
-        console.error('Error fetching recent reviews:', error);
+        console.error('Error fetching nearby reviews:', error);
         throw error;
       }
 
@@ -597,12 +634,13 @@ export const fetchRecentReviews = createAsyncThunk(
         user_id: review.user_id,
         location_id: review.location_id,
         title: review.title,
-        location_name: review.locations?.name || 'Unknown Location',
-        location_address: review.locations?.address || '',
+        location_name: review.location_name,
+        location_address: review.location_address,
         safety_rating: review.safety_rating,
         overall_rating: review.overall_rating,
         content: review.content,
         created_at: review.created_at,
+        distance_meters: review.distance_meters,
       }));
     } catch (error) {
       console.error('Recent reviews fetch error:', error);
@@ -1295,6 +1333,14 @@ const locationsSlice = createSlice({
       state.selectedLocation = action.payload;
     },
 
+    setMapCenter: (state, action: PayloadAction<{ latitude: number; longitude: number } | null>) => {
+      state.mapCenter = action.payload;
+    },
+
+    setCommunityFeedMode: (state, action: PayloadAction<'near_me' | 'map_area'>) => {
+      state.communityFeedMode = action.payload;
+    },
+
     setFilters: (state, action: PayloadAction<Partial<LocationsState['filters']>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
@@ -1455,6 +1501,16 @@ const locationsSlice = createSlice({
       .addCase(createLocationFromSearch.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to create location';
+      })
+
+      // Load community feed mode
+      .addCase(loadCommunityFeedMode.fulfilled, (state, action) => {
+        state.communityFeedMode = action.payload;
+      })
+
+      // Save community feed mode
+      .addCase(saveCommunityFeedMode.fulfilled, (state, action) => {
+        state.communityFeedMode = action.payload;
       })
 
       // Heat Map Data
@@ -1651,6 +1707,8 @@ export const {
   addLocationToNearby,
   toggleHeatMap,
   setHeatMapVisible,
+  setMapCenter,
+  setCommunityFeedMode,
   toggleDangerZones,
   setDangerZonesVisible,
   setSelectedRoute,

@@ -15,9 +15,12 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchRecentReviews,
   fetchTrendingLocations,
+  loadCommunityFeedMode,
+  saveCommunityFeedMode,
 } from "src/store/locationsSlice";
 import { theme } from "src/styles/theme";
 import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -26,19 +29,79 @@ export default function CommunityScreen() {
     communityLoading,
     trendingLocations,
     trendingLoading,
+    userLocation,
+    mapCenter,
+    communityFeedMode,
   } = useAppSelector((state) => state.locations);
   const [refreshing, setRefreshing] = React.useState(false);
+
   useRealtimeReviews();
+
   useEffect(() => {
-    loadCommunityData();
+    dispatch(loadCommunityFeedMode());
   }, []);
 
+  // Load data on mount AND reload when location or mode changes
+  useEffect(() => {
+    const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
+
+    if (!coords) return; // Early exit if no coordinates
+
+    console.log("🗺️ Community feed mode:", communityFeedMode);
+    console.log("🗺️ Using coordinates:", coords);
+
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          dispatch(
+            fetchRecentReviews({
+              limit: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+            })
+          ).unwrap(),
+          dispatch(
+            fetchTrendingLocations({
+              daysWindow: APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS,
+              maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
+            })
+          ).unwrap(),
+        ]);
+      } catch (error) {
+        console.error("Error loading community data:", error);
+      }
+    };
+
+    fetchData();
+  }, [
+    userLocation?.latitude,
+    userLocation?.longitude,
+    mapCenter?.latitude,
+    mapCenter?.longitude,
+    communityFeedMode,
+    dispatch,
+  ]);
+
   const loadCommunityData = async () => {
+    const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
+    if (!coords) return;
+
+    console.log("🗺️ Community feed mode:", communityFeedMode);
+    console.log("🗺️ Using coordinates:", coords);
     try {
       await Promise.all([
-        dispatch(fetchRecentReviews(10)).unwrap(),
         dispatch(
-          fetchTrendingLocations({ daysWindow: 7, maxResults: 10 })
+          fetchRecentReviews({
+            limit: 10,
+            latitude: userLocation?.latitude,
+            longitude: userLocation?.longitude,
+          })
+        ).unwrap(),
+        dispatch(
+          fetchTrendingLocations({
+            daysWindow: APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS,
+            maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
+          })
         ).unwrap(),
       ]);
     } catch (error) {
@@ -50,6 +113,12 @@ export default function CommunityScreen() {
     setRefreshing(true);
     await loadCommunityData();
     setRefreshing(false);
+  };
+
+  const handleToggleMode = async () => {
+    const newMode = communityFeedMode === "near_me" ? "map_area" : "near_me";
+    console.log("🔄 Toggling mode from", communityFeedMode, "to", newMode);
+    await dispatch(saveCommunityFeedMode(newMode)).unwrap();
   };
 
   const getRatingColor = (rating: number) => {
@@ -164,7 +233,90 @@ export default function CommunityScreen() {
           <Text style={styles.screenSubtitle}>
             Recent reviews and safety updates from travelers like you
           </Text>
+          {/* ADD THIS TOGGLE UI */}
+          <View style={styles.modeToggleContainer}>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                communityFeedMode === "near_me" && styles.modeButtonActive,
+              ]}
+              onPress={handleToggleMode}
+            >
+              <Ionicons
+                name="navigate"
+                size={18}
+                color={
+                  communityFeedMode === "near_me"
+                    ? "#fff"
+                    : theme.colors.primary
+                }
+              />
+              <Text
+                style={[
+                  styles.modeButtonText,
+                  communityFeedMode === "near_me" &&
+                    styles.modeButtonTextActive,
+                ]}
+              >
+                Near Me
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                communityFeedMode === "map_area" && styles.modeButtonActive,
+              ]}
+              onPress={handleToggleMode}
+            >
+              <Ionicons
+                name="map"
+                size={18}
+                color={
+                  communityFeedMode === "map_area"
+                    ? "#fff"
+                    : theme.colors.primary
+                }
+              />
+              <Text
+                style={[
+                  styles.modeButtonText,
+                  communityFeedMode === "map_area" &&
+                    styles.modeButtonTextActive,
+                ]}
+              >
+                Map Area
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+        {/* No location available message */}
+        {(!userLocation && communityFeedMode === "near_me") ||
+        (!mapCenter && communityFeedMode === "map_area") ? (
+          <View style={styles.noLocationContainer}>
+            <Ionicons name="location-outline" size={48} color="#999" />
+            <Text style={styles.noLocationTitle}>Location Required</Text>
+            <Text style={styles.noLocationText}>
+              {communityFeedMode === "near_me"
+                ? "Enable location services to see reviews near you"
+                : "Move the map to explore reviews in different areas"}
+            </Text>
+          </View>
+        ) : null}
+
+        {/* No reviews found in area */}
+        {((userLocation && communityFeedMode === "near_me") ||
+          (mapCenter && communityFeedMode === "map_area")) &&
+        communityReviews.length === 0 &&
+        !communityLoading ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="chatbubbles-outline" size={48} color="#999" />
+            <Text style={styles.emptyTitle}>No Reviews Nearby</Text>
+            <Text style={styles.emptyText}>
+              Be the first to review a location in this area!
+            </Text>
+          </View>
+        ) : null}
 
         {/* Safety Updates Section */}
         <View style={styles.section}>
@@ -249,6 +401,64 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+  },
+  modeToggleContainer: {
+    flexDirection: "row",
+    marginTop: 16,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    padding: 4,
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  modeButtonActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  modeButtonText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.primary,
+  },
+  modeButtonTextActive: {
+    color: "#fff",
+  },
+  noLocationContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noLocationTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noLocationText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 16,
+    marginBottom: 8,
   },
   screenTitle: {
     fontSize: 32,

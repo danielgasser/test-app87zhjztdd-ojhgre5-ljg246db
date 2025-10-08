@@ -36,6 +36,8 @@ import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import RoutePlanningModal from "src/components/RoutePlanningModal";
+import { setMapCenter } from "src/store/locationsSlice";
+
 import { APP_CONFIG } from "@/utils/appConfig";
 
 const getMarkerColor = (rating: number | string | null) => {
@@ -204,6 +206,12 @@ export default function MapScreen() {
       longitudeDelta: 0.01,
     };
     setRegion(newRegion);
+    dispatch(
+      setMapCenter({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      })
+    );
     mapRef.current?.animateToRegion(newRegion, 1000);
 
     if (location.source === "database" && location.id) {
@@ -474,6 +482,14 @@ export default function MapScreen() {
             Math.abs(newRegion.longitudeDelta - region.longitudeDelta) > 0.02;
 
           if (positionChanged || zoomChanged) {
+            // Update map center for Community feed
+            dispatch(
+              setMapCenter({
+                latitude: newRegion.latitude,
+                longitude: newRegion.longitude,
+              })
+            );
+
             // Calculate dynamic radius based on zoom level
             const latRadius = newRegion.latitudeDelta * 111 * 1000;
             const dynamicRadius = Math.min(Math.max(latRadius, 10000), 100000);
