@@ -745,6 +745,8 @@ export const fetchDangerZones = createAsyncThunk(
     radius?: number;
     userDemographics?: any;
   }) => {
+    console.log('🛡️ fetchDangerZones called with:', { userId, radius, userDemographics });
+
     try {
       console.log('🛡️ fetchDangerZones START', { userId, radius });
 

@@ -43,6 +43,7 @@ import { setMapCenter } from "src/store/locationsSlice";
 import { getUserCountry } from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/utils/appConfig";
+import { requireAuth } from "@/utils/authHelpers";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -174,6 +175,8 @@ export default function MapScreen() {
 
   // ============= EVENT HANDLERS =============
   const handleMarkerPress = async (locationId: string) => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     setSelectedLocationId(locationId);
     setModalVisible(true);
 
@@ -201,6 +204,8 @@ export default function MapScreen() {
   };
 
   const handleLocationSelected = async (location: SearchResult) => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     setSearchMarker(location);
     const newRegion = {
       latitude: location.latitude,
@@ -223,6 +228,8 @@ export default function MapScreen() {
   };
 
   const handleAddLocation = async () => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     if (!searchMarker) return;
 
     if (searchMarker.source === "database" && searchMarker.id) {
@@ -244,6 +251,8 @@ export default function MapScreen() {
     }
   };
   const handleMapLongPress = async (event: any) => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     const { latitude, longitude } = event.nativeEvent.coordinate;
 
     // Set as search marker (same UX as search results)
@@ -261,6 +270,8 @@ export default function MapScreen() {
   };
 
   const handleToggleHeatMap = () => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     dispatch(toggleHeatMap());
     if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
       console.log("🔥 Fetching heatmap data...");
@@ -276,8 +287,11 @@ export default function MapScreen() {
   };
 
   const handleToggleDangerZones = () => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     dispatch(toggleDangerZones());
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
+      console.log("🛡️ Fetching danger zones for userId:", userId);
       dispatch(
         fetchDangerZones({
           userId: userId,
@@ -320,6 +334,8 @@ export default function MapScreen() {
     }
   };
   const handleStartRouteSelection = () => {
+    if (!requireAuth(userId, "view danger zones")) return;
+
     setShowRoutePlanningModal(true);
   };
   const handleCloseRoutePlanning = () => {
@@ -583,12 +599,15 @@ export default function MapScreen() {
               );
             }
           )}
-
+        {console.log("🛡️ BEFORE DangerZoneOverlay:", {
+          dangerZonesVisible,
+          dangerZonesCount: dangerZones.length,
+          dangerZones,
+        })}{" "}
         <DangerZoneOverlay
           dangerZones={dangerZones}
           visible={dangerZonesVisible}
         />
-
         {/* Location markers */}
         {mapReady &&
           nearbyLocations &&
@@ -677,7 +696,6 @@ export default function MapScreen() {
               }
             }
           )}
-
         {/* Search result marker */}
         {searchMarker && (
           <Marker

@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { theme } from "src/styles/theme";
+import { TouchableWithoutFeedback, Keyboard } from "react-native";
 
 import {
   View,
@@ -198,68 +199,72 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons
-            name="search"
-            size={20}
-            color="#666"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search for places..."
-            value={searchText}
-            onChangeText={(text) => {
-              setSearchText(text);
-              performSearch(text);
-            }}
-            onFocus={() => onSearchToggle?.(true)}
-            autoCorrect={false}
-            autoCapitalize="none"
-            returnKeyType="search"
-            onSubmitEditing={() => performSearch(searchText)}
-          />
-          {(searchText.length > 0 || searchLoading) && (
-            <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-              {searchLoading ? (
-                <ActivityIndicator size="small" color="#666" />
-              ) : (
-                <Ionicons name="close-circle" size={20} color="#666" />
-              )}
-            </TouchableOpacity>
-          )}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#666"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search for places..."
+              value={searchText}
+              onChangeText={(text) => {
+                setSearchText(text);
+                performSearch(text);
+              }}
+              onFocus={() => onSearchToggle?.(true)}
+              autoCorrect={false}
+              autoCapitalize="none"
+              returnKeyType="search"
+              onSubmitEditing={() => performSearch(searchText)}
+            />
+            {(searchText.length > 0 || searchLoading) && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={handleClear}
+              >
+                {searchLoading ? (
+                  <ActivityIndicator size="small" color="#666" />
+                ) : (
+                  <Ionicons name="close-circle" size={20} color="#666" />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
-
-      {showResults && allResults.length > 0 && (
-        <View style={styles.resultsContainer}>
-          <FlatList
-            data={allResults}
-            renderItem={renderSearchResult}
-            keyExtractor={(item) => item.id}
-            style={styles.resultsList}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      )}
-
-      {showResults &&
-        searchText.length >= 3 &&
-        allResults.length === 0 &&
-        !searchLoading && (
-          <View style={styles.noResultsContainer}>
-            <Text style={styles.noResultsText}>
-              No places found for "{searchText}"
-            </Text>
-            <Text style={styles.noResultsSubtext}>
-              Try a different search term
-            </Text>
+        {showResults && allResults.length > 0 && (
+          <View style={styles.resultsContainer}>
+            <FlatList
+              data={allResults}
+              renderItem={renderSearchResult}
+              keyExtractor={(item) => item.id}
+              style={styles.resultsList}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            />
           </View>
         )}
-    </View>
+
+        {showResults &&
+          searchText.length >= 3 &&
+          allResults.length === 0 &&
+          !searchLoading && (
+            <View style={styles.noResultsContainer}>
+              <Text style={styles.noResultsText}>
+                No places found for "{searchText}"
+              </Text>
+              <Text style={styles.noResultsSubtext}>
+                Try a different search term
+              </Text>
+            </View>
+          )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

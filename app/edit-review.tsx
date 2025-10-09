@@ -19,7 +19,10 @@ import { Picker } from "@react-native-picker/picker";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { updateReview } from "src/store/locationsSlice";
 import { supabase } from "src/services/supabase";
-import { Review } from "src/types/supabase";
+import { Database } from "src/types/database.types";
+import { CreateReviewForm } from "@/types/supabase";
+import { requireAuth } from "@/utils/authHelpers";
+type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
 interface RatingProps {
   label: string;
@@ -56,12 +59,19 @@ const RatingInput: React.FC<RatingProps> = ({
 
 export default function EditReviewScreen() {
   const router = useRouter();
+  const user = useAppSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    if (!requireAuth(user?.id, "edit reviews")) {
+      router.back();
+    }
+  }, [user]);
+
   const dispatch = useAppDispatch();
   const { reviewId } = useLocalSearchParams();
   const [showVisitTypePicker, setShowVisitTypePicker] = useState(false);
 
   const { loading } = useAppSelector((state) => state.locations);
-  const user = useAppSelector((state) => state.auth.user);
 
   const [originalReview, setOriginalReview] = useState<Review | null>(null);
   const [loadingReview, setLoadingReview] = useState(true);
@@ -76,7 +86,7 @@ export default function EditReviewScreen() {
     comfort_rating: 0,
     accessibility_rating: 0,
     service_rating: 0,
-    visit_type: "solo" as const,
+    visit_type: "solo",
   });
 
   useEffect(() => {
@@ -91,7 +101,7 @@ export default function EditReviewScreen() {
         .from("reviews")
         .select("*")
         .eq("id", reviewId as string)
-        .eq("user_id", user?.id)
+        .eq("user_id", user!.id)
         .single();
 
       if (error) throw error;
@@ -145,15 +155,26 @@ export default function EditReviewScreen() {
     }
 
     try {
+      const updateData: Partial<CreateReviewForm> = {
+        title: formData.title,
+        content: formData.content,
+        overall_rating: formData.overall_rating,
+        safety_rating: formData.safety_rating,
+        comfort_rating: formData.comfort_rating,
+        accessibility_rating: formData.accessibility_rating || undefined,
+        service_rating: formData.service_rating || undefined,
+        visited_at: visitDateTime.toISOString(),
+        visit_type: formData.visit_type as
+          | "solo"
+          | "couple"
+          | "family"
+          | "group"
+          | "business",
+        location_id: originalReview?.location_id,
+      };
+
       await dispatch(
-        updateReview({
-          id: reviewId as string,
-          ...formData,
-          visited_at: visitDateTime.toISOString(),
-          accessibility_rating: formData.accessibility_rating || undefined,
-          service_rating: formData.service_rating || undefined,
-          location_id: originalReview?.location_id,
-        })
+        updateReview({ id: reviewId as string, ...updateData })
       ).unwrap();
 
       Alert.alert("Success", "Your review has been updated!", [
