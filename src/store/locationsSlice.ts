@@ -588,18 +588,6 @@ export const fetchHeatMapData = createAsyncThunk(
     userProfile?: any;
   }) => {
     try {
-      console.log('🔥 fetchHeatMapData START');
-      console.log('🔥 Parameters:', {
-        center_lat: latitude,
-        center_lng: longitude,
-        radius_meters: radius,
-        user_race_ethnicity: userProfile?.race_ethnicity,
-        user_gender: userProfile?.gender,
-        user_lgbtq_status: userProfile?.lgbtq_status,
-        user_disability_status: userProfile?.disability_status,
-        user_religion: userProfile?.religion,
-        user_age_range: userProfile?.age_range,
-      });
       const { data, error } = await (supabase.rpc as any)('get_heatmap_data', {
         center_lat: latitude,
         center_lng: longitude,
@@ -611,16 +599,6 @@ export const fetchHeatMapData = createAsyncThunk(
         user_religion: userProfile?.religion || null,
         user_age_range: userProfile?.age_range || null,
       });
-      console.log('🔥 RPC Response:', {
-        hasError: !!error,
-        errorMessage: error?.message,
-        errorDetails: error?.details,
-        errorHint: error?.hint,
-        errorCode: error?.code,
-        dataIsNull: data === null,
-        dataLength: data?.length || 0,
-        firstDataItem: data?.[0]
-      });
       if (error) {
         console.error('Error fetching heat map data:', error);
         return [];
@@ -630,10 +608,6 @@ export const fetchHeatMapData = createAsyncThunk(
         return [];
       }
       if (!data || data.length === 0) {
-        console.log('⚠️ No heatmap data returned - possible reasons:');
-        console.log('   - No locations with reviews in the area');
-        console.log('   - Locations exist but have review_count = 0');
-        console.log('   - Radius too small');
         return [];
       }
 
@@ -643,8 +617,6 @@ export const fetchHeatMapData = createAsyncThunk(
         weight: Math.max(0.1, Math.min(1.0, (location.safety_score || 3) / 5)),
         safety_score: location.safety_score || 3,
       }));
-      console.log('✅ Mapped heatmap points:', heatMapPoints);
-      console.log('🔥 fetchHeatMapData END - returning', heatMapPoints.length, 'points');
 
       return heatMapPoints;
     } catch (error) {
@@ -679,12 +651,6 @@ export const fetchRecentReviews = createAsyncThunk(
         lng: longitude,
         radius_meters: radius,
         review_limit: limit
-      });
-      console.log('📍 Nearby reviews search:', {
-        lat: latitude,
-        lng: longitude,
-        radius_km: radius / 1000,
-        results_count: data?.length || 0
       });
       if (error) {
         console.error('Error fetching nearby reviews:', error);
@@ -745,13 +711,8 @@ export const fetchDangerZones = createAsyncThunk(
     radius?: number;
     userDemographics?: any;
   }) => {
-    console.log('🛡️ fetchDangerZones called with:', { userId, radius, userDemographics });
-
     try {
-      console.log('🛡️ fetchDangerZones START', { userId, radius });
-
       const token = await getAuthToken();
-      console.log('🛡️ Got auth token:', token ? `${token.substring(0, 20)}...` : 'NULL');
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
         method: 'POST',
@@ -765,7 +726,6 @@ export const fetchDangerZones = createAsyncThunk(
           user_demographics: userDemographics
         })
       });
-      console.log('🛡️ Response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -774,7 +734,6 @@ export const fetchDangerZones = createAsyncThunk(
       }
 
       const data: DangerZonesResponse = await response.json();
-      console.log('🛡️ Success! Danger zones count:', data.danger_zones?.length || 0);
       return data.danger_zones || [];
     } catch (error) {
       console.error('Error fetching danger zones:', error);
@@ -877,9 +836,6 @@ export const calculateRouteSafety = createAsyncThunk(
     user_demographics: any;
     waypoints?: RouteCoordinate[];
   }) => {
-    console.log('🔍 Calculating route safety scores...');
-
-    // Try the route-safety-scorer Edge Function first
     try {
       const { data, error } = await supabase.functions.invoke('route-safety-scorer', {
         body: payload
@@ -890,11 +846,9 @@ export const calculateRouteSafety = createAsyncThunk(
         throw error;
       }
 
-      console.log('✅ Route safety analysis complete:', data);
       return data as RouteSafetyAnalysis;
     } catch (error) {
       // Fallback to simplified safety analysis
-      console.log('🔄 Using fallback route safety analysis...');
 
       const coordinates = payload.route_coordinates;
       const samplePoints = coordinates.filter((_, index) =>
@@ -1012,8 +966,6 @@ export const getGoogleRoute = createAsyncThunk(
       `&alternatives=true` +
       `&key=${googleApiKey}`;
 
-    console.log('🗺️ Calling Google Directions API...');
-
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -1043,7 +995,6 @@ export const getGoogleRoute = createAsyncThunk(
       };
     });
 
-    console.log(`✅ Got ${transformedRoutes.length} route(s) from Google`);
     return transformedRoutes;
   }
 );
@@ -1091,8 +1042,6 @@ export const generateSafeRoute = createAsyncThunk(
   'locations/generateSafeRoute',
   async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
     try {
-      console.log('🚀 Starting safe route generation...');
-
       // Step 1: Get route from Mapbox
       const mapboxRoutes = await dispatch(getGoogleRoute({
         origin: routeRequest.origin,
@@ -1105,7 +1054,6 @@ export const generateSafeRoute = createAsyncThunk(
       }
 
       const primaryRoute = mapboxRoutes[0];
-      console.log(`🗺️ Got primary route: ${Math.round(primaryRoute.duration / 60)} min, ${Math.round(primaryRoute.distance / 1000)} km`);
 
       // Step 2: Convert coordinates for safety analysis
       const routeCoordinates: RouteCoordinate[] = primaryRoute.geometry.coordinates.map(
@@ -1116,7 +1064,6 @@ export const generateSafeRoute = createAsyncThunk(
       );
 
       // Step 3: Calculate route safety
-      console.log('🔍 Analyzing route safety...');
       const safetyAnalysis = await dispatch(calculateRouteSafety({
         route_coordinates: routeCoordinates,
         user_demographics: routeRequest.user_demographics
@@ -1142,8 +1089,6 @@ export const generateSafeRoute = createAsyncThunk(
         }
       };
 
-      console.log(`✅ Generated route: ${safeRoute.name} (${safeRoute.estimated_duration_minutes} min, Safety: ${safetyAnalysis.overall_route_score.toFixed(1)})`);
-
       return {
         route: safeRoute,
         mapbox_routes: mapboxRoutes
@@ -1160,8 +1105,6 @@ export const generateRouteAlternatives = createAsyncThunk(
   'locations/generateRouteAlternatives',
   async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
     try {
-      console.log('🔄 Generating route alternatives...');
-
       // Get Mapbox routes (with alternatives)
       const mapboxRoutes = await dispatch(getGoogleRoute({
         origin: routeRequest.origin,
@@ -1181,8 +1124,6 @@ export const generateRouteAlternatives = createAsyncThunk(
         const route = mapboxRoutes[i];
 
         try {
-          console.log(`🔍 Analyzing alternative route ${i}...`);
-
           const routeCoordinates: RouteCoordinate[] = route.geometry.coordinates.map(
             ([lng, lat]: [number, number]) => ({
               latitude: lat,
@@ -1242,7 +1183,6 @@ export const generateRouteAlternatives = createAsyncThunk(
         b.safety_analysis.overall_route_score - a.safety_analysis.overall_route_score
       );
 
-      console.log(`✅ Generated ${alternatives.length} alternative routes`);
       return alternatives;
 
     } catch (error) {
@@ -1256,8 +1196,6 @@ export const generateSmartRoute = createAsyncThunk(
   'locations/generateSmartRoute',
   async (routeRequest: RouteRequest, { rejectWithValue }) => {
     try {
-      console.log('🧠 Starting SMART route generation...');
-
       // Call the NEW smart-route-generator edge function
       const { data, error } = await supabase.functions.invoke('smart-route-generator', {
         body: {
@@ -1278,11 +1216,6 @@ export const generateSmartRoute = createAsyncThunk(
         // Still return the data so UI can show the comparison
         return data;
       }
-
-      console.log('✅ Smart route generated successfully!');
-      console.log(`   Safety improvement: +${data.improvement_summary.safety_improvement.toFixed(2)}`);
-      console.log(`   Time added: +${data.improvement_summary.time_added_minutes} min`);
-      console.log(`   Danger zones avoided: ${data.improvement_summary.danger_zones_avoided}`);
 
       // Convert the optimized route to SafeRoute format
       const optimizedCoords: RouteCoordinate[] = data.optimized_route.geometry.coordinates.map(
@@ -1808,10 +1741,8 @@ const locationsSlice = createSlice({
           // Show comparison UI
           state.showSmartRouteComparison = true;
 
-          console.log('✅ Smart route comparison data stored in state');
         } else {
           // If smart routing didn't improve anything, just store basic route
-          console.log('ℹ️ Smart routing did not produce improvement');
           state.smartRouteComparison = null;
           state.showSmartRouteComparison = false;
         }

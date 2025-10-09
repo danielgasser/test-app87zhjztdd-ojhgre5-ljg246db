@@ -126,18 +126,7 @@ export default function MapScreen() {
     const hasReviews =
       location.demographic_safety_score || location.avg_safety_score;
     const prediction = mlPredictions[location.id];
-    /*
-    if (location.id === "4cb9c306-9a14-4fd5-a09d-79217145556e") {
-      console.log("🎯 getMarkerProps for test location:");
-      console.log("   - prediction object:", prediction);
-      console.log("   - prediction.confidence:", prediction?.confidence);
-      console.log("   - confidence type:", typeof prediction?.confidence);
-      console.log(
-        "   - Math.round(prediction.confidence * 100):",
-        Math.round((prediction?.confidence || 0) * 100)
-      );
-    }
-      */
+
     if (hasReviews) {
       return {
         type: "reviewed",
@@ -595,11 +584,7 @@ export default function MapScreen() {
               );
             }
           )}
-        {console.log("🛡️ BEFORE DangerZoneOverlay:", {
-          dangerZonesVisible,
-          dangerZonesCount: dangerZones.length,
-          dangerZones,
-        })}{" "}
+
         <DangerZoneOverlay
           dangerZones={dangerZones}
           visible={dangerZonesVisible}

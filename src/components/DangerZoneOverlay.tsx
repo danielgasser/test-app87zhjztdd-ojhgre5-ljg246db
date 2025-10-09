@@ -37,18 +37,6 @@ export default function DangerZoneOverlay({
   dangerZones,
   visible,
 }: DangerZoneOverlayProps) {
-  console.log("🛡️ DangerZoneOverlay render:", {
-    visible,
-    zoneCount: dangerZones.length,
-    zones: dangerZones.map((z) => ({
-      id: z.id,
-      name: z.location_name,
-      lat: z.center_lat,
-      lng: z.center_lng,
-      hasPolygon: z.polygon_points?.length || 0,
-    })),
-  });
-
   if (!visible || dangerZones.length === 0) {
     return null;
   }

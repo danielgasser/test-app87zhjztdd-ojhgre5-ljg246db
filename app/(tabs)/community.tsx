@@ -51,9 +51,6 @@ export default function CommunityScreen() {
 
     if (!coords) return; // Early exit if no coordinates
 
-    console.log("🗺️ Community feed mode:", communityFeedMode);
-    console.log("🗺️ Using coordinates:", coords);
-
     const fetchData = async () => {
       try {
         await Promise.all([
@@ -90,8 +87,6 @@ export default function CommunityScreen() {
     const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
     if (!coords) return;
 
-    console.log("🗺️ Community feed mode:", communityFeedMode);
-    console.log("🗺️ Using coordinates:", coords);
     try {
       await Promise.all([
         dispatch(
@@ -121,7 +116,6 @@ export default function CommunityScreen() {
 
   const handleToggleMode = async () => {
     const newMode = communityFeedMode === "near_me" ? "map_area" : "near_me";
-    console.log("🔄 Toggling mode from", communityFeedMode, "to", newMode);
     await dispatch(saveCommunityFeedMode(newMode)).unwrap();
   };
 

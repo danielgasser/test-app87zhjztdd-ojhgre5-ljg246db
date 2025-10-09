@@ -110,7 +110,6 @@ async function getGoogleRoute(
     waypointsParam +
     `&key=${googleApiKey}`;
 
-  console.log('🗺️ Calling Google Directions API with waypoints...');
   const response = await fetch(url);
 
   if (!response.ok) {

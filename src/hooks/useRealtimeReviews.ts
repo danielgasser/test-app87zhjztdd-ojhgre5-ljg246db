@@ -19,8 +19,6 @@ export const useRealtimeReviews = () => {
                     filter: 'status=eq.active'
                 },
                 async (payload) => {
-                    console.log('New review detected:', payload.new);
-
                     // Fetch the location name for the new review
                     const { data: location } = await supabase
                         .from('locations')
