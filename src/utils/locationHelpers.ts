@@ -13,8 +13,6 @@ export const getUserCountry = async (
     }
 
     try {
-        console.log('🌍 Reverse geocoding to get country:', userLocation);
-
         const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLocation.latitude},${userLocation.longitude}&key=${googleApiKey}`;
         const response = await fetch(url);
         const data = await response.json();
@@ -28,7 +26,6 @@ export const getUserCountry = async (
             return countryCode;
         }
 
-        console.log('⚠️ Reverse geocoding failed, defaulting to US');
         return 'us';
     } catch (error) {
         console.error('❌ Error getting user country:', error);

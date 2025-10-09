@@ -297,12 +297,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     };
 
     try {
-      console.log("🧠 Requesting SMART safe route...");
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
 
       if (result.optimized_route && result.original_route) {
         console.log("✅ Smart route comparison available");
-        // Comparison will be shown automatically via Redux state
       } else {
         console.log("ℹ️ Original route is already optimal");
       }
@@ -314,7 +312,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       );
 
       // Fallback to basic route generation
-      console.log("⚠️ Falling back to basic route generation...");
       try {
         await dispatch(generateSafeRoute(routeRequest)).unwrap();
       } catch (fallbackError) {
