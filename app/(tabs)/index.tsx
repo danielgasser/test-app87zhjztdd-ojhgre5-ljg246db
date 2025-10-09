@@ -175,8 +175,6 @@ export default function MapScreen() {
 
   // ============= EVENT HANDLERS =============
   const handleMarkerPress = async (locationId: string) => {
-    if (!requireAuth(userId, "view danger zones")) return;
-
     setSelectedLocationId(locationId);
     setModalVisible(true);
 
@@ -204,8 +202,6 @@ export default function MapScreen() {
   };
 
   const handleLocationSelected = async (location: SearchResult) => {
-    if (!requireAuth(userId, "view danger zones")) return;
-
     setSearchMarker(location);
     const newRegion = {
       latitude: location.latitude,
@@ -228,7 +224,7 @@ export default function MapScreen() {
   };
 
   const handleAddLocation = async () => {
-    if (!requireAuth(userId, "view danger zones")) return;
+    if (!requireAuth(userId, "add location")) return;
 
     if (!searchMarker) return;
 
@@ -251,7 +247,7 @@ export default function MapScreen() {
     }
   };
   const handleMapLongPress = async (event: any) => {
-    if (!requireAuth(userId, "view danger zones")) return;
+    if (!requireAuth(userId, "add marker")) return;
 
     const { latitude, longitude } = event.nativeEvent.coordinate;
 
@@ -334,7 +330,7 @@ export default function MapScreen() {
     }
   };
   const handleStartRouteSelection = () => {
-    if (!requireAuth(userId, "view danger zones")) return;
+    if (!requireAuth(userId, "plan a route")) return;
 
     setShowRoutePlanningModal(true);
   };
