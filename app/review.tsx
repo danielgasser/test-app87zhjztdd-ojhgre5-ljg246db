@@ -24,6 +24,7 @@ import {
   addLocationToNearby,
 } from "src/store/locationsSlice";
 import { LocationWithScores } from "@/types/supabase";
+import { requireAuth } from "@/utils/authHelpers";
 
 interface RatingProps {
   label: string;
@@ -76,7 +77,9 @@ export default function ReviewScreen() {
 
   const { loading } = useAppSelector((state) => state.locations);
   const user = useAppSelector((state) => state.auth.user);
-
+  useEffect(() => {
+    requireAuth(user?.id, "write reviews");
+  }, [user]);
   const [visitDateTime, setVisitDateTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
