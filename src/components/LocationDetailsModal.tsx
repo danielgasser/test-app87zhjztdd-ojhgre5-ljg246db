@@ -54,7 +54,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   }, [locationId, visible]);
 
   useEffect(() => {
-    if (selectedLocation && visible) {
+    if ((selectedLocation || googlePlaceId) && visible) {
       fetchPlaceDetails();
     }
   }, [selectedLocation, googlePlaceId, visible]);
@@ -114,9 +114,14 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           "place_id",
           "name",
           "formatted_address",
+          "geometry",
           "opening_hours",
           "formatted_phone_number",
           "website",
+          "rating",
+          "user_ratings_total",
+          "photos",
+          "reviews",
           "types",
         ],
       });
@@ -132,13 +137,34 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
   const handleWriteReview = () => {
     onClose();
-    router.push({
-      pathname: "/review",
-      params: {
-        locationId: locationId!,
-        locationName: selectedLocation?.name || "",
-      },
-    });
+
+    // If location exists in DB, pass locationId
+    if (locationId) {
+      router.push({
+        pathname: "/review",
+        params: {
+          locationId: locationId,
+          locationName: selectedLocation?.name || "",
+        },
+      });
+    }
+    // If it's a new Google POI, pass location data
+    else if (placeDetails) {
+      router.push({
+        pathname: "/review",
+        params: {
+          isNewLocation: "true",
+          locationData: JSON.stringify({
+            name: placeDetails.name,
+            address: placeDetails.formatted_address,
+            latitude: placeDetails.geometry.location.lat,
+            longitude: placeDetails.geometry.location.lng,
+            place_type: placeDetails.types[0] || "other",
+            google_place_id: googlePlaceId,
+          }),
+        },
+      });
+    }
   };
 
   const getRatingColor = (rating: number) => {

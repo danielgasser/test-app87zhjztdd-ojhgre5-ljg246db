@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import MapView, {
+  PROVIDER_GOOGLE,
   Marker,
   Circle,
   Callout,
@@ -542,6 +543,8 @@ export default function MapScreen() {
       <MapView
         key={mapKey}
         ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        showsPointsOfInterest={true}
         style={styles.map}
         region={region}
         showsUserLocation={true}
