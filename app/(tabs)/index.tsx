@@ -44,6 +44,7 @@ import { getUserCountry } from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/utils/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
+import { supabase } from "@/services/supabase";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -94,6 +95,9 @@ export default function MapScreen() {
   const [showRoutePlanningModal, setShowRoutePlanningModal] = useState(false);
   const [mapKey, setMapKey] = useState(0);
 
+  const [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState<
+    string | null
+  >(null); // ADD THIS LINE
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -189,6 +193,7 @@ export default function MapScreen() {
   const handleModalClose = () => {
     setModalVisible(false);
     setSelectedLocationId(null);
+    setSelectedGooglePlaceId(null);
   };
 
   const handleLocationSelected = async (location: SearchResult) => {
@@ -370,6 +375,34 @@ export default function MapScreen() {
       }
     );
   };
+
+  const handlePoiClick = async (event: any) => {
+    const { placeId, name, coordinate } = event.nativeEvent;
+
+    console.log("POI clicked:", { placeId, name, coordinate });
+
+    // Check if this place already exists in database
+    const { data: existingLocation } = await supabase
+      .from("locations")
+      .select("id")
+      .eq("google_place_id", placeId)
+      .single();
+
+    // Set the Google Place ID so modal can ALWAYS fetch Google details
+    setSelectedGooglePlaceId(placeId);
+
+    if (existingLocation) {
+      // Location exists in DB - modal will show DB reviews + Google details
+      setSelectedLocationId(existingLocation.id);
+    } else {
+      // New POI - modal will show only Google details (no DB reviews)
+      setSelectedLocationId(null);
+    }
+
+    // Open modal
+    setModalVisible(true);
+  };
+
   // ============= EFFECTS =============
   useEffect(() => {
     requestLocationPermission();
@@ -514,10 +547,11 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
-        onLongPress={handleMapLongPress}
+        onPress={handleMapLongPress}
         onMapReady={() => {
           setMapReady(true);
         }}
+        onPoiClick={handlePoiClick}
         onRegionChangeComplete={(newRegion) => {
           setRegion(newRegion);
 
@@ -997,6 +1031,7 @@ export default function MapScreen() {
       <LocationDetailsModal
         visible={modalVisible}
         locationId={selectedLocationId}
+        googlePlaceId={selectedGooglePlaceId}
         onClose={handleModalClose}
       />
       <RoutePlanningModal
