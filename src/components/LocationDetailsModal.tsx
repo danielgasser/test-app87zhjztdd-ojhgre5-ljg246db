@@ -212,24 +212,28 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#4CAF50" />
             </View>
-          ) : selectedLocation ? (
+          ) : selectedLocation || googlePlaceId ? (
             <ScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
             >
               {/* Location Info */}
               <View style={styles.locationSection}>
-                <Text style={styles.locationName}>{selectedLocation.name}</Text>
+                <Text style={styles.locationName}>
+                  {selectedLocation?.name ||
+                    placeDetails?.name ||
+                    "Unknown Location"}
+                </Text>
                 <Text style={styles.locationAddress}>
-                  {selectedLocation.address}
+                  {selectedLocation?.address ||
+                    placeDetails?.formatted_address ||
+                    ""}
                 </Text>
                 <Text style={styles.locationType}>
-                  {(selectedLocation.place_type || "unknown")
-                    .charAt(0)
-                    .toUpperCase() +
-                    (selectedLocation.place_type || "unknown")
-                      .slice(1)
-                      .replace("_", " ")}
+                  {selectedLocation?.place_type ||
+                    placeDetails?.place_id ||
+                    "unknown"}
+                  .
                 </Text>
 
                 {/* Place Details from Google */}
@@ -289,7 +293,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 )}
 
                 {/* Overall Safety Score */}
-                {selectedLocation.overall_safety_score && (
+                {selectedLocation?.overall_safety_score && (
                   <View style={styles.safetyScoreContainer}>
                     <View
                       style={[
@@ -320,15 +324,18 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 />
               )}
               {/* Write Review Button */}
-              {currentUser && !userHasReviewed && (
-                <TouchableOpacity
-                  style={styles.writeReviewButton}
-                  onPress={handleWriteReview}
-                >
-                  <Ionicons name="create-outline" size={20} color="#FFF" />
-                  <Text style={styles.writeReviewText}>Write a Review</Text>
-                </TouchableOpacity>
-              )}
+              {!selectedLocation &&
+                googlePlaceId &&
+                currentUser &&
+                !userHasReviewed && (
+                  <TouchableOpacity
+                    style={styles.writeReviewButton}
+                    onPress={handleWriteReview}
+                  >
+                    <Ionicons name="create-outline" size={20} color="#FFF" />
+                    <Text style={styles.writeReviewText}>Write a Review</Text>
+                  </TouchableOpacity>
+                )}
               {currentUser && userHasReviewed && (
                 <View style={styles.alreadyReviewedBadge}>
                   <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
@@ -338,101 +345,109 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 </View>
               )}
               {/* Reviews Section */}
-              <View style={styles.reviewsSection}>
-                <Text style={styles.sectionTitle}>Recent Reviews</Text>
+              {selectedLocation && (
+                <View style={styles.reviewsSection}>
+                  <Text style={styles.sectionTitle}>Recent Reviews</Text>
 
-                {loadingReviews ? (
-                  <ActivityIndicator size="small" color="#4CAF50" />
-                ) : reviews.length > 0 ? (
-                  reviews.map((review) => (
-                    <View key={review.id} style={styles.reviewCard}>
-                      {review.user_id === currentUser?.id && (
-                        <TouchableOpacity
-                          style={styles.editButton}
-                          onPress={() => {
-                            onClose();
-                            router.push({
-                              pathname: "/edit-review",
-                              params: {
-                                reviewId: review.id,
-                                locationId: selectedLocation.id,
-                                locationName: selectedLocation.name,
-                              },
-                            });
-                          }}
-                        >
-                          <Ionicons name="pencil" size={18} color="#FFF" />
-                          <Text style={styles.editButtonText}>Edit Review</Text>
-                        </TouchableOpacity>
-                      )}
-                      <View style={styles.reviewHeader}>
-                        <View>
-                          <Text style={styles.reviewerName}>
-                            {review.user_profiles?.full_name ||
-                              review.user_profiles?.username ||
-                              "Anonymous"}
-                          </Text>
-                          {renderDemographics(review.user_profiles)}
-                        </View>
-                        {renderStars(review.overall_rating)}
-                      </View>
-
-                      <Text style={styles.reviewTitle}>{review.title}</Text>
-                      <Text style={styles.reviewContent}>{review.content}</Text>
-
-                      <View style={styles.reviewRatings}>
-                        <View style={styles.ratingItem}>
-                          <Text style={styles.ratingLabel}>Safety:</Text>
-                          <Text
-                            style={[
-                              styles.ratingValue,
-                              { color: getRatingColor(review.safety_rating) },
-                            ]}
+                  {loadingReviews ? (
+                    <ActivityIndicator size="small" color="#4CAF50" />
+                  ) : reviews.length > 0 ? (
+                    reviews.map((review) => (
+                      <View key={review.id} style={styles.reviewCard}>
+                        {review.user_id === currentUser?.id && (
+                          <TouchableOpacity
+                            style={styles.editButton}
+                            onPress={() => {
+                              onClose();
+                              router.push({
+                                pathname: "/edit-review",
+                                params: {
+                                  reviewId: review.id,
+                                  locationId: selectedLocation.id,
+                                  locationName: selectedLocation.name,
+                                },
+                              });
+                            }}
                           >
-                            {review.safety_rating}/5
-                          </Text>
+                            <Ionicons name="pencil" size={18} color="#FFF" />
+                            <Text style={styles.editButtonText}>
+                              Edit Review
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                        <View style={styles.reviewHeader}>
+                          <View>
+                            <Text style={styles.reviewerName}>
+                              {review.user_profiles?.full_name ||
+                                review.user_profiles?.username ||
+                                "Anonymous"}
+                            </Text>
+                            {renderDemographics(review.user_profiles)}
+                          </View>
+                          {renderStars(review.overall_rating)}
                         </View>
-                        <View style={styles.ratingItem}>
-                          <Text style={styles.ratingLabel}>Comfort:</Text>
-                          <Text
-                            style={[
-                              styles.ratingValue,
-                              { color: getRatingColor(review.comfort_rating) },
-                            ]}
-                          >
-                            {review.comfort_rating}/5
-                          </Text>
-                        </View>
-                        {review.accessibility_rating && (
+
+                        <Text style={styles.reviewTitle}>{review.title}</Text>
+                        <Text style={styles.reviewContent}>
+                          {review.content}
+                        </Text>
+
+                        <View style={styles.reviewRatings}>
                           <View style={styles.ratingItem}>
-                            <Text style={styles.ratingLabel}>Access:</Text>
+                            <Text style={styles.ratingLabel}>Safety:</Text>
+                            <Text
+                              style={[
+                                styles.ratingValue,
+                                { color: getRatingColor(review.safety_rating) },
+                              ]}
+                            >
+                              {review.safety_rating}/5
+                            </Text>
+                          </View>
+                          <View style={styles.ratingItem}>
+                            <Text style={styles.ratingLabel}>Comfort:</Text>
                             <Text
                               style={[
                                 styles.ratingValue,
                                 {
-                                  color: getRatingColor(
-                                    review.accessibility_rating
-                                  ),
+                                  color: getRatingColor(review.comfort_rating),
                                 },
                               ]}
                             >
-                              {review.accessibility_rating}/5
+                              {review.comfort_rating}/5
                             </Text>
                           </View>
-                        )}
-                      </View>
+                          {review.accessibility_rating && (
+                            <View style={styles.ratingItem}>
+                              <Text style={styles.ratingLabel}>Access:</Text>
+                              <Text
+                                style={[
+                                  styles.ratingValue,
+                                  {
+                                    color: getRatingColor(
+                                      review.accessibility_rating
+                                    ),
+                                  },
+                                ]}
+                              >
+                                {review.accessibility_rating}/5
+                              </Text>
+                            </View>
+                          )}
+                        </View>
 
-                      <Text style={styles.reviewDate}>
-                        {new Date(review.created_at).toLocaleDateString()}
-                      </Text>
-                    </View>
-                  ))
-                ) : (
-                  <Text style={styles.noReviewsText}>
-                    No reviews yet. Be the first to review this location!
-                  </Text>
-                )}
-              </View>
+                        <Text style={styles.reviewDate}>
+                          {new Date(review.created_at).toLocaleDateString()}
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.noReviewsText}>
+                      No reviews yet. Be the first to review this location!
+                    </Text>
+                  )}
+                </View>
+              )}
             </ScrollView>
           ) : null}
         </View>
