@@ -235,7 +235,7 @@ export default function ProfileScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Demographics</Text>
             <TouchableOpacity onPress={handleEditProfile}>
-              <Text style={styles.editText}>Edit</Text>
+              <Text style={styles.editText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
           {profile ? (
@@ -245,23 +245,25 @@ export default function ProfileScreen() {
               style={styles.setupButton}
               onPress={() => router.push("/onboarding")}
             >
-              <Text style={styles.setupButtonText}>Set up profile</Text>
+              <Text style={styles.setupButtonText}>Set Up Profile</Text>
             </TouchableOpacity>
           )}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings</Text>
-          <TouchableOpacity style={styles.menuItem}>
-            <MaterialIcons name="notifications" size={24} color="#333" />
-            <Text style={styles.menuText}>Notifications</Text>
-            <MaterialIcons name="chevron-right" size={24} color="#999" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem}>
-            <MaterialIcons name="privacy-tip" size={24} color="#333" />
-            <Text style={styles.menuText}>Privacy</Text>
-            <MaterialIcons name="chevron-right" size={24} color="#999" />
-          </TouchableOpacity>
+          <View style={styles.sectionHeaderSettings}>
+            <Text style={styles.sectionTitle}>Settings</Text>
+            <TouchableOpacity style={styles.menuItem}>
+              <MaterialIcons name="notifications" size={24} color="#333" />
+              <Text style={styles.menuText}>Notifications</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#999" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem}>
+              <MaterialIcons name="privacy-tip" size={24} color="#333" />
+              <Text style={styles.menuText}>Privacy</Text>
+              <MaterialIcons name="chevron-right" size={24} color="#999" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -344,15 +346,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: theme.spacing.md,
   },
+  sectionHeaderSettings: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+    paddingBottom: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
   },
-  editText: {
-    fontSize: 14,
+  editProfile: {
+    fontSize: 18,
     color: theme.colors.primary,
-    fontWeight: "500",
+    fontWeight: "600",
+  },
+  editText: {
+    fontSize: 18,
+    color: theme.colors.primary,
+    fontWeight: "600",
   },
   demographicsCard: {
     marginHorizontal: 20,

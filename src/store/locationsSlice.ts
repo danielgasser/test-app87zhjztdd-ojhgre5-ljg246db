@@ -29,6 +29,7 @@ async function getAuthToken(): Promise<string> {
   }
   return session.access_token;
 }
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 interface SearchLocation {
   id: string;
   name: string;
@@ -125,6 +126,7 @@ interface RouteSafetyAnalysis {
   risk_factors?: string[];
 }
 
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 export interface SafeRoute {
   id: string;
   name: string;
@@ -484,6 +486,7 @@ export const searchLocations = createAsyncThunk(
 
                 name = locality?.long_name || adminArea?.long_name || country?.long_name || name;
               }
+              // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
               searchResults.push({
                 id: result.place_id,
                 name: result.address_components?.[0]?.long_name || result.formatted_address.split(',')[0],
@@ -1037,6 +1040,7 @@ function decodePolyline(encoded: string): [number, number][] {
 
   return coordinates;
 }
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
 export const generateSafeRoute = createAsyncThunk(
   'locations/generateSafeRoute',
@@ -1100,6 +1104,7 @@ export const generateSafeRoute = createAsyncThunk(
     }
   }
 );
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
 export const generateRouteAlternatives = createAsyncThunk(
   'locations/generateRouteAlternatives',

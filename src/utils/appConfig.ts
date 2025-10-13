@@ -150,23 +150,6 @@ export const APP_CONFIG = {
     MIN_CONFIDENCE_FOR_RECOMMENDATIONS: 0.6,        // Minimum confidence to make route suggestions
     MAX_UNSAFE_SEGMENT_PERCENTAGE: 30,              // Max % of unsafe segments before recommending alternative
 
-    // Mapbox Directions API Settings
-    MAPBOX: {
-      BASE_URL: 'https://api.mapbox.com/directions/v5',
-      PROFILES: {
-        DRIVING: 'mapbox/driving',                   // Standard driving profile
-        DRIVING_TRAFFIC: 'mapbox/driving-traffic',   // Driving with real-time traffic
-        WALKING: 'mapbox/walking',                   // Walking profile
-        CYCLING: 'mapbox/cycling',                   // Cycling profile
-      },
-      DEFAULT_PROFILE: 'mapbox/driving-traffic',     // Default routing profile
-      MAX_WAYPOINTS: 25,                             // Maximum waypoints per request
-      GEOMETRIES: 'geojson',                         // Response geometry format
-      OVERVIEW: 'full',                              // Include full route geometry
-      STEPS: true,                                   // Include turn-by-turn instructions
-      ALTERNATIVES: true,                            // Request alternative routes
-    },
-
     // Performance & Caching
     ROUTE_CACHE_TTL_MINUTES: 15,                     // Cache route calculations for 15 minutes
     MAX_CONCURRENT_ROUTE_REQUESTS: 3,                // Limit concurrent external API requests

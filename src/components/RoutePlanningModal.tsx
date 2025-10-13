@@ -30,6 +30,8 @@ interface RoutePlanningModalProps {
   onClose: () => void;
 }
 
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
+
 interface LocationResult {
   id: string;
   name: string;
@@ -64,6 +66,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Location state
   const [fromLocation, setFromLocation] = useState<LocationResult | null>(null);
   const [toLocation, setToLocation] = useState<LocationResult | null>(null);
+  // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
   // Search state
   const [activeInput, setActiveInput] = useState<"from" | "to" | null>(null);
@@ -152,6 +155,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               country?.long_name ||
               name;
           }
+          // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
           return {
             id: `google_${result.place_id}`,
@@ -193,6 +197,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         })
       );
 
+      // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
       // Search Mapbox
       const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
@@ -327,6 +332,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     dispatch(updateRoutePreferences({ safetyPriority: priority }));
   };
 
+  // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
   // Get combined search results
   const allResults: LocationResult[] = [
     ...searchResults.map((result) => ({

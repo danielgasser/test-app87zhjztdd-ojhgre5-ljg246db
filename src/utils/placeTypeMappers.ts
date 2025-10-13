@@ -1,34 +1,35 @@
-export type DatabasePlaceType = 
-  'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' | 
-  'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' | 
-  'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' | 
-  'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' | 
-  'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' | 
-  'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' | 
-  'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' | 
-  'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' | 
-  'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' | 
-  'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' | 
-  'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' | 
-  'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' | 
-  'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' | 
-  'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' | 
-  'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' | 
-  'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' | 
-  'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' | 
-  'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' | 
-  'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' | 
+export type DatabasePlaceType =
+  'accounting' | 'airport' | 'amusement_park' | 'aquarium' | 'art_gallery' | 'atm' |
+  'bakery' | 'bank' | 'bar' | 'beauty_salon' | 'bicycle_store' | 'book_store' |
+  'bowling_alley' | 'bus_station' | 'cafe' | 'campground' | 'car_dealer' | 'car_rental' |
+  'car_repair' | 'car_wash' | 'casino' | 'cemetery' | 'church' | 'city_hall' |
+  'clothing_store' | 'convenience_store' | 'courthouse' | 'dentist' | 'department_store' |
+  'doctor' | 'drugstore' | 'electrician' | 'electronics_store' | 'embassy' |
+  'fire_station' | 'florist' | 'funeral_home' | 'furniture_store' | 'gas_station' |
+  'gym' | 'hair_care' | 'hardware_store' | 'hindu_temple' | 'home_goods_store' |
+  'hospital' | 'insurance_agency' | 'jewelry_store' | 'laundry' | 'lawyer' | 'library' |
+  'light_rail_station' | 'liquor_store' | 'local_government_office' | 'locksmith' |
+  'lodging' | 'meal_delivery' | 'meal_takeaway' | 'mosque' | 'movie_rental' |
+  'movie_theater' | 'moving_company' | 'museum' | 'night_club' | 'painter' | 'park' |
+  'parking' | 'pet_store' | 'pharmacy' | 'physiotherapist' | 'plumber' | 'police' |
+  'post_office' | 'primary_school' | 'real_estate_agency' | 'restaurant' |
+  'roofing_contractor' | 'rv_park' | 'school' | 'secondary_school' | 'shoe_store' |
+  'shopping_mall' | 'spa' | 'stadium' | 'storage' | 'store' | 'subway_station' |
+  'supermarket' | 'synagogue' | 'taxi_stand' | 'tourist_attraction' | 'train_station' |
+  'transit_station' | 'travel_agency' | 'university' | 'veterinary_care' | 'zoo' |
+  'address' | 'neighborhood' | 'locality' | 'region' | 'district' | 'postcode' |
   'country' | 'poi' | 'place' | 'other';
 
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
 export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
   if (!mapboxType) return 'other';
-  
+
   const type = mapboxType.toLowerCase();
-  
+
   const mapboxMappings: { [key: string]: DatabasePlaceType } = {
     'address': 'address',
-    'neighborhood': 'neighborhood', 
+    'neighborhood': 'neighborhood',
     'locality': 'locality',
     'place': 'place',
     'region': 'region',
@@ -36,7 +37,7 @@ export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
     'postcode': 'postcode',
     'country': 'country',
     'poi': 'poi',
-    
+
     'restaurant': 'restaurant',
     'cafe': 'cafe',
     'bar': 'bar',
@@ -61,7 +62,7 @@ export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
     'synagogue': 'synagogue',
     'university': 'university',
   };
-  
+
   return mapboxMappings[type] || 'other';
 }
 
@@ -71,53 +72,53 @@ export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
  */
 export function mapGooglePlaceType(googleTypes?: string[]): DatabasePlaceType {
   if (!googleTypes || googleTypes.length === 0) return 'other';
-  
+
   // Google Places can return multiple types, we want the most specific one
   // Order by specificity (most specific first)
   const priorityOrder: DatabasePlaceType[] = [
     'restaurant', 'bar', 'cafe', 'bakery', 'meal_delivery', 'meal_takeaway',
-    
+
     'lodging', 'campground', 'rv_park',
-    
-    'gas_station', 'airport', 'train_station', 'bus_station', 'subway_station', 
+
+    'gas_station', 'airport', 'train_station', 'bus_station', 'subway_station',
     'light_rail_station', 'transit_station', 'taxi_stand',
-    
+
     'night_club', 'casino', 'movie_theater', 'amusement_park', 'bowling_alley',
-    
-    'supermarket', 'convenience_store', 'shopping_mall', 
+
+    'supermarket', 'convenience_store', 'shopping_mall',
     'department_store', 'clothing_store', 'shoe_store', 'electronics_store',
     'jewelry_store', 'book_store', 'bicycle_store', 'furniture_store',
     'hardware_store', 'home_goods_store', 'pet_store', 'store',
-    
+
     'hospital', 'doctor', 'dentist', 'pharmacy', 'drugstore', 'veterinary_care',
     'physiotherapist', 'beauty_salon', 'hair_care', 'spa', 'gym',
-    
+
     'bank', 'atm', 'lawyer', 'accounting', 'insurance_agency', 'real_estate_agency',
     'travel_agency',
-    
-    'city_hall', 'courthouse', 'police', 'fire_station', 'post_office', 
+
+    'city_hall', 'courthouse', 'police', 'fire_station', 'post_office',
     'embassy', 'local_government_office',
-    
+
     'school', 'primary_school', 'secondary_school', 'university', 'library',
-    
+
     'church', 'mosque', 'synagogue', 'hindu_temple',
-    
+
     'park', 'tourist_attraction', 'museum', 'art_gallery', 'zoo', 'aquarium',
     'stadium',
-    
+
     'car_dealer', 'car_rental', 'car_repair', 'car_wash', 'moving_company',
     'storage', 'laundry', 'locksmith', 'electrician', 'plumber', 'painter',
     'roofing_contractor', 'florist', 'funeral_home',
-    
+
     'parking', 'other'
   ];
-  
+
   for (const priorityType of priorityOrder) {
     if (googleTypes.includes(priorityType)) {
       return priorityType;
     }
   }
-  
+
   const firstType = googleTypes[0] as DatabasePlaceType;
   const allValidTypes: DatabasePlaceType[] = [
     'accounting', 'airport', 'amusement_park', 'aquarium', 'art_gallery', 'atm',
@@ -141,7 +142,7 @@ export function mapGooglePlaceType(googleTypes?: string[]): DatabasePlaceType {
     'address', 'neighborhood', 'locality', 'region', 'district', 'postcode',
     'country', 'poi', 'place', 'other'
   ];
-  
+
   return allValidTypes.includes(firstType) ? firstType : 'other';
 }
 
@@ -257,6 +258,6 @@ export function getPlaceTypeDisplayName(placeType: DatabasePlaceType): string {
     'place': 'Place',
     'other': 'Other'
   };
-  
+
   return displayNames[placeType] || 'Other';
 }

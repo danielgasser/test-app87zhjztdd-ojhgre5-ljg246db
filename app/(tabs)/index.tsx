@@ -57,6 +57,7 @@ const getMarkerColor = (rating: number | string | null) => {
     return APP_CONFIG.MAP_MARKERS.COLOR_MIXED;
   return APP_CONFIG.MAP_MARKERS.COLOR_UNSAFE;
 };
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
 interface SearchResult {
   id: string;
@@ -239,6 +240,7 @@ export default function MapScreen() {
     if (!requireAuth(userId, "add marker")) return;
 
     const { latitude, longitude } = event.nativeEvent.coordinate;
+    // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
     // Set as search marker (same UX as search results)
     const newMarker = {

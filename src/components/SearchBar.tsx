@@ -16,6 +16,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { searchLocations } from "src/store/locationsSlice";
 
+// NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
+
 interface SearchResult {
   id: string;
   name: string;
@@ -41,6 +43,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const { searchResults, searchLoading, userCountry } = useAppSelector(
     (state) => state.locations
   );
+  // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
   const [searchText, setSearchText] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -101,6 +104,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               country?.long_name ||
               name;
           }
+          // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
           return {
             id: `google_${result.place_id}`,
@@ -142,6 +146,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           longitude: userLocation?.longitude,
         })
       );
+      // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
       const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
@@ -162,6 +167,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     setShowResults(false);
   };
 
+  // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
   // Combine results: database results first, then Mapbox results
   // Ensure all results have a source property
   const dbResultsWithSource = searchResults.map((result) => ({
