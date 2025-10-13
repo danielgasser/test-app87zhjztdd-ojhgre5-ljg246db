@@ -133,6 +133,7 @@ export default function ReviewScreen() {
     }
 
     let finalLocationId = currentLocationId;
+    // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
     try {
       // If this is a new location, create it first
