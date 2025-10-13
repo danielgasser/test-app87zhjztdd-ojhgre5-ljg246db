@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { searchLocations } from "src/store/locationsSlice";
+import { googlePlacesService } from "@/services/googlePlaces";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -50,81 +51,29 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [mapboxResults, setMapboxResults] = useState<SearchResult[]>([]);
 
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
-    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    if (!googleApiKey) {
-      console.warn(
-        "Google Maps API key not found - using database search only"
-      );
-      return [];
-    }
-
     try {
       const country = userCountry || "us";
-      let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-        query
-      )}&key=${googleApiKey}&region=${country}&components=country:${country}`;
 
-      if (userLocation) {
-        url += `&location=${userLocation.latitude},${userLocation.longitude}`;
-      }
+      const results = await googlePlacesService.autocomplete({
+        query,
+        latitude: userLocation?.latitude,
+        longitude: userLocation?.longitude,
+        radius: 50000, // 50km radius for location bias
+        components: `country:${country}`,
+      });
 
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`Google Maps API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-        throw new Error(`Google Maps API status: ${data.status}`);
-      }
-
-      if (data.results && data.results.length > 0) {
-        return data.results.slice(0, 5).map((result: any) => {
-          // Better name extraction logic
-          let name = result.formatted_address.split(",")[0];
-
-          const addressComponents = result.address_components;
-          if (addressComponents && addressComponents.length > 0) {
-            const locality = addressComponents.find((c: any) =>
-              c.types.includes("locality")
-            );
-            const adminArea = addressComponents.find((c: any) =>
-              c.types.includes("administrative_area_level_1")
-            );
-            const country = addressComponents.find((c: any) =>
-              c.types.includes("country")
-            );
-
-            name =
-              locality?.long_name ||
-              adminArea?.long_name ||
-              country?.long_name ||
-              name;
-          }
-          // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
-
-          return {
-            id: `google_${result.place_id}`,
-            name: name,
-            address: result.formatted_address,
-            latitude: result.geometry.location.lat,
-            longitude: result.geometry.location.lng,
-            place_type: result.types?.[0] || "location",
-            source: "mapbox" as const,
-          };
-        });
-      }
-
-      return [];
+      return results.slice(0, 5).map((result) => ({
+        id: `google_${result.place_id}`,
+        name: result.structured_formatting.main_text,
+        address:
+          result.structured_formatting.secondary_text || result.description,
+        latitude: 0, // Will be fetched when user selects
+        longitude: 0, // Will be fetched when user selects
+        place_type: result.types[0] || "location",
+        source: "mapbox" as const, // NOTE: Legacy naming, actually Google Places
+      }));
     } catch (error) {
-      console.error("Google Maps search error:", error);
-      Alert.alert(
-        "Search Error",
-        "Unable to search locations. Please check your internet connection."
-      );
+      console.error("Google Places search error:", error);
       return [];
     }
   };
@@ -154,11 +103,47 @@ const SearchBar: React.FC<SearchBarProps> = ({
     [dispatch, userLocation]
   );
 
-  const handleSelectLocation = (location: SearchResult) => {
+  const handleSelectLocation = async (location: SearchResult) => {
     setSearchText(location.name);
     setShowResults(false);
-    onLocationSelect(location);
-    onSearchToggle?.(false);
+
+    // If location already has coordinates (database result), use it directly
+    if (location.latitude !== 0 && location.longitude !== 0) {
+      onLocationSelect(location);
+      onSearchToggle?.(false);
+      return;
+    }
+
+    // Google Places result - fetch full details
+    try {
+      const details = await googlePlacesService.getDetails({
+        place_id: location.id.replace("google_", ""),
+        fields: ["place_id", "name", "formatted_address", "geometry", "types"],
+      });
+
+      if (details) {
+        const completeLocation: SearchResult = {
+          id: details.place_id,
+          name: details.name,
+          address: details.formatted_address,
+          latitude: details.geometry.location.lat,
+          longitude: details.geometry.location.lng,
+          place_type: details.types[0] || "location",
+          source: "mapbox" as const,
+        };
+
+        onLocationSelect(completeLocation);
+        onSearchToggle?.(false);
+      } else {
+        Alert.alert(
+          "Error",
+          "Unable to get location details. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching place details:", error);
+      Alert.alert("Error", "Unable to get location details. Please try again.");
+    }
   };
 
   const handleClear = () => {

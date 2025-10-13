@@ -531,8 +531,7 @@ export const createLocationFromSearch = createAsyncThunk(
       coordinates: `POINT(${searchLocation.longitude} ${searchLocation.latitude})`,
       place_type: mappedPlaceType,
       tags: null,
-      google_place_id: null,
-      created_by: userId,
+      google_place_id: searchLocation.id.startsWith('google_') ? searchLocation.id.replace('google_', '') : null, created_by: userId,
       verified: false,
       active: true,
     };

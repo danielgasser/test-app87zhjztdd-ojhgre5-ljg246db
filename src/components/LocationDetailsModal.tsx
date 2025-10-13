@@ -15,6 +15,7 @@ import { fetchLocationDetails } from "src/store/locationsSlice";
 import { supabase } from "src/services/supabase";
 import { ReviewWithUser } from "src/types/supabase";
 import PredictionBadge from "./PredictionBadge";
+import { googlePlacesService, PlaceDetails } from "@/services/googlePlaces";
 
 interface LocationDetailsModalProps {
   visible: boolean;
@@ -35,6 +36,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const currentUser = useAppSelector((state) => state.auth.user);
   const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [placeDetails, setPlaceDetails] = useState<PlaceDetails | null>(null);
   const mlPredictions = useAppSelector(
     (state) => state.locations.mlPredictions
   );
@@ -48,6 +50,12 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       fetchReviews();
     }
   }, [locationId, visible]);
+
+  useEffect(() => {
+    if (selectedLocation && visible) {
+      fetchPlaceDetails();
+    }
+  }, [selectedLocation, visible]);
 
   const fetchReviews = async () => {
     if (!locationId) return;
@@ -84,6 +92,31 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       console.error("Error fetching reviews:", error);
     } finally {
       setLoadingReviews(false);
+    }
+  };
+
+  const fetchPlaceDetails = async () => {
+    if (!selectedLocation?.google_place_id) return;
+
+    try {
+      const details = await googlePlacesService.getDetails({
+        place_id: selectedLocation.google_place_id,
+        fields: [
+          "name",
+          "formatted_phone_number",
+          "website",
+          "opening_hours",
+          "rating",
+          "user_ratings_total",
+        ],
+        clearSession: false, // Don't clear session for background fetches
+      });
+
+      if (details) {
+        setPlaceDetails(details);
+      }
+    } catch (error) {
+      console.error("Error fetching place details:", error);
     }
   };
 
@@ -181,6 +214,59 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   {selectedLocation.address}
                 </Text>
                 <Text style={styles.locationType}>
+                  {/* Place Details from Google */}
+                  {placeDetails?.opening_hours && (
+                    <View style={{ marginTop: 12 }}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <Ionicons
+                          name={
+                            placeDetails.opening_hours.open_now
+                              ? "time"
+                              : "close-circle"
+                          }
+                          size={16}
+                          color={
+                            placeDetails.opening_hours.open_now
+                              ? "#4CAF50"
+                              : "#F44336"
+                          }
+                        />
+                        <Text
+                          style={{
+                            marginLeft: 6,
+                            fontSize: 14,
+                            fontWeight: "600",
+                            color: placeDetails.opening_hours.open_now
+                              ? "#4CAF50"
+                              : "#F44336",
+                          }}
+                        >
+                          {placeDetails.opening_hours.open_now
+                            ? "Open Now"
+                            : "Closed"}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  {placeDetails?.formatted_phone_number && (
+                    <Text style={{ fontSize: 14, color: "#666", marginTop: 4 }}>
+                      📞 {placeDetails.formatted_phone_number}
+                    </Text>
+                  )}
+                  {placeDetails?.website && (
+                    <Text
+                      style={{ fontSize: 14, color: "#2196F3", marginTop: 4 }}
+                      numberOfLines={1}
+                    >
+                      🌐 {placeDetails.website}
+                    </Text>
+                  )}
                   {(selectedLocation.place_type || "unknown")
                     .charAt(0)
                     .toUpperCase() +
