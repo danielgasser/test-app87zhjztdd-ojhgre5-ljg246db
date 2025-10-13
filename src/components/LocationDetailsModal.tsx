@@ -20,12 +20,14 @@ import { googlePlacesService, PlaceDetails } from "@/services/googlePlaces";
 interface LocationDetailsModalProps {
   visible: boolean;
   locationId: string | null;
+  googlePlaceId?: string | null;
   onClose: () => void;
 }
 
 const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   visible,
   locationId,
+  googlePlaceId,
   onClose,
 }) => {
   const router = useRouter();
@@ -55,7 +57,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     if (selectedLocation && visible) {
       fetchPlaceDetails();
     }
-  }, [selectedLocation, visible]);
+  }, [selectedLocation, googlePlaceId, visible]);
 
   const fetchReviews = async () => {
     if (!locationId) return;
@@ -96,23 +98,31 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   };
 
   const fetchPlaceDetails = async () => {
-    if (!selectedLocation?.google_place_id) return;
+    // Use googlePlaceId prop if available, otherwise try from selectedLocation
+    const placeIdToFetch = googlePlaceId || selectedLocation?.google_place_id;
+
+    if (!placeIdToFetch) {
+      console.log("No Google Place ID available");
+      return;
+    }
 
     try {
+      console.log("Fetching Google Place details for:", placeIdToFetch);
       const details = await googlePlacesService.getDetails({
-        place_id: selectedLocation.google_place_id,
+        place_id: placeIdToFetch,
         fields: [
+          "place_id",
           "name",
+          "formatted_address",
+          "opening_hours",
           "formatted_phone_number",
           "website",
-          "opening_hours",
-          "rating",
-          "user_ratings_total",
+          "types",
         ],
-        clearSession: false, // Don't clear session for background fetches
       });
 
       if (details) {
+        console.log("Google Place details fetched:", details);
         setPlaceDetails(details);
       }
     } catch (error) {
@@ -214,66 +224,69 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   {selectedLocation.address}
                 </Text>
                 <Text style={styles.locationType}>
-                  {/* Place Details from Google */}
-                  {placeDetails?.opening_hours && (
-                    <View style={{ marginTop: 12 }}>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginBottom: 4,
-                        }}
-                      >
-                        <Ionicons
-                          name={
-                            placeDetails.opening_hours.open_now
-                              ? "time"
-                              : "close-circle"
-                          }
-                          size={16}
-                          color={
-                            placeDetails.opening_hours.open_now
-                              ? "#4CAF50"
-                              : "#F44336"
-                          }
-                        />
-                        <Text
-                          style={{
-                            marginLeft: 6,
-                            fontSize: 14,
-                            fontWeight: "600",
-                            color: placeDetails.opening_hours.open_now
-                              ? "#4CAF50"
-                              : "#F44336",
-                          }}
-                        >
-                          {placeDetails.opening_hours.open_now
-                            ? "Open Now"
-                            : "Closed"}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                  {placeDetails?.formatted_phone_number && (
-                    <Text style={{ fontSize: 14, color: "#666", marginTop: 4 }}>
-                      📞 {placeDetails.formatted_phone_number}
-                    </Text>
-                  )}
-                  {placeDetails?.website && (
-                    <Text
-                      style={{ fontSize: 14, color: "#2196F3", marginTop: 4 }}
-                      numberOfLines={1}
-                    >
-                      🌐 {placeDetails.website}
-                    </Text>
-                  )}
                   {(selectedLocation.place_type || "unknown")
                     .charAt(0)
                     .toUpperCase() +
                     (selectedLocation.place_type || "unknown")
                       .slice(1)
-                      .replace("_", " ")}{" "}
+                      .replace("_", " ")}
                 </Text>
+
+                {/* Place Details from Google */}
+                {placeDetails?.opening_hours && (
+                  <View style={{ marginTop: 12 }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 4,
+                      }}
+                    >
+                      <Ionicons
+                        name={
+                          placeDetails.opening_hours.open_now
+                            ? "time"
+                            : "close-circle"
+                        }
+                        size={16}
+                        color={
+                          placeDetails.opening_hours.open_now
+                            ? "#4CAF50"
+                            : "#F44336"
+                        }
+                      />
+                      <Text
+                        style={{
+                          marginLeft: 6,
+                          fontSize: 14,
+                          fontWeight: "600",
+                          color: placeDetails.opening_hours.open_now
+                            ? "#4CAF50"
+                            : "#F44336",
+                        }}
+                      >
+                        {placeDetails.opening_hours.open_now
+                          ? "Open Now"
+                          : "Closed"}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {placeDetails?.formatted_phone_number && (
+                  <Text style={{ fontSize: 14, color: "#666", marginTop: 4 }}>
+                    📞 {placeDetails.formatted_phone_number}
+                  </Text>
+                )}
+
+                {placeDetails?.website && (
+                  <Text
+                    style={{ fontSize: 14, color: "#2196F3", marginTop: 4 }}
+                    numberOfLines={1}
+                  >
+                    🌐 {placeDetails.website}
+                  </Text>
+                )}
 
                 {/* Overall Safety Score */}
                 {selectedLocation.overall_safety_score && (
