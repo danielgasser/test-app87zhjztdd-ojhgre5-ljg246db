@@ -391,6 +391,7 @@ export default function MapScreen() {
     }
 
     dispatch(startNavigation());
+    setShowRoutePlanning(false);
   };
 
   const handleExitNavigation = () => {
