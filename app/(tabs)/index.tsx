@@ -862,7 +862,7 @@ export default function MapScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-      {selectedRoute && (
+      {selectedRoute && !navigationActive && (
         <View
           style={{
             flexDirection: "row",
@@ -1019,7 +1019,7 @@ export default function MapScreen() {
           />
         </View>
       )}
-      {selectedRoute && (
+      {selectedRoute && !navigationActive && (
         <View style={styles.routeInfoPanel}>
           <View style={styles.routeInfoHeader}>
             <Text style={styles.routeInfoTitle}>{selectedRoute.name}</Text>
@@ -1078,10 +1078,6 @@ export default function MapScreen() {
         locationId={selectedLocationId}
         googlePlaceId={selectedGooglePlaceId}
         onClose={handleModalClose}
-      />
-      <RoutePlanningModal
-        visible={showRoutePlanningModal}
-        onClose={() => setShowRoutePlanningModal(false)}
       />
       {/* Navigation Mode - ADD THIS */}
       {navigationActive && (
