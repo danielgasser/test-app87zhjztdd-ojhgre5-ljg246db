@@ -60,6 +60,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     searchLoading,
     userLocation,
     userCountry,
+    navigationActive,
   } = useAppSelector((state) => state.locations);
 
   const currentUser = useAppSelector((state) => state.auth.user);
