@@ -8,14 +8,14 @@ import {
   CreateLocationForm,
   Coordinates,
   DangerZone,
-  DangerZonesResponse
+  DangerZonesResponse,
+  SafetyInsight
 } from '../types/supabase';
 import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { APP_CONFIG } from '@/utils/appConfig';
 import { ReactNode } from 'react';
-
 type Review = Database['public']['Tables']['reviews']['Row'];
 // ================================
 // INTERFACES AND TYPES
@@ -174,6 +174,8 @@ interface LocationsState {
   communityLoading: boolean;
   trendingLocations: any[];
   trendingLoading: boolean;
+  safetyInsights: SafetyInsight[],
+  safetyInsightsLoading: boolean,
   dangerZones: DangerZone[];
   dangerZonesVisible: boolean;
   dangerZonesLoading: boolean;
@@ -270,6 +272,8 @@ const initialState: LocationsState = {
   communityLoading: false,
   trendingLocations: [],
   trendingLoading: false,
+  safetyInsights: [] as SafetyInsight[],
+  safetyInsightsLoading: false,
   dangerZones: [],
   dangerZonesVisible: false,
   dangerZonesLoading: false,
@@ -346,6 +350,40 @@ export const fetchLocationDetails = createAsyncThunk(
     }
 
     return Array.isArray(data) && data.length > 0 ? data[0] : data;
+  }
+);
+
+export const fetchSafetyInsights = createAsyncThunk(
+  'locations/fetchSafetyInsights',
+  async ({
+    latitude,
+    longitude,
+    radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+    maxResults = 5
+  }: {
+    latitude?: number;
+    longitude?: number;
+    radius?: number;
+    maxResults?: number;
+  } = {}) => {
+    try {
+      const { data, error } = await (supabase.rpc as any)('get_safety_insights', {
+        user_lat: latitude || null,
+        user_lng: longitude || null,
+        radius_meters: radius,
+        max_results: maxResults,
+      });
+
+      if (error) {
+        console.error('Error fetching safety insights:', error);
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Safety insights fetch error:', error);
+      throw error;
+    }
   }
 );
 
@@ -1468,6 +1506,19 @@ const locationsSlice = createSlice({
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch nearby locations';
+      })
+
+      // Safety Insights
+      .addCase(fetchSafetyInsights.pending, (state) => {
+        state.safetyInsightsLoading = true;
+      })
+      .addCase(fetchSafetyInsights.fulfilled, (state, action) => {
+        state.safetyInsightsLoading = false;
+        state.safetyInsights = action.payload as any;
+      })
+      .addCase(fetchSafetyInsights.rejected, (state, action) => {
+        state.safetyInsightsLoading = false;
+        state.error = action.error.message || 'Failed to fetch safety insights';
       })
 
       // Fetch Location Details

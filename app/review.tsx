@@ -100,7 +100,7 @@ export default function ReviewScreen() {
   const [currentLocationId, setCurrentLocationId] = useState<string | null>(
     isCreatingNew ? null : typedLocationId || null
   );
-
+  const [editableLocationName, setEditableLocationName] = useState("");
   useEffect(() => {
     if (!isCreatingNew && !typedLocationId) {
       Alert.alert("Error", "No location specified");
@@ -124,6 +124,11 @@ export default function ReviewScreen() {
       return;
     }
 
+    if (isCreatingNew && !editableLocationName.trim()) {
+      Alert.alert("Error", "Please enter a name for this location");
+      return;
+    }
+
     if (!formData.content.trim()) {
       Alert.alert("Error", "Please enter review content");
       return;
@@ -143,7 +148,7 @@ export default function ReviewScreen() {
         // Convert parsed data to SearchLocation format
         const searchLocation = {
           id: `temp-${Date.now()}`, // Temporary ID
-          name: parsedLocationData.name,
+          name: editableLocationName.trim(),
           address: parsedLocationData.address,
           latitude: parsedLocationData.latitude,
           longitude: parsedLocationData.longitude,
@@ -278,6 +283,29 @@ export default function ReviewScreen() {
           <Text style={styles.locationName}>{locationName || "Location"}</Text>
         </View>
 
+        {/* Location Name for New Locations */}
+        {isCreatingNew && (
+          <View style={styles.newLocationSection}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>
+                📍 What is this place called?{" "}
+                <Text style={styles.required}>*</Text>
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder='e.g., "Joe&apos;s Pizza" or "Central Park"'
+                value={editableLocationName}
+                onChangeText={setEditableLocationName}
+                maxLength={100}
+                autoCapitalize="words"
+              />
+              <Text style={styles.helperText}>
+                Give this location a name so others can find it
+              </Text>
+            </View>
+          </View>
+        )}
+
         <View style={styles.form}>
           {/* Title */}
           <View style={styles.inputGroup}>
@@ -292,7 +320,6 @@ export default function ReviewScreen() {
               maxLength={100}
             />
           </View>
-
           {/* Ratings */}
           <RatingInput
             label="Overall Experience"
@@ -302,7 +329,6 @@ export default function ReviewScreen() {
             }
             required
           />
-
           <RatingInput
             label="Safety"
             value={formData.safety_rating}
@@ -311,7 +337,6 @@ export default function ReviewScreen() {
             }
             required
           />
-
           <RatingInput
             label="Comfort Level"
             value={formData.comfort_rating}
@@ -320,7 +345,6 @@ export default function ReviewScreen() {
             }
             required
           />
-
           <RatingInput
             label="Accessibility"
             value={formData.accessibility_rating}
@@ -328,7 +352,6 @@ export default function ReviewScreen() {
               setFormData({ ...formData, accessibility_rating: value })
             }
           />
-
           <RatingInput
             label="Service Quality"
             value={formData.service_rating}
@@ -336,7 +359,6 @@ export default function ReviewScreen() {
               setFormData({ ...formData, service_rating: value })
             }
           />
-
           {/* Review Content */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>
@@ -356,7 +378,6 @@ export default function ReviewScreen() {
             />
             <Text style={styles.charCount}>{formData.content.length}/1000</Text>
           </View>
-
           {/* Visit Details */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Visit Date</Text>
@@ -402,7 +423,6 @@ export default function ReviewScreen() {
               <Ionicons name="time" size={20} color="#666" />
             </TouchableOpacity>
           </View>
-
           {showTimePicker && (
             <DateTimePicker
               value={visitDateTime}
@@ -419,7 +439,6 @@ export default function ReviewScreen() {
               }}
             />
           )}
-
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Visit Type</Text>
             <TouchableOpacity
@@ -433,7 +452,6 @@ export default function ReviewScreen() {
               <Ionicons name="chevron-down" size={20} color="#666" />
             </TouchableOpacity>
           </View>
-
           {/* Visit Type Modal */}
           <Modal
             visible={showVisitTypePicker}
@@ -470,7 +488,6 @@ export default function ReviewScreen() {
               </View>
             </TouchableOpacity>
           </Modal>
-
           {/* Demographic Context Note */}
           <View style={styles.noteContainer}>
             <Ionicons name="information-circle" size={20} color="#666" />
@@ -479,7 +496,6 @@ export default function ReviewScreen() {
               others who share similar identities make informed decisions.
             </Text>
           </View>
-
           {/* Submit Button */}
           <TouchableOpacity
             style={[styles.submitButton, loading && styles.disabledButton]}
@@ -536,6 +552,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
+  },
+  newLocationSection: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#4CAF50",
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+    fontStyle: "italic",
   },
   locationInfo: {
     padding: 16,

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,16 +16,16 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchRecentReviews,
   fetchTrendingLocations,
+  fetchSafetyInsights,
   loadCommunityFeedMode,
   saveCommunityFeedMode,
-  fetchLocationDetails,
-  setMapCenter,
   setNavigationIntent,
 } from "src/store/locationsSlice";
 import { theme } from "src/styles/theme";
 import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { router } from "expo-router";
+import type { SafetyInsight } from "@/types/supabase";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -33,6 +34,8 @@ export default function CommunityScreen() {
     communityLoading,
     trendingLocations,
     trendingLoading,
+    safetyInsights,
+    safetyInsightsLoading,
     userLocation,
     mapCenter,
     communityFeedMode,
@@ -49,9 +52,10 @@ export default function CommunityScreen() {
   useEffect(() => {
     const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
 
-    if (!coords) return; // Early exit if no coordinates
+    if (!coords) return;
 
     const fetchData = async () => {
+      console.log("🔍 Fetching data with coords:", coords); // ADD THIS
       try {
         await Promise.all([
           dispatch(
@@ -65,6 +69,15 @@ export default function CommunityScreen() {
             fetchTrendingLocations({
               daysWindow: APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS,
               maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
+            })
+          ).unwrap(),
+          // ADD THIS:
+          dispatch(
+            fetchSafetyInsights({
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+              radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+              maxResults: 5,
             })
           ).unwrap(),
         ]);
@@ -85,6 +98,7 @@ export default function CommunityScreen() {
 
   const loadCommunityData = async () => {
     const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
+    console.log("🔍 Fetching insights with coords:", coords); // ADD THIS
     if (!coords) return;
 
     try {
@@ -102,6 +116,14 @@ export default function CommunityScreen() {
             maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
           })
         ).unwrap(),
+        dispatch(
+          fetchSafetyInsights({
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+            maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
+          })
+        ).unwrap(),
       ]);
     } catch (error) {
       console.error("Error loading community data:", error);
@@ -114,6 +136,17 @@ export default function CommunityScreen() {
     setRefreshing(false);
   };
 
+  const handleInsightPress = (insight: SafetyInsight) => {
+    dispatch(
+      setNavigationIntent({
+        targetTab: "map",
+        locationId: insight.location_id,
+        action: "view_location",
+      })
+    );
+    router.push("/(tabs)");
+  };
+
   const handleToggleMode = async () => {
     const newMode = communityFeedMode === "near_me" ? "map_area" : "near_me";
     await dispatch(saveCommunityFeedMode(newMode)).unwrap();
@@ -123,6 +156,59 @@ export default function CommunityScreen() {
     if (rating >= 4) return theme.colors.safeGreen;
     if (rating >= 3) return theme.colors.mixedYellow;
     return theme.colors.unsafeRed;
+  };
+
+  const renderSafetyInsight = (insight: SafetyInsight) => {
+    const timeAgo = formatDistanceToNow(new Date(insight.created_at), {
+      addSuffix: true,
+    });
+
+    const getSeverityColor = () => {
+      switch (insight.severity) {
+        case "high":
+          return "#FF6B6B";
+        case "medium":
+          return "#FFA500";
+        case "low":
+          return "#4CAF50";
+        default:
+          return "#666";
+      }
+    };
+
+    const getSeverityBg = () => {
+      switch (insight.severity) {
+        case "high":
+          return "#FFF5F5";
+        case "medium":
+          return "#FFF8E6";
+        case "low":
+          return "#F0F8F5";
+        default:
+          return "#F5F5F5";
+      }
+    };
+
+    return (
+      <TouchableOpacity
+        key={`${insight.insight_type}-${insight.location_id}`}
+        style={[
+          styles.insightCard,
+          { backgroundColor: getSeverityBg(), borderColor: getSeverityColor() },
+        ]}
+        onPress={() => handleInsightPress(insight)}
+      >
+        <View style={styles.insightContent}>
+          <Text style={[styles.insightMessage, { color: getSeverityColor() }]}>
+            {insight.message}
+          </Text>
+          <Text style={styles.insightAddress} numberOfLines={1}>
+            {insight.location_address}
+          </Text>
+          <Text style={styles.insightTime}>{timeAgo}</Text>
+        </View>
+      </TouchableOpacity>
+    );
   };
 
   const renderReviewItem = (review: any) => {
@@ -355,24 +441,42 @@ export default function CommunityScreen() {
         {/* Safety Updates Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Safety Updates</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
+            <Text style={styles.sectionTitle}>Safety Insights</Text>
+            {safetyInsights.length > 0 && (
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert("Coming Soon", "Full insights view coming soon!")
+                }
+              >
+                <Text style={styles.seeAllText}>See all</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          {renderSafetyUpdateItem()}
-          <Text style={styles.comingSoonText}>
-            More safety updates coming soon...
-          </Text>
+          {safetyInsightsLoading ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : safetyInsights.length > 0 ? (
+            safetyInsights.map(renderSafetyInsight)
+          ) : (
+            <Text style={styles.emptyText}>No safety alerts at this time</Text>
+          )}
         </View>
 
         {/* Trending Locations Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Trending This Week</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
+            <Text style={styles.sectionTitle}>
+              Community Awareness This Week
+            </Text>
+            {/* Only show "See all" if there are trending locations */}
+            {trendingLocations.length > 0 && (
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert("Coming Soon", "Full list view coming soon!")
+                }
+              >
+                <Text style={styles.seeAllText}>See all</Text>
+              </TouchableOpacity>
+            )}
           </View>
           {trendingLoading ? (
             <ActivityIndicator size="small" color={theme.colors.primary} />
@@ -387,7 +491,7 @@ export default function CommunityScreen() {
             )
           ) : (
             <Text style={styles.emptyText}>
-              No trending locations yet. Be the first to review!
+              No significant activity this week
             </Text>
           )}
         </View>
@@ -436,6 +540,35 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+  },
+  insightCard: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  insightContent: {
+    flex: 1,
+  },
+  insightMessage: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+  insightAddress: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 4,
+  },
+  insightTime: {
+    fontSize: 12,
+    color: "#999",
   },
   modeToggleContainer: {
     flexDirection: "row",
