@@ -89,7 +89,6 @@ export default function MapScreen() {
     null
   );
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
-  const [showRoutePlanning, setShowRoutePlanning] = useState(false);
   const [routeOrigin, setRouteOrigin] = useState<RouteCoordinate | null>(null);
   const [routeDestination, setRouteDestination] =
     useState<RouteCoordinate | null>(null);
@@ -391,7 +390,7 @@ export default function MapScreen() {
     }
 
     dispatch(startNavigation());
-    setShowRoutePlanning(false);
+    setShowRoutePlanningModal(false);
   };
 
   const handleExitNavigation = () => {
@@ -1068,7 +1067,7 @@ export default function MapScreen() {
 
           <TouchableOpacity
             style={styles.routeDetailsButton}
-            onPress={() => setShowRoutePlanning(true)}
+            onPress={() => setShowRoutePlanningModal(true)}
           >
             <Text style={styles.routeDetailsButtonText}>View Details</Text>
           </TouchableOpacity>
@@ -1081,12 +1080,8 @@ export default function MapScreen() {
         onClose={handleModalClose}
       />
       <RoutePlanningModal
-        visible={showRoutePlanning}
-        onClose={() => setShowRoutePlanning(false)}
-      />
-      <RoutePlanningModal
-        visible={showRoutePlanning}
-        onClose={() => setShowRoutePlanning(false)}
+        visible={showRoutePlanningModal}
+        onClose={() => setShowRoutePlanningModal(false)}
       />
       {/* Navigation Mode - ADD THIS */}
       {navigationActive && (
