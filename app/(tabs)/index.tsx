@@ -218,18 +218,18 @@ export default function MapScreen() {
       }),
     ]).start();
     setControlsCollapsed(true);
-  }, [slideAnimHeatMap]);
+  }, [slideAnimHeatMap, slideAnimDangerZone]);
 
   const expandControls = useCallback(() => {
     Animated.parallel([
       Animated.spring(slideAnimHeatMap, {
-        toValue: 1,
+        toValue: 0,
         useNativeDriver: true,
         tension: 65,
         friction: 8,
       }),
       Animated.spring(slideAnimDangerZone, {
-        toValue: 1,
+        toValue: 0,
         delay: 50, // Slight delay for stagger effect
         useNativeDriver: true,
         tension: 65,
@@ -237,7 +237,7 @@ export default function MapScreen() {
       }),
     ]).start();
     setControlsCollapsed(false);
-  }, [slideAnimHeatMap]);
+  }, [slideAnimHeatMap, slideAnimDangerZone]);
 
   // Swipe gesture handler
   const panResponder = useRef(
@@ -877,96 +877,88 @@ export default function MapScreen() {
           )}
       </MapView>
       {/* Map Controls */}
-      <View {...panResponder.panHandlers} style={styles.mapControls}>
-        <Animated.View
-          {...panResponder.panHandlers}
-          style={[
-            styles.heatMapContainer,
-            {
-              transform: [
-                {
-                  translateX: slideAnimHeatMap.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 120],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={[
-              styles.heatMapToggle,
-              heatMapVisible && styles.heatMapToggleActive,
-            ]}
-            onPress={handleToggleHeatMap}
-            disabled={heatMapLoading}
-          >
-            <Ionicons
-              name={heatMapVisible ? "thermometer" : "thermometer-outline"}
-              size={24}
-              color={heatMapVisible ? "#fff" : "#333"}
-            />
-            {!controlsCollapsed && (
-              <Text
-                style={[
-                  styles.heatMapToggleText,
-                  heatMapVisible && styles.heatMapToggleTextActive,
-                ]}
-              >
-                {heatMapLoading ? "Loading..." : "Heat Map"}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-        <Animated.View
-          {...panResponder.panHandlers}
-          style={[
-            styles.dangerZoneContainer,
-            {
-              transform: [
-                {
-                  translateX: slideAnimDangerZone.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 140],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={[
-              styles.controlButton,
-              dangerZonesVisible && styles.controlButtonActive,
-            ]}
-            onPress={handleToggleDangerZones}
-            disabled={dangerZonesLoading}
-          >
-            <Ionicons
-              name={dangerZonesVisible ? "shield" : "shield-outline"}
-              size={24}
-              color={dangerZonesVisible ? "#fff" : "#333"}
-            />
-            {!controlsCollapsed && (
-              <Text
-                style={[
-                  styles.controlButtonText,
-                  dangerZonesVisible && styles.controlButtonTextActive,
-                ]}
-              >
-                {dangerZonesLoading ? "Loading..." : "Danger Zones"}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-      {controlsCollapsed && (
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[
+          styles.heatMapContainer,
+          {
+            transform: [
+              {
+                translateX: slideAnimHeatMap.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 20],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
         <TouchableOpacity
-          onPress={expandControls}
-          style={styles.swipeBackArea}
-        />
-      )}
+          style={[
+            styles.heatMapToggle,
+            heatMapVisible && styles.heatMapToggleActive,
+          ]}
+          onPress={handleToggleHeatMap}
+          disabled={heatMapLoading}
+        >
+          <Ionicons
+            name={heatMapVisible ? "thermometer" : "thermometer-outline"}
+            size={24}
+            color={heatMapVisible ? "#fff" : "#333"}
+          />
+          {!controlsCollapsed && (
+            <Text
+              style={[
+                styles.heatMapToggleText,
+                heatMapVisible && styles.heatMapToggleTextActive,
+              ]}
+            >
+              {heatMapLoading ? "Loading..." : "Heat Map"}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[
+          styles.dangerZoneContainer,
+          {
+            transform: [
+              {
+                translateX: slideAnimDangerZone.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={[
+            styles.controlButton,
+            dangerZonesVisible && styles.controlButtonActive,
+          ]}
+          onPress={handleToggleDangerZones}
+          disabled={dangerZonesLoading}
+        >
+          <Ionicons
+            name={dangerZonesVisible ? "shield" : "shield-outline"}
+            size={24}
+            color={dangerZonesVisible ? "#fff" : "#333"}
+          />
+          {!controlsCollapsed && (
+            <Text
+              style={[
+                styles.controlButtonText,
+                dangerZonesVisible && styles.controlButtonTextActive,
+              ]}
+            >
+              {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </Animated.View>
       {selectedRoute && !navigationActive && (
         <View
           style={{
@@ -1277,13 +1269,13 @@ const styles = StyleSheet.create({
   },
   heatMapContainer: {
     position: "absolute",
-    bottom: 60,
+    bottom: 80,
     right: 0,
     zIndex: 1000,
   },
   dangerZoneContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: 20,
     right: 0,
     zIndex: 1000,
   },
@@ -1305,15 +1297,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
   },
-  swipeBackArea: {
-    position: "absolute",
-    right: 0,
-    bottom: 120,
-    width: 60, // Wide enough to catch swipe
-    height: 140, // Covers both buttons area
-    backgroundColor: "#ff9900",
-    zIndex: 999,
-  },
+
   heatMapToggle: {
     flexDirection: "row",
     alignItems: "center",
