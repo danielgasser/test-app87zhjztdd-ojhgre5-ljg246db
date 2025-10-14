@@ -463,52 +463,69 @@ export default function MapScreen() {
       }
     }, [dispatch, userLocation, mapReady])
   );
-  // Handle navigation intents from other tabs
-  useEffect(() => {
-    if (navigationIntent && navigationIntent.targetTab === "map") {
-      const handleIntent = async () => {
-        if (
-          navigationIntent.action === "view_location" &&
+
+  // Handle navigation intents from other tabs - using useFocusEffect so it runs when tab is focused
+  useFocusEffect(
+    useCallback(() => {
+      console.log(
+        "🗺️ Map focused, checking for navigation intent:",
+        navigationIntent
+      );
+
+      if (
+        navigationIntent?.targetTab === "map" &&
+        navigationIntent?.locationId
+      ) {
+        console.log(
+          "🎯 Found navigation intent for location:",
           navigationIntent.locationId
-        ) {
+        );
+
+        dispatch(clearNavigationIntent());
+
+        setTimeout(async () => {
           try {
-            // Fetch location details to get coordinates
+            console.log("📍 Fetching location details...");
             const locationDetails = await dispatch(
               fetchLocationDetails(navigationIntent.locationId)
             ).unwrap();
 
-            if (
-              locationDetails &&
-              locationDetails.latitude &&
-              locationDetails.longitude
-            ) {
-              // Center map on location
+            console.log("✅ Location details:", locationDetails);
+
+            const location = Array.isArray(locationDetails)
+              ? locationDetails[0]
+              : locationDetails;
+
+            if (location?.latitude && location?.longitude) {
               const newRegion = {
-                latitude: locationDetails.latitude,
-                longitude: locationDetails.longitude,
+                latitude: location.latitude,
+                longitude: location.longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               };
+
+              console.log("🎬 Animating to region:", newRegion);
               setRegion(newRegion);
-              mapRef.current?.animateToRegion(newRegion, 1000);
 
-              // Open location modal
-              setSelectedLocationId(navigationIntent.locationId);
-              setModalVisible(true);
+              // Wait a bit longer for Redux to update selectedLocation
+              setTimeout(() => {
+                if (mapRef.current) {
+                  mapRef.current.animateToRegion(newRegion, 1000);
+                  console.log("✨ Animation triggered");
+                }
+
+                // Open modal AFTER redux has time to update
+                setSelectedLocationId(navigationIntent.locationId);
+                setModalVisible(true);
+              }, 800); // <- Increased delay
             }
-
-            // Clear the intent after handling
-            dispatch(clearNavigationIntent());
           } catch (error) {
-            console.error("Error handling navigation intent:", error);
-            dispatch(clearNavigationIntent());
+            console.error("❌ Error handling navigation:", error);
           }
-        }
-      };
-
-      handleIntent();
-    }
-  }, [navigationIntent, dispatch]);
+        }, 100);
+      }
+    }, [navigationIntent])
+  );
 
   // ============= CONDITIONAL RENDERS =============
   if (!locationPermission) {

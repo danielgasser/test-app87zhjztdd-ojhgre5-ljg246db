@@ -206,23 +206,40 @@ export default function CommunityScreen() {
     name: string,
     trend: string,
     reviews: number
-  ) => (
-    <TouchableOpacity key={id} style={styles.trendingCard}>
-      <View>
-        <Text style={styles.trendingName}>{name}</Text>
-        <Text style={styles.trendingStats}>{reviews} reviews this week</Text>
-      </View>
-      <View style={styles.trendBadge}>
-        <Ionicons
-          name={trend === "up" ? "trending-up" : "trending-down"}
-          size={20}
-          color={
-            trend === "up" ? theme.colors.safeGreen : theme.colors.unsafeRed
-          }
-        />
-      </View>
-    </TouchableOpacity>
-  );
+  ) => {
+    const handleTrendingPress = () => {
+      dispatch(
+        setNavigationIntent({
+          targetTab: "map",
+          locationId: id,
+          action: "view_location",
+        })
+      );
+      router.push("/(tabs)");
+    };
+
+    return (
+      <TouchableOpacity
+        key={id}
+        style={styles.trendingCard}
+        onPress={handleTrendingPress} // <- ADD THIS
+      >
+        <View>
+          <Text style={styles.trendingName}>{name}</Text>
+          <Text style={styles.trendingStats}>{reviews} reviews this week</Text>
+        </View>
+        <View style={styles.trendBadge}>
+          <Ionicons
+            name={trend === "up" ? "trending-up" : "trending-down"}
+            size={20}
+            color={
+              trend === "up" ? theme.colors.safeGreen : theme.colors.unsafeRed
+            }
+          />
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (communityLoading && communityReviews.length === 0) {
     return (
