@@ -412,9 +412,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      visible={visible && !navigationActive}
       animationType="slide"
       presentationStyle="pageSheet"
+      onRequestClose={onClose}
     >
       <View style={styles.container}>
         {/* Header */}
