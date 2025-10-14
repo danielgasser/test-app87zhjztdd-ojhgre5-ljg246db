@@ -380,8 +380,6 @@ export default function MapScreen() {
   const handlePoiClick = async (event: any) => {
     const { placeId, name, coordinate } = event.nativeEvent;
 
-    console.log("POI clicked:", { placeId, name, coordinate });
-
     // Check if this place already exists in database
     const { data: existingLocation } = await supabase
       .from("locations")
