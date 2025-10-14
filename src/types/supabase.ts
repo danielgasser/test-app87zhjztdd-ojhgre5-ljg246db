@@ -393,6 +393,17 @@ export interface LocationWithScores extends Location {
     review_count?: number
 }
 
+export interface SafetyInsight {
+    insight_type: 'rating_drop' | 'rating_improve' | 'high_activity' | 'consistently_safe';
+    message: string;
+    location_id: string;
+    location_name: string;
+    location_address: string;
+    severity: 'high' | 'medium' | 'low';
+    created_at: string;
+    change_value: number;
+}
+
 export interface ReviewWithUser extends Review {
     user_profiles?: UserProfile
 }
