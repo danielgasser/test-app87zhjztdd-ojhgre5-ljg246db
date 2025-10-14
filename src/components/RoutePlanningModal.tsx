@@ -74,7 +74,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [activeInput, setActiveInput] = useState<"from" | "to" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
-  const [showNavigation, setShowNavigation] = useState(false);
 
   // Initialize from location with current location
   useEffect(() => {
@@ -162,21 +161,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       Alert.alert("Error", "No route selected for navigation");
       return;
     }
+    dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
 
     // Dispatch start navigation action
     dispatch(startNavigation());
-
-    // Show navigation mode
-    setShowNavigation(true);
-
-    // Close the route planning modal
     onClose();
-  };
-
-  // Handle exiting navigation
-  const handleExitNavigation = () => {
-    setShowNavigation(false);
-    dispatch(endNavigation());
   };
 
   useEffect(() => {
@@ -627,7 +616,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           </ScrollView>
         )}
       </View>
-      {showNavigation && <NavigationMode onExit={handleExitNavigation} />}
     </Modal>
   );
 };

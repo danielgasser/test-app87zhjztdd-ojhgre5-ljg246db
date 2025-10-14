@@ -103,8 +103,6 @@ export default function MapScreen() {
     string | null
   >(null);
 
-  const [showNavigation, setShowNavigation] = useState(false);
-
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -116,6 +114,7 @@ export default function MapScreen() {
     loading,
     error,
     userLocation,
+    navigationActive,
     heatMapData,
     heatMapVisible,
     heatMapLoading,
@@ -392,11 +391,9 @@ export default function MapScreen() {
     }
 
     dispatch(startNavigation());
-    setShowNavigation(true);
   };
 
   const handleExitNavigation = () => {
-    setShowNavigation(false);
     dispatch(endNavigation());
   };
 
@@ -577,7 +574,6 @@ export default function MapScreen() {
         onLocationSelect={handleLocationSelected}
         userLocation={userLocation || undefined}
       />
-
       <MapView
         key={mapKey}
         ref={mapRef}
@@ -818,7 +814,6 @@ export default function MapScreen() {
             )
           )}
       </MapView>
-
       {/* Map Controls */}
       <View style={styles.mapControls}>
         <TouchableOpacity
@@ -908,7 +903,6 @@ export default function MapScreen() {
           <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>
         </View>
       )}
-
       {/* Heat Map Legend */}
       {heatMapVisible && (
         <View style={styles.heatMapLegend}>
@@ -935,7 +929,6 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-
       {/* Danger Zones Legend */}
       {dangerZonesVisible && dangerZones.length > 0 && (
         <View style={styles.dangerZoneLegend}>
@@ -965,7 +958,6 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-
       {/* Add Location Button */}
       {searchMarker && (
         <View style={styles.addLocationContainer}>
@@ -1095,9 +1087,10 @@ export default function MapScreen() {
         visible={showRoutePlanning}
         onClose={() => setShowRoutePlanning(false)}
       />
-
       {/* Navigation Mode - ADD THIS */}
-      {showNavigation && <NavigationMode onExit={handleExitNavigation} />}
+      {navigationActive && (
+        <NavigationMode onExit={handleExitNavigation} />
+      )}{" "}
     </View>
   );
 }
