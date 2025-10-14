@@ -240,23 +240,70 @@ export default function MapScreen() {
   }, [slideAnimHeatMap, slideAnimDangerZone]);
 
   // Swipe gesture handler
-  const panResponder = useRef(
+  const panResponderHeatMap = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 10; // Horizontal swipe
+        return Math.abs(gesture.dx) > 10;
       },
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx > 30 && !controlsCollapsed) {
-          // Swipe left to hide
-          collapseControls();
+          // Swipe right to hide
+          Animated.spring(slideAnimHeatMap, {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 65,
+            friction: 8,
+          }).start();
+          // Check if danger zone is also collapsed
+          if (slideAnimDangerZone._value === 1) {
+            setControlsCollapsed(true);
+          }
         } else if (gesture.dx < -30 && controlsCollapsed) {
-          // Swipe right to show
-          expandControls();
+          // Swipe left to show
+          Animated.spring(slideAnimHeatMap, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 65,
+            friction: 8,
+          }).start();
+          setControlsCollapsed(false);
         }
       },
     })
   ).current;
 
+  // Danger Zone pan responder
+  const panResponderDangerZone = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return Math.abs(gesture.dx) > 10;
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx > 30 && !controlsCollapsed) {
+          // Swipe right to hide
+          Animated.spring(slideAnimDangerZone, {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 65,
+            friction: 8,
+          }).start();
+          // Check if heat map is also collapsed
+          if (slideAnimHeatMap._value === 1) {
+            setControlsCollapsed(true);
+          }
+        } else if (gesture.dx < -30 && controlsCollapsed) {
+          // Swipe left to show
+          Animated.spring(slideAnimDangerZone, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 65,
+            friction: 8,
+          }).start();
+          setControlsCollapsed(false);
+        }
+      },
+    })
+  ).current;
   const handleModalClose = () => {
     setModalVisible(false);
     setSelectedLocationId(null);
@@ -878,7 +925,7 @@ export default function MapScreen() {
       </MapView>
       {/* Map Controls */}
       <Animated.View
-        {...panResponder.panHandlers}
+        {...panResponderHeatMap.panHandlers}
         style={[
           styles.heatMapContainer,
           {
@@ -919,7 +966,7 @@ export default function MapScreen() {
         </TouchableOpacity>
       </Animated.View>
       <Animated.View
-        {...panResponder.panHandlers}
+        {...panResponderDangerZone.panHandlers}
         style={[
           styles.dangerZoneContainer,
           {
