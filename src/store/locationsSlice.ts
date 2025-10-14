@@ -345,7 +345,7 @@ export const fetchLocationDetails = createAsyncThunk(
       throw error;
     }
 
-    return data;
+    return Array.isArray(data) && data.length > 0 ? data[0] : data;
   }
 );
 
