@@ -21,9 +21,12 @@ import {
   searchLocations,
   RouteRequest,
   setSmartRouteComparison,
+  startNavigation,
+  endNavigation,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
+import NavigationMode from "./NavigationMode";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -71,6 +74,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [activeInput, setActiveInput] = useState<"from" | "to" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
+  const [showNavigation, setShowNavigation] = useState(false);
 
   // Initialize from location with current location
   useEffect(() => {
@@ -151,6 +155,29 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     },
     [dispatch, userLocation]
   );
+
+  // Handle starting navigation
+  const handleStartNavigation = () => {
+    if (!smartRouteComparison?.optimized_route) {
+      Alert.alert("Error", "No route selected for navigation");
+      return;
+    }
+
+    // Dispatch start navigation action
+    dispatch(startNavigation());
+
+    // Show navigation mode
+    setShowNavigation(true);
+
+    // Close the route planning modal
+    onClose();
+  };
+
+  // Handle exiting navigation
+  const handleExitNavigation = () => {
+    setShowNavigation(false);
+    dispatch(endNavigation());
+  };
 
   useEffect(() => {
     const searchTimeout = setTimeout(() => {
@@ -545,6 +572,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 comparison={smartRouteComparison}
                 onSelectOriginal={handleSelectOriginalRoute}
                 onSelectOptimized={handleSelectOptimizedRoute}
+                onStartNavigation={handleStartNavigation}
               />
             )}
 
@@ -599,6 +627,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           </ScrollView>
         )}
       </View>
+      {showNavigation && <NavigationMode onExit={handleExitNavigation} />}
     </Modal>
   );
 };

@@ -16,6 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { APP_CONFIG } from '@/utils/appConfig';
 import { ReactNode } from 'react';
+import { RootState } from '.';
+import { Alert } from 'react-native';
 type Review = Database['public']['Tables']['reviews']['Row'];
 // ================================
 // INTERFACES AND TYPES
@@ -52,6 +54,9 @@ interface CommunityReview {
   user_id: string;
   location_id: string;
   location_name: string;
+  location_address: string;
+  location_latitude: number;
+  location_longitude: number;
   safety_rating: number;
   overall_rating: number;
   comment: string;
@@ -126,12 +131,22 @@ interface RouteSafetyAnalysis {
   risk_factors?: string[];
 }
 
+export interface NavigationStep {
+  instruction: string;
+  distance_meters: number;
+  duration_seconds: number;
+  start_location: RouteCoordinate;
+  end_location: RouteCoordinate;
+  maneuver?: string; // e.g., "turn-left", "turn-right"
+}
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 export interface SafeRoute {
   id: string;
   name: string;
   route_type: 'fastest' | 'safest' | 'balanced';
   coordinates: RouteCoordinate[];
+  route_points?: RouteCoordinate[];
+  steps?: NavigationStep[]; //
   estimated_duration_minutes: number;
   distance_kilometers: number;
   safety_analysis: RouteSafetyAnalysis;
@@ -140,6 +155,7 @@ export interface SafeRoute {
     duration: number;
     distance: number;
     geometry: any;
+    steps?: any[];
   };
   waypoints_added?: any; // NEW: track why route was modified
 }
@@ -219,6 +235,9 @@ interface LocationsState {
     action: 'view_location' | 'center_map' | 'show_reviews';
     data?: any; // For future flexibility
   } | null;
+  navigationActive: boolean;
+  currentNavigationStep: number | null;
+  navigationStartTime: string | null;
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -298,6 +317,9 @@ const initialState: LocationsState = {
   smartRouteComparison: null,
   showSmartRouteComparison: false,
   navigationIntent: null,
+  navigationActive: false,
+  currentNavigationStep: null,
+  navigationStartTime: null,
 };
 
 
@@ -1025,13 +1047,35 @@ export const getGoogleRoute = createAsyncThunk(
       // Decode polyline to get coordinates
       const coordinates = decodePolyline(route.overview_polyline.points);
 
+      // Extract turn-by-turn steps from all legs
+      const steps: NavigationStep[] = [];
+      route.legs.forEach((leg: any) => {
+        leg.steps.forEach((step: any) => {
+          steps.push({
+            instruction: step.html_instructions.replace(/<[^>]*>/g, ''), // Strip HTML tags
+            distance_meters: step.distance.value,
+            duration_seconds: step.duration.value,
+            start_location: {
+              latitude: step.start_location.lat,
+              longitude: step.start_location.lng,
+            },
+            end_location: {
+              latitude: step.end_location.lat,
+              longitude: step.end_location.lng,
+            },
+            maneuver: step.maneuver || undefined,
+          });
+        });
+      });
+
       return {
         duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
         distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
         geometry: {
           coordinates: coordinates,
           type: 'LineString'
-        }
+        },
+        steps: steps, // ADD THIS
       };
     });
 
@@ -1349,6 +1393,93 @@ export const generateSmartRoute = createAsyncThunk(
     }
   }
 );
+
+export const checkForReroute = createAsyncThunk(
+  'locations/checkForReroute',
+  async (
+    currentPosition: { latitude: number; longitude: number },
+    { getState, dispatch }
+  ) => {
+    const state = getState() as RootState;
+    const { selectedRoute, routeRequest } = state.locations;
+
+    if (!selectedRoute || !routeRequest) {
+      console.log('❌ No route or request to reroute');
+      return;
+    }
+
+    console.log('🔄 User deviated from route. Recalculating...');
+
+    // Show alert
+    Alert.alert(
+      "Recalculating Route",
+      "You've gone off course. Finding a new route...",
+      [{ text: "OK" }]
+    );
+
+    try {
+      // Create new route request from current position to original destination
+      const newRouteRequest: RouteRequest = {
+        ...routeRequest,
+        origin: {
+          latitude: currentPosition.latitude,
+          longitude: currentPosition.longitude,
+        },
+        // Keep the same destination
+      };
+
+      // Try smart route first (safer route)
+      try {
+        const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
+
+        if (result.success && result.optimized_route) {
+          // Use the safer route
+          dispatch(setSelectedRoute(result.optimized_route));
+
+          Alert.alert(
+            "Route Updated",
+            "New safer route calculated from your current position",
+            [{ text: "OK" }]
+          );
+        } else {
+          // Fall back to basic safe route
+          throw new Error("Smart route not better");
+        }
+      } catch (smartRouteError) {
+        console.log('⚠️ Smart route failed, using basic route');
+
+        // Fallback to basic route generation
+        const basicResult = await dispatch(generateSafeRoute(newRouteRequest)).unwrap();
+
+        if (basicResult.route) {
+          dispatch(setSelectedRoute(basicResult.route));
+
+          Alert.alert(
+            "Route Updated",
+            "New route calculated from your current position",
+            [{ text: "OK" }]
+          );
+        }
+      }
+
+    } catch (error) {
+      console.error('❌ Rerouting failed:', error);
+      Alert.alert(
+        "Rerouting Failed",
+        "Could not calculate new route. Please try planning again.",
+        [
+          {
+            text: "Stop Navigation",
+            style: "destructive",
+            onPress: () => dispatch(endNavigation()),
+          },
+          { text: "Continue", style: "cancel" },
+        ]
+      );
+    }
+  }
+);
+
 // ================================
 // HELPER FUNCTIONS
 // ================================
@@ -1489,6 +1620,22 @@ const locationsSlice = createSlice({
 
     clearNavigationIntent: (state) => {
       state.navigationIntent = null;
+    },
+    // Navigation actions
+    startNavigation: (state) => {
+      state.navigationActive = true;
+      state.currentNavigationStep = 0;
+      state.navigationStartTime = new Date().toISOString();
+    },
+
+    endNavigation: (state) => {
+      state.navigationActive = false;
+      state.currentNavigationStep = null;
+      state.navigationStartTime = null;
+    },
+
+    updateNavigationProgress: (state, action: PayloadAction<number>) => {
+      state.currentNavigationStep = action.payload;
     },
   },
 
@@ -1839,6 +1986,9 @@ export const {
   toggleSmartRouteComparison,
   setNavigationIntent,
   clearNavigationIntent,
+  startNavigation,
+  endNavigation,
+  updateNavigationProgress,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

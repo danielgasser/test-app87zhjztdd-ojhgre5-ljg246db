@@ -33,6 +33,8 @@ import {
   RouteCoordinate,
   setNavigationIntent,
   clearNavigationIntent,
+  endNavigation,
+  startNavigation,
 } from "../../src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -46,6 +48,7 @@ import { getUserCountry } from "src/utils/locationHelpers";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
 import { supabase } from "@/services/supabase";
+import NavigationMode from "src/components/NavigationMode";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -98,7 +101,10 @@ export default function MapScreen() {
 
   const [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState<
     string | null
-  >(null); // ADD THIS LINE
+  >(null);
+
+  const [showNavigation, setShowNavigation] = useState(false);
+
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -242,6 +248,7 @@ export default function MapScreen() {
       });
     }
   };
+
   const handleMapLongPress = async (event: any) => {
     if (!requireAuth(userId, "add marker")) return;
 
@@ -326,6 +333,7 @@ export default function MapScreen() {
       setLocationPermission(false);
     }
   };
+
   const handleStartRouteSelection = () => {
     if (!requireAuth(userId, "plan a route")) return;
 
@@ -375,6 +383,21 @@ export default function MapScreen() {
         );
       }
     );
+  };
+
+  const handleStartNavigationFromMap = () => {
+    if (!selectedRoute) {
+      Alert.alert("Error", "No route selected");
+      return;
+    }
+
+    dispatch(startNavigation());
+    setShowNavigation(true);
+  };
+
+  const handleExitNavigation = () => {
+    setShowNavigation(false);
+    dispatch(endNavigation());
   };
 
   const handlePoiClick = async (event: any) => {
@@ -1043,6 +1066,14 @@ export default function MapScreen() {
           </View>
 
           <TouchableOpacity
+            style={styles.startNavButton}
+            onPress={handleStartNavigationFromMap}
+          >
+            <Ionicons name="navigate-circle" size={24} color="#FFF" />
+            <Text style={styles.startNavButtonText}>Start Navigation</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.routeDetailsButton}
             onPress={() => setShowRoutePlanning(true)}
           >
@@ -1060,6 +1091,13 @@ export default function MapScreen() {
         visible={showRoutePlanning}
         onClose={() => setShowRoutePlanning(false)}
       />
+      <RoutePlanningModal
+        visible={showRoutePlanning}
+        onClose={() => setShowRoutePlanning(false)}
+      />
+
+      {/* Navigation Mode - ADD THIS */}
+      {showNavigation && <NavigationMode onExit={handleExitNavigation} />}
     </View>
   );
 }
@@ -1118,6 +1156,22 @@ const styles = StyleSheet.create({
   },
   viewLocationButton: {
     backgroundColor: APP_CONFIG.MAP_MARKERS.COLOR_NO_REVIEWS,
+  },
+  startNavButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4CAF50",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 8,
+  },
+  startNavButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "700",
   },
   addLocationText: {
     color: "#FFF",

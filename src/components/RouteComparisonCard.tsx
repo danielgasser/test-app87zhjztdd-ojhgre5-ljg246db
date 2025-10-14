@@ -7,12 +7,14 @@ interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
   onSelectOriginal: () => void;
   onSelectOptimized: () => void;
+  onStartNavigation?: () => void;
 }
 
 const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
   comparison,
   onSelectOriginal,
   onSelectOptimized,
+  onStartNavigation,
 }) => {
   const {
     original_route,
@@ -149,6 +151,16 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             </View>
           ))}
         </View>
+      )}
+      {onStartNavigation && (
+        <TouchableOpacity
+          style={styles.startNavigationButton}
+          onPress={onStartNavigation}
+        >
+          <Ionicons name="navigate-circle" size={28} color="#FFF" />
+          <Text style={styles.startNavigationText}>Start Navigation</Text>
+          <Ionicons name="arrow-forward" size={20} color="#FFF" />
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -301,6 +313,27 @@ const styles = StyleSheet.create({
     color: "#666",
     marginLeft: 6,
     flex: 1,
+  },
+  // ADD THESE:
+  startNavigationButton: {
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  startNavigationText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "700",
   },
 });
 
