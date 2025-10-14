@@ -116,6 +116,8 @@ export default function ReviewScreen() {
   }, [typedLocationId, isCreatingNew, parsedLocationData]);
 
   const handleSubmit = async () => {
+    requireAuth(user?.id, "write reviews");
+
     // Validation
     if (!formData.title.trim()) {
       Alert.alert("Error", "Please enter a review title");
