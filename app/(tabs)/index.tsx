@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,8 @@ import {
   Text,
   ActivityIndicator,
   TouchableOpacity,
+  Animated,
+  PanResponder,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -102,6 +104,9 @@ export default function MapScreen() {
     string | null
   >(null);
 
+  const [controlsCollapsed, setControlsCollapsed] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -194,6 +199,44 @@ export default function MapScreen() {
       }
     }
   };
+
+  const collapseControls = () => {
+    Animated.spring(slideAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 8,
+    }).start();
+    setControlsCollapsed(true);
+  };
+
+  const expandControls = () => {
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 8,
+    }).start();
+    setControlsCollapsed(false);
+  };
+
+  // Swipe gesture handler
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return Math.abs(gesture.dx) > 10; // Horizontal swipe
+      },
+      onPanResponderRelease: (_, gesture) => {
+        if (gesture.dx < -30 && !controlsCollapsed) {
+          // Swipe left to hide
+          collapseControls();
+        } else if (gesture.dx > 30 && controlsCollapsed) {
+          // Swipe right to show
+          expandControls();
+        }
+      },
+    })
+  ).current;
 
   const handleModalClose = () => {
     setModalVisible(false);
@@ -815,7 +858,28 @@ export default function MapScreen() {
           )}
       </MapView>
       {/* Map Controls */}
-      <View style={styles.mapControls}>
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[
+          styles.mapControls,
+          {
+            transform: [
+              {
+                translateX: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 155], // Slide right
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        {/* Triangle indicator when collapsed */}
+        {controlsCollapsed && (
+          <View style={styles.collapseIndicator}>
+            <Ionicons name="chevron-back" size={20} color="#666" />
+          </View>
+        )}
         <TouchableOpacity
           style={[
             styles.heatMapToggle,
@@ -829,14 +893,16 @@ export default function MapScreen() {
             size={24}
             color={heatMapVisible ? "#fff" : "#333"}
           />
-          <Text
-            style={[
-              styles.heatMapToggleText,
-              heatMapVisible && styles.heatMapToggleTextActive,
-            ]}
-          >
-            {heatMapLoading ? "Loading..." : "Heat Map"}
-          </Text>
+          {!controlsCollapsed && (
+            <Text
+              style={[
+                styles.heatMapToggleText,
+                heatMapVisible && styles.heatMapToggleTextActive,
+              ]}
+            >
+              {heatMapLoading ? "Loading..." : "Heat Map"}
+            </Text>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -852,16 +918,18 @@ export default function MapScreen() {
             size={24}
             color={dangerZonesVisible ? "#fff" : "#333"}
           />
-          <Text
-            style={[
-              styles.controlButtonText,
-              dangerZonesVisible && styles.controlButtonTextActive,
-            ]}
-          >
-            {dangerZonesLoading ? "Loading..." : "Danger Zones"}
-          </Text>
+          {!controlsCollapsed && (
+            <Text
+              style={[
+                styles.controlButtonText,
+                dangerZonesVisible && styles.controlButtonTextActive,
+              ]}
+            >
+              {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+            </Text>
+          )}
         </TouchableOpacity>
-      </View>
+      </Animated.View>
       {selectedRoute && !navigationActive && (
         <View
           style={{
@@ -1169,6 +1237,24 @@ const styles = StyleSheet.create({
     bottom: 120,
     right: 20,
     zIndex: 1000,
+  },
+  collapseIndicator: {
+    position: "absolute",
+    left: -8,
+    top: "50%",
+    marginTop: -20,
+    width: 16,
+    height: 40,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: -1, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 3,
   },
   heatMapToggle: {
     flexDirection: "row",
