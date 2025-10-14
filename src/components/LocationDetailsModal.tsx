@@ -50,6 +50,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     if (locationId && visible) {
       dispatch(fetchLocationDetails(locationId));
       fetchReviews();
+    } else if (visible && !locationId) {
+      // Clear reviews for new Google POIs (not in DB yet)
+      setReviews([]);
     }
   }, [locationId, visible]);
 
@@ -107,7 +110,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     }
 
     try {
-      console.log("Fetching Google Place details for:", placeIdToFetch);
       const details = await googlePlacesService.getDetails({
         place_id: placeIdToFetch,
         fields: [
@@ -127,7 +129,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       });
 
       if (details) {
-        console.log("Google Place details fetched:", details);
         setPlaceDetails(details);
       }
     } catch (error) {
@@ -350,18 +351,16 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 />
               )}
               {/* Write Review Button */}
-              {!selectedLocation &&
-                googlePlaceId &&
-                currentUser &&
-                !userHasReviewed && (
-                  <TouchableOpacity
-                    style={styles.writeReviewButton}
-                    onPress={handleWriteReview}
-                  >
-                    <Ionicons name="create-outline" size={20} color="#FFF" />
-                    <Text style={styles.writeReviewText}>Write a Review</Text>
-                  </TouchableOpacity>
-                )}
+              {/* Write Review Button - ALWAYS show if user is logged in and hasn't reviewed */}
+              {currentUser && !userHasReviewed && (
+                <TouchableOpacity
+                  style={styles.writeReviewButton}
+                  onPress={handleWriteReview}
+                >
+                  <Ionicons name="create-outline" size={20} color="#FFF" />
+                  <Text style={styles.writeReviewText}>Write a Review</Text>
+                </TouchableOpacity>
+              )}
               {currentUser && userHasReviewed && (
                 <View style={styles.alreadyReviewedBadge}>
                   <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
