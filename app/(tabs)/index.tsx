@@ -105,6 +105,8 @@ export default function MapScreen() {
   >(null);
 
   const [controlsCollapsed, setControlsCollapsed] = useState(false);
+  const [heatMapCollapsed, setHeatMapCollapsed] = useState(false); // ✅ NEW
+  const [dangerZoneCollapsed, setDangerZoneCollapsed] = useState(false);
   const slideAnimHeatMap = useRef(new Animated.Value(0)).current;
   const slideAnimDangerZone = useRef(new Animated.Value(0)).current;
 
@@ -201,52 +203,15 @@ export default function MapScreen() {
     }
   };
 
-  const collapseControls = useCallback(() => {
-    Animated.parallel([
-      Animated.spring(slideAnimHeatMap, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 8,
-      }),
-      Animated.spring(slideAnimDangerZone, {
-        toValue: 1,
-        delay: 50, // Slight delay for stagger effect
-        useNativeDriver: true,
-        tension: 65,
-        friction: 8,
-      }),
-    ]).start();
-    setControlsCollapsed(true);
-  }, [slideAnimHeatMap, slideAnimDangerZone]);
-
-  const expandControls = useCallback(() => {
-    Animated.parallel([
-      Animated.spring(slideAnimHeatMap, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 8,
-      }),
-      Animated.spring(slideAnimDangerZone, {
-        toValue: 0,
-        delay: 50, // Slight delay for stagger effect
-        useNativeDriver: true,
-        tension: 65,
-        friction: 8,
-      }),
-    ]).start();
-    setControlsCollapsed(false);
-  }, [slideAnimHeatMap, slideAnimDangerZone]);
-
   // Swipe gesture handler
+  // Heat Map pan responder
   const panResponderHeatMap = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gesture) => {
         return Math.abs(gesture.dx) > 10;
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 30 && !controlsCollapsed) {
+        if (gesture.dx > 30 && !heatMapCollapsed) {
           // Swipe right to hide
           Animated.spring(slideAnimHeatMap, {
             toValue: 1,
@@ -254,11 +219,8 @@ export default function MapScreen() {
             tension: 65,
             friction: 8,
           }).start();
-          // Check if danger zone is also collapsed
-          if (slideAnimDangerZone._value === 1) {
-            setControlsCollapsed(true);
-          }
-        } else if (gesture.dx < -30 && controlsCollapsed) {
+          setHeatMapCollapsed(true);
+        } else if (gesture.dx < -30 && heatMapCollapsed) {
           // Swipe left to show
           Animated.spring(slideAnimHeatMap, {
             toValue: 0,
@@ -266,7 +228,7 @@ export default function MapScreen() {
             tension: 65,
             friction: 8,
           }).start();
-          setControlsCollapsed(false);
+          setHeatMapCollapsed(false);
         }
       },
     })
@@ -279,7 +241,7 @@ export default function MapScreen() {
         return Math.abs(gesture.dx) > 10;
       },
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 30 && !controlsCollapsed) {
+        if (gesture.dx > 30 && !dangerZoneCollapsed) {
           // Swipe right to hide
           Animated.spring(slideAnimDangerZone, {
             toValue: 1,
@@ -287,11 +249,8 @@ export default function MapScreen() {
             tension: 65,
             friction: 8,
           }).start();
-          // Check if heat map is also collapsed
-          if (slideAnimHeatMap._value === 1) {
-            setControlsCollapsed(true);
-          }
-        } else if (gesture.dx < -30 && controlsCollapsed) {
+          setDangerZoneCollapsed(true);
+        } else if (gesture.dx < -30 && dangerZoneCollapsed) {
           // Swipe left to show
           Animated.spring(slideAnimDangerZone, {
             toValue: 0,
@@ -299,11 +258,12 @@ export default function MapScreen() {
             tension: 65,
             friction: 8,
           }).start();
-          setControlsCollapsed(false);
+          setDangerZoneCollapsed(false);
         }
       },
     })
   ).current;
+
   const handleModalClose = () => {
     setModalVisible(false);
     setSelectedLocationId(null);
@@ -947,13 +907,14 @@ export default function MapScreen() {
           ]}
           onPress={handleToggleHeatMap}
           disabled={heatMapLoading}
+          pointerEvents={heatMapCollapsed ? "none" : "auto"}
         >
           <Ionicons
             name={heatMapVisible ? "thermometer" : "thermometer-outline"}
             size={24}
             color={heatMapVisible ? "#fff" : "#333"}
           />
-          {!controlsCollapsed && (
+          {!heatMapCollapsed && (
             <Text
               style={[
                 styles.heatMapToggleText,
@@ -987,14 +948,15 @@ export default function MapScreen() {
             dangerZonesVisible && styles.controlButtonActive,
           ]}
           onPress={handleToggleDangerZones}
-          disabled={dangerZonesLoading}
+          disabled={dangerZonesLoading || dangerZoneCollapsed}
+          activeOpacity={dangerZoneCollapsed ? 1 : 0.7}
         >
           <Ionicons
             name={dangerZonesVisible ? "shield" : "shield-outline"}
             size={24}
             color={dangerZonesVisible ? "#fff" : "#333"}
           />
-          {!controlsCollapsed && (
+          {!dangerZoneCollapsed && (
             <Text
               style={[
                 styles.controlButtonText,
@@ -1359,6 +1321,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 8,
+    width: 160,
   },
   heatMapToggleActive: {
     backgroundColor: "#4CAF50",
@@ -1388,6 +1351,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 8,
     marginTop: 10,
+    width: 160,
   },
   controlButtonActive: {
     backgroundColor: "#F44336",
