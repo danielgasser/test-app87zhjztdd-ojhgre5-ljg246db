@@ -75,6 +75,19 @@ export const APP_CONFIG = {
     ZOOM_RADIUS_MULTIPLIER: 50,               // Multiply by zoom level
     MIN_RADIUS: 200,                           // Minimum circle radius
     MAX_RADIUS: 2000,                          // Maximum circle radius
+    COLORS: {
+      VERY_SAFE: "#4CAF5060",    // Green - 4.5+
+      SAFE: "#8BC34A60",         // Light green - 3.5+
+      NEUTRAL: "#FFC10760",      // Yellow - 2.5+
+      UNSAFE: "#FF572260",       // Orange - 1.5+
+      VERY_UNSAFE: "#F4433660",  // Red - <1.5
+    },
+    THRESHOLDS: {
+      VERY_SAFE: 4.5,
+      SAFE: 3.5,
+      NEUTRAL: 2.5,
+      UNSAFE: 1.5,
+    },
   },
   DANGER_ZONES: {
     SEARCH_RADIUS_MILES: 50,              // Already in your config
@@ -92,7 +105,7 @@ export const APP_CONFIG = {
 
   COMMUNITY: {
     FEED_RADIUS_METERS: 50000,            // 50km radius for community feed
-    REVIEWS_PER_PAGE: 10,                  // Pagination size for reviews
+    REVIEWS_PER_PAGE: 5,                  // Pagination size for reviews
     TRENDING_TIMEFRAME_DAYS: 7,           // Days to consider for trending locations
     TRENDING_MIN_REVIEWS: 5,              // Minimum reviews to be considered trending
   },

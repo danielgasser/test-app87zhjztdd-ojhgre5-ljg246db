@@ -40,7 +40,7 @@ import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import RoutePlanningModal from "src/components/RoutePlanningModal";
-import { setMapCenter } from "src/store/locationsSlice";
+import { setMapCenter, HeatMapPoint } from "src/store/locationsSlice";
 import { getUserCountry } from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/utils/appConfig";
@@ -591,36 +591,40 @@ export default function MapScreen() {
         {/* Heat Map Overlay */}
         {heatMapVisible &&
           heatMapData.length > 0 &&
-          heatMapData.map(
-            (
-              point: { weight: number; latitude: any; longitude: any },
-              index: any
-            ) => {
-              const getHeatColor = (weight: number) => {
-                if (weight >= 4.5) return "#4CAF5060";
-                if (weight >= 3.5) return "#8BC34A60";
-                if (weight >= 2.5) return "#FFC10760";
-                if (weight >= 1.5) return "#FF572260";
-                return "#F4433660";
-              };
+          heatMapData.map((point: HeatMapPoint, index: any) => {
+            const getHeatColor = (safetyScore: number) => {
+              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.VERY_SAFE)
+                return APP_CONFIG.HEAT_MAP.COLORS.VERY_SAFE;
+              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.SAFE)
+                return APP_CONFIG.HEAT_MAP.COLORS.SAFE;
+              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.NEUTRAL)
+                return APP_CONFIG.HEAT_MAP.COLORS.NEUTRAL;
+              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.UNSAFE)
+                return APP_CONFIG.HEAT_MAP.COLORS.UNSAFE;
+              return APP_CONFIG.HEAT_MAP.COLORS.VERY_UNSAFE;
+            };
 
-              const baseRadius = 200 + point.weight * 100;
-
-              return (
-                <Circle
-                  key={`heat-${index}`}
-                  center={{
-                    latitude: point.latitude,
-                    longitude: point.longitude,
-                  }}
-                  radius={baseRadius}
-                  fillColor={getHeatColor(point.weight)}
-                  strokeColor="transparent"
-                  strokeWidth={0}
-                />
-              );
-            }
-          )}
+            const baseRadius = Math.min(
+              APP_CONFIG.HEAT_MAP.MAX_RADIUS,
+              Math.max(
+                APP_CONFIG.HEAT_MAP.MIN_RADIUS,
+                APP_CONFIG.HEAT_MAP.BASE_RADIUS + point.weight * 100
+              )
+            );
+            return (
+              <Circle
+                key={`heat-${index}`}
+                center={{
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                }}
+                radius={baseRadius}
+                fillColor={getHeatColor(point.safety_score)}
+                strokeColor="transparent"
+                strokeWidth={0}
+              />
+            );
+          })}
 
         <DangerZoneOverlay
           dangerZones={dangerZones}

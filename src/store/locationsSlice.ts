@@ -40,7 +40,7 @@ interface SearchLocation {
   source?: 'database' | 'mapbox';
 }
 
-interface HeatMapPoint {
+export interface HeatMapPoint {
   latitude: number;
   longitude: number;
   weight: number;
@@ -681,7 +681,7 @@ export const fetchRecentReviews = createAsyncThunk(
 
 export const fetchTrendingLocations = createAsyncThunk(
   'locations/fetchTrendingLocations',
-  async ({ daysWindow = 7, maxResults = 10 }: { daysWindow?: number; maxResults?: number } = {}) => {
+  async ({ daysWindow = APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS, maxResults = APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE }: { daysWindow?: number; maxResults?: number } = {}) => {
     try {
       const { data, error } = await (supabase.rpc as any)('get_trending_locations', {
         days_window: daysWindow,
