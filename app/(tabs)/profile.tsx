@@ -27,7 +27,8 @@ export default function ProfileScreen() {
   const { user } = useAppSelector((state) => state.auth);
   const { profile, loading } = useAppSelector((state) => state.user);
   const [uploading, setUploading] = useState(false);
-
+  const isLoggedIn = !!user;
+  const hasCompletedOnboarding = !!profile;
   const handleLogout = async () => {
     try {
       await dispatch(signOut()).unwrap();
@@ -187,122 +188,111 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          {/* Profile Picture Section */}
-          <TouchableOpacity
-            onPress={pickImage}
-            disabled={uploading}
-            style={styles.avatarContainer}
-          >
-            {uploading ? (
-              <View style={styles.avatarPlaceholder}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-              </View>
-            ) : profile?.avatar_url ? (
-              <>
-                <Image
-                  key={profile.avatar_url}
-                  source={{ uri: profile.avatar_url }}
-                  style={styles.avatar}
-                />
-              </>
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Ionicons
-                  name="person"
-                  size={50}
-                  color={theme.colors.textLight}
-                />
-              </View>
-            )}
-            <View style={styles.cameraIcon}>
-              <Ionicons
-                name="camera"
-                size={20}
-                color={theme.colors.textOnPrimary}
-              />
-            </View>
-          </TouchableOpacity>
-
-          {profile?.avatar_url && !uploading && (
-            <TouchableOpacity onPress={removeProfilePicture}>
-              <Text style={styles.removePhotoText}>Remove Photo</Text>
-            </TouchableOpacity>
-          )}
-
-          <Text style={styles.email}>{user?.email}</Text>
-          {profile?.full_name && (
-            <Text style={styles.fullName}>
-              {profile.full_name}
-              uid: <TextInput value={profile.id} />
+        {!isLoggedIn ? (
+          // NOT LOGGED IN - Only show Sign In button
+          <View style={styles.notLoggedInContainer}>
+            <Text style={styles.notLoggedInText}>
+              Please sign in to view your profile
             </Text>
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Demographics</Text>
-            {profile && (
-              <TouchableOpacity onPress={handleEditProfile}>
-                <Text style={styles.editText}>Edit Profile</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={styles.signInButton}
+              onPress={() => router.push("/(auth)/login")}
+            >
+              <Text style={styles.signInButtonText}>Sign In</Text>
+            </TouchableOpacity>
           </View>
-          {profile && user ? (
-            <View style={styles.demographicsCard}>{renderDemographics()}</View>
-          ) : (
+        ) : !hasCompletedOnboarding ? (
+          // LOGGED IN but NO PROFILE - Show Set Up Profile
+          <View style={styles.setupContainer}>
+            <Text style={styles.setupTitle}>Complete Your Profile</Text>
+            <Text style={styles.setupDescription}>
+              Set up your profile to get personalized safety recommendations
+            </Text>
             <TouchableOpacity
               style={styles.setupButton}
               onPress={() => router.push("/onboarding")}
             >
               <Text style={styles.setupButtonText}>Set Up Profile</Text>
             </TouchableOpacity>
-          )}
-        </View>
-        {profile && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeaderSettings}>
-              <Text style={styles.sectionTitle}>Settings</Text>
-              <TouchableOpacity style={styles.menuItem}>
-                <MaterialIcons
-                  name="notifications"
-                  size={24}
-                  color={theme.colors.text}
-                />
-                <Text style={styles.menuText}>Notifications</Text>
-                <MaterialIcons
-                  name="chevron-right"
-                  size={24}
-                  color={theme.colors.textLight}
-                />
+          </View>
+        ) : (
+          // LOGGED IN and HAS PROFILE - Show full profile UI
+          <>
+            <View style={styles.header}>
+              {/* Avatar section */}
+              <TouchableOpacity
+                onPress={pickImage}
+                disabled={uploading}
+                style={styles.avatarContainer}
+              >
+                {uploading ? (
+                  <View style={styles.avatarPlaceholder}>
+                    <ActivityIndicator
+                      size="large"
+                      color={theme.colors.primary}
+                    />
+                  </View>
+                ) : profile?.avatar_url ? (
+                  <>
+                    <Image
+                      key={profile.avatar_url}
+                      source={{ uri: profile.avatar_url }}
+                      style={styles.avatar}
+                    />
+                  </>
+                ) : (
+                  <View style={styles.avatarPlaceholder}>
+                    <Ionicons name="person" size={50} color="#999" />
+                  </View>
+                )}
+                <View style={styles.cameraIcon}>
+                  <Ionicons name="camera" size={20} color="#fff" />
+                </View>{" "}
               </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem}>
-                <MaterialIcons
-                  name="privacy-tip"
-                  size={24}
-                  color={theme.colors.text}
-                />
-                <Text style={styles.menuText}>Privacy</Text>
-                <MaterialIcons
-                  name="chevron-right"
-                  size={24}
-                  color={theme.colors.textLight}
-                />
+
+              {/* User info */}
+              <Text style={styles.name}>
+                {profile.full_name || "SafePath User"}
+              </Text>
+              <Text style={styles.email}>{user.email}</Text>
+
+              {/* Edit Profile Button */}
+              <TouchableOpacity onPress={handleEditProfile}>
+                <Text style={styles.editText}>Edit Profile</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        )}
-        {user ? (
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Sign Out</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={() => router.push("/(auth)/login")}
-          >
-            <Text style={styles.logoutText}>Sign In</Text>
-          </TouchableOpacity>
+
+            {/* Demographics Card */}
+            <View style={styles.demographicsCard}>{renderDemographics()}</View>
+
+            {/* Settings Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeaderSettings}>
+                <Text style={styles.sectionTitle}>Settings</Text>
+                <TouchableOpacity style={styles.menuItem}>
+                  <MaterialIcons name="notifications" size={24} color="#333" />
+                  <Text style={styles.menuText}>Notifications</Text>
+                  <MaterialIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => router.push("/privacy-settings")}
+                >
+                  <MaterialIcons name="privacy-tip" size={24} color="#333" />
+                  <Text style={styles.menuText}>Privacy</Text>
+                  <MaterialIcons name="chevron-right" size={24} color="#999" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Sign Out Button */}
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <Text style={styles.logoutText}>Sign Out</Text>
+            </TouchableOpacity>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -310,6 +300,53 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  notLoggedInContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.xl,
+    marginTop: 100,
+  },
+  name: {
+    fontSize: 18,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    marginBottom: theme.spacing.lg,
+  },
+  notLoggedInText: {
+    fontSize: 18,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    marginBottom: theme.spacing.lg,
+  },
+  signInButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.xl,
+    borderRadius: 8,
+  },
+  signInButtonText: {
+    color: theme.colors.textOnPrimary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  setupContainer: {
+    padding: theme.spacing.xl,
+    alignItems: "center",
+    marginTop: 100,
+  },
+  setupTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  setupDescription: {
+    fontSize: 16,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    marginBottom: theme.spacing.xl,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
