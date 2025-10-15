@@ -104,6 +104,8 @@ export default function MapScreen() {
     string | null
   >(null);
 
+  const [fabMenuOpen, setFabMenuOpen] = useState(false);
+
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -817,6 +819,77 @@ export default function MapScreen() {
           )}
       </MapView>
       {/* Map Controls */}
+      <View style={styles.fabContainer}>
+        {/* Menu Items - only show when open */}
+        {fabMenuOpen && (
+          <View style={styles.fabMenu}>
+            <View style={styles.heatMapContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.heatMapToggle,
+                  heatMapVisible && styles.heatMapToggleActive,
+                ]}
+                onPress={() => {
+                  handleToggleHeatMap();
+                }}
+              >
+                <Ionicons
+                  name={heatMapVisible ? "thermometer" : "thermometer-outline"}
+                  size={24}
+                  color={heatMapVisible ? "#fff" : "#333"}
+                />
+                <Text
+                  style={[
+                    styles.heatMapToggleText,
+                    heatMapVisible && styles.heatMapToggleTextActive,
+                  ]}
+                >
+                  {heatMapLoading ? "Loading..." : "Heat Map"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.dangerZoneContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.controlButton,
+                  dangerZonesVisible && styles.controlButtonActive,
+                ]}
+                onPress={() => {
+                  handleToggleDangerZones();
+                }}
+              >
+                <Ionicons
+                  name={dangerZonesVisible ? "shield" : "shield-outline"}
+                  size={24}
+                  color={dangerZonesVisible ? "#fff" : "#333"}
+                />
+                <Text
+                  style={[
+                    styles.controlButtonText,
+                    dangerZonesVisible && styles.controlButtonTextActive,
+                  ]}
+                >
+                  {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* FAB Button */}
+        <TouchableOpacity
+          style={[styles.fab, fabMenuOpen && styles.fabOpen]}
+          onPress={() => setFabMenuOpen(!fabMenuOpen)}
+        >
+          <Ionicons
+            name={fabMenuOpen ? "close" : "map"}
+            size={28}
+            color={fabMenuOpen ? "#8E24AA" : "#fff"}
+          />
+        </TouchableOpacity>
+      </View>
+      {/*
       <View style={styles.heatMapContainer}>
         <TouchableOpacity
           style={[
@@ -863,6 +936,7 @@ export default function MapScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+      */}
       {selectedRoute && !navigationActive && (
         <View
           style={{
@@ -1168,6 +1242,55 @@ const styles = StyleSheet.create({
     bottom: 120,
     right: 20,
     zIndex: 1000,
+  },
+  fabContainer: {
+    position: "absolute",
+    bottom: 120,
+    right: 20,
+    zIndex: 1000,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#8E24AA",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fabOpen: {
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#8E24AA",
+  },
+  fabMenu: {
+    position: "absolute",
+    bottom: 70, // Above the FAB
+    right: 0,
+    gap: 12,
+  },
+  fabMenuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+    gap: 8,
+  },
+  fabMenuText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
   },
   heatMapContainer: {
     position: "absolute",
