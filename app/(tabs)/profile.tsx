@@ -242,11 +242,13 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Demographics</Text>
-            <TouchableOpacity onPress={handleEditProfile}>
-              <Text style={styles.editText}>Edit Profile</Text>
-            </TouchableOpacity>
+            {profile && (
+              <TouchableOpacity onPress={handleEditProfile}>
+                <Text style={styles.editText}>Edit Profile</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          {profile ? (
+          {profile && user ? (
             <View style={styles.demographicsCard}>{renderDemographics()}</View>
           ) : (
             <TouchableOpacity
@@ -257,42 +259,51 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           )}
         </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderSettings}>
-            <Text style={styles.sectionTitle}>Settings</Text>
-            <TouchableOpacity style={styles.menuItem}>
-              <MaterialIcons
-                name="notifications"
-                size={24}
-                color={theme.colors.text}
-              />
-              <Text style={styles.menuText}>Notifications</Text>
-              <MaterialIcons
-                name="chevron-right"
-                size={24}
-                color={theme.colors.textLight}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem}>
-              <MaterialIcons
-                name="privacy-tip"
-                size={24}
-                color={theme.colors.text}
-              />
-              <Text style={styles.menuText}>Privacy</Text>
-              <MaterialIcons
-                name="chevron-right"
-                size={24}
-                color={theme.colors.textLight}
-              />
-            </TouchableOpacity>
+        {profile && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderSettings}>
+              <Text style={styles.sectionTitle}>Settings</Text>
+              <TouchableOpacity style={styles.menuItem}>
+                <MaterialIcons
+                  name="notifications"
+                  size={24}
+                  color={theme.colors.text}
+                />
+                <Text style={styles.menuText}>Notifications</Text>
+                <MaterialIcons
+                  name="chevron-right"
+                  size={24}
+                  color={theme.colors.textLight}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem}>
+                <MaterialIcons
+                  name="privacy-tip"
+                  size={24}
+                  color={theme.colors.text}
+                />
+                <Text style={styles.menuText}>Privacy</Text>
+                <MaterialIcons
+                  name="chevron-right"
+                  size={24}
+                  color={theme.colors.textLight}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Sign Out</Text>
-        </TouchableOpacity>
+        )}
+        {user ? (
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Sign Out</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={() => router.push("/(auth)/login")}
+          >
+            <Text style={styles.logoutText}>Sign In</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
