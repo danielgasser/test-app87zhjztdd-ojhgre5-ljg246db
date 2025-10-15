@@ -205,14 +205,18 @@ export default function MapScreen() {
 
   // Swipe gesture handler
   // Heat Map pan responder
+  // Heat Map pan responder
+  // Heat Map pan responder
   const panResponderHeatMap = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => false, // ✅ DON'T capture on start!
+      onStartShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 10;
+        return Math.abs(gesture.dx) > 10; // Only respond to actual swipes
       },
+      onMoveShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx > 30 && !heatMapCollapsed) {
-          // Swipe right to hide
           Animated.spring(slideAnimHeatMap, {
             toValue: 1,
             useNativeDriver: true,
@@ -221,7 +225,6 @@ export default function MapScreen() {
           }).start();
           setHeatMapCollapsed(true);
         } else if (gesture.dx < -30 && heatMapCollapsed) {
-          // Swipe left to show
           Animated.spring(slideAnimHeatMap, {
             toValue: 0,
             useNativeDriver: true,
@@ -237,12 +240,14 @@ export default function MapScreen() {
   // Danger Zone pan responder
   const panResponderDangerZone = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => false, // ✅ DON'T capture on start!
+      onStartShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
       onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 10;
+        return Math.abs(gesture.dx) > 10; // Only respond to actual swipes
       },
+      onMoveShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx > 30 && !dangerZoneCollapsed) {
-          // Swipe right to hide
           Animated.spring(slideAnimDangerZone, {
             toValue: 1,
             useNativeDriver: true,
@@ -251,7 +256,6 @@ export default function MapScreen() {
           }).start();
           setDangerZoneCollapsed(true);
         } else if (gesture.dx < -30 && dangerZoneCollapsed) {
-          // Swipe left to show
           Animated.spring(slideAnimDangerZone, {
             toValue: 0,
             useNativeDriver: true,
@@ -886,6 +890,7 @@ export default function MapScreen() {
       {/* Map Controls */}
       <Animated.View
         {...panResponderHeatMap.panHandlers}
+        pointerEvents={heatMapCollapsed ? "box-none" : "auto"}
         style={[
           styles.heatMapContainer,
           {
@@ -906,8 +911,6 @@ export default function MapScreen() {
             heatMapVisible && styles.heatMapToggleActive,
           ]}
           onPress={handleToggleHeatMap}
-          disabled={heatMapLoading}
-          pointerEvents={heatMapCollapsed ? "none" : "auto"}
         >
           <Ionicons
             name={heatMapVisible ? "thermometer" : "thermometer-outline"}
@@ -928,6 +931,7 @@ export default function MapScreen() {
       </Animated.View>
       <Animated.View
         {...panResponderDangerZone.panHandlers}
+        pointerEvents={dangerZoneCollapsed ? "box-none" : "auto"}
         style={[
           styles.dangerZoneContainer,
           {
@@ -948,7 +952,6 @@ export default function MapScreen() {
             dangerZonesVisible && styles.controlButtonActive,
           ]}
           onPress={handleToggleDangerZones}
-          disabled={dangerZonesLoading || dangerZoneCollapsed}
           activeOpacity={dangerZoneCollapsed ? 1 : 0.7}
         >
           <Ionicons
@@ -1321,7 +1324,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 8,
-    width: 160,
   },
   heatMapToggleActive: {
     backgroundColor: "#4CAF50",
@@ -1351,7 +1353,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 8,
     marginTop: 10,
-    width: 160,
   },
   controlButtonActive: {
     backgroundColor: "#F44336",
