@@ -269,14 +269,12 @@ export default function ProfileScreen() {
             <View style={styles.section}>
               <View style={styles.sectionHeaderSettings}>
                 <Text style={styles.sectionTitle}>Settings</Text>
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => router.push("/notification-settings")}
+                >
                   <MaterialIcons name="notifications" size={24} color="#333" />
-                  <Text
-                    style={styles.menuText}
-                    onPress={() => router.push("/notification-settings")}
-                  >
-                    Notifications
-                  </Text>
+                  <Text style={styles.menuText}>Notifications</Text>
                   <MaterialIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
                 <TouchableOpacity
