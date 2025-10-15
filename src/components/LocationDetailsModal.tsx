@@ -434,9 +434,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         <View style={styles.reviewHeader}>
                           <View>
                             <Text style={styles.reviewerName}>
-                              {review.user_profiles?.full_name ||
-                                review.user_profiles?.username ||
-                                "Anonymous"}
+                              {review.user_profiles?.show_demographics
+                                ? review.user_profiles?.full_name || "Anonymous"
+                                : "Anonymous"}
                             </Text>
                             {renderDemographics(review.user_profiles)}
                           </View>
