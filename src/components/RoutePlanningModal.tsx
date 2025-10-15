@@ -369,9 +369,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         <Ionicons
           name={type === "from" ? "radio-button-on" : "location"}
           size={20}
-          color={
-            type === "from" ? "theme.colors.secondary" : theme.colors.error
-          }
+          color={type === "from" ? theme.colors.secondary : theme.colors.error}
         />
       </View>
       <View style={styles.locationInputContent}>
@@ -802,7 +800,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activePriorityButton: {
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
   },
   priorityButtonText: {
     fontSize: 12,
@@ -833,13 +831,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   toggleActive: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.secondary,
   },
   generateButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -882,7 +880,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   selectedRouteCard: {
-    borderColor: "theme.colors.secondary",
+    borderColor: theme.colors.secondary,
     backgroundColor: theme.colors.backgroundSecondary,
   },
   routeHeader: {

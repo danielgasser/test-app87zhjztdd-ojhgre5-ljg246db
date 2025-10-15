@@ -955,7 +955,7 @@ export default function MapScreen() {
               <View
                 style={[
                   styles.legendColor,
-                  { backgroundColor: "theme.colors.secondary" },
+                  { backgroundColor: theme.colors.secondary },
                 ]}
               />
               <Text style={styles.legendText}>Safe</Text>
@@ -1221,7 +1221,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.secondary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1333,7 +1333,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: "theme.colors.secondary",
+    borderColor: theme.colors.secondary,
     shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -1341,8 +1341,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   heatMapToggleActive: {
-    backgroundColor: "theme.colors.secondary",
-    borderColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.secondary,
+    borderColor: theme.colors.secondary,
   },
   heatMapToggleText: {
     marginLeft: 6,
