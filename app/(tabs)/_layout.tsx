@@ -4,10 +4,11 @@ import { theme } from "src/styles/theme";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUserProfile } from "@/store/userSlice";
+import { RootState } from "@/store";
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const user = useAppSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     if (user?.id) {
@@ -34,6 +35,7 @@ export default function TabLayout() {
         headerTintColor: theme.colors.textOnPrimary,
         headerTitleStyle: {
           fontWeight: "bold",
+          fontSize: 22,
         },
       }}
     >
