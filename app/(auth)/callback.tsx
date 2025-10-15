@@ -4,11 +4,14 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/services/supabase";
 import { theme } from "src/styles/theme";
 import { Database } from "@/types/database.types";
+import { useAppDispatch } from "@/store/hooks";
+import { setSession } from "@/store/authSlice";
 
 type UserProfile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export default function AuthCallback() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -17,6 +20,7 @@ export default function AuthCallback() {
       } = await supabase.auth.getSession();
 
       if (session) {
+        dispatch(setSession(session));
         const { data: profile } = await supabase
           .from("user_profiles")
           .select("*")

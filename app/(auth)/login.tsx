@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { Link, router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { signIn } from "src/store/authSlice";
+import { signIn, setSession } from "src/store/authSlice";
 import { supabase } from "@/services/supabase";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
@@ -80,7 +80,28 @@ export default function LoginScreen() {
 
       if (error) throw error;
 
-      router.replace("/(tabs)");
+      // CRITICAL: Update Redux state with the session
+      if (data.session) {
+        dispatch(setSession(data.session));
+      }
+
+      // Check if user has completed onboarding
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .single();
+
+      // Route based on onboarding status
+      if (
+        !profile ||
+        !profile.race_ethnicity ||
+        profile.race_ethnicity.length === 0
+      ) {
+        router.replace("/onboarding");
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (error: any) {
       if (error.code === "ERR_REQUEST_CANCELED") {
         return; // User canceled
