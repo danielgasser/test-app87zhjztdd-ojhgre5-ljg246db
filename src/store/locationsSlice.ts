@@ -40,6 +40,27 @@ interface SearchLocation {
   source?: 'database' | 'mapbox';
 }
 
+interface NearbyReviewResponse {
+  id: string;
+  user_id: string;
+  location_id: string;
+  title: string;
+  content: string;
+  safety_rating: number;
+  overall_rating: number;
+  created_at: string;
+  location_name: string;
+  location_address: string;
+  location_latitude: number;
+  location_longitude: number;
+  distance_meters: number;
+  user_full_name: string;
+  user_show_demographics: boolean;
+  user_race_ethnicity: string[];
+  user_gender: string;
+  user_lgbtq_status: boolean;
+  user_disability_status: string[];
+}
 export interface HeatMapPoint {
   latitude: number;
   longitude: number;
@@ -60,7 +81,9 @@ interface CommunityReview {
   comment: string;
   created_at: string;
   user_demographics: {
+    full_name: string;
     race_ethnicity: string[];
+    show_demographics: boolean;
     gender: string;
     lgbtq_status: string;
   };
@@ -721,14 +744,22 @@ export const fetchRecentReviews = createAsyncThunk(
         id: review.id,
         user_id: review.user_id,
         location_id: review.location_id,
-        title: review.title,
         location_name: review.location_name,
         location_address: review.location_address,
+        location_latitude: review.location_latitude,
+        location_longitude: review.location_longitude,
         safety_rating: review.safety_rating,
         overall_rating: review.overall_rating,
-        content: review.content,
+        comment: review.content,
         created_at: review.created_at,
-        distance_meters: review.distance_meters,
+        user_demographics: {
+          full_name: review.user_full_name,
+          show_demographics: review.user_show_demographics,
+          race_ethnicity: review.user_race_ethnicity,
+          gender: review.user_gender,
+          lgbtq_status: review.user_lgbtq_status,
+          disability_status: review.user_disability_status,
+        },
       }));
     } catch (error) {
       console.error('Recent reviews fetch error:', error);
