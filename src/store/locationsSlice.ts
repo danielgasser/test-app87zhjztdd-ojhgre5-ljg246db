@@ -19,9 +19,7 @@ import { ReactNode } from 'react';
 import { RootState } from '.';
 import { Alert } from 'react-native';
 type Review = Database['public']['Tables']['reviews']['Row'];
-// ================================
-// INTERFACES AND TYPES
-// ================================
+
 
 // Helper function to get the current auth token
 async function getAuthToken(): Promise<string> {
