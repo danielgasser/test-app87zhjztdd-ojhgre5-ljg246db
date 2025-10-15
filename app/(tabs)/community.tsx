@@ -279,7 +279,7 @@ export default function CommunityScreen() {
                     review.user_demographics.disability_status.join(", "),
                 ]
                   .filter(Boolean)
-                  .join(" • ") || "Anonymous"}
+                  .join(" • ")}
               </Text>
             ) : (
               <Text style={styles.anonymousText}>Anonymous Reviewer</Text>

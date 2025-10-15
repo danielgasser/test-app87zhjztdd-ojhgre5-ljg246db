@@ -26,6 +26,7 @@ import { fetchRecentReviews } from "@/store/locationsSlice";
 export default function PrivacySettings() {
   const user = useAppSelector((state: any) => state.auth.user);
   const profile = useAppSelector((state: any) => state.user.profile);
+  const userLocation = useAppSelector((state) => state.locations.userLocation);
 
   const [showDemographics, setShowDemographics] = useState(false);
   const [profileVisibility, setProfileVisibility] = useState(false);
@@ -52,17 +53,13 @@ export default function PrivacySettings() {
       ).unwrap();
 
       // NEW: Reload community reviews after privacy change
-      if (field === "show_demographics") {
-        const state = (dispatch as any).getState();
-        const userLocation = state.locations.userLocation;
-        if (userLocation) {
-          dispatch(
-            fetchRecentReviews({
-              latitude: userLocation.latitude,
-              longitude: userLocation.longitude,
-            })
-          );
-        }
+      if (field === "show_demographics" && userLocation) {
+        dispatch(
+          fetchRecentReviews({
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+          })
+        );
       }
 
       console.log(`${field} saved successfully`);
