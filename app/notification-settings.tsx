@@ -66,8 +66,6 @@ export default function NotificationSettings() {
           profileData: { notification_preferences: updatedPrefs },
         })
       ).unwrap();
-
-      console.log(`${field} saved successfully`);
     } catch (error) {
       Alert.alert("Error", "Failed to save setting. Please try again.");
       console.error("Save error:", error);

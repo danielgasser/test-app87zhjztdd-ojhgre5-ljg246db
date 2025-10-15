@@ -11,11 +11,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Linking,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { signIn } from "src/store/authSlice";
 import { supabase } from "@/services/supabase";
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as Crypto from "expo-crypto";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -56,6 +60,55 @@ export default function LoginScreen() {
       );
     } catch (error: any) {
       Alert.alert("Error", error.message);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      const nonce = Math.random().toString(36).substring(2, 10);
+
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // Sign in to Supabase with the Apple credential
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: "apple",
+        token: credential.identityToken!,
+        nonce: nonce,
+      });
+
+      if (error) throw error;
+
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      if (error.code === "ERR_REQUEST_CANCELED") {
+        return; // User canceled
+      }
+      Alert.alert("Error", error.message || "Failed to sign in with Apple");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: "safepath://auth/callback",
+        },
+      });
+
+      if (error) throw error;
+
+      // Open the OAuth URL
+      if (data?.url) {
+        await Linking.openURL(data.url);
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to sign in with Google");
     }
   };
 
@@ -103,7 +156,47 @@ export default function LoginScreen() {
               {loading ? "Signing in..." : "Sign In"}
             </Text>
           </TouchableOpacity>
+          {/* Social Login Divider */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.divider} />
+          </View>
 
+          {/* Apple Sign In Button */}
+          {Platform.OS === "ios" && (
+            <TouchableOpacity
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            >
+              <Ionicons
+                name="logo-apple"
+                size={20}
+                color={theme.colors.background}
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.appleButtonText}> Sign in with Apple</Text>
+            </TouchableOpacity>
+          )}
+          {/* Social Login Divider */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.divider} />
+          </View>
+          {/* Google Sign In Button */}
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={handleGoogleSignIn}
+          >
+            <Ionicons
+              name="logo-google"
+              size={20}
+              color={theme.colors.background}
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.googleButtonText}>Sign in with Google</Text>
+          </TouchableOpacity>
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? </Text>
             <Link href="/register" asChild>
@@ -162,6 +255,48 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: theme.colors.primary,
     fontSize: 18,
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.border,
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: theme.colors.textSecondary,
+    fontSize: 14,
+  },
+  appleButton: {
+    backgroundColor: theme.colors.shadowBlack,
+    padding: theme.spacing.md,
+    borderRadius: 8,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  appleButtonText: {
+    color: theme.colors.background,
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  googleButton: {
+    backgroundColor: "#4285F4", // Google blue
+    padding: theme.spacing.md,
+    borderRadius: 8,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  googleButtonText: {
+    color: theme.colors.background,
+    fontSize: 18,
+    fontWeight: "600",
   },
   button: {
     backgroundColor: theme.colors.primary,

@@ -55,7 +55,6 @@ export default function CommunityScreen() {
     if (!coords) return;
 
     const fetchData = async () => {
-      console.log("🔍 Fetching data with coords:", coords); // ADD THIS
       try {
         await Promise.all([
           dispatch(
@@ -98,7 +97,6 @@ export default function CommunityScreen() {
 
   const loadCommunityData = async () => {
     const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
-    console.log("🔍 Fetching insights with coords:", coords); // ADD THIS
     if (!coords) return;
 
     try {
@@ -212,11 +210,6 @@ export default function CommunityScreen() {
   };
 
   const renderReviewItem = (review: any) => {
-    console.log(
-      "Review user_demographics:",
-      JSON.stringify(review.user_demographics, null, 2)
-    );
-
     const timeAgo = formatDistanceToNow(new Date(review.created_at), {
       addSuffix: true,
     });

@@ -61,8 +61,6 @@ export default function PrivacySettings() {
           })
         );
       }
-
-      console.log(`${field} saved successfully`);
     } catch (error) {
       Alert.alert("Error", "Failed to save setting. Please try again.");
       console.error("Save error:", error);
@@ -137,12 +135,9 @@ export default function PrivacySettings() {
     try {
       setDeleteConfirmVisible(false);
 
-      console.log("=== STARTING DELETE ===");
-
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      console.log("Session exists:", !!session);
 
       if (!session) {
         Alert.alert("Error", "You must be logged in to delete your account.");
@@ -150,13 +145,7 @@ export default function PrivacySettings() {
       }
 
       const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/delete-user-account`;
-      console.log("Full URL:", url);
-      console.log(
-        "EXPO_PUBLIC_SUPABASE_URL:",
-        process.env.EXPO_PUBLIC_SUPABASE_URL
-      );
 
-      console.log("Making fetch request...");
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -165,11 +154,7 @@ export default function PrivacySettings() {
         },
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
-
       const result = await response.json();
-      console.log("Response body:", result);
 
       if (!response.ok) {
         throw new Error(result.error || "Failed to delete account");
@@ -315,7 +300,6 @@ export default function PrivacySettings() {
         <TouchableOpacity
           style={styles.dangerButton}
           onPress={() => {
-            console.log("🚨 Delete account button tapped!");
             setDeleteConfirmVisible(true);
           }}
         >
@@ -423,7 +407,6 @@ export default function PrivacySettings() {
               <TouchableOpacity
                 style={styles.confirmDeleteButton}
                 onPress={() => {
-                  console.log("🔴 DELETE FOREVER BUTTON PRESSED!");
                   handleDeleteAccount();
                 }}
               >
