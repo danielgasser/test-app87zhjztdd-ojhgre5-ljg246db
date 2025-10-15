@@ -17,9 +17,10 @@ import { theme } from "../src/styles/theme";
 import SettingToggle from "../src/components/SettingToggle";
 import { useAppSelector } from "../src/store/hooks";
 import { ActivityIndicator } from "react-native";
-import { useAppDispatch } from "../src/store/hooks";
 import { updateUserProfile } from "../src/store/userSlice";
 import { supabase } from "@/services/supabase";
+import { useAppDispatch } from "../src/store/hooks";
+import { signOut } from "../src/store/authSlice";
 
 export default function PrivacySettings() {
   const user = useAppSelector((state: any) => state.auth.user);
@@ -124,57 +125,55 @@ export default function PrivacySettings() {
     try {
       setDeleteConfirmVisible(false);
 
-      // Show loading state
-      Alert.alert("Deleting Account", "Please wait...", [], {
-        cancelable: false,
-      });
+      console.log("=== STARTING DELETE ===");
 
-      // Call the edge function
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      console.log("Session exists:", !!session);
 
       if (!session) {
         Alert.alert("Error", "You must be logged in to delete your account.");
         return;
       }
 
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/delete-user-account`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            "Content-Type": "application/json",
-          },
-        }
+      const url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/delete-user-account`;
+      console.log("Full URL:", url);
+      console.log(
+        "EXPO_PUBLIC_SUPABASE_URL:",
+        process.env.EXPO_PUBLIC_SUPABASE_URL
       );
 
+      console.log("Making fetch request...");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
       const result = await response.json();
+      console.log("Response body:", result);
 
       if (!response.ok) {
         throw new Error(result.error || "Failed to delete account");
       }
 
-      // Account deleted successfully - sign out and redirect
+      // Rest of success handling...
+      await dispatch(signOut()).unwrap();
+
       Alert.alert(
         "Account Deleted",
         "Your account has been permanently deleted.",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              router.replace("/(auth)/login");
-            },
-          },
-        ]
+        [{ text: "OK", onPress: () => router.replace("/(auth)/login") }]
       );
     } catch (error) {
-      console.error("Delete account error:", error);
-      Alert.alert(
-        "Error",
-        "Failed to delete account. Please try again or contact support."
-      );
+      console.error("=== DELETE ERROR ===", error);
+      Alert.alert("Error", `Failed to delete account: `);
     }
   };
 
@@ -255,6 +254,7 @@ export default function PrivacySettings() {
             </Text>
           </View>
         </View>
+
         {/* Account Management Section */}
         <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
           Account Management
@@ -271,7 +271,11 @@ export default function PrivacySettings() {
               See what information SafePath has collected
             </Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color="#999" />
+          <MaterialIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -289,12 +293,19 @@ export default function PrivacySettings() {
               Download all your data in JSON format
             </Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color="#999" />
+          <MaterialIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.dangerButton}
-          onPress={() => setDeleteConfirmVisible(true)}
+          onPress={() => {
+            console.log("🚨 Delete account button tapped!");
+            setDeleteConfirmVisible(true);
+          }}
         >
           <MaterialIcons
             name="delete-forever"
@@ -309,7 +320,11 @@ export default function PrivacySettings() {
               Permanently delete your account and all data
             </Text>
           </View>
-          <MaterialIcons name="chevron-right" size={24} color="#999" />
+          <MaterialIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
       </ScrollView>
       {/* View Data Modal */}
@@ -395,7 +410,7 @@ export default function PrivacySettings() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmDeleteButton}
-                onPress={handleDeleteAccount}
+                onPress={() => handleDeleteAccount}
               >
                 <Text style={styles.confirmDeleteText}>Delete Forever</Text>
               </TouchableOpacity>
@@ -465,7 +480,7 @@ const styles = StyleSheet.create({
   confirmDeleteText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#fff",
+    color: theme.colors.text,
   },
   modalContainer: {
     flex: 1,
