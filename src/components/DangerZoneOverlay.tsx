@@ -4,6 +4,7 @@ import { Polygon, Callout, Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { DangerZone } from "../types/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { theme } from "@/styles/theme";
 
 interface DangerZoneOverlayProps {
   dangerZones: DangerZone[];
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 5,
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     padding: 16,
     maxWidth: 280,
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -160,7 +161,7 @@ const styles = StyleSheet.create({
   calloutTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 4,
   },
   dangerLevel: {
@@ -170,30 +171,30 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: theme.colors.backgroundSecondary,
     marginVertical: 12,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 6,
   },
   demographicItem: {
     fontSize: 13,
-    color: "#333",
+    color: theme.colors.text,
     marginLeft: 8,
     marginBottom: 3,
   },
   reasonItem: {
     fontSize: 13,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginLeft: 8,
     marginBottom: 3,
   },
   timeWarning: {
     fontSize: 13,
-    color: "#FF6B35",
+    color: theme.colors.error,
     fontWeight: "500",
     marginTop: 4,
   },

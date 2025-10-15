@@ -356,7 +356,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
           rotation={currentPosition.heading || 0}
         >
           <View style={styles.userMarker}>
-            <Ionicons name="navigate" size={30} color="#4A90E2" />
+            <Ionicons name="navigate" size={30} color={theme.colors.primary} />
           </View>
         </Marker>
       </MapView>
@@ -367,7 +367,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
           <Text style={styles.distanceText}>
             {formatDistance(distanceToNextTurn)}
           </Text>
-          <Ionicons name="arrow-up" size={60} color="#fff" />
+          <Ionicons name="arrow-up" size={60} color={theme.colors.card} />
         </View>
 
         <View style={styles.instructionTextContainer}>
@@ -407,7 +407,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
           style={styles.endButton}
           onPress={handleEndNavigation}
         >
-          <Ionicons name="close-circle" size={24} color="#fff" />
+          <Ionicons name="close-circle" size={24} color={theme.colors.card} />
           <Text style={styles.endButtonText}>End Navigation</Text>
         </TouchableOpacity>
       </View>
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderRadius: 16,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   distanceText: {
     fontSize: 48,
     fontWeight: "bold",
-    color: "#fff",
+    color: theme.colors.card,
     marginRight: 16,
   },
   instructionTextContainer: {
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   instructionText: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#fff",
+    color: theme.colors.card,
     marginBottom: 4,
   },
   nextInstructionText: {
@@ -472,11 +472,11 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -487,29 +487,29 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: theme.colors.text,
   },
   endButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F44336",
+    backgroundColor: theme.colors.error,
     borderRadius: 12,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
   },
   endButtonText: {
-    color: "#fff",
+    color: theme.colors.card,
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
@@ -518,10 +518,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,

@@ -27,6 +27,8 @@ import {
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
 import NavigationMode from "./NavigationMode";
+import { theme } from "@/styles/theme";
+import { APP_CONFIG } from "@/utils/appConfig";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -367,7 +369,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         <Ionicons
           name={type === "from" ? "radio-button-on" : "location"}
           size={20}
-          color={type === "from" ? "theme.colors.secondary" : "#F44336"}
+          color={
+            type === "from" ? "theme.colors.secondary" : theme.colors.error
+          }
         />
       </View>
       <View style={styles.locationInputContent}>
@@ -384,7 +388,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           <Text style={styles.locationPlaceholder}>{placeholder}</Text>
         )}
       </View>
-      <Ionicons name="search" size={20} color="#999" />
+      <Ionicons name="search" size={20} color={theme.colors.textSecondary} />
     </TouchableOpacity>
   );
 
@@ -395,7 +399,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       onPress={() => handleLocationSelect(item)}
     >
       <View style={styles.searchResultIcon}>
-        <Ionicons name="location" size={20} color="#666" />
+        <Ionicons
+          name="location"
+          size={20}
+          color={theme.colors.textSecondary}
+        />
       </View>
       <View style={styles.searchResultContent}>
         <Text style={styles.searchResultName}>{item.name}</Text>
@@ -406,9 +414,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Get safety badge color
   const getSafetyBadgeColor = (score: number): string => {
-    if (score >= 4.0) return "theme.colors.secondary";
-    if (score >= 3.0) return "#FFC107";
-    return "#F44336";
+    if (score >= 4.0) return APP_CONFIG.HEAT_MAP.COLORS.VERY_SAFE;
+    if (score >= 3.0) return APP_CONFIG.HEAT_MAP.COLORS.NEUTRAL;
+    return theme.colors.error;
   };
 
   return (
@@ -422,7 +430,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#000" />
+            <Ionicons name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.title}>Plan Safe Route</Text>
           <View style={styles.headerSpacer} />
@@ -432,7 +440,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         {activeInput ? (
           <View style={styles.searchMode}>
             <View style={styles.searchInputContainer}>
-              <Ionicons name="search" size={20} color="#666" />
+              <Ionicons
+                name="search"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
               <TextInput
                 style={styles.searchInput}
                 value={searchQuery}
@@ -443,7 +455,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 autoFocus
               />
               {searchLoading && (
-                <ActivityIndicator size="small" color="theme.colors.primary" />
+                <ActivityIndicator size="small" color={theme.colors.primary} />
               )}
             </View>
 
@@ -523,7 +535,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   }
                 >
                   {routePreferences.avoidEveningDanger && (
-                    <Ionicons name="checkmark" size={16} color="#FFF" />
+                    <Ionicons
+                      name="checkmark"
+                      size={16}
+                      color={theme.colors.background}
+                    />
                   )}
                 </TouchableOpacity>
               </View>
@@ -540,9 +556,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               disabled={routeLoading || !fromLocation || !toLocation}
             >
               {routeLoading ? (
-                <ActivityIndicator size="small" color="#FFF" />
+                <ActivityIndicator
+                  size="small"
+                  color={theme.colors.background}
+                />
               ) : (
-                <Ionicons name="navigate" size={20} color="#FFF" />
+                <Ionicons
+                  name="navigate"
+                  size={20}
+                  color={theme.colors.background}
+                />
               )}
               <Text style={styles.generateButtonText}>
                 {routeLoading ? "Finding safe route..." : "Generate Safe Route"}
@@ -552,7 +575,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             {/* Error Display */}
             {routeError && (
               <View style={styles.errorContainer}>
-                <Ionicons name="warning" size={20} color="#F44336" />
+                <Ionicons name="warning" size={20} color={theme.colors.error} />
                 <Text style={styles.errorText}>{routeError}</Text>
               </View>
             )}
@@ -600,13 +623,21 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   </View>
                   <View style={styles.routeMetrics}>
                     <View style={styles.metric}>
-                      <Ionicons name="time" size={16} color="#666" />
+                      <Ionicons
+                        name="time"
+                        size={16}
+                        color={theme.colors.textSecondary}
+                      />
                       <Text style={styles.metricText}>
                         {selectedRoute.estimated_duration_minutes} min
                       </Text>
                     </View>
                     <View style={styles.metric}>
-                      <Ionicons name="navigate" size={16} color="#666" />
+                      <Ionicons
+                        name="navigate"
+                        size={16}
+                        color={theme.colors.textSecondary}
+                      />
                       <Text style={styles.metricText}>
                         {selectedRoute.distance_kilometers} km
                       </Text>
@@ -625,7 +656,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   header: {
     flexDirection: "row",
@@ -634,9 +665,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingTop: 50,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.inputBorder,
   },
   closeButton: {
     width: 40,
@@ -647,7 +678,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.text,
   },
   headerSpacer: {
     width: 40,
@@ -658,11 +689,11 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.backgroundSecondary,
   },
   searchInput: {
     flex: 1,
@@ -677,7 +708,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: theme.colors.backgroundSecondary,
   },
   searchResultIcon: {
     width: 40,
@@ -690,12 +721,12 @@ const styles = StyleSheet.create({
   searchResultName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#000",
+    color: theme.colors.text,
     marginBottom: 2,
   },
   searchResultAddress: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   noResults: {
     padding: 32,
@@ -703,7 +734,7 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   content: {
     flex: 1,
@@ -716,11 +747,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.text,
     marginBottom: 16,
   },
   locationInputs: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     overflow: "hidden",
   },
@@ -729,10 +760,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: theme.colors.backgroundSecondary,
   },
   activeLocationInput: {
-    backgroundColor: "#F8F9FA",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   locationInputIcon: {
     width: 24,
@@ -745,20 +776,20 @@ const styles = StyleSheet.create({
   locationName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#000",
+    color: theme.colors.text,
     marginBottom: 2,
   },
   locationAddress: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   locationPlaceholder: {
     fontSize: 16,
-    color: "#999",
+    color: theme.colors.textSecondary,
   },
   priorityButtons: {
     flexDirection: "row",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 4,
     marginBottom: 16,
@@ -776,28 +807,28 @@ const styles = StyleSheet.create({
   priorityButtonText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   activePriorityButtonText: {
-    color: "#FFF",
+    color: theme.colors.background,
   },
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     padding: 16,
     borderRadius: 12,
   },
   toggleLabel: {
     fontSize: 16,
-    color: "#000",
+    color: theme.colors.text,
   },
   toggle: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -819,7 +850,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   generateButtonText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
@@ -827,13 +858,13 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFEBEE",
+    backgroundColor: theme.colors.backgroundSecondary,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
   },
   errorText: {
-    color: "#F44336",
+    color: theme.colors.error,
     fontSize: 14,
     marginLeft: 8,
     flex: 1,
@@ -843,7 +874,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   routeCard: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -852,7 +883,7 @@ const styles = StyleSheet.create({
   },
   selectedRouteCard: {
     borderColor: "theme.colors.secondary",
-    backgroundColor: "#F8FFF8",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   routeHeader: {
     flexDirection: "row",
@@ -866,12 +897,12 @@ const styles = StyleSheet.create({
   routeName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.text,
     marginBottom: 2,
   },
   routeType: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontWeight: "500",
   },
   safetyBadge: {
@@ -882,7 +913,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   safetyScore: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 14,
     fontWeight: "700",
   },
@@ -897,7 +928,7 @@ const styles = StyleSheet.create({
   },
   metricText: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginLeft: 4,
   },
 });

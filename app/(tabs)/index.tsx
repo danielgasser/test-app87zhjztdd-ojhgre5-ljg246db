@@ -774,7 +774,7 @@ export default function MapScreen() {
                 ? "Tap to view details"
                 : "Tap + to add this location"
             }
-            pinColor={theme.colors.primaryLight}
+            pinColor={theme.colors.primary}
           />
         )}
         {routeOrigin && (
@@ -838,7 +838,11 @@ export default function MapScreen() {
                 <Ionicons
                   name={heatMapVisible ? "thermometer" : "thermometer-outline"}
                   size={24}
-                  color={heatMapVisible ? theme.colors.textOnPrimary : theme.colors.text}
+                  color={
+                    heatMapVisible
+                      ? theme.colors.textOnPrimary
+                      : theme.colors.overlay
+                  }
                 />
                 <Text
                   style={[
@@ -865,7 +869,9 @@ export default function MapScreen() {
                   name={dangerZonesVisible ? "shield" : "shield-outline"}
                   size={24}
                   color={
-                    dangerZonesVisible ? theme.colors.textOnPrimary : theme.colors.text
+                    dangerZonesVisible
+                      ? theme.colors.textOnPrimary
+                      : theme.colors.overlay
                   }
                 />
                 <Text
@@ -895,54 +901,7 @@ export default function MapScreen() {
           />
         </TouchableOpacity>
       </View>
-      {/*
-      <View style={styles.heatMapContainer}>
-        <TouchableOpacity
-          style={[
-            styles.heatMapToggle,
-            heatMapVisible && styles.heatMapToggleActive,
-          ]}
-          onPress={handleToggleHeatMap}
-        >
-          <Ionicons
-            name={heatMapVisible ? "thermometer" : "thermometer-outline"}
-            size={24}
-            color={heatMapVisible ? theme.colors.textOnPrimary : {theme.colors.text}}
-          />
-          <Text
-            style={[
-              styles.heatMapToggleText,
-              heatMapVisible && styles.heatMapToggleTextActive,
-            ]}
-          >
-            {heatMapLoading ? "Loading..." : "Heat Map"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.dangerZoneContainer}>
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            dangerZonesVisible && styles.controlButtonActive,
-          ]}
-          onPress={handleToggleDangerZones}
-        >
-          <Ionicons
-            name={dangerZonesVisible ? "shield" : "shield-outline"}
-            size={24}
-            color={dangerZonesVisible ? theme.colors.textOnPrimary : {theme.colors.text}}
-          />
-          <Text
-            style={[
-              styles.controlButtonText,
-              dangerZonesVisible && styles.controlButtonTextActive,
-            ]}
-          >
-            {dangerZonesLoading ? "Loading..." : "Danger Zones"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      */}
+
       {selectedRoute && !navigationActive && (
         <View
           style={{
@@ -954,7 +913,10 @@ export default function MapScreen() {
           }}
         >
           <TouchableOpacity
-            style={[styles.mapControlButton, { backgroundColor: "#F44336" }]}
+            style={[
+              styles.mapControlButton,
+              { backgroundColor: theme.colors.error },
+            ]}
             onPress={() => {
               dispatch(clearRoutes());
               setRouteOrigin(null);
@@ -962,7 +924,7 @@ export default function MapScreen() {
               setMapKey((prev) => prev + 1);
             }}
           >
-            <Ionicons name="close" size={24} color="#FFF" />
+            <Ionicons name="close" size={24} color={theme.colors.background} />
           </TouchableOpacity>
           <Text
             style={{
@@ -980,7 +942,7 @@ export default function MapScreen() {
       {/* ML Loading indicator */}
       {Object.values(mlPredictionsLoading).some((loading) => loading) && (
         <View style={styles.mlLoadingContainer}>
-          <ActivityIndicator size="small" color="#2196F3" />
+          <ActivityIndicator size="small" color={theme.colors.primary} />
           <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>
         </View>
       )}
@@ -1000,13 +962,19 @@ export default function MapScreen() {
             </View>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendColor, { backgroundColor: "#FFC107" }]}
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: theme.colors.mixedYellow },
+                ]}
               />
               <Text style={styles.legendText}>Mixed</Text>
             </View>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendColor, { backgroundColor: "#F44336" }]}
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: theme.colors.error },
+                ]}
               />
               <Text style={styles.legendText}>Unsafe</Text>
             </View>
@@ -1023,19 +991,28 @@ export default function MapScreen() {
           <View style={styles.legendItems}>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendColor, { backgroundColor: "#F44336" }]}
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: theme.colors.error },
+                ]}
               />
               <Text style={styles.legendText}>High Risk</Text>
             </View>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendColor, { backgroundColor: "#FF9800" }]}
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: theme.colors.accent },
+                ]}
               />
               <Text style={styles.legendText}>Medium Risk</Text>
             </View>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendColor, { backgroundColor: "#FFC107" }]}
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: theme.colors.mixedYellow },
+                ]}
               />
               <Text style={styles.legendText}>Low Risk</Text>
             </View>
@@ -1056,7 +1033,7 @@ export default function MapScreen() {
                   : "add-circle"
               }
               size={24}
-              color="#FFF"
+              color={theme.colors.background}
             />
             <Text style={styles.addLocationText}>
               {(searchMarker.source || "database") === "database"
@@ -1068,7 +1045,11 @@ export default function MapScreen() {
             style={styles.closeSearchButton}
             onPress={() => setSearchMarker(null)}
           >
-            <Ionicons name="close-circle" size={28} color="#F44336" />
+            <Ionicons
+              name="close-circle"
+              size={28}
+              color={theme.colors.error}
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -1079,7 +1060,11 @@ export default function MapScreen() {
               style={styles.routeButton}
               onPress={handleStartRouteSelection}
             >
-              <Ionicons name="navigate" size={24} color="#FFF" />
+              <Ionicons
+                name="navigate"
+                size={24}
+                color={theme.colors.background}
+              />
               <Text style={styles.routeButtonText}>Plan Route</Text>
             </TouchableOpacity>
           ) : (
@@ -1093,7 +1078,11 @@ export default function MapScreen() {
                 style={styles.cancelButton}
                 onPress={handleCloseRoutePlanning}
               >
-                <Ionicons name="close" size={20} color="#FFF" />
+                <Ionicons
+                  name="close"
+                  size={20}
+                  color={theme.colors.background}
+                />
               </TouchableOpacity>
             </View>
           )}
@@ -1145,7 +1134,11 @@ export default function MapScreen() {
             style={styles.startNavButton}
             onPress={handleStartNavigationFromMap}
           >
-            <Ionicons name="navigate-circle" size={24} color="#FFF" />
+            <Ionicons
+              name="navigate-circle"
+              size={24}
+              color={theme.colors.background}
+            />
             <Text style={styles.startNavButtonText}>Start Navigation</Text>
           </TouchableOpacity>
 
@@ -1177,7 +1170,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   map: {
     flex: 1,
@@ -1189,7 +1182,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: "#ff3b30",
+    color: theme.colors.error,
     textAlign: "center",
     paddingHorizontal: 20,
   },
@@ -1236,12 +1229,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   startNavButtonText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: "700",
   },
   addLocationText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
@@ -1299,7 +1292,7 @@ const styles = StyleSheet.create({
   fabMenuText: {
     fontSize: 14,
     fontWeight: "600",
-    color: theme.colors.text},
+    color: theme.colors.text,
   },
   heatMapContainer: {
     position: "absolute",
@@ -1355,7 +1348,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     fontWeight: "600",
-    color: {theme.colors.text},
+    color: theme.colors.text,
   },
   heatMapToggleTextActive: {
     color: theme.colors.textOnPrimary,
@@ -1368,7 +1361,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: "#F44336",
+    borderColor: theme.colors.error,
     shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -1377,14 +1370,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   controlButtonActive: {
-    backgroundColor: "#F44336",
-    borderColor: "#F44336",
+    backgroundColor: theme.colors.error,
+    borderColor: theme.colors.error,
   },
   controlButtonText: {
     marginLeft: 6,
     fontSize: 14,
     fontWeight: "600",
-    color: {theme.colors.text},
+    color: theme.colors.text,
   },
   controlButtonTextActive: {
     color: theme.colors.textOnPrimary,
@@ -1415,12 +1408,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     borderWidth: 1,
-    borderColor: "#F44336",
+    borderColor: theme.colors.error,
   },
   legendTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: {theme.colors.text},
+    color: theme.colors.text,
     marginBottom: 8,
   },
   legendSubtitle: {
@@ -1457,7 +1450,7 @@ const styles = StyleSheet.create({
   },
   calloutPrediction: {
     fontSize: 14,
-    color: "#2196F3",
+    color: theme.colors.primary,
     fontWeight: "600",
     marginBottom: 3,
   },
@@ -1468,7 +1461,7 @@ const styles = StyleSheet.create({
   },
   calloutNote: {
     fontSize: 11,
-    color: "#888",
+    color: theme.colors.textSecondary,
     fontStyle: "italic",
   },
   mlLoadingContainer: {
@@ -1490,7 +1483,7 @@ const styles = StyleSheet.create({
   mlLoadingText: {
     marginLeft: 8,
     fontSize: 12,
-    color: "#2196F3",
+    color: theme.colors.primary,
     fontWeight: "600",
   },
   routeControls: {
@@ -1510,7 +1503,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   routeButtonText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
@@ -1525,7 +1518,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   routeModeText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 16,
     fontWeight: "500",
     flex: 1,
@@ -1538,7 +1531,7 @@ const styles = StyleSheet.create({
     top: 100,
     left: 20,
     right: 20,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     shadowColor: theme.colors.text,
@@ -1567,7 +1560,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   segmentToggleText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 12,
     fontWeight: "500",
   },
@@ -1597,7 +1590,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   routeDetailsButtonText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 14,
     fontWeight: "600",
   },

@@ -16,6 +16,8 @@ import { supabase } from "src/services/supabase";
 import { ReviewWithUser } from "src/types/supabase";
 import PredictionBadge from "./PredictionBadge";
 import { googlePlacesService, PlaceDetails } from "@/services/googlePlaces";
+import { theme } from "@/styles/theme";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 interface LocationDetailsModalProps {
   visible: boolean;
@@ -169,9 +171,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   };
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 4) return "theme.colors.secondary";
-    if (rating >= 3) return "#FFC107";
-    return "#F44336";
+    if (rating >= 4) return APP_CONFIG.MAP_MARKERS.COLOR_SAFE;
+    if (rating >= 3) return APP_CONFIG.MAP_MARKERS.COLOR_MIXED;
+    return APP_CONFIG.MAP_MARKERS.COLOR_UNSAFE;
   };
 
   const renderStars = (rating: number) => {
@@ -182,7 +184,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
             key={star}
             name={star <= rating ? "star" : "star-outline"}
             size={16}
-            color={star <= rating ? "#FFB800" : "#E0E0E0"}
+            color={
+              star <= rating
+                ? theme.colors.mixedYellow
+                : theme.colors.backgroundSecondary
+            }
           />
         ))}
       </View>
@@ -231,13 +237,13 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Location Details</Text>
             <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#333" />
+              <Ionicons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="theme.colors.secondary" />
+              <ActivityIndicator size="large" color={theme.colors.secondary} />
             </View>
           ) : selectedLocation || googlePlaceId ? (
             <ScrollView
@@ -282,8 +288,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         size={16}
                         color={
                           placeDetails.opening_hours.open_now
-                            ? "theme.colors.secondary"
-                            : "#F44336"
+                            ? theme.colors.secondary
+                            : theme.colors.error
                         }
                       />
                       <Text
@@ -292,8 +298,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           fontSize: 14,
                           fontWeight: "600",
                           color: placeDetails.opening_hours.open_now
-                            ? "theme.colors.secondary"
-                            : "#F44336",
+                            ? theme.colors.secondary
+                            : theme.colors.error,
                         }}
                       >
                         {placeDetails.opening_hours.open_now
@@ -305,14 +311,24 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 )}
 
                 {placeDetails?.formatted_phone_number && (
-                  <Text style={{ fontSize: 14, color: "#666", marginTop: 4 }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: theme.colors.textSecondary,
+                      marginTop: 4,
+                    }}
+                  >
                     📞 {placeDetails.formatted_phone_number}
                   </Text>
                 )}
 
                 {placeDetails?.website && (
                   <Text
-                    style={{ fontSize: 14, color: "#2196F3", marginTop: 4 }}
+                    style={{
+                      fontSize: 14,
+                      color: theme.colors.primary,
+                      marginTop: 4,
+                    }}
                     numberOfLines={1}
                   >
                     🌐 {placeDetails.website}
@@ -357,7 +373,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   style={styles.writeReviewButton}
                   onPress={handleWriteReview}
                 >
-                  <Ionicons name="create-outline" size={20} color="#FFF" />
+                  <Ionicons
+                    name="create-outline"
+                    size={20}
+                    color={theme.colors.card}
+                  />
                   <Text style={styles.writeReviewText}>Write a Review</Text>
                 </TouchableOpacity>
               )}
@@ -366,7 +386,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   <Ionicons
                     name="checkmark-circle"
                     size={20}
-                    color="theme.colors.secondary"
+                    color={theme.colors.secondary}
                   />
                   <Text style={styles.alreadyReviewedText}>
                     You've reviewed this location
@@ -381,7 +401,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   {loadingReviews ? (
                     <ActivityIndicator
                       size="small"
-                      color="theme.colors.secondary"
+                      color={theme.colors.secondary}
                     />
                   ) : reviews.length > 0 ? (
                     reviews.map((review) => (
@@ -401,7 +421,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                               });
                             }}
                           >
-                            <Ionicons name="pencil" size={18} color="#FFF" />
+                            <Ionicons
+                              name="pencil"
+                              size={18}
+                              color={theme.colors.card}
+                            />
                             <Text style={styles.editButtonText}>
                               Edit Review
                             </Text>
@@ -491,7 +515,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 const styles = StyleSheet.create({
   alreadyReviewedBadge: {
     flexDirection: "row",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.backgroundSecondary,
     margin: 16,
     padding: 16,
     borderRadius: 8,
@@ -500,7 +524,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   alreadyReviewedText: {
-    color: "theme.colors.secondary",
+    color: theme.colors.secondary,
     fontSize: 16,
     fontWeight: "500",
   },
@@ -511,20 +535,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#2196F3",
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
     zIndex: 10,
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   editButtonText: {
     fontSize: 14,
-    color: "#FFF",
+    color: theme.colors.card,
     fontWeight: "600",
   },
   modalOverlay: {
@@ -533,7 +557,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "90%",
@@ -545,12 +569,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.backgroundSecondary,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   loadingContainer: {
     padding: 40,
@@ -562,22 +586,22 @@ const styles = StyleSheet.create({
   locationSection: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.backgroundSecondary,
   },
   locationName: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 4,
   },
   locationAddress: {
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   locationType: {
     fontSize: 14,
-    color: "#999",
+    color: theme.colors.text,
     textTransform: "capitalize",
   },
   safetyScoreContainer: {
@@ -596,15 +620,15 @@ const styles = StyleSheet.create({
   safetyScoreText: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#FFF",
+    color: theme.colors.card,
   },
   reviewCountText: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   writeReviewButton: {
     flexDirection: "row",
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.secondary,
     margin: 16,
     padding: 16,
     borderRadius: 8,
@@ -613,7 +637,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   writeReviewText: {
-    color: "#FFF",
+    color: theme.colors.card,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -623,11 +647,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 16,
   },
   reviewCard: {
-    backgroundColor: "#F8F9FA",
+    backgroundColor: theme.colors.backgroundSecondary,
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -641,11 +665,11 @@ const styles = StyleSheet.create({
   reviewerName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   reviewerDemographics: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginTop: 2,
   },
   starsContainer: {
@@ -655,12 +679,12 @@ const styles = StyleSheet.create({
   reviewTitle: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   reviewContent: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -676,7 +700,7 @@ const styles = StyleSheet.create({
   },
   ratingLabel: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.text,
   },
   ratingValue: {
     fontSize: 12,
@@ -684,12 +708,12 @@ const styles = StyleSheet.create({
   },
   reviewDate: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.text,
   },
   noReviewsText: {
     textAlign: "center",
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
     paddingVertical: 32,
   },
 });
