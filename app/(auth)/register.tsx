@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
     borderRadius: 8,
     fontSize: 18,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: theme.colors.inputBackground,
   },
   button: {
     backgroundColor: theme.colors.primary,

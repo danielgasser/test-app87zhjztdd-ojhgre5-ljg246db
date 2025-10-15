@@ -166,11 +166,11 @@ export default function CommunityScreen() {
     const getSeverityColor = () => {
       switch (insight.severity) {
         case "high":
-          return "#FF6B6B";
+          return theme.colors.error;
         case "medium":
-          return "#FFA500";
+          return theme.colors.mixedYellow;
         case "low":
-          return "theme.colors.secondary";
+          return theme.colors.secondary;
         default:
           return theme.colors.textSecondary;
       }
@@ -179,13 +179,13 @@ export default function CommunityScreen() {
     const getSeverityBg = () => {
       switch (insight.severity) {
         case "high":
-          return "#FFF5F5";
+          return theme.colors.backgroundSecondary;
         case "medium":
-          return "#FFF8E6";
+          return theme.colors.backgroundSecondary;
         case "low":
-          return "#F0F8F5";
+          return theme.colors.backgroundSecondary;
         default:
-          return "#F5F5F5";
+          return theme.colors.backgroundSecondary;
       }
     };
 
@@ -274,7 +274,7 @@ export default function CommunityScreen() {
   const renderSafetyUpdateItem = () => (
     <View style={styles.safetyUpdateCard}>
       <View style={styles.updateIcon}>
-        <Ionicons name="alert-circle" size={24} color="#FF9500" />
+        <Ionicons name="alert-circle" size={24} color={theme.colors.accent} />
       </View>
       <View style={styles.updateContent}>
         <Text style={styles.updateTitle}>Construction on Main St</Text>

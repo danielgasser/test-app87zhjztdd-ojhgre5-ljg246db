@@ -373,7 +373,7 @@ export default function OnboardingScreen() {
               {race}
             </Text>
             {formData.race_ethnicity.includes(race) && (
-              <Ionicons name="checkmark" size={20} color="#fff" />
+              <Ionicons name="checkmark" size={20} color={theme.colors.card} />
             )}
           </TouchableOpacity>
         ))}
@@ -410,10 +410,21 @@ export default function OnboardingScreen() {
             Platform.OS === "ios" ? styles.iosPicker : styles.androidPicker
           }
           itemStyle={Platform.OS === "ios" ? styles.iosPickerItem : undefined}
+          dropdownIconColor={theme.colors.primary}
+          mode="dropdown"
         >
-          <Picker.Item label="Select gender identity" value="" />
+          <Picker.Item
+            label="Select gender identity"
+            value=""
+            color={theme.colors.textSecondary}
+          />
           {DEMOGRAPHIC_OPTIONS.gender.map((gender) => (
-            <Picker.Item key={gender} label={gender} value={gender} />
+            <Picker.Item
+              key={gender}
+              label={gender}
+              value={gender}
+              color={theme.colors.text}
+            />
           ))}
         </Picker>
       </View>
@@ -508,7 +519,11 @@ export default function OnboardingScreen() {
                 {disability}
               </Text>
               {formData.disability_status.includes(disability) && (
-                <Ionicons name="checkmark" size={20} color="#fff" />
+                <Ionicons
+                  name="checkmark"
+                  size={20}
+                  color={theme.colors.card}
+                />
               )}
             </TouchableOpacity>
           )
@@ -631,7 +646,7 @@ export default function OnboardingScreen() {
           }
         >
           <View style={styles.privacyHeader}>
-            <Ionicons name="eye-off" size={24} color="#FF9800" />
+            <Ionicons name="eye-off" size={24} color={theme.colors.accent} />
             <Text style={styles.privacyTitle}>Anonymous</Text>
           </View>
           <Text style={styles.privacyDescription}>
@@ -648,7 +663,7 @@ export default function OnboardingScreen() {
           onPress={() => setFormData({ ...formData, privacy_level: "private" })}
         >
           <View style={styles.privacyHeader}>
-            <Ionicons name="lock-closed" size={24} color="#F44336" />
+            <Ionicons name="lock-closed" size={24} color={theme.colors.error} />
             <Text style={styles.privacyTitle}>Private</Text>
           </View>
           <Text style={styles.privacyDescription}>
@@ -899,15 +914,15 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.card,
   },
   optionSelected: {
-    borderColor: theme.colors.inputBorder,
-    backgroundColor: theme.colors.inputBackground,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   optionText: {
     fontSize: 16,
     color: theme.colors.text,
   },
   optionTextSelected: {
-    color: theme.colors.card,
+    color: theme.colors.textOnPrimary,
   },
   pickerContainer: {
     alignSelf: "stretch",
@@ -940,8 +955,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.card,
   },
   toggleButtonSelected: {
-    borderColor: theme.colors.inputBorder,
-    backgroundColor: theme.colors.card,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   toggleText: {
     fontSize: 16,
@@ -962,8 +977,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.card,
   },
   privacyOptionSelected: {
-    borderColor: theme.colors.inputBorder,
-    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primaryLight + "20",
   },
   privacyHeader: {
     flexDirection: "row",
@@ -988,7 +1003,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     marginTop: 20,
     padding: theme.spacing.md,
-    backgroundColor: "#F8F8F8",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 8,
   },
   toggleLabel: {
@@ -1055,7 +1070,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   nextButtonText: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
     fontSize: 16,
     fontWeight: "600",
   },
