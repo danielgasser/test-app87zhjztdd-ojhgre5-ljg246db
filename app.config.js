@@ -10,7 +10,7 @@ module.exports = {
     splash: {
       image: "./assets/images/splash-icon.png",
       resizeMode: "contain",
-      backgroundColor: theme.colors.card,
+      backgroundColor: "#ffffff",
     },
     ios: {
       supportsTablet: false,
@@ -30,7 +30,7 @@ module.exports = {
       },
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: theme.colors.card,
+        backgroundColor: "#FFFFFF",
       },
       package: "com.safepath.app",
     },

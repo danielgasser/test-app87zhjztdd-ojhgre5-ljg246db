@@ -22,7 +22,7 @@ export const APP_CONFIG = {
 
   // Map Marker Colors & Thresholds
   MAP_MARKERS: {
-    COLOR_SAFE: 'theme.colors.secondary',                     // Green for safe (4+)
+    COLOR_SAFE: '#4CAF50',                     // Green for safe (4+)
     COLOR_MIXED: '#FFC107',                    // Yellow for mixed (3-3.9)
     COLOR_MEDIUM: '#FF9800',                    // Yellow for mixed (3-3.9)
     COLOR_UNSAFE: '#F44336',                   // Red for unsafe (<3)
@@ -76,7 +76,7 @@ export const APP_CONFIG = {
     MIN_RADIUS: 200,                           // Minimum circle radius
     MAX_RADIUS: 2000,                          // Maximum circle radius
     COLORS: {
-      VERY_SAFE: "theme.colors.secondary60",    // Green - 4.5+
+      VERY_SAFE: "#4CAF5060",    // Green - 4.5+
       SAFE: "#8BC34A60",         // Light green - 3.5+
       NEUTRAL: "#FFC10760",      // Yellow - 2.5+
       UNSAFE: "#FF572260",       // Orange - 1.5+
@@ -173,7 +173,7 @@ export const APP_CONFIG = {
   ROUTE_DISPLAY: {
     // Route Line Colors
     COLORS: {
-      SAFE_ROUTE: 'theme.colors.secondary',                         // Green for safe routes
+      SAFE_ROUTE: '#4CAF50',                         // Green for safe routes
       MIXED_ROUTE: '#FFC107',                        // Yellow for mixed safety routes  
       UNSAFE_ROUTE: '#F44336',                       // Red for unsafe routes
       SELECTED_ROUTE: 'theme.colors.primary',                     // Purple for selected route

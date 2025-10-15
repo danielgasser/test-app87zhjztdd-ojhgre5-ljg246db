@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SmartRouteComparison } from "../store/locationsSlice";
+import { theme } from "@/styles/theme";
 
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
@@ -25,9 +26,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
 
   // Helper function to get safety score color
   const getSafetyColor = (score: number): string => {
-    if (score >= 4.0) return "theme.colors.secondary"; // Green
-    if (score >= 3.0) return "#FFC107"; // Yellow
-    return "#F44336"; // Red
+    if (score >= 4.0) return theme.colors.success; // Green
+    if (score >= 3.0) return theme.colors.mixedYellow; // Yellow
+    return theme.colors.error; // Red
   };
 
   return (
@@ -74,13 +75,17 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           </View>
           <View style={styles.routeMetrics}>
             <View style={styles.metric}>
-              <Ionicons name="time-outline" size={16} color="#666" />
+              <Ionicons
+                name="time-outline"
+                size={16}
+                color={theme.colors.textSecondary}
+              />
               <Text style={styles.metricText}>
                 {original_route.estimated_duration_minutes} min
               </Text>
             </View>
             <View style={styles.metric}>
-              <Ionicons name="warning" size={16} color="#F44336" />
+              <Ionicons name="warning" size={16} color={theme.colors.error} />
               <Text style={styles.metricText}>
                 {improvement_summary.danger_zones_avoided} danger zones
               </Text>
@@ -118,7 +123,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           </View>
           <View style={styles.routeMetrics}>
             <View style={styles.metric}>
-              <Ionicons name="time-outline" size={16} color="#666" />
+              <Ionicons
+                name="time-outline"
+                size={16}
+                color={theme.colors.textSecondary}
+              />
               <Text style={styles.metricText}>
                 {optimized_route.estimated_duration_minutes} min
                 <Text style={styles.addedTime}>
@@ -158,7 +167,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           </Text>
           {waypoints_added.map((waypoint, index) => (
             <View key={index} style={styles.waypointItem}>
-              <Ionicons name="location" size={14} color="#666" />
+              <Ionicons
+                name="location"
+                size={14}
+                color={theme.colors.textSecondary}
+              />
               <Text style={styles.waypointReason}>{waypoint.reason}</Text>
             </View>
           ))}
@@ -169,9 +182,17 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           style={styles.startNavigationButton}
           onPress={onStartNavigation}
         >
-          <Ionicons name="navigate-circle" size={28} color="#FFF" />
+          <Ionicons
+            name="navigate-circle"
+            size={28}
+            color={theme.colors.background}
+          />
           <Text style={styles.startNavigationText}>Start Navigation</Text>
-          <Ionicons name="arrow-forward" size={20} color="#FFF" />
+          <Ionicons
+            name="arrow-forward"
+            size={20}
+            color={theme.colors.background}
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -180,11 +201,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     marginVertical: 16,
-    shadowColor: "#000",
+    shadowColor: theme.colors.backdrop,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -198,13 +219,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.backdrop,
     marginLeft: 8,
   },
   improvementBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.backgroundSecondary,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
@@ -212,7 +233,7 @@ const styles = StyleSheet.create({
   improvementText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#2E7D32",
+    color: theme.colors.success,
     marginLeft: 8,
   },
   routesContainer: {
@@ -222,27 +243,27 @@ const styles = StyleSheet.create({
   },
   routeCard: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 8,
     padding: 12,
     borderWidth: 2,
     borderColor: "transparent",
   },
   recommendedCard: {
-    backgroundColor: "#F3E5F5",
-    borderColor: "theme.colors.primary",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderColor: theme.colors.primary,
   },
   recommendedBadge: {
     position: "absolute",
     top: -8,
     right: 8,
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
   },
   recommendedText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 10,
     fontWeight: "700",
   },
@@ -256,7 +277,7 @@ const styles = StyleSheet.create({
   routeLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.backdrop,
   },
   safetyBadge: {
     paddingHorizontal: 8,
@@ -264,7 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   safetyScore: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 12,
     fontWeight: "700",
   },
@@ -278,21 +299,21 @@ const styles = StyleSheet.create({
   },
   metricText: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginLeft: 4,
   },
   addedTime: {
-    color: "#FF9800",
+    color: theme.colors.accent,
     fontWeight: "600",
   },
   selectButton: {
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.backgroundSecondary,
     paddingVertical: 8,
     borderRadius: 6,
     alignItems: "center",
   },
   selectButtonText: {
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
   },
@@ -300,19 +321,19 @@ const styles = StyleSheet.create({
     backgroundColor: "theme.colors.primary",
   },
   primaryButtonText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 13,
     fontWeight: "600",
   },
   waypointsSection: {
     borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
+    borderTopColor: theme.colors.backgroundSecondary,
     paddingTop: 12,
   },
   waypointsTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.backdrop,
     marginBottom: 8,
   },
   waypointItem: {
@@ -322,7 +343,7 @@ const styles = StyleSheet.create({
   },
   waypointReason: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginLeft: 6,
     flex: 1,
   },
@@ -336,14 +357,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 16,
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.backdrop,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   startNavigationText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 18,
     fontWeight: "700",
   },

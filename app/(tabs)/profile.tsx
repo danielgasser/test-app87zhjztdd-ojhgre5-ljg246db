@@ -208,7 +208,11 @@ export default function ProfileScreen() {
               </>
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={50} color="#999" />
+                <Ionicons
+                  name="person"
+                  size={50}
+                  color={theme.colors.textLight}
+                />
               </View>
             )}
             <View style={styles.cameraIcon}>
@@ -264,7 +268,11 @@ export default function ProfileScreen() {
                 color={theme.colors.text}
               />
               <Text style={styles.menuText}>Notifications</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#999" />
+              <MaterialIcons
+                name="chevron-right"
+                size={24}
+                color={theme.colors.textLight}
+              />
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem}>
               <MaterialIcons
@@ -273,7 +281,11 @@ export default function ProfileScreen() {
                 color={theme.colors.text}
               />
               <Text style={styles.menuText}>Privacy</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#999" />
+              <MaterialIcons
+                name="chevron-right"
+                size={24}
+                color={theme.colors.textLight}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -289,7 +301,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   header: {
     alignItems: "center",
@@ -311,11 +323,11 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: theme.colors.inputBackground,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#e0e0e0",
+    borderColor: theme.colors.inputBorder,
   },
   cameraIcon: {
     position: "absolute",

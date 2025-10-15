@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/styles/theme";
 
 interface MLPrediction {
   confidence: number;
@@ -19,7 +20,11 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
   if (loading) {
     return (
       <View style={styles.container}>
-        <Ionicons name="hourglass-outline" size={16} color="#666" />
+        <Ionicons
+          name="hourglass-outline"
+          size={16}
+          color={theme.colors.textSecondary}
+        />
         <Text style={styles.loadingText}>Getting AI prediction...</Text>
       </View>
     );
@@ -35,16 +40,16 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 
   // Determine badge color based on confidence
   const getBadgeColor = (confidence: number) => {
-    if (confidence >= 70) return "theme.colors.secondary"; // Green - High confidence
-    if (confidence >= 30) return "#FF9800"; // Orange - Medium confidence
-    return "#F44336"; // Red - Low confidence
+    if (confidence >= 70) return theme.colors.success; // Green - High confidence
+    if (confidence >= 30) return theme.colors.accent; // Orange - Medium confidence
+    return theme.colors.error; // Red - Low confidence
   };
 
   const badgeColor = getBadgeColor(confidencePercent);
 
   return (
     <View style={[styles.container, { backgroundColor: badgeColor }]}>
-      <Ionicons name="bulb" size={16} color="#FFF" />
+      <Ionicons name="bulb" size={16} color={theme.colors.background} />
       <Text style={styles.predictionText}>
         AI Prediction: {prediction.predicted_safety_score.toFixed(1)}/5
       </Text>
@@ -66,17 +71,17 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   predictionText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 14,
     fontWeight: "600",
   },
   confidenceText: {
-    color: "#FFF",
+    color: theme.colors.background,
     fontSize: 12,
     opacity: 0.9,
   },
   loadingText: {
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontSize: 14,
   },
 });

@@ -176,7 +176,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <Ionicons
           name={item.source === "database" ? "storefront" : "location-outline"}
           size={20}
-          color={item.source === "database" ? "theme.colors.secondary" : "#666"}
+          color={
+            item.source === "database"
+              ? theme.colors.secondary
+              : theme.colors.textSecondary
+          }
         />
       </View>
       <View style={styles.resultTextContainer}>
@@ -197,7 +201,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <Ionicons
               name="search"
               size={20}
-              color="#666"
+              color={theme.colors.textSecondary}
               style={styles.searchIcon}
             />
             <TextInput
@@ -220,9 +224,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 onPress={handleClear}
               >
                 {searchLoading ? (
-                  <ActivityIndicator size="small" color="#666" />
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.textSecondary}
+                  />
                 ) : (
-                  <Ionicons name="close-circle" size={20} color="#666" />
+                  <Ionicons
+                    name="close-circle"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
                 )}
               </TouchableOpacity>
             )}
@@ -268,9 +279,9 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   searchContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.overlay,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -288,17 +299,17 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
   },
   clearButton: {
     marginLeft: 8,
   },
   resultsContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     marginTop: 4,
     maxHeight: 300,
-    shadowColor: "#000",
+    shadowColor: theme.colors.overlay,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -313,7 +324,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: theme.colors.border,
   },
   resultIconContainer: {
     marginRight: 12,
@@ -324,12 +335,12 @@ const styles = StyleSheet.create({
   resultName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 2,
   },
   resultAddress: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   hasReviewsText: {
     fontSize: 12,
@@ -338,12 +349,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   noResultsContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     marginTop: 4,
     padding: theme.spacing.lg,
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: theme.colors.overlay,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -351,12 +362,12 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 4,
   },
   noResultsSubtext: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
 });
 

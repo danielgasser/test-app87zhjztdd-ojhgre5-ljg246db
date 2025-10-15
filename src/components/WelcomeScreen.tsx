@@ -142,11 +142,18 @@ const WelcomeScreenNew = () => {
               <Text style={styles.pinLabel}>Safe</Text>
             </View>
             <View style={styles.mapPin2}>
-              <View style={[styles.pin, { backgroundColor: "#FFC107" }]} />
+              <View
+                style={[
+                  styles.pin,
+                  { backgroundColor: theme.colors.mixedYellow },
+                ]}
+              />
               <Text style={styles.pinLabel}>Caution</Text>
             </View>
             <View style={styles.mapPin3}>
-              <View style={[styles.pin, { backgroundColor: "#F44336" }]} />
+              <View
+                style={[styles.pin, { backgroundColor: theme.colors.error }]}
+              />
               <Text style={styles.pinLabel}>Avoid</Text>
             </View>
           </View>
@@ -259,7 +266,7 @@ const getStyles = (isDark: boolean) =>
     logoText: {
       fontSize: 28,
       fontWeight: "bold",
-      color: "#FFFFFF",
+      color: theme.colors.background,
       textAlign: "center",
     },
     heroSection: {
@@ -269,7 +276,7 @@ const getStyles = (isDark: boolean) =>
     heroTitle: {
       fontSize: 33,
       fontWeight: "bold",
-      color: "#FFFFFF",
+      color: theme.colors.background,
       textAlign: "center",
       lineHeight: 42,
       marginBottom: 16,
@@ -277,7 +284,7 @@ const getStyles = (isDark: boolean) =>
     heroAccent: {
       fontSize: 24,
       fontWeight: "bold",
-      color: "#FFD700",
+      color: theme.colors.mixedYellow,
     },
     heroSubtitle: {
       fontSize: 18,
@@ -326,7 +333,7 @@ const getStyles = (isDark: boolean) =>
     },
     pinLabel: {
       fontSize: 15,
-      color: "#FFFFFF",
+      color: theme.colors.background,
       fontWeight: "600",
     },
     benefitsContainer: {
@@ -373,7 +380,7 @@ const getStyles = (isDark: boolean) =>
     primaryButtonText: {
       fontSize: 18,
       fontWeight: "bold",
-      color: "#FFFFFF",
+      color: theme.colors.background,
     },
     secondaryButton: {
       width: "100%",
@@ -389,7 +396,7 @@ const getStyles = (isDark: boolean) =>
     secondaryButtonText: {
       fontSize: 18,
       fontWeight: "600",
-      color: "#FFFFFF",
+      color: theme.colors.background,
     },
     demoButton: {
       width: "100%",
