@@ -35,7 +35,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="analytics" size={24} color="theme.colors.primary" />
+        <Ionicons name="analytics" size={24} color={theme.colors.primary} />
         <Text style={styles.headerTitle}>Safer Route Found!</Text>
       </View>
 
@@ -44,7 +44,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
         <Ionicons
           name="shield-checkmark"
           size={20}
-          color="theme.colors.secondary"
+          color={theme.colors.secondary}
         />
         <Text style={styles.improvementText}>
           Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
@@ -140,7 +140,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               <Ionicons
                 name="shield-checkmark"
                 size={16}
-                color="theme.colors.secondary"
+                color={theme.colors.secondary}
               />
               <Text style={styles.metricText}>Avoids danger zones</Text>
             </View>
@@ -161,7 +161,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             <Ionicons
               name="navigate-circle"
               size={16}
-              color="theme.colors.primary"
+              color={theme.colors.primary}
             />{" "}
             Safe Detours Added
           </Text>
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   primaryButton: {
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
   },
   primaryButtonText: {
     color: theme.colors.background,
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   // ADD THESE:
   startNavigationButton: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.secondary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

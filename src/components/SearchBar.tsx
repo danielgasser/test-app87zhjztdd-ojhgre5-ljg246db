@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   hasReviewsText: {
     fontSize: 12,
-    color: "theme.colors.secondary",
+    color: theme.colors.secondary,
     fontWeight: "500",
     marginTop: 2,
   },

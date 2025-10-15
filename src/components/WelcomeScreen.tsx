@@ -136,7 +136,7 @@ const WelcomeScreenNew = () => {
               <View
                 style={[
                   styles.pin,
-                  { backgroundColor: "theme.colors.secondary" },
+                  { backgroundColor: theme.colors.secondary },
                 ]}
               />
               <Text style={styles.pinLabel}>Safe</Text>
