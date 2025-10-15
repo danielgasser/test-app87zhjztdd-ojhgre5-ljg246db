@@ -25,7 +25,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
 
   // Helper function to get safety score color
   const getSafetyColor = (score: number): string => {
-    if (score >= 4.0) return "#4CAF50"; // Green
+    if (score >= 4.0) return "theme.colors.secondary"; // Green
     if (score >= 3.0) return "#FFC107"; // Yellow
     return "#F44336"; // Red
   };
@@ -34,13 +34,17 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="analytics" size={24} color="#8E24AA" />
+        <Ionicons name="analytics" size={24} color="theme.colors.primary" />
         <Text style={styles.headerTitle}>Safer Route Found!</Text>
       </View>
 
       {/* Improvement Summary */}
       <View style={styles.improvementBanner}>
-        <Ionicons name="shield-checkmark" size={20} color="#4CAF50" />
+        <Ionicons
+          name="shield-checkmark"
+          size={20}
+          color="theme.colors.secondary"
+        />
         <Text style={styles.improvementText}>
           Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
           points
@@ -124,7 +128,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               </Text>
             </View>
             <View style={styles.metric}>
-              <Ionicons name="shield-checkmark" size={16} color="#4CAF50" />
+              <Ionicons
+                name="shield-checkmark"
+                size={16}
+                color="theme.colors.secondary"
+              />
               <Text style={styles.metricText}>Avoids danger zones</Text>
             </View>
           </View>
@@ -141,8 +149,12 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
       {waypoints_added && waypoints_added.length > 0 && (
         <View style={styles.waypointsSection}>
           <Text style={styles.waypointsTitle}>
-            <Ionicons name="navigate-circle" size={16} color="#8E24AA" /> Safe
-            Detours Added
+            <Ionicons
+              name="navigate-circle"
+              size={16}
+              color="theme.colors.primary"
+            />{" "}
+            Safe Detours Added
           </Text>
           {waypoints_added.map((waypoint, index) => (
             <View key={index} style={styles.waypointItem}>
@@ -218,13 +230,13 @@ const styles = StyleSheet.create({
   },
   recommendedCard: {
     backgroundColor: "#F3E5F5",
-    borderColor: "#8E24AA",
+    borderColor: "theme.colors.primary",
   },
   recommendedBadge: {
     position: "absolute",
     top: -8,
     right: 8,
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
@@ -285,7 +297,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   primaryButton: {
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
   },
   primaryButtonText: {
     color: "#FFF",
@@ -316,7 +328,7 @@ const styles = StyleSheet.create({
   },
   // ADD THESE:
   startNavigationButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

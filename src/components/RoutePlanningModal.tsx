@@ -367,7 +367,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         <Ionicons
           name={type === "from" ? "radio-button-on" : "location"}
           size={20}
-          color={type === "from" ? "#4CAF50" : "#F44336"}
+          color={type === "from" ? "theme.colors.secondary" : "#F44336"}
         />
       </View>
       <View style={styles.locationInputContent}>
@@ -406,7 +406,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Get safety badge color
   const getSafetyBadgeColor = (score: number): string => {
-    if (score >= 4.0) return "#4CAF50";
+    if (score >= 4.0) return "theme.colors.secondary";
     if (score >= 3.0) return "#FFC107";
     return "#F44336";
   };
@@ -443,7 +443,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 autoFocus
               />
               {searchLoading && (
-                <ActivityIndicator size="small" color="#8E24AA" />
+                <ActivityIndicator size="small" color="theme.colors.primary" />
               )}
             </View>
 
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   activePriorityButton: {
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
   },
   priorityButtonText: {
     fontSize: 12,
@@ -802,13 +802,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   toggleActive: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
   },
   generateButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -851,7 +851,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   selectedRouteCard: {
-    borderColor: "#4CAF50",
+    borderColor: "theme.colors.secondary",
     backgroundColor: "#F8FFF8",
   },
   routeHeader: {

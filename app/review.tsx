@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#4CAF50",
+    borderColor: "theme.colors.secondary",
   },
   helperText: {
     fontSize: 12,
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   submitButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: "center",
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

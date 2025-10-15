@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: "center",
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     borderColor: "#E0E0E0",
   },
   submitButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
   },
   buttonDisabled: {
     backgroundColor: "#CCCCCC",
