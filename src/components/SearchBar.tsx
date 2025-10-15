@@ -176,7 +176,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <Ionicons
           name={item.source === "database" ? "storefront" : "location-outline"}
           size={20}
-          color={item.source === "database" ? "#4CAF50" : "#666"}
+          color={item.source === "database" ? "theme.colors.secondary" : "#666"}
         />
       </View>
       <View style={styles.resultTextContainer}>
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   hasReviewsText: {
     fontSize: 12,
-    color: "#4CAF50",
+    color: "theme.colors.secondary",
     fontWeight: "500",
     marginTop: 2,
   },

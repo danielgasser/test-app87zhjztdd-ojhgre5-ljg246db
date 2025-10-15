@@ -169,7 +169,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   };
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 4) return "#4CAF50";
+    if (rating >= 4) return "theme.colors.secondary";
     if (rating >= 3) return "#FFC107";
     return "#F44336";
   };
@@ -237,7 +237,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#4CAF50" />
+              <ActivityIndicator size="large" color="theme.colors.secondary" />
             </View>
           ) : selectedLocation || googlePlaceId ? (
             <ScrollView
@@ -282,7 +282,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         size={16}
                         color={
                           placeDetails.opening_hours.open_now
-                            ? "#4CAF50"
+                            ? "theme.colors.secondary"
                             : "#F44336"
                         }
                       />
@@ -292,7 +292,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           fontSize: 14,
                           fontWeight: "600",
                           color: placeDetails.opening_hours.open_now
-                            ? "#4CAF50"
+                            ? "theme.colors.secondary"
                             : "#F44336",
                         }}
                       >
@@ -363,7 +363,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               )}
               {currentUser && userHasReviewed && (
                 <View style={styles.alreadyReviewedBadge}>
-                  <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={20}
+                    color="theme.colors.secondary"
+                  />
                   <Text style={styles.alreadyReviewedText}>
                     You've reviewed this location
                   </Text>
@@ -375,7 +379,10 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   <Text style={styles.sectionTitle}>Recent Reviews</Text>
 
                   {loadingReviews ? (
-                    <ActivityIndicator size="small" color="#4CAF50" />
+                    <ActivityIndicator
+                      size="small"
+                      color="theme.colors.secondary"
+                    />
                   ) : reviews.length > 0 ? (
                     reviews.map((review) => (
                       <View key={review.id} style={styles.reviewCard}>
@@ -493,7 +500,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   alreadyReviewedText: {
-    color: "#4CAF50",
+    color: "theme.colors.secondary",
     fontSize: 16,
     fontWeight: "500",
   },
@@ -597,7 +604,7 @@ const styles = StyleSheet.create({
   },
   writeReviewButton: {
     flexDirection: "row",
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     margin: 16,
     padding: 16,
     borderRadius: 8,

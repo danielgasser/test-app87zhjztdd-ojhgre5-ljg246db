@@ -170,7 +170,7 @@ export default function CommunityScreen() {
         case "medium":
           return "#FFA500";
         case "low":
-          return "#4CAF50";
+          return "theme.colors.secondary";
         default:
           return "#666";
       }

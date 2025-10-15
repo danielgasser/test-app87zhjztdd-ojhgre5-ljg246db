@@ -51,6 +51,7 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
 import { supabase } from "@/services/supabase";
 import NavigationMode from "src/components/NavigationMode";
+import { commonStyles } from "@/styles/common";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -879,13 +880,13 @@ export default function MapScreen() {
 
         {/* FAB Button */}
         <TouchableOpacity
-          style={[styles.fab, fabMenuOpen && styles.fabOpen]}
+          style={[commonStyles.primaryButton, fabMenuOpen && styles.fabOpen]}
           onPress={() => setFabMenuOpen(!fabMenuOpen)}
         >
           <Ionicons
             name={fabMenuOpen ? "close" : "map"}
             size={28}
-            color={fabMenuOpen ? "#8E24AA" : "#fff"}
+            color={fabMenuOpen ? "theme.colors.primary" : "#fff"}
           />
         </TouchableOpacity>
       </View>
@@ -985,7 +986,10 @@ export default function MapScreen() {
           <View style={styles.legendItems}>
             <View style={styles.legendItem}>
               <View
-                style={[styles.legendColor, { backgroundColor: "#4CAF50" }]}
+                style={[
+                  styles.legendColor,
+                  { backgroundColor: "theme.colors.secondary" },
+                ]}
               />
               <Text style={styles.legendText}>Safe</Text>
             </View>
@@ -1219,7 +1223,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1253,7 +1257,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -1265,7 +1269,7 @@ const styles = StyleSheet.create({
   fabOpen: {
     backgroundColor: "#fff",
     borderWidth: 2,
-    borderColor: "#8E24AA",
+    borderColor: "theme.colors.primary",
   },
   fabMenu: {
     position: "absolute",
@@ -1331,7 +1335,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 2,
-    borderColor: "#4CAF50",
+    borderColor: "theme.colors.secondary",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -1339,8 +1343,8 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   heatMapToggleActive: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
+    borderColor: "theme.colors.secondary",
   },
   heatMapToggleText: {
     marginLeft: 6,
@@ -1495,7 +1499,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -1510,7 +1514,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -1554,7 +1558,7 @@ const styles = StyleSheet.create({
   segmentToggle: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     borderRadius: 16,
   },
   segmentToggleText: {
@@ -1581,7 +1585,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   routeDetailsButton: {
-    backgroundColor: "#8E24AA",
+    backgroundColor: "theme.colors.primary",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,

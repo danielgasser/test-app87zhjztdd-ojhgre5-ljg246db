@@ -314,25 +314,33 @@ export default function OnboardingScreen() {
       </Text>
       <View style={styles.bulletPoints}>
         <View style={styles.bulletPoint}>
-          <Ionicons name="shield-checkmark" size={20} color="#4CAF50" />
+          <Ionicons
+            name="shield-checkmark"
+            size={20}
+            color="theme.colors.secondary"
+          />
           <Text style={styles.bulletText}>
             Get safety ratings personalized for your demographic
           </Text>
         </View>
         <View style={styles.bulletPoint}>
-          <Ionicons name="map" size={20} color="#4CAF50" />
+          <Ionicons name="map" size={20} color="theme.colors.secondary" />
           <Text style={styles.bulletText}>
             See location safety from your perspective
           </Text>
         </View>
         <View style={styles.bulletPoint}>
-          <Ionicons name="people" size={20} color="#4CAF50" />
+          <Ionicons name="people" size={20} color="theme.colors.secondary" />
           <Text style={styles.bulletText}>
             Connect with travelers who share your experiences
           </Text>
         </View>
         <View style={styles.bulletPoint}>
-          <Ionicons name="lock-closed" size={20} color="#4CAF50" />
+          <Ionicons
+            name="lock-closed"
+            size={20}
+            color="theme.colors.secondary"
+          />
           <Text style={styles.bulletText}>Your data is private and secure</Text>
         </View>
       </View>
@@ -605,7 +613,7 @@ export default function OnboardingScreen() {
           onPress={() => setFormData({ ...formData, privacy_level: "public" })}
         >
           <View style={styles.privacyHeader}>
-            <Ionicons name="eye" size={24} color="#4CAF50" />
+            <Ionicons name="eye" size={24} color="theme.colors.secondary" />
             <Text style={styles.privacyTitle}>Public</Text>
           </View>
           <Text style={styles.privacyDescription}>
@@ -677,7 +685,11 @@ export default function OnboardingScreen() {
 
   const renderCompleteStep = () => (
     <View style={styles.stepContainer}>
-      <Ionicons name="checkmark-circle" size={80} color="#4CAF50" />
+      <Ionicons
+        name="checkmark-circle"
+        size={80}
+        color="theme.colors.secondary"
+      />
       <Text style={styles.stepTitle}>
         {isEditing ? "Profile Updated!" : "You're All Set!"}
       </Text>
@@ -689,19 +701,23 @@ export default function OnboardingScreen() {
       {!isEditing && (
         <View style={styles.bulletPoints}>
           <View style={styles.bulletPoint}>
-            <Ionicons name="map" size={20} color="#4CAF50" />
+            <Ionicons name="map" size={20} color="theme.colors.secondary" />
             <Text style={styles.bulletText}>
               View safety ratings personalized for you
             </Text>
           </View>
           <View style={styles.bulletPoint}>
-            <Ionicons name="star" size={20} color="#4CAF50" />
+            <Ionicons name="star" size={20} color="theme.colors.secondary" />
             <Text style={styles.bulletText}>
               Leave reviews to help your community
             </Text>
           </View>
           <View style={styles.bulletPoint}>
-            <Ionicons name="settings" size={20} color="#4CAF50" />
+            <Ionicons
+              name="settings"
+              size={20}
+              color="theme.colors.secondary"
+            />
             <Text style={styles.bulletText}>
               Update your profile anytime in Settings
             </Text>
@@ -825,7 +841,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
     borderRadius: 2,
   },
   progressText: {
@@ -888,8 +904,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   optionSelected: {
-    borderColor: "#4CAF50",
-    backgroundColor: "#4CAF50",
+    borderColor: "theme.colors.secondary",
+    backgroundColor: "theme.colors.secondary",
   },
   optionText: {
     fontSize: 16,
@@ -929,8 +945,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   toggleButtonSelected: {
-    borderColor: "#4CAF50",
-    backgroundColor: "#4CAF50",
+    borderColor: "theme.colors.secondary",
+    backgroundColor: "theme.colors.secondary",
   },
   toggleText: {
     fontSize: 16,
@@ -951,7 +967,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   privacyOptionSelected: {
-    borderColor: "#4CAF50",
+    borderColor: "theme.colors.secondary",
     backgroundColor: "#F8F8F8",
   },
   privacyHeader: {
@@ -994,7 +1010,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   switchActive: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
   },
   switchThumb: {
     width: 26,
@@ -1041,7 +1057,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   nextButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "theme.colors.secondary",
   },
   nextButtonText: {
     color: "#fff",

@@ -128,7 +128,12 @@ const WelcomeScreenNew = () => {
           {/* Map Mockup */}
           <View style={styles.mapMockup}>
             <View style={styles.mapPin1}>
-              <View style={[styles.pin, { backgroundColor: "#4CAF50" }]} />
+              <View
+                style={[
+                  styles.pin,
+                  { backgroundColor: "theme.colors.secondary" },
+                ]}
+              />
               <Text style={styles.pinLabel}>Safe</Text>
             </View>
             <View style={styles.mapPin2}>

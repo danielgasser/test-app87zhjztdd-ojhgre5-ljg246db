@@ -35,7 +35,7 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 
   // Determine badge color based on confidence
   const getBadgeColor = (confidence: number) => {
-    if (confidence >= 70) return "#4CAF50"; // Green - High confidence
+    if (confidence >= 70) return "theme.colors.secondary"; // Green - High confidence
     if (confidence >= 30) return "#FF9800"; // Orange - Medium confidence
     return "#F44336"; // Red - Low confidence
   };
