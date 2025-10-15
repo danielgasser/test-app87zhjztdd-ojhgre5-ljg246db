@@ -104,12 +104,6 @@ export default function MapScreen() {
     string | null
   >(null);
 
-  const [controlsCollapsed, setControlsCollapsed] = useState(false);
-  const [heatMapCollapsed, setHeatMapCollapsed] = useState(false); // ✅ NEW
-  const [dangerZoneCollapsed, setDangerZoneCollapsed] = useState(false);
-  const slideAnimHeatMap = useRef(new Animated.Value(0)).current;
-  const slideAnimDangerZone = useRef(new Animated.Value(0)).current;
-
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -202,71 +196,6 @@ export default function MapScreen() {
       }
     }
   };
-
-  // Swipe gesture handler
-  // Heat Map pan responder
-  // Heat Map pan responder
-  // Heat Map pan responder
-  const panResponderHeatMap = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false, // ✅ DON'T capture on start!
-      onStartShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
-      onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 10; // Only respond to actual swipes
-      },
-      onMoveShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
-      onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 30 && !heatMapCollapsed) {
-          Animated.spring(slideAnimHeatMap, {
-            toValue: 1,
-            useNativeDriver: true,
-            tension: 65,
-            friction: 8,
-          }).start();
-          setHeatMapCollapsed(true);
-        } else if (gesture.dx < -30 && heatMapCollapsed) {
-          Animated.spring(slideAnimHeatMap, {
-            toValue: 0,
-            useNativeDriver: true,
-            tension: 65,
-            friction: 8,
-          }).start();
-          setHeatMapCollapsed(false);
-        }
-      },
-    })
-  ).current;
-
-  // Danger Zone pan responder
-  const panResponderDangerZone = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false, // ✅ DON'T capture on start!
-      onStartShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
-      onMoveShouldSetPanResponder: (_, gesture) => {
-        return Math.abs(gesture.dx) > 10; // Only respond to actual swipes
-      },
-      onMoveShouldSetPanResponderCapture: () => false, // ✅ DON'T use capture!
-      onPanResponderRelease: (_, gesture) => {
-        if (gesture.dx > 30 && !dangerZoneCollapsed) {
-          Animated.spring(slideAnimDangerZone, {
-            toValue: 1,
-            useNativeDriver: true,
-            tension: 65,
-            friction: 8,
-          }).start();
-          setDangerZoneCollapsed(true);
-        } else if (gesture.dx < -30 && dangerZoneCollapsed) {
-          Animated.spring(slideAnimDangerZone, {
-            toValue: 0,
-            useNativeDriver: true,
-            tension: 65,
-            friction: 8,
-          }).start();
-          setDangerZoneCollapsed(false);
-        }
-      },
-    })
-  ).current;
 
   const handleModalClose = () => {
     setModalVisible(false);
@@ -888,23 +817,7 @@ export default function MapScreen() {
           )}
       </MapView>
       {/* Map Controls */}
-      <Animated.View
-        {...panResponderHeatMap.panHandlers}
-        pointerEvents={heatMapCollapsed ? "box-none" : "auto"}
-        style={[
-          styles.heatMapContainer,
-          {
-            transform: [
-              {
-                translateX: slideAnimHeatMap.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 20],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
+      <View style={styles.heatMapContainer}>
         <TouchableOpacity
           style={[
             styles.heatMapToggle,
@@ -917,60 +830,39 @@ export default function MapScreen() {
             size={24}
             color={heatMapVisible ? "#fff" : "#333"}
           />
-          {!heatMapCollapsed && (
-            <Text
-              style={[
-                styles.heatMapToggleText,
-                heatMapVisible && styles.heatMapToggleTextActive,
-              ]}
-            >
-              {heatMapLoading ? "Loading..." : "Heat Map"}
-            </Text>
-          )}
+          <Text
+            style={[
+              styles.heatMapToggleText,
+              heatMapVisible && styles.heatMapToggleTextActive,
+            ]}
+          >
+            {heatMapLoading ? "Loading..." : "Heat Map"}
+          </Text>
         </TouchableOpacity>
-      </Animated.View>
-      <Animated.View
-        {...panResponderDangerZone.panHandlers}
-        pointerEvents={dangerZoneCollapsed ? "box-none" : "auto"}
-        style={[
-          styles.dangerZoneContainer,
-          {
-            transform: [
-              {
-                translateX: slideAnimDangerZone.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 0],
-                }),
-              },
-            ],
-          },
-        ]}
-      >
+      </View>
+      <View style={styles.dangerZoneContainer}>
         <TouchableOpacity
           style={[
             styles.controlButton,
             dangerZonesVisible && styles.controlButtonActive,
           ]}
           onPress={handleToggleDangerZones}
-          activeOpacity={dangerZoneCollapsed ? 1 : 0.7}
         >
           <Ionicons
             name={dangerZonesVisible ? "shield" : "shield-outline"}
             size={24}
             color={dangerZonesVisible ? "#fff" : "#333"}
           />
-          {!dangerZoneCollapsed && (
-            <Text
-              style={[
-                styles.controlButtonText,
-                dangerZonesVisible && styles.controlButtonTextActive,
-              ]}
-            >
-              {dangerZonesLoading ? "Loading..." : "Danger Zones"}
-            </Text>
-          )}
+          <Text
+            style={[
+              styles.controlButtonText,
+              dangerZonesVisible && styles.controlButtonTextActive,
+            ]}
+          >
+            {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+          </Text>
         </TouchableOpacity>
-      </Animated.View>
+      </View>
       {selectedRoute && !navigationActive && (
         <View
           style={{
@@ -1189,9 +1081,7 @@ export default function MapScreen() {
         onClose={handleModalClose}
       />
       {/* Navigation Mode - ADD THIS */}
-      {navigationActive && (
-        <NavigationMode onExit={handleExitNavigation} />
-      )}{" "}
+      {navigationActive && <NavigationMode onExit={handleExitNavigation} />}
     </View>
   );
 }
