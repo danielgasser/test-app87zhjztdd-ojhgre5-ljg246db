@@ -56,7 +56,11 @@ const RatingInput: React.FC<RatingProps> = ({
             <Ionicons
               name={star <= value ? "star" : "star-outline"}
               size={32}
-              color={star <= value ? "#FFB800" : "#E0E0E0"}
+              color={
+                star <= value
+                  ? theme.colors.mixedYellow
+                  : theme.colors.backgroundSecondary
+              }
             />
           </TouchableOpacity>
         ))}

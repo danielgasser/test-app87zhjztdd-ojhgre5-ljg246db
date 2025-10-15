@@ -172,7 +172,7 @@ export default function MapScreen() {
       return {
         type: "unknown",
         score: null,
-        color: "#007AFF",
+        color: theme.colors.primary,
         description: "No data available",
       };
     }
@@ -567,7 +567,7 @@ export default function MapScreen() {
   if (loading && nearbyLocations.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Loading nearby locations...</Text>
       </View>
     );
@@ -774,7 +774,7 @@ export default function MapScreen() {
                 ? "Tap to view details"
                 : "Tap + to add this location"
             }
-            pinColor="#2196F3"
+            pinColor={theme.colors.primaryLight}
           />
         )}
         {routeOrigin && (
@@ -838,7 +838,7 @@ export default function MapScreen() {
                 <Ionicons
                   name={heatMapVisible ? "thermometer" : "thermometer-outline"}
                   size={24}
-                  color={heatMapVisible ? theme.colors.textOnPrimary : "#333"}
+                  color={heatMapVisible ? theme.colors.textOnPrimary : theme.colors.text}
                 />
                 <Text
                   style={[
@@ -865,7 +865,7 @@ export default function MapScreen() {
                   name={dangerZonesVisible ? "shield" : "shield-outline"}
                   size={24}
                   color={
-                    dangerZonesVisible ? theme.colors.textOnPrimary : "#333"
+                    dangerZonesVisible ? theme.colors.textOnPrimary : theme.colors.text
                   }
                 />
                 <Text
@@ -907,7 +907,7 @@ export default function MapScreen() {
           <Ionicons
             name={heatMapVisible ? "thermometer" : "thermometer-outline"}
             size={24}
-            color={heatMapVisible ? theme.colors.textOnPrimary : "#333"}
+            color={heatMapVisible ? theme.colors.textOnPrimary : {theme.colors.text}}
           />
           <Text
             style={[
@@ -930,7 +930,7 @@ export default function MapScreen() {
           <Ionicons
             name={dangerZonesVisible ? "shield" : "shield-outline"}
             size={24}
-            color={dangerZonesVisible ? theme.colors.textOnPrimary : "#333"}
+            color={dangerZonesVisible ? theme.colors.textOnPrimary : {theme.colors.text}}
           />
           <Text
             style={[
@@ -1299,7 +1299,7 @@ const styles = StyleSheet.create({
   fabMenuText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text},
   },
   heatMapContainer: {
     position: "absolute",
@@ -1355,7 +1355,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: {theme.colors.text},
   },
   heatMapToggleTextActive: {
     color: theme.colors.textOnPrimary,
@@ -1384,7 +1384,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: {theme.colors.text},
   },
   controlButtonTextActive: {
     color: theme.colors.textOnPrimary,
@@ -1420,7 +1420,7 @@ const styles = StyleSheet.create({
   legendTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: {theme.colors.text},
     marginBottom: 8,
   },
   legendSubtitle: {
