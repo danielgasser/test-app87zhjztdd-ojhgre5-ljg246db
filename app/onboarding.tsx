@@ -22,6 +22,7 @@ import { notificationService } from "src/services/notificationService";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
+  { id: "name", title: "What's your name?" },
   { id: "race", title: "Race & Ethnicity" },
   { id: "gender", title: "Gender Identity" },
   { id: "lgbtq", title: "LGBTQ+ Identity" },
@@ -40,6 +41,7 @@ export default function OnboardingScreen() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
+    full_name: "",
     race_ethnicity: [] as string[],
     gender: "",
     lgbtq_status: false,
@@ -345,7 +347,23 @@ export default function OnboardingScreen() {
       </View>
     </View>
   );
-
+  const renderNameStep = () => (
+    <View style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>What's your name?</Text>
+      <Text style={styles.stepDescription}>
+        This helps personalize your experience. You can control who sees this in
+        privacy settings.
+      </Text>
+      <TextInput
+        style={styles.nameInput}
+        placeholder="Enter your full name"
+        value={formData.full_name}
+        onChangeText={(text) => setFormData({ ...formData, full_name: text })}
+        autoCapitalize="words"
+        autoComplete="name"
+      />
+    </View>
+  );
   const renderRaceStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>Race & Ethnicity</Text>
@@ -741,6 +759,8 @@ export default function OnboardingScreen() {
     switch (ONBOARDING_STEPS[currentStep].id) {
       case "welcome":
         return renderWelcomeStep();
+      case "name":
+        return renderNameStep();
       case "race":
         return renderRaceStep();
       case "gender":
@@ -901,6 +921,15 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     alignSelf: "stretch",
+  },
+  nameInput: {
+    borderWidth: 1,
+    borderColor: theme.colors.inputBorder,
+    borderRadius: 8,
+    padding: 16,
+    fontSize: 16,
+    backgroundColor: theme.colors.inputBackground,
+    marginTop: 20,
   },
   optionButton: {
     flexDirection: "row",
