@@ -121,7 +121,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
@@ -135,24 +135,24 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 42,
     fontWeight: "bold",
-    color: theme.colors.secondary,
+    color: theme.colors.primary,
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 18,
-    color: "#666",
+    fontSize: 22,
+    color: theme.colors.textSecondary,
   },
   form: {
     width: "100%",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: theme.colors.inputBorder,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
     borderRadius: 8,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: theme.colors.inputBackground,
   },
   forgotPassword: {
     alignSelf: "flex-end",
@@ -160,11 +160,11 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   forgotPasswordText: {
-    color: theme.colors.secondary,
-    fontSize: 14,
+    color: theme.colors.primary,
+    fontSize: 18,
   },
   button: {
-    backgroundColor: theme.colors.secondary,
+    backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
     borderRadius: 8,
     alignItems: "center",
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   buttonText: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -184,11 +184,11 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   footerText: {
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontSize: 16,
   },
   link: {
-    color: theme.colors.secondary,
+    color: theme.colors.primary,
     fontSize: 16,
     fontWeight: "600",
   },
