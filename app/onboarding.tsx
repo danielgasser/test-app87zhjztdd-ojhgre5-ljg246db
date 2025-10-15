@@ -948,7 +948,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   toggleTextSelected: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
   },
   privacyOptions: {
     alignSelf: "stretch",
