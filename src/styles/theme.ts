@@ -41,6 +41,7 @@ interface Colors {
 
     // Border and separator colors
     border: string;
+    borderDark: string;
     borderLight: string;
     separator: string;
 
@@ -173,6 +174,7 @@ export const theme: Theme = {
 
         // Borders and separators
         border: '#CFD8DC',            // Default borders
+        borderDark: '#1e4d87ff',            // Default borders
         borderLight: '#ECEFF1',       // Lighter borders
         separator: '#F5F7FA',         // Section separators
 

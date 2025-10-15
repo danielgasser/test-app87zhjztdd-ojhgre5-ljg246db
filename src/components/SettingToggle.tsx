@@ -66,8 +66,10 @@ const styles = StyleSheet.create({
     width: 50,
     height: 28,
     borderRadius: 14,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.backgroundSecondary,
     padding: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.borderDark,
     justifyContent: "center",
   },
   switchActive: {

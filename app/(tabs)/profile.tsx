@@ -247,7 +247,7 @@ export default function ProfileScreen() {
                 )}
                 <View style={styles.cameraIcon}>
                   <Ionicons name="camera" size={20} color="#fff" />
-                </View>{" "}
+                </View>
               </TouchableOpacity>
 
               {/* User info */}
