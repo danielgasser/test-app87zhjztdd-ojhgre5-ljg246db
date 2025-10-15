@@ -96,6 +96,7 @@ export default function OnboardingScreen() {
         setIsEditing(true);
 
         // Parse race/ethnicity array and handle "Other" values
+        const fullName = profile.full_name || "";
         const parsedRaceEthnicity: string[] = [];
         const raceOtherValues: string[] = [];
 
@@ -135,6 +136,7 @@ export default function OnboardingScreen() {
           return "public"; // Default fallback
         };
         setFormData({
+          full_name: fullName,
           race_ethnicity: parsedRaceEthnicity,
           gender: parsedGender.mainValue,
           lgbtq_status: profile.lgbtq_status || false,
