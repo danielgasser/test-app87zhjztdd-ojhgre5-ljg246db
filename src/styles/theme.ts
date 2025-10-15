@@ -54,6 +54,7 @@ interface Colors {
     shadowLight: string;
     shadowMedium: string;
     shadowDark: string;
+    shadowBlack: string;
 
     // Overlay colors
     overlay: string;
@@ -187,6 +188,7 @@ export const theme: Theme = {
         shadowLight: 'rgba(42, 92, 153, 0.08)',   // Light shadow (primary tint)
         shadowMedium: 'rgba(42, 92, 153, 0.12)',  // Medium shadow
         shadowDark: 'rgba(42, 92, 153, 0.16)',    // Dark shadow
+        shadowBlack: 'rgba(0, 0, 0, 1)',    // Dark shadow
 
         // Overlay colors
         overlay: 'rgba(0, 0, 0, 0.5)',
