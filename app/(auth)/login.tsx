@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
     borderRadius: 8,
-    fontSize: 16,
+    fontSize: 18,
     backgroundColor: theme.colors.inputBackground,
   },
   forgotPassword: {

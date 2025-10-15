@@ -251,7 +251,7 @@ export default function EditReviewScreen() {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={handleCancel}>
-            <Ionicons name="close" size={24} color="#333" />
+            <Ionicons name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Review</Text>
           <View style={{ width: 24 }} />
@@ -346,7 +346,11 @@ export default function EditReviewScreen() {
               <Text style={styles.dateButtonText}>
                 {visitDateTime.toLocaleDateString()}
               </Text>
-              <Ionicons name="calendar" size={20} color="#666" />
+              <Ionicons
+                name="calendar"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -376,7 +380,11 @@ export default function EditReviewScreen() {
                   minute: "2-digit",
                 })}
               </Text>
-              <Ionicons name="time" size={20} color="#666" />
+              <Ionicons
+                name="time"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -404,7 +412,11 @@ export default function EditReviewScreen() {
                 {formData.visit_type.charAt(0).toUpperCase() +
                   formData.visit_type.slice(1)}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
+              <Ionicons
+                name="chevron-down"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
@@ -475,11 +487,11 @@ export default function EditReviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   safeTop: {
     height: Platform.OS === "ios" ? 44 : 0,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.card,
   },
   scrollView: {
     flex: 1,
@@ -495,13 +507,13 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 20,
     textAlign: "center",
   },
   loadingText: {
     fontSize: 18,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
   },
   header: {
@@ -509,14 +521,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.separator,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   form: {
     padding: 16,
@@ -527,13 +539,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   dateButton: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.primary,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
     padding: 12,
     flexDirection: "row",
@@ -542,19 +554,19 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
   },
   required: {
-    color: "#E53935",
+    color: theme.colors.error,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.inputBackground,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
   },
   textArea: {
     minHeight: 120,
@@ -562,7 +574,7 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.textLight,
     textAlign: "right",
     marginTop: 4,
   },
@@ -572,7 +584,7 @@ const styles = StyleSheet.create({
   ratingLabel: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   stars: {
@@ -585,7 +597,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -595,16 +607,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.separator,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   modalDone: {
     fontSize: 16,
-    color: "#007AFF",
+    color: theme.colors.primary,
     fontWeight: "600",
   },
   picker: {
@@ -621,31 +633,31 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   cancelButton: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.inputBackground,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
   },
   submitButton: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
   },
   buttonDisabled: {
-    backgroundColor: "#CCCCCC",
+    backgroundColor: theme.colors.border,
+    opacity: 0.5,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFF",
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
 });

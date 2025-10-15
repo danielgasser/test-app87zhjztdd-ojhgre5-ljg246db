@@ -273,7 +273,7 @@ export default function ReviewScreen() {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Write a Review</Text>
           <View style={{ width: 24 }} />
@@ -388,7 +388,11 @@ export default function ReviewScreen() {
               <Text style={styles.dateButtonText}>
                 {visitDateTime.toLocaleDateString()}
               </Text>
-              <Ionicons name="calendar" size={20} color="#666" />
+              <Ionicons
+                name="calendar"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
           {showDatePicker && (
@@ -420,7 +424,11 @@ export default function ReviewScreen() {
                   minute: "2-digit",
                 })}
               </Text>
-              <Ionicons name="time" size={20} color="#666" />
+              <Ionicons
+                name="time"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
           {showTimePicker && (
@@ -449,7 +457,11 @@ export default function ReviewScreen() {
                 {formData.visit_type.charAt(0).toUpperCase() +
                   formData.visit_type.slice(1)}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
+              <Ionicons
+                name="chevron-down"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
           {/* Visit Type Modal */}
@@ -490,7 +502,11 @@ export default function ReviewScreen() {
           </Modal>
           {/* Demographic Context Note */}
           <View style={styles.noteContainer}>
-            <Ionicons name="information-circle" size={20} color="#666" />
+            <Ionicons
+              name="information-circle"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
             <Text style={styles.noteText}>
               Your demographic profile will be attached to this review to help
               others who share similar identities make informed decisions.
@@ -515,11 +531,11 @@ export default function ReviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.background,
   },
   safeTop: {
     height: Platform.OS === "ios" ? 44 : 0,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
   },
   scrollView: {
     flex: 1,
@@ -535,7 +551,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 20,
     textAlign: "center",
   },
@@ -544,39 +560,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.separator,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   newLocationSection: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     padding: 16,
     marginHorizontal: 20,
     marginTop: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "theme.colors.secondary",
+    borderColor: theme.colors.border,
   },
   helperText: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginTop: 4,
     fontStyle: "italic",
   },
   locationInfo: {
     padding: 16,
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     marginBottom: 8,
   },
   locationName: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   form: {
     padding: 16,
@@ -587,13 +603,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   dateButton: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
     borderRadius: 8,
     padding: 12,
     flexDirection: "row",
@@ -602,19 +618,19 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
   },
   required: {
-    color: "#E53935",
+    color: theme.colors.error,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
     padding: 12,
-    fontSize: 16,
-    color: "#333",
+    fontSize: 18,
+    color: theme.colors.text,
   },
   textArea: {
     minHeight: 120,
@@ -622,7 +638,7 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.textLight,
     textAlign: "right",
     marginTop: 4,
   },
@@ -631,11 +647,11 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -645,22 +661,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.separator,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   modalDone: {
     fontSize: 16,
-    color: "#007AFF",
+    color: theme.colors.primary,
     fontWeight: "600",
   },
   ratingLabel: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   stars: {
@@ -668,9 +684,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   pickerContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.textOnPrimary,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
     overflow: "hidden",
   },
@@ -680,7 +696,7 @@ const styles = StyleSheet.create({
   },
   noteContainer: {
     flexDirection: "row",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.success,
     padding: 12,
     borderRadius: 8,
     marginBottom: 24,
@@ -689,11 +705,11 @@ const styles = StyleSheet.create({
   noteText: {
     flex: 1,
     fontSize: 14,
-    color: "#388E3C",
+    color: theme.colors.success,
     lineHeight: 20,
   },
   submitButton: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: "center",
@@ -702,18 +718,18 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitButtonText: {
-    color: "#FFF",
+    color: theme.colors.textOnPrimary,
     fontSize: 18,
     fontWeight: "600",
   },
   button: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   buttonText: {
-    color: "#FFF",
+    color: theme.colors.textOnPrimary,
     fontSize: 16,
     fontWeight: "600",
   },
