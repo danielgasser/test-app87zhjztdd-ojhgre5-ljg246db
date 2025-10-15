@@ -212,6 +212,11 @@ export default function CommunityScreen() {
   };
 
   const renderReviewItem = (review: any) => {
+    console.log(
+      "Review user_demographics:",
+      JSON.stringify(review.user_demographics, null, 2)
+    );
+
     const timeAgo = formatDistanceToNow(new Date(review.created_at), {
       addSuffix: true,
     });
@@ -278,7 +283,7 @@ export default function CommunityScreen() {
               </Text>
             ) : (
               <Text style={styles.anonymousText}>Anonymous Reviewer</Text>
-            )}{" "}
+            )}
           </View>
           <Text style={styles.timeText}>{timeAgo}</Text>
         </View>
@@ -752,7 +757,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   anonymousText: {
-    fontSize: 12,
+    fontSize: 16,
     color: theme.colors.textLight,
     fontStyle: "italic",
   },

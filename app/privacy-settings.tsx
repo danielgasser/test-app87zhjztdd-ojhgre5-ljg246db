@@ -21,6 +21,7 @@ import { updateUserProfile } from "../src/store/userSlice";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "../src/store/hooks";
 import { signOut } from "../src/store/authSlice";
+import { fetchRecentReviews } from "@/store/locationsSlice";
 
 export default function PrivacySettings() {
   const user = useAppSelector((state: any) => state.auth.user);
@@ -49,7 +50,21 @@ export default function PrivacySettings() {
           profileData: { [field]: value },
         })
       ).unwrap();
-      // Optional: Show subtle success feedback
+
+      // NEW: Reload community reviews after privacy change
+      if (field === "show_demographics") {
+        const state = (dispatch as any).getState();
+        const userLocation = state.locations.userLocation;
+        if (userLocation) {
+          dispatch(
+            fetchRecentReviews({
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+            })
+          );
+        }
+      }
+
       console.log(`${field} saved successfully`);
     } catch (error) {
       Alert.alert("Error", "Failed to save setting. Please try again.");
