@@ -172,7 +172,7 @@ export default function CommunityScreen() {
         case "low":
           return "theme.colors.secondary";
         default:
-          return "#666";
+          return theme.colors.textSecondary;
       }
     };
 
@@ -367,7 +367,7 @@ export default function CommunityScreen() {
                 size={18}
                 color={
                   communityFeedMode === "near_me"
-                    ? "#fff"
+                    ? theme.colors.card
                     : theme.colors.primary
                 }
               />
@@ -394,7 +394,7 @@ export default function CommunityScreen() {
                 size={18}
                 color={
                   communityFeedMode === "map_area"
-                    ? "#fff"
+                    ? theme.colors.card
                     : theme.colors.primary
                 }
               />
@@ -414,7 +414,11 @@ export default function CommunityScreen() {
         {(!userLocation && communityFeedMode === "near_me") ||
         (!mapCenter && communityFeedMode === "map_area") ? (
           <View style={styles.noLocationContainer}>
-            <Ionicons name="location-outline" size={48} color="#999" />
+            <Ionicons
+              name="location-outline"
+              size={48}
+              color={theme.colors.textLight}
+            />
             <Text style={styles.noLocationTitle}>Location Required</Text>
             <Text style={styles.noLocationText}>
               {communityFeedMode === "near_me"
@@ -430,7 +434,11 @@ export default function CommunityScreen() {
         communityReviews.length === 0 &&
         !communityLoading ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="chatbubbles-outline" size={48} color="#999" />
+            <Ionicons
+              name="chatbubbles-outline"
+              size={48}
+              color={theme.colors.textLight}
+            />
             <Text style={styles.emptyTitle}>No Reviews Nearby</Text>
             <Text style={styles.emptyText}>
               Be the first to review a location in this area!
@@ -520,7 +528,7 @@ export default function CommunityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollView: {
     flex: 1,
@@ -533,20 +541,20 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   header: {
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: theme.colors.separator,
   },
   insightCard: {
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
@@ -563,17 +571,17 @@ const styles = StyleSheet.create({
   },
   insightAddress: {
     fontSize: 13,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 4,
   },
   insightTime: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.textLight,
   },
   modeToggleContainer: {
     flexDirection: "row",
     marginTop: 16,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: theme.colors.surface,
     borderRadius: 8,
     padding: 4,
   },
@@ -596,7 +604,7 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
   modeButtonTextActive: {
-    color: "#fff",
+    color: theme.colors.card,
   },
   noLocationContainer: {
     padding: 40,
@@ -606,13 +614,13 @@ const styles = StyleSheet.create({
   noLocationTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   noLocationText: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
   },
@@ -624,19 +632,19 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   screenTitle: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   screenSubtitle: {
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 22,
   },
   section: {
@@ -652,7 +660,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   seeAllText: {
     fontSize: 14,
@@ -660,11 +668,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   reviewCard: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -682,11 +690,11 @@ const styles = StyleSheet.create({
   locationName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   locationAddress: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginTop: 2,
   },
   ratingBadge: {
@@ -697,19 +705,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   ratingText: {
-    color: "#fff",
+    color: theme.colors.card,
     fontSize: 18,
     fontWeight: "bold",
   },
   reviewTitle: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
   },
   reviewBody: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -725,26 +733,26 @@ const styles = StyleSheet.create({
   },
   demographicsText: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginLeft: 6,
   },
   anonymousText: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.textLight,
     fontStyle: "italic",
   },
   timeText: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.textLight,
   },
   safetyUpdateCard: {
     flexDirection: "row",
-    backgroundColor: "#FFF5E6",
+    backgroundColor: theme.colors.warning,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#FFE0B2",
+    borderColor: theme.colors.separator,
   },
   updateIcon: {
     marginRight: 12,
@@ -755,28 +763,28 @@ const styles = StyleSheet.create({
   updateTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 4,
   },
   updateDescription: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     marginBottom: 8,
   },
   updateTime: {
     fontSize: 12,
-    color: "#999",
+    color: theme.colors.textLight,
   },
   trendingCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -785,31 +793,31 @@ const styles = StyleSheet.create({
   trendingName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 4,
   },
   trendingStats: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   trendBadge: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: theme.colors.surface,
     justifyContent: "center",
     alignItems: "center",
   },
   comingSoonText: {
     fontSize: 14,
-    color: "#999",
+    color: theme.colors.textLight,
     fontStyle: "italic",
     textAlign: "center",
     marginTop: 10,
   },
   emptyText: {
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     marginTop: 20,
   },

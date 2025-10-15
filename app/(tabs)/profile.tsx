@@ -212,7 +212,11 @@ export default function ProfileScreen() {
               </View>
             )}
             <View style={styles.cameraIcon}>
-              <Ionicons name="camera" size={20} color="#fff" />
+              <Ionicons
+                name="camera"
+                size={20}
+                color={theme.colors.textOnPrimary}
+              />
             </View>
           </TouchableOpacity>
 
@@ -254,12 +258,20 @@ export default function ProfileScreen() {
           <View style={styles.sectionHeaderSettings}>
             <Text style={styles.sectionTitle}>Settings</Text>
             <TouchableOpacity style={styles.menuItem}>
-              <MaterialIcons name="notifications" size={24} color="#333" />
+              <MaterialIcons
+                name="notifications"
+                size={24}
+                color={theme.colors.text}
+              />
               <Text style={styles.menuText}>Notifications</Text>
               <MaterialIcons name="chevron-right" size={24} color="#999" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem}>
-              <MaterialIcons name="privacy-tip" size={24} color="#333" />
+              <MaterialIcons
+                name="privacy-tip"
+                size={24}
+                color={theme.colors.text}
+              />
               <Text style={styles.menuText}>Privacy</Text>
               <MaterialIcons name="chevron-right" size={24} color="#999" />
             </TouchableOpacity>
@@ -282,7 +294,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     padding: 30,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
   avatarContainer: {
     position: "relative",
@@ -316,7 +328,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#fff",
+    borderColor: theme.colors.border,
   },
   removePhotoText: {
     color: theme.colors.error,
@@ -326,17 +338,17 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 18,
-    color: "#333",
+    color: theme.colors.text,
     marginTop: 10,
   },
   fullName: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 18,
+    color: theme.colors.textSecondary,
     marginTop: 4,
   },
   section: {
     marginTop: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     paddingVertical: 20,
   },
   sectionHeader: {
@@ -357,7 +369,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    color: theme.colors.text,
   },
   editProfile: {
     fontSize: 18,
@@ -372,25 +384,25 @@ const styles = StyleSheet.create({
   demographicsCard: {
     marginHorizontal: 20,
     padding: theme.spacing.md,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: theme.colors.inputBackground,
     borderRadius: 8,
   },
   demographicText: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 18,
+    color: theme.colors.textSecondary,
     marginBottom: 8,
     lineHeight: 20,
   },
   setupButton: {
     marginHorizontal: 20,
     padding: theme.spacing.md,
-    backgroundColor: "#007AFF",
+    backgroundColor: theme.colors.primary,
     borderRadius: 8,
     alignItems: "center",
   },
   setupButtonText: {
-    color: "#fff",
-    fontSize: 16,
+    color: theme.colors.textOnPrimary,
+    fontSize: 18,
     fontWeight: "600",
   },
   menuItem: {
@@ -399,24 +411,24 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: theme.colors.separator,
   },
   menuText: {
     flex: 1,
-    fontSize: 16,
-    color: "#333",
+    fontSize: 20,
+    color: theme.colors.text,
     marginLeft: 15,
   },
   logoutButton: {
     margin: 20,
     padding: theme.spacing.md,
-    backgroundColor: "#ff3b30",
+    backgroundColor: theme.colors.error,
     borderRadius: 8,
     alignItems: "center",
   },
   logoutText: {
-    color: "#fff",
-    fontSize: 16,
+    color: theme.colors.textOnPrimary,
+    fontSize: 18,
     fontWeight: "600",
   },
 });

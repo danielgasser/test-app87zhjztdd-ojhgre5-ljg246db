@@ -308,7 +308,10 @@ export default function OnboardingScreen() {
         travel preferences and needs.
       </Text>
       <Text
-        style={[styles.stepDescription, { fontWeight: "600", color: "#333" }]}
+        style={[
+          styles.stepDescription,
+          { fontWeight: "600", color: theme.colors.text },
+        ]}
       >
         This setup is required to access SafePath's core features.
       </Text>
@@ -317,30 +320,26 @@ export default function OnboardingScreen() {
           <Ionicons
             name="shield-checkmark"
             size={20}
-            color="theme.colors.secondary"
+            color={theme.colors.primary}
           />
           <Text style={styles.bulletText}>
             Get safety ratings personalized for your demographic
           </Text>
         </View>
         <View style={styles.bulletPoint}>
-          <Ionicons name="map" size={20} color="theme.colors.secondary" />
+          <Ionicons name="map" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>
             See location safety from your perspective
           </Text>
         </View>
         <View style={styles.bulletPoint}>
-          <Ionicons name="people" size={20} color="theme.colors.secondary" />
+          <Ionicons name="people" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>
             Connect with travelers who share your experiences
           </Text>
         </View>
         <View style={styles.bulletPoint}>
-          <Ionicons
-            name="lock-closed"
-            size={20}
-            color="theme.colors.secondary"
-          />
+          <Ionicons name="lock-closed" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>Your data is private and secure</Text>
         </View>
       </View>
@@ -613,7 +612,7 @@ export default function OnboardingScreen() {
           onPress={() => setFormData({ ...formData, privacy_level: "public" })}
         >
           <View style={styles.privacyHeader}>
-            <Ionicons name="eye" size={24} color="theme.colors.secondary" />
+            <Ionicons name="eye" size={24} color={theme.colors.primary} />
             <Text style={styles.privacyTitle}>Public</Text>
           </View>
           <Text style={styles.privacyDescription}>
@@ -688,7 +687,7 @@ export default function OnboardingScreen() {
       <Ionicons
         name="checkmark-circle"
         size={80}
-        color="theme.colors.secondary"
+        color={theme.colors.primary}
       />
       <Text style={styles.stepTitle}>
         {isEditing ? "Profile Updated!" : "You're All Set!"}
@@ -701,23 +700,19 @@ export default function OnboardingScreen() {
       {!isEditing && (
         <View style={styles.bulletPoints}>
           <View style={styles.bulletPoint}>
-            <Ionicons name="map" size={20} color="theme.colors.secondary" />
+            <Ionicons name="map" size={20} color={theme.colors.primary} />
             <Text style={styles.bulletText}>
               View safety ratings personalized for you
             </Text>
           </View>
           <View style={styles.bulletPoint}>
-            <Ionicons name="star" size={20} color="theme.colors.secondary" />
+            <Ionicons name="star" size={20} color={theme.colors.primary} />
             <Text style={styles.bulletText}>
               Leave reviews to help your community
             </Text>
           </View>
           <View style={styles.bulletPoint}>
-            <Ionicons
-              name="settings"
-              size={20}
-              color="theme.colors.secondary"
-            />
+            <Ionicons name="settings" size={20} color={theme.colors.primary} />
             <Text style={styles.bulletText}>
               Update your profile anytime in Settings
             </Text>
@@ -827,7 +822,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
   progressContainer: {
     paddingHorizontal: 20,
@@ -835,18 +830,18 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.border,
     borderRadius: 2,
     marginBottom: 8,
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
     borderRadius: 2,
   },
   progressText: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
   },
   content: {
@@ -861,13 +856,13 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: theme.spacing.md,
     textAlign: "center",
   },
   stepDescription: {
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 30,
@@ -886,7 +881,7 @@ const styles = StyleSheet.create({
   bulletText: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
     marginLeft: 15,
   },
   optionsContainer: {
@@ -899,27 +894,27 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
   optionSelected: {
-    borderColor: "theme.colors.secondary",
-    backgroundColor: "theme.colors.secondary",
+    borderColor: theme.colors.inputBorder,
+    backgroundColor: theme.colors.inputBackground,
   },
   optionText: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
   },
   optionTextSelected: {
-    color: "#fff",
+    color: theme.colors.card,
   },
   pickerContainer: {
     alignSelf: "stretch",
     borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
   iosPicker: {
     height: 200,
@@ -939,18 +934,18 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     marginHorizontal: 5,
     borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
   toggleButtonSelected: {
-    borderColor: "theme.colors.secondary",
-    backgroundColor: "theme.colors.secondary",
+    borderColor: theme.colors.inputBorder,
+    backgroundColor: theme.colors.card,
   },
   toggleText: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
   },
   toggleTextSelected: {
     color: "#fff",
@@ -962,13 +957,13 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
     borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
   privacyOptionSelected: {
-    borderColor: "theme.colors.secondary",
-    backgroundColor: "#F8F8F8",
+    borderColor: theme.colors.inputBorder,
+    backgroundColor: theme.colors.background,
   },
   privacyHeader: {
     flexDirection: "row",
@@ -978,12 +973,12 @@ const styles = StyleSheet.create({
   privacyTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: theme.colors.text,
     marginLeft: 10,
   },
   privacyDescription: {
     fontSize: 14,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 20,
   },
   toggleRow: {
@@ -998,25 +993,25 @@ const styles = StyleSheet.create({
   },
   toggleLabel: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
     flex: 1,
   },
   switch: {
     width: 50,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.border,
     padding: 2,
     justifyContent: "center",
   },
   switchActive: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
   },
   switchThumb: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     alignSelf: "flex-start",
   },
   switchThumbActive: {
@@ -1028,9 +1023,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
+    borderTopColor: theme.colors.separator,
   },
   navButton: {
     paddingVertical: 12,
@@ -1045,7 +1040,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   skipButtonText: {
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontSize: 16,
   },
   backButton: {
@@ -1053,11 +1048,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   backButtonText: {
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontSize: 16,
   },
   nextButton: {
-    backgroundColor: "theme.colors.secondary",
+    backgroundColor: theme.colors.primary,
   },
   nextButtonText: {
     color: "#fff",
@@ -1070,16 +1065,16 @@ const styles = StyleSheet.create({
   },
   otherInputLabel: {
     fontSize: 16,
-    color: "#333",
+    color: theme.colors.text,
     marginBottom: 8,
     fontWeight: "500",
   },
   otherInput: {
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.inputBorder,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
   },
 });

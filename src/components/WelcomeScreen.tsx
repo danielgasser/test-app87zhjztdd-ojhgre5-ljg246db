@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import logoImage from "assets/images/logo.png";
+import { theme } from "@/styles/theme";
 
 const { width, height } = Dimensions.get("window");
 
@@ -78,7 +79,11 @@ const WelcomeScreenNew = () => {
         colors={
           isDark
             ? ["#1a1a2e", "#16213e", "#0f3460"]
-            : ["#667eea", "#764ba2", "#f093fb"]
+            : [
+                theme.colors.primary,
+                theme.colors.primaryDark,
+                theme.colors.secondary,
+              ]
         }
         style={styles.gradient}
       />
@@ -184,7 +189,7 @@ const WelcomeScreenNew = () => {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={["#667eea", "#764ba2"]}
+            colors={[theme.colors.primary, theme.colors.primaryDark]}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -222,7 +227,7 @@ const getStyles = (isDark: boolean) =>
     },
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#1a1a2e" : "#667eea",
+      backgroundColor: isDark ? "#1a1a2e" : theme.colors.primary,
     },
     gradient: {
       position: "absolute",

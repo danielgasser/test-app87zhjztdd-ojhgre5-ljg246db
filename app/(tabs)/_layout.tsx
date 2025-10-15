@@ -17,17 +17,21 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.colors.secondary,
-        tabBarInactiveTintColor: "#999",
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textLight,
         tabBarStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: theme.colors.card,
           borderTopWidth: 1,
-          borderTopColor: "#e0e0e0",
+          borderTopColor: theme.colors.separator,
+        },
+        tabBarLabelStyle: {
+          fontSize: 16,
+          fontWeight: "600",
         },
         headerStyle: {
           backgroundColor: theme.colors.secondary,
         },
-        headerTintColor: "#fff",
+        headerTintColor: theme.colors.textOnPrimary,
         headerTitleStyle: {
           fontWeight: "bold",
         },
@@ -38,7 +42,7 @@ export default function TabLayout() {
         options={{
           title: "Map",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="map" size={size} color={color} />
+            <MaterialIcons name="map" size={32} color={color} />
           ),
         }}
       />
@@ -47,7 +51,7 @@ export default function TabLayout() {
         options={{
           title: "Community",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="people" size={size} color={color} />
+            <MaterialIcons name="people" size={32} color={color} />
           ),
         }}
       />
@@ -56,7 +60,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" size={size} color={color} />
+            <MaterialIcons name="person" size={32} color={color} />
           ),
         }}
       />

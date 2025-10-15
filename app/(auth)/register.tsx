@@ -113,7 +113,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
@@ -127,27 +127,27 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 36,
     fontWeight: "bold",
-    color: theme.colors.secondary,
+    color: theme.colors.primary,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   form: {
     width: "100%",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: theme.colors.inputBorder,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
     borderRadius: 8,
-    fontSize: 16,
+    fontSize: 18,
     backgroundColor: "#f9f9f9",
   },
   button: {
-    backgroundColor: theme.colors.secondary,
+    backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
     borderRadius: 8,
     alignItems: "center",
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   buttonText: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
     fontSize: 18,
     fontWeight: "600",
   },
@@ -167,12 +167,12 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   footerText: {
-    color: "#666",
-    fontSize: 16,
+    color: theme.colors.textSecondary,
+    fontSize: 18,
   },
   link: {
-    color: theme.colors.secondary,
-    fontSize: 16,
+    color: theme.colors.primary,
+    fontSize: 18,
     fontWeight: "600",
   },
 });

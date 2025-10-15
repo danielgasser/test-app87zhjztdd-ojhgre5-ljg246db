@@ -52,6 +52,7 @@ import { requireAuth } from "@/utils/authHelpers";
 import { supabase } from "@/services/supabase";
 import NavigationMode from "src/components/NavigationMode";
 import { commonStyles } from "@/styles/common";
+import { theme } from "@/styles/theme";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -837,7 +838,7 @@ export default function MapScreen() {
                 <Ionicons
                   name={heatMapVisible ? "thermometer" : "thermometer-outline"}
                   size={24}
-                  color={heatMapVisible ? "#fff" : "#333"}
+                  color={heatMapVisible ? theme.colors.textOnPrimary : "#333"}
                 />
                 <Text
                   style={[
@@ -863,7 +864,9 @@ export default function MapScreen() {
                 <Ionicons
                   name={dangerZonesVisible ? "shield" : "shield-outline"}
                   size={24}
-                  color={dangerZonesVisible ? "#fff" : "#333"}
+                  color={
+                    dangerZonesVisible ? theme.colors.textOnPrimary : "#333"
+                  }
                 />
                 <Text
                   style={[
@@ -886,7 +889,9 @@ export default function MapScreen() {
           <Ionicons
             name={fabMenuOpen ? "close" : "map"}
             size={28}
-            color={fabMenuOpen ? "theme.colors.primary" : "#fff"}
+            color={
+              fabMenuOpen ? theme.colors.primary : theme.colors.textOnPrimary
+            }
           />
         </TouchableOpacity>
       </View>
@@ -902,7 +907,7 @@ export default function MapScreen() {
           <Ionicons
             name={heatMapVisible ? "thermometer" : "thermometer-outline"}
             size={24}
-            color={heatMapVisible ? "#fff" : "#333"}
+            color={heatMapVisible ? theme.colors.textOnPrimary : "#333"}
           />
           <Text
             style={[
@@ -925,7 +930,7 @@ export default function MapScreen() {
           <Ionicons
             name={dangerZonesVisible ? "shield" : "shield-outline"}
             size={24}
-            color={dangerZonesVisible ? "#fff" : "#333"}
+            color={dangerZonesVisible ? theme.colors.textOnPrimary : "#333"}
           />
           <Text
             style={[
@@ -945,7 +950,7 @@ export default function MapScreen() {
             alignItems: "center",
             paddingLeft: 16,
             paddingTop: 16,
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.card,
           }}
         >
           <TouchableOpacity
@@ -961,7 +966,7 @@ export default function MapScreen() {
           </TouchableOpacity>
           <Text
             style={{
-              color: "#000",
+              color: theme.colors.text,
               fontSize: 18,
               fontWeight: "600",
               marginLeft: 14, // Spacing between button and text
@@ -1180,7 +1185,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   errorText: {
     fontSize: 16,
@@ -1210,7 +1215,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -1257,19 +1262,19 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   fabOpen: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderWidth: 2,
-    borderColor: "theme.colors.primary",
+    borderColor: theme.colors.primary,
   },
   fabMenu: {
     position: "absolute",
@@ -1280,11 +1285,11 @@ const styles = StyleSheet.create({
   fabMenuItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 25,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -1315,12 +1320,12 @@ const styles = StyleSheet.create({
     marginTop: -20,
     width: 16,
     height: 40,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     borderTopLeftRadius: 8,
     borderBottomLeftRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: -1, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 2,
@@ -1330,13 +1335,13 @@ const styles = StyleSheet.create({
   heatMapToggle: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: "theme.colors.secondary",
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -1353,18 +1358,18 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   heatMapToggleTextActive: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
   },
   controlButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: "#F44336",
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -1382,16 +1387,16 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   controlButtonTextActive: {
-    color: "#fff",
+    color: theme.colors.textOnPrimary,
   },
   heatMapLegend: {
     position: "absolute",
     bottom: 100,
     left: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     padding: 12,
     borderRadius: 8,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -1401,10 +1406,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 180,
     left: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.card,
     padding: 12,
     borderRadius: 8,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -1420,7 +1425,7 @@ const styles = StyleSheet.create({
   },
   legendSubtitle: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 8,
   },
   legendItems: {
@@ -1439,7 +1444,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
   },
   predictionCallout: {
     width: 200,
@@ -1458,7 +1463,7 @@ const styles = StyleSheet.create({
   },
   calloutConfidence: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 5,
   },
   calloutNote: {
@@ -1477,7 +1482,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     elevation: 3,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -1499,7 +1504,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -1514,7 +1519,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -1536,7 +1541,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 12,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -1552,13 +1557,13 @@ const styles = StyleSheet.create({
   routeInfoTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000",
+    color: theme.colors.text,
     flex: 1,
   },
   segmentToggle: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     borderRadius: 16,
   },
   segmentToggleText: {
@@ -1577,15 +1582,15 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#000",
+    color: theme.colors.text,
   },
   statLabel: {
     fontSize: 12,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginTop: 2,
   },
   routeDetailsButton: {
-    backgroundColor: "theme.colors.primary",
+    backgroundColor: theme.colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1603,7 +1608,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
-    shadowColor: "#000",
+    shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
