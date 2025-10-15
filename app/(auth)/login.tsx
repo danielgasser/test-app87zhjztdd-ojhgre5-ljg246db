@@ -65,8 +65,6 @@ export default function LoginScreen() {
 
   const handleAppleSignIn = async () => {
     try {
-      const nonce = Math.random().toString(36).substring(2, 10);
-
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -78,7 +76,6 @@ export default function LoginScreen() {
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: "apple",
         token: credential.identityToken!,
-        nonce: nonce,
       });
 
       if (error) throw error;
@@ -291,7 +288,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 10,
+    marginTop: 0,
   },
   googleButtonText: {
     color: theme.colors.background,

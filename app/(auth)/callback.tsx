@@ -1,0 +1,61 @@
+import { useEffect } from "react";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { supabase } from "@/services/supabase";
+import { theme } from "src/styles/theme";
+import { Database } from "@/types/database.types";
+
+type UserProfile = Database["public"]["Tables"]["profiles"]["Row"];
+
+export default function AuthCallback() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        const userProfile = profile as UserProfile | null;
+
+        if (!userProfile || !userProfile.onboarding_complete) {
+          router.replace("/onboarding");
+        } else {
+          router.replace("/(tabs)");
+        }
+      } else {
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color={theme.colors.primary} />
+      <Text style={styles.text}>Completing sign in...</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+  },
+  text: {
+    marginTop: 20,
+    fontSize: 16,
+    color: theme.colors.text,
+  },
+});
