@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     color: theme.colors.textSecondary,
     lineHeight: 18,
   },

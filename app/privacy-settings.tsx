@@ -169,7 +169,7 @@ export default function PrivacySettings() {
       Alert.alert(
         "Account Deleted",
         "Your account has been permanently deleted.",
-        [{ text: "OK", onPress: () => router.replace("/(auth)/login") }]
+        [{ text: "OK", onPress: () => router.replace("/welcome") }]
       );
     } catch (error) {
       console.error("=== DELETE ERROR ===", error);
@@ -410,7 +410,10 @@ export default function PrivacySettings() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmDeleteButton}
-                onPress={() => handleDeleteAccount}
+                onPress={() => {
+                  console.log("🔴 DELETE FOREVER BUTTON PRESSED!");
+                  handleDeleteAccount();
+                }}
               >
                 <Text style={styles.confirmDeleteText}>Delete Forever</Text>
               </TouchableOpacity>
