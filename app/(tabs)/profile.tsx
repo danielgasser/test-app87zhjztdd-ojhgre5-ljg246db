@@ -271,7 +271,12 @@ export default function ProfileScreen() {
                 <Text style={styles.sectionTitle}>Settings</Text>
                 <TouchableOpacity style={styles.menuItem}>
                   <MaterialIcons name="notifications" size={24} color="#333" />
-                  <Text style={styles.menuText}>Notifications</Text>
+                  <Text
+                    style={styles.menuText}
+                    onPress={() => router.push("/notification-settings")}
+                  >
+                    Notifications
+                  </Text>
                   <MaterialIcons name="chevron-right" size={24} color="#999" />
                 </TouchableOpacity>
                 <TouchableOpacity
