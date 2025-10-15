@@ -263,7 +263,22 @@ export default function CommunityScreen() {
 
         <View style={styles.reviewFooter}>
           <View style={styles.userInfo}>
-            <Text style={styles.anonymousText}>Anonymous reviewer</Text>
+            {review.user_demographics?.show_demographics ? (
+              <Text style={styles.demographicsText}>
+                {[
+                  review.user_demographics.race_ethnicity?.length > 0 &&
+                    review.user_demographics.race_ethnicity.join(", "),
+                  review.user_demographics.gender,
+                  review.user_demographics.lgbtq_status && "LGBTQ+",
+                  review.user_demographics.disability_status?.length > 0 &&
+                    review.user_demographics.disability_status.join(", "),
+                ]
+                  .filter(Boolean)
+                  .join(" • ") || "Anonymous"}
+              </Text>
+            ) : (
+              <Text style={styles.anonymousText}>Anonymous Reviewer</Text>
+            )}{" "}
           </View>
           <Text style={styles.timeText}>{timeAgo}</Text>
         </View>

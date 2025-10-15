@@ -1088,7 +1088,13 @@ export type Database = {
           overall_rating: number
           safety_rating: number
           title: string
+          user_disability_status: string[]
+          user_full_name: string
+          user_gender: string
           user_id: string
+          user_lgbtq_status: boolean
+          user_race_ethnicity: string[]
+          user_show_demographics: boolean
         }[]
       }
       get_proj4_from_srid: {
