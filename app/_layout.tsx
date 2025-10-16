@@ -19,9 +19,9 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
   const router = useRouter();
-
   const dispatch = useAppDispatch();
 
+  // Auth state listener
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -46,28 +46,44 @@ function RootLayoutNav() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [dispatch, router]);
 
+  // Deep link listener for OAuth callback
   useEffect(() => {
-    // Handle deep link when app reopens from OAuth
-    const handleUrl = ({ url }: { url: string }) => {
-      setStatus("🔗 App opened with URL:", url);
+    const handleUrl = async ({ url }: { url: string }) => {
+      console.log("🔗 Deep link received:", url);
 
       if (url.includes("safepath://callback")) {
-        // Force check session when returning from OAuth
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session) {
-            setStatus("✅ Session found from deep link", session.access_token);
-            dispatch(setSession(session));
+        console.log("✅ OAuth callback detected");
+
+        // Wait for Supabase to process tokens
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        try {
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+
+          if (error) {
+            console.error("❌ Session error:", error);
+            return;
           }
-        });
+
+          if (session) {
+            console.log("✅ Session found, updating Redux");
+            dispatch(setSession(session));
+          } else {
+            console.log("⚠️ No session after OAuth");
+          }
+        } catch (err) {
+          console.error("❌ handleUrl error:", err);
+        }
       }
     };
 
-    // Listen for URL events (when app already running)
     const subscription = Linking.addEventListener("url", handleUrl);
 
-    // Check initial URL (when app starts from deep link)
     Linking.getInitialURL().then((url) => {
       if (url) {
         handleUrl({ url });
@@ -79,6 +95,7 @@ function RootLayoutNav() {
     };
   }, [dispatch]);
 
+  // First launch check
   useEffect(() => {
     checkFirstLaunch();
   }, []);
@@ -86,23 +103,20 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isFirstLaunch === null) return;
 
-    // Navigate based on first launch status
     if (isFirstLaunch) {
       router.replace("/welcome");
     } else {
       router.replace("/(tabs)");
     }
-  }, [isFirstLaunch]);
+  }, [isFirstLaunch, router]);
 
   const checkFirstLaunch = async () => {
     try {
       const hasLaunched = await AsyncStorage.getItem("hasLaunched");
       if (hasLaunched === null) {
-        // First time launching
         setIsFirstLaunch(true);
         await AsyncStorage.setItem("hasLaunched", "true");
       } else {
-        // Not first time
         setIsFirstLaunch(false);
       }
     } catch (error) {
@@ -126,7 +140,4 @@ function RootLayoutNav() {
       <Stack.Screen name="onboarding" />
     </Stack>
   );
-}
-function setStatus(arg0: string, url: string) {
-  throw new Error("Function not implemented.");
 }
