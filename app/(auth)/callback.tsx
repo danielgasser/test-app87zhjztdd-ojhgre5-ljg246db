@@ -15,45 +15,25 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get the URL that opened the app
-        const url = await Linking.getInitialURL();
-        setStatus(`URL: ${url?.substring(0, 50)}...`);
-
-        if (!url) {
-          setStatus("No URL received");
-          setTimeout(() => router.replace("/login"), 2000);
-          return;
-        }
-
-        // Extract tokens from URL
-        const urlObj = Linking.parse(url);
-        const params = urlObj.queryParams;
-
         setStatus("Checking session...");
 
-        // Wait a moment for Supabase to process tokens
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Wait for session to be established
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
         const {
           data: { session },
-          error,
         } = await supabase.auth.getSession();
 
-        if (error) {
-          setStatus(`Error: ${error.message}`);
-          setTimeout(() => router.replace("/login"), 3000);
-          return;
-        }
-
         if (!session) {
-          setStatus("No session found");
-          setTimeout(() => router.replace("/login"), 2000);
+          setStatus("No session found, redirecting...");
+          setTimeout(() => router.replace("/login"), 1000);
           return;
         }
 
-        setStatus("Session found! Checking profile...");
+        // Update Redux
         dispatch(setSession(session));
 
+        // Check onboarding
         const { data: profile } = await supabase
           .from("profiles")
           .select("onboarding_complete")
@@ -67,12 +47,12 @@ export default function AuthCallback() {
         }
       } catch (error: any) {
         setStatus(`Error: ${error.message}`);
-        setTimeout(() => router.replace("/login"), 3000);
+        setTimeout(() => router.replace("/login"), 2000);
       }
     };
 
     handleCallback();
-  }, []);
+  }, [dispatch, router]);
 
   return (
     <View style={styles.container}>

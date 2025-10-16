@@ -6,6 +6,7 @@ import { store } from "src/store";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
+import { Linking } from "react-native";
 
 export default function RootLayout() {
   return (
@@ -46,6 +47,37 @@ function RootLayoutNav() {
       authListener.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    // Handle deep link when app reopens from OAuth
+    const handleUrl = ({ url }: { url: string }) => {
+      setStatus("🔗 App opened with URL:", url);
+
+      if (url.includes("safepath://callback")) {
+        // Force check session when returning from OAuth
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            setStatus("✅ Session found from deep link", session.access_token);
+            dispatch(setSession(session));
+          }
+        });
+      }
+    };
+
+    // Listen for URL events (when app already running)
+    const subscription = Linking.addEventListener("url", handleUrl);
+
+    // Check initial URL (when app starts from deep link)
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleUrl({ url });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     checkFirstLaunch();
@@ -94,4 +126,7 @@ function RootLayoutNav() {
       <Stack.Screen name="onboarding" />
     </Stack>
   );
+}
+function setStatus(arg0: string, url: string) {
+  throw new Error("Function not implemented.");
 }
