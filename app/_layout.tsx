@@ -21,6 +21,7 @@ function RootLayoutNav() {
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+
   // Auth state listener
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -39,7 +40,7 @@ function RootLayoutNav() {
           } else {
             router.replace("/(tabs)");
           }
-          setAuthCheckComplete(true); // Mark auth as handled
+          setAuthCheckComplete(true);
         }
       }
     );
@@ -95,55 +96,36 @@ function RootLayoutNav() {
     };
   }, [dispatch]);
 
-  // First launch check - ONLY if auth didn't handle routing
+  // First launch check
   useEffect(() => {
     checkFirstLaunch();
   }, []);
 
+  // Handle first launch routing - ONLY if auth didn't handle it
   useEffect(() => {
-    const handleUrl = async ({ url }: { url: string }) => {
-      console.log("🔗 Deep link received:", url);
+    if (isFirstLaunch === null || authCheckComplete) return;
 
-      if (url.includes("safepath://callback")) {
-        console.log("✅ OAuth callback detected");
+    if (isFirstLaunch) {
+      router.replace("/welcome");
+    } else {
+      router.replace("/(tabs)");
+    }
+  }, [isFirstLaunch, authCheckComplete, router]);
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        try {
-          const {
-            data: { session },
-            error,
-          } = await supabase.auth.getSession();
-
-          if (error) {
-            console.error("❌ Session error:", error);
-            return;
-          }
-
-          if (session) {
-            console.log("✅ Session found, updating Redux");
-            dispatch(setSession(session));
-          } else {
-            console.log("⚠️ No session after OAuth");
-          }
-        } catch (err) {
-          console.error("❌ handleUrl error:", err);
-        }
+  const checkFirstLaunch = async () => {
+    try {
+      const hasLaunched = await AsyncStorage.getItem("hasLaunched");
+      if (hasLaunched === null) {
+        setIsFirstLaunch(true);
+        await AsyncStorage.setItem("hasLaunched", "true");
+      } else {
+        setIsFirstLaunch(false);
       }
-    };
-
-    const subscription = Linking.addEventListener("url", handleUrl);
-
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        handleUrl({ url });
-      }
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [dispatch]);
+    } catch (error) {
+      console.error("Error checking first launch:", error);
+      setIsFirstLaunch(false);
+    }
+  };
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -160,7 +142,4 @@ function RootLayoutNav() {
       <Stack.Screen name="onboarding" />
     </Stack>
   );
-}
-function checkFirstLaunch() {
-  throw new Error("Function not implemented.");
 }
