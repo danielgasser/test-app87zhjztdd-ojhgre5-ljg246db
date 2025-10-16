@@ -87,17 +87,13 @@ export default function LoginScreen() {
 
       // Check if user has completed onboarding
       const { data: profile } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", data.user.id)
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("user_id", data.user.id)
         .single();
 
       // Route based on onboarding status
-      if (
-        !profile ||
-        !profile.race_ethnicity ||
-        profile.race_ethnicity.length === 0
-      ) {
+      if (!profile || !profile.onboarding_complete) {
         router.replace("/onboarding");
       } else {
         router.replace("/(tabs)");
@@ -115,7 +111,7 @@ export default function LoginScreen() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "safepath://auth/callback",
+          redirectTo: "safepath://callback",
         },
       });
 
