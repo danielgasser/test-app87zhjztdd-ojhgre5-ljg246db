@@ -13,11 +13,13 @@ export default function TabLayout() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
   console.log("APP version:", appConfig.expo?.version);
+
   useEffect(() => {
     if (user?.id) {
       dispatch(fetchUserProfile(user.id));
     }
   }, [user, dispatch]);
+
   return (
     <View style={{ flex: 1 }}>
       <Tabs

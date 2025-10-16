@@ -3,6 +3,8 @@ import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
 import { store } from "src/store";
+import { Linking } from "react-native";
+import { supabase } from "@/services/supabase";
 
 export default function RootLayout() {
   return (
@@ -15,6 +17,27 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    // Handle deep link URLs for OAuth
+    const handleUrl = (event: { url: string }) => {
+      const url = event.url;
+      console.log("Deep link received:", url);
+    };
+
+    // Get initial URL (when app opens from a link)
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.log("Initial URL:", url);
+        handleUrl({ url });
+      }
+    });
+
+    // Listen for URL events while app is running
+    const subscription = Linking.addEventListener("url", handleUrl);
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     checkFirstLaunch();
