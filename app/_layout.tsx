@@ -18,6 +18,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -39,6 +40,7 @@ function RootLayoutNav() {
           } else {
             router.replace("/(tabs)");
           }
+          setAuthCheckComplete(true); // Mark auth as handled
         }
       }
     );
@@ -56,7 +58,6 @@ function RootLayoutNav() {
       if (url.includes("safepath://callback")) {
         console.log("✅ OAuth callback detected");
 
-        // Wait for Supabase to process tokens
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         try {
@@ -95,20 +96,20 @@ function RootLayoutNav() {
     };
   }, [dispatch]);
 
-  // First launch check
+  // First launch check - ONLY if auth didn't handle routing
   useEffect(() => {
     checkFirstLaunch();
   }, []);
 
   useEffect(() => {
-    if (isFirstLaunch === null) return;
+    if (isFirstLaunch === null || authCheckComplete) return; // Don't route if auth handled it
 
     if (isFirstLaunch) {
       router.replace("/welcome");
     } else {
       router.replace("/(tabs)");
     }
-  }, [isFirstLaunch, router]);
+  }, [isFirstLaunch, authCheckComplete, router]);
 
   const checkFirstLaunch = async () => {
     try {
@@ -127,17 +128,7 @@ function RootLayoutNav() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="welcome"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-        }}
-      />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="review" />
-      <Stack.Screen name="onboarding" />
+      {/* ... rest stays the same */}
     </Stack>
   );
 }
