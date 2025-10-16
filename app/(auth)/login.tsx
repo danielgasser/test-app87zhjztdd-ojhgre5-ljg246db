@@ -111,41 +111,50 @@ export default function LoginScreen() {
     }
   };
 
+  const [debugMessage, setDebugMessage] = useState("");
+
   const handleGoogleSignIn = async () => {
     try {
-      const redirectTo = makeRedirectUri();
+      setDebugMessage("Step 1: Requesting OAuth URL...");
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo,
-          skipBrowserRedirect: true,
+          redirectTo: "safepath://callback",
         },
       });
 
-      if (error) throw error;
-
-      const res = await WebBrowser.openAuthSessionAsync(
-        data?.url ?? "",
-        redirectTo
-      );
-
-      if (res.type === "success") {
-        const { url } = res;
-        const { params } = QueryParams.getQueryParams(url);
-
-        if (params.access_token && params.refresh_token) {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: params.access_token as string,
-            refresh_token: params.refresh_token as string,
-          });
-
-          if (sessionError) throw sessionError;
-          // onAuthStateChange listener in _layout will handle routing
-        }
+      if (error) {
+        setDebugMessage(`OAuth Error: ${error.message}`);
+        Alert.alert("Error", error.message);
+        return;
       }
+
+      if (!data?.url) {
+        setDebugMessage("Error: No URL returned from Supabase");
+        Alert.alert("Error", "No OAuth URL returned");
+        return;
+      }
+
+      setDebugMessage(`Step 2: Got URL, checking if can open...`);
+
+      const canOpen = await Linking.canOpenURL(data.url);
+
+      if (!canOpen) {
+        setDebugMessage(`Error: Cannot open URL: ${data.url}`);
+        Alert.alert(
+          "Error",
+          `Cannot open URL: ${data.url.substring(0, 50)}...`
+        );
+        return;
+      }
+
+      setDebugMessage(`Step 3: Opening URL...`);
+      await Linking.openURL(data.url);
+      setDebugMessage(`Step 4: URL opened successfully`);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to sign in with Google");
+      setDebugMessage(`Exception: ${error.message}`);
+      Alert.alert("Error", error.message);
     }
   };
 
@@ -243,6 +252,18 @@ export default function LoginScreen() {
             </Link>
           </View>
         </View>
+        {debugMessage ? (
+          <Text
+            style={{
+              color: "red",
+              fontSize: 12,
+              marginTop: 20,
+              textAlign: "center",
+            }}
+          >
+            Debug: {debugMessage}
+          </Text>
+        ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
