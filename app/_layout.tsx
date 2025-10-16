@@ -27,20 +27,9 @@ function RootLayoutNav() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN" && session) {
+          console.log("🔥 Auth state changed: SIGNED_IN");
           dispatch(setSession(session));
-
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("onboarding_complete")
-            .eq("user_id", session.user.id)
-            .single();
-
-          if (!profile || !profile.onboarding_complete) {
-            router.replace("/onboarding");
-          } else {
-            router.replace("/(tabs)");
-          }
-          setAuthCheckComplete(true);
+          // Don't route here - let deep link or callback screen handle it
         }
       }
     );
@@ -48,7 +37,7 @@ function RootLayoutNav() {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [dispatch, router]);
+  }, [dispatch]);
 
   // Deep link listener for OAuth callback
   useEffect(() => {
@@ -58,7 +47,7 @@ function RootLayoutNav() {
       if (url.includes("safepath://callback")) {
         console.log("✅ OAuth callback detected");
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Increased wait time
 
         try {
           const {
@@ -74,11 +63,28 @@ function RootLayoutNav() {
           if (session) {
             console.log("✅ Session found, updating Redux");
             dispatch(setSession(session));
+
+            // Check onboarding and route
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("onboarding_complete")
+              .eq("user_id", session.user.id)
+              .single();
+
+            setAuthCheckComplete(true);
+
+            if (!profile || !profile.onboarding_complete) {
+              router.replace("/onboarding");
+            } else {
+              router.replace("/(tabs)");
+            }
           } else {
             console.log("⚠️ No session after OAuth");
+            router.replace("/login");
           }
         } catch (err) {
           console.error("❌ handleUrl error:", err);
+          router.replace("/login");
         }
       }
     };
@@ -94,7 +100,7 @@ function RootLayoutNav() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch]);
+  }, [dispatch, router]);
 
   // First launch check
   useEffect(() => {
