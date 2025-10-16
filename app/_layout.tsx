@@ -21,7 +21,6 @@ function RootLayoutNav() {
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
-
   // Auth state listener
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -128,7 +127,17 @@ function RootLayoutNav() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {/* ... rest stays the same */}
+      <Stack.Screen
+        name="welcome"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="review" />
+      <Stack.Screen name="onboarding" />
     </Stack>
   );
 }
