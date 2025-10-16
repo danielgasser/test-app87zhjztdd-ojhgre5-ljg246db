@@ -20,6 +20,7 @@ import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
+const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -59,6 +60,15 @@ export default function OnboardingScreen() {
     religion_other: "",
     disability_other: "",
   });
+
+  useEffect(() => {
+    // Check if user just confirmed email (within last 2 minutes)
+    if (user?.email_confirmed_at) {
+      const confirmedTime = new Date(user.email_confirmed_at).getTime();
+      const isRecentConfirmation = confirmedTime > Date.now() - 120000; // 2 minutes
+      setShowWelcomeBanner(isRecentConfirmation);
+    }
+  }, [user]);
 
   // Helper function to parse "Other: Custom text" back into separate values
   const parseOtherValue = (value: string) => {
@@ -325,6 +335,19 @@ export default function OnboardingScreen() {
       >
         This setup is required to access SafePath's core features.
       </Text>
+      {showWelcomeBanner && currentStep === 0 && (
+        <View style={styles.welcomeBanner}>
+          <View style={styles.welcomeBannerContent}>
+            <Text style={styles.welcomeBannerIcon}>🎉</Text>
+            <View style={styles.welcomeBannerText}>
+              <Text style={styles.welcomeBannerTitle}>Email Confirmed!</Text>
+              <Text style={styles.welcomeBannerSubtitle}>
+                Welcome to SafePath. Let's personalize your experience.
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
       <View style={styles.bulletPoints}>
         <View style={styles.bulletPoint}>
           <Ionicons
@@ -863,6 +886,38 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
+  welcomeBanner: {
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 10,
+    padding: 16,
+    backgroundColor: "#e8f5e9",
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.primary,
+  },
+  welcomeBannerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  welcomeBannerIcon: {
+    fontSize: 32,
+    marginRight: 12,
+  },
+  welcomeBannerText: {
+    flex: 1,
+  },
+  welcomeBannerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: theme.colors.primary,
+    marginBottom: 4,
+  },
+  welcomeBannerSubtitle: {
+    fontSize: 14,
+    color: "#2e7d32",
+    lineHeight: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.card,
