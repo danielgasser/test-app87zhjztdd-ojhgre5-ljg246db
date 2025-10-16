@@ -43,12 +43,7 @@ export default function RegisterScreen() {
         user: result.user,
         session: result.session,
       });
-      Alert.alert(
-        "DEBUG",
-        `User: ${!!result.user}\nSession: ${!!result.session}\nEmail Confirmed: ${
-          result.user?.email_confirmed_at
-        }`
-      );
+
       // Check if email confirmation is required
       if (result.user && !result.session) {
         // Email confirmation required

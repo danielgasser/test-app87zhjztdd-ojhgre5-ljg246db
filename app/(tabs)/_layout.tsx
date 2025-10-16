@@ -75,7 +75,7 @@ export default function TabLayout() {
       </Tabs>
       <View style={styles.versionFooter}>
         <Text style={styles.versionText}>
-          v{appConfig.expo?.version || "1.3.2"} Beta
+          v{appConfig.expo?.version || "1.3.2"}
         </Text>
       </View>
     </View>
