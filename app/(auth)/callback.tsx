@@ -7,6 +7,13 @@ import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
 import * as Linking from "expo-linking";
 
+const [statusHistory, setStatusHistory] = useState<string[]>([]);
+const addStatus = (message: string) => {
+  setStatusHistory((prev) => [
+    ...prev,
+    `${new Date().toLocaleTimeString()}: ${message}`,
+  ]);
+};
 export default function AuthCallback() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -15,17 +22,41 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        setStatus("Checking session...");
+        addStatus("Starting callback...");
 
-        // Wait for session to be established
+        const url = await Linking.getInitialURL();
+        addStatus(`URL: ${url ? url.substring(0, 100) : "NONE"}`);
+
+        // Parse URL params
+        if (url) {
+          const parsed = Linking.parse(url);
+          addStatus(`Path: ${parsed.path || "none"}`);
+          addStatus(
+            `Params: ${JSON.stringify(parsed.queryParams || {}).substring(
+              0,
+              150
+            )}`
+          );
+        }
+
+        addStatus("Waiting 3 seconds...");
         await new Promise((resolve) => setTimeout(resolve, 3000));
+        addStatus("Calling getSession...");
 
         const {
           data: { session },
+          error,
         } = await supabase.auth.getSession();
+        addStatus(session ? "✅ Session FOUND" : "❌ Session NOT FOUND");
+        if (error) {
+          addStatus(`Session error: ${error.message}`);
+        }
+        addStatus(
+          session ? `✅ Session found: ${session.user.email}` : "❌ NO SESSION"
+        );
 
         if (!session) {
-          setStatus("No session found, redirecting...");
+          addStatus("Redirecting to login in 5 seconds...");
           setTimeout(() => router.replace("/login"), 1000);
           return;
         }
@@ -46,7 +77,7 @@ export default function AuthCallback() {
           router.replace("/(tabs)");
         }
       } catch (error: any) {
-        setStatus(`Error: ${error.message}`);
+        addStatus(`EXCEPTION: ${error.message}`);
         setTimeout(() => router.replace("/login"), 2000);
       }
     };
