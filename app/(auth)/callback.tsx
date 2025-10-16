@@ -24,7 +24,7 @@ export default function AuthCallback() {
         const { data: profile } = await supabase
           .from("profiles")
           .select("onboarding_complete")
-          .eq("id", session.user.id)
+          .eq("user_id", session.user.id)
           .single();
 
         const userProfile = profile as UserProfile | null;
