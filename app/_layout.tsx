@@ -6,7 +6,7 @@ import { store } from "src/store";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
-import { Alert, Linking } from "react-native";
+import { Linking } from "react-native";
 
 export default function RootLayout() {
   return (
@@ -22,8 +22,6 @@ function RootLayoutNav() {
   const dispatch = useAppDispatch();
 
   // Auth state listener
-  // In app/_layout.tsx, update the onAuthStateChange:
-
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -37,29 +35,7 @@ function RootLayoutNav() {
             .single();
 
           if (!profile || !profile.onboarding_complete) {
-            // Check if this is email confirmation (user just verified)
-            const isEmailConfirmation =
-              session.user.email_confirmed_at &&
-              new Date(session.user.email_confirmed_at).getTime() >
-                Date.now() - 60000; // Within last minute
-
-            if (isEmailConfirmation) {
-              // Show welcome message for new users
-              setTimeout(() => {
-                Alert.alert(
-                  "Welcome to SafePath! 🛡️",
-                  "Your email has been confirmed. Let's set up your profile so we can provide personalized safety recommendations.",
-                  [
-                    {
-                      text: "Get Started",
-                      onPress: () => router.replace("/onboarding"),
-                    },
-                  ]
-                );
-              }, 500);
-            } else {
-              router.replace("/onboarding");
-            }
+            router.replace("/onboarding");
           } else {
             router.replace("/(tabs)");
           }
