@@ -44,48 +44,11 @@ function RootLayoutNav() {
     const handleUrl = async ({ url }: { url: string }) => {
       console.log("🔗 Deep link received:", url);
 
+      // Just log it - let the callback screen handle the rest
       if (url.includes("safepath://callback")) {
-        console.log("✅ OAuth callback detected");
-
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Increased wait time
-
-        try {
-          const {
-            data: { session },
-            error,
-          } = await supabase.auth.getSession();
-
-          if (error) {
-            console.error("❌ Session error:", error);
-            return;
-          }
-
-          if (session) {
-            console.log("✅ Session found, updating Redux");
-            dispatch(setSession(session));
-
-            // Check onboarding and route
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("onboarding_complete")
-              .eq("user_id", session.user.id)
-              .single();
-
-            setAuthCheckComplete(true);
-
-            if (!profile || !profile.onboarding_complete) {
-              router.replace("/onboarding");
-            } else {
-              router.replace("/(tabs)");
-            }
-          } else {
-            console.log("⚠️ No session after OAuth");
-            router.replace("/login");
-          }
-        } catch (err) {
-          console.error("❌ handleUrl error:", err);
-          router.replace("/login");
-        }
+        console.log(
+          "✅ OAuth callback detected - navigating to callback screen"
+        );
       }
     };
 
@@ -100,7 +63,7 @@ function RootLayoutNav() {
     return () => {
       subscription.remove();
     };
-  }, [dispatch, router]);
+  }, []);
 
   // First launch check
   useEffect(() => {
