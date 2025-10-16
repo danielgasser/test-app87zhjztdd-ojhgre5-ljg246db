@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "SafePath",
     slug: "safepath",
-    version: "1.4.4",
+    version: "1.4.5",
     scheme: "safepath",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -24,6 +24,8 @@ module.exports = {
       },
     },
     android: {
+      minSdkVersion: 31, // Android 12
+      targetSdkVersion: 34, // Android 14
       config: {
         googleMaps: {
           apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
