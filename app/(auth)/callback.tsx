@@ -18,7 +18,7 @@ export default function AuthCallback() {
         setStatus("Checking session...");
 
         // Wait for session to be established
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         const {
           data: { session },

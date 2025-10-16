@@ -15,6 +15,7 @@ module.exports = {
     ios: {
       supportsTablet: false,
       bundleIdentifier: "com.keradaniel.safepath.app",
+      associatedDomains: ["applinks:safepath.app"],
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
       },
