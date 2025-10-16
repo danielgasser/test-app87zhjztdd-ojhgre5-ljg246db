@@ -5,6 +5,8 @@ import { Provider } from "react-redux";
 import { store } from "src/store";
 import { Linking } from "react-native";
 import { supabase } from "@/services/supabase";
+import { useAppDispatch } from "@/store/hooks";
+import { setSession } from "@/store/authSlice";
 
 export default function RootLayout() {
   return (
@@ -18,25 +20,32 @@ function RootLayoutNav() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
   const router = useRouter();
 
+  const dispatch = useAppDispatch();
+
   useEffect(() => {
-    // Handle deep link URLs for OAuth
-    const handleUrl = (event: { url: string }) => {
-      const url = event.url;
-      console.log("Deep link received:", url);
-    };
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          dispatch(setSession(session));
 
-    // Get initial URL (when app opens from a link)
-    Linking.getInitialURL().then((url) => {
-      if (url) {
-        console.log("Initial URL:", url);
-        handleUrl({ url });
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("onboarding_complete")
+            .eq("user_id", session.user.id)
+            .single();
+
+          if (!profile || !profile.onboarding_complete) {
+            router.replace("/onboarding");
+          } else {
+            router.replace("/(tabs)");
+          }
+        }
       }
-    });
+    );
 
-    // Listen for URL events while app is running
-    const subscription = Linking.addEventListener("url", handleUrl);
-
-    return () => subscription.remove();
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
