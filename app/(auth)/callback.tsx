@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "@/services/supabase";
 import { theme } from "src/styles/theme";
@@ -90,6 +96,13 @@ export default function AuthCallback() {
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.text}>Completing sign in...</Text>
       <Text style={styles.debugText}>{status}</Text>
+      <ScrollView style={styles.debugContainer}>
+        {statusHistory.map((status, i) => (
+          <Text key={i} style={styles.debugText}>
+            {status}
+          </Text>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -106,6 +119,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: theme.colors.text,
+  },
+  debugContainer: {
+    flex: 1,
+    width: "100%",
+    padding: 10,
   },
   debugText: {
     marginTop: 20,
