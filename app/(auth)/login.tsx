@@ -20,6 +20,11 @@ import { supabase } from "@/services/supabase";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import { makeRedirectUri } from "expo-auth-session";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -108,18 +113,36 @@ export default function LoginScreen() {
 
   const handleGoogleSignIn = async () => {
     try {
+      const redirectTo = makeRedirectUri();
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "safepath://callback",
+          redirectTo,
+          skipBrowserRedirect: true,
         },
       });
 
       if (error) throw error;
 
-      // Open the OAuth URL
-      if (data?.url) {
-        await Linking.openURL(data.url);
+      const res = await WebBrowser.openAuthSessionAsync(
+        data?.url ?? "",
+        redirectTo
+      );
+
+      if (res.type === "success") {
+        const { url } = res;
+        const { params } = QueryParams.getQueryParams(url);
+
+        if (params.access_token && params.refresh_token) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: params.access_token as string,
+            refresh_token: params.refresh_token as string,
+          });
+
+          if (sessionError) throw sessionError;
+          // onAuthStateChange listener in _layout will handle routing
+        }
       }
     } catch (error: any) {
       Alert.alert("Error", error.message || "Failed to sign in with Google");
