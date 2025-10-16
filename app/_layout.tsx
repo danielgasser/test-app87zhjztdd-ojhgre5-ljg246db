@@ -101,29 +101,49 @@ function RootLayoutNav() {
   }, []);
 
   useEffect(() => {
-    if (isFirstLaunch === null || authCheckComplete) return; // Don't route if auth handled it
+    const handleUrl = async ({ url }: { url: string }) => {
+      console.log("🔗 Deep link received:", url);
 
-    if (isFirstLaunch) {
-      router.replace("/welcome");
-    } else {
-      router.replace("/(tabs)");
-    }
-  }, [isFirstLaunch, authCheckComplete, router]);
+      if (url.includes("safepath://callback")) {
+        console.log("✅ OAuth callback detected");
 
-  const checkFirstLaunch = async () => {
-    try {
-      const hasLaunched = await AsyncStorage.getItem("hasLaunched");
-      if (hasLaunched === null) {
-        setIsFirstLaunch(true);
-        await AsyncStorage.setItem("hasLaunched", "true");
-      } else {
-        setIsFirstLaunch(false);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        try {
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+
+          if (error) {
+            console.error("❌ Session error:", error);
+            return;
+          }
+
+          if (session) {
+            console.log("✅ Session found, updating Redux");
+            dispatch(setSession(session));
+          } else {
+            console.log("⚠️ No session after OAuth");
+          }
+        } catch (err) {
+          console.error("❌ handleUrl error:", err);
+        }
       }
-    } catch (error) {
-      console.error("Error checking first launch:", error);
-      setIsFirstLaunch(false);
-    }
-  };
+    };
+
+    const subscription = Linking.addEventListener("url", handleUrl);
+
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleUrl({ url });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [dispatch]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -140,4 +160,7 @@ function RootLayoutNav() {
       <Stack.Screen name="onboarding" />
     </Stack>
   );
+}
+function checkFirstLaunch() {
+  throw new Error("Function not implemented.");
 }
