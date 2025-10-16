@@ -65,7 +65,7 @@ export const APP_CONFIG = {
   // Business Rules
   BUSINESS_RULES: {
     ONE_REVIEW_PER_USER_LOCATION: true,       // Enforce single review per user/location
-    REQUIRE_EMAIL_CONFIRMATION: false,         // Currently disabled for dev
+    REQUIRE_EMAIL_CONFIRMATION: true,         // Currently disabled for dev
     MIN_DEMOGRAPHIC_GROUPS_FOR_COMPARISON: 2,  // Min groups to compare for patterns
   },
 
