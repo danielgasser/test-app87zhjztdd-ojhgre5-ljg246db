@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
+import { supabase } from "@/services/supabase";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -208,6 +209,11 @@ export default function OnboardingScreen() {
           profileData: processedData,
         })
       ).unwrap();
+
+      await supabase
+        .from("profiles")
+        .update({ onboarding_complete: true })
+        .eq("user_id", user.id);
 
       Alert.alert(
         isEditing ? "Profile Updated!" : "Welcome to SafePath!",

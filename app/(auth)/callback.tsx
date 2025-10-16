@@ -22,8 +22,8 @@ export default function AuthCallback() {
       if (session) {
         dispatch(setSession(session));
         const { data: profile } = await supabase
-          .from("user_profiles")
-          .select("*")
+          .from("profiles")
+          .select("onboarding_complete")
           .eq("id", session.user.id)
           .single();
 
