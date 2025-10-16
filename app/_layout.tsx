@@ -3,7 +3,6 @@ import { Stack, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
 import { store } from "src/store";
-import { Linking } from "react-native";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
