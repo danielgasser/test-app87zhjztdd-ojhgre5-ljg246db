@@ -35,14 +35,32 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters");
-      return;
-    }
-
     try {
-      await dispatch(signUp({ email, password })).unwrap();
-      router.replace("/onboarding");
+      const result = await dispatch(signUp({ email, password })).unwrap();
+      console.log("SignUp Result:", {
+        hasUser: !!result.user,
+        hasSession: !!result.session,
+        user: result.user,
+        session: result.session,
+      });
+      Alert.alert(
+        "DEBUG",
+        `User: ${!!result.user}\nSession: ${!!result.session}\nEmail Confirmed: ${
+          result.user?.email_confirmed_at
+        }`
+      );
+      // Check if email confirmation is required
+      if (result.user && !result.session) {
+        // Email confirmation required
+        Alert.alert(
+          "Check Your Email",
+          "We've sent you a confirmation email. Please check your inbox and click the link to verify your account.",
+          [{ text: "OK", onPress: () => router.replace("/login") }]
+        );
+      } else {
+        // Auto-login (confirmation disabled or already confirmed)
+        router.replace("/onboarding");
+      }
     } catch (err: any) {
       Alert.alert("Registration Failed", err.message || "Please try again");
     }

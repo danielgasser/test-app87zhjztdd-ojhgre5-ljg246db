@@ -364,7 +364,7 @@ export default function OnboardingScreen() {
       </Text>
       <TextInput
         style={styles.nameInput}
-        placeholder="Enter your full name"
+        placeholder="Enter your name or a nickname"
         value={formData.full_name}
         onChangeText={(text) => setFormData({ ...formData, full_name: text })}
         autoCapitalize="words"
