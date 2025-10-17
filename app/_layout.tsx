@@ -42,8 +42,6 @@ function RootLayoutNav() {
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
-      console.log("🔗 Deep link received:", url);
-
       if (url.includes("safepath://callback")) {
         console.log(
           "✅ OAuth callback detected - navigating to callback screen"
