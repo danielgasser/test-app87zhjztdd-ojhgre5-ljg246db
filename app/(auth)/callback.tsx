@@ -38,7 +38,6 @@ export default function AuthCallback() {
       const url = urlParam || deepLinkUrl || null;
 
       try {
-        addStatus("Starting callback...");
         addStatus(`URL: ${url ? url.substring(0, 100) : "NONE"}`);
 
         // Parse URL params
@@ -54,12 +53,12 @@ export default function AuthCallback() {
         }
 
         addStatus("Waiting 3 seconds...");
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         addStatus("Calling getSession...");
 
         // First, try to exchange the URL hash for a session
         if (url && url.includes("#access_token=")) {
-          addStatus("Found tokens in URL, exchanging...");
+          addStatus("Found your account, doing some background work...");
 
           const { data, error } = await supabase.auth.setSession({
             access_token: url.split("access_token=")[1].split("&")[0],
@@ -72,11 +71,8 @@ export default function AuthCallback() {
           }
 
           if (data.session) {
-            addStatus("✅ Session created from URL tokens!");
-
             // Update Redux with session
             dispatch(setSession(data.session));
-            addStatus("Session dispatched to Redux");
 
             // Check onboarding status
             const { data: profile } = await supabase
@@ -93,7 +89,7 @@ export default function AuthCallback() {
 
             // Route based on onboarding
             if (!profile || !profile.onboarding_complete) {
-              addStatus("Routing to onboarding...");
+              addStatus("Signing you in...");
               router.replace("/onboarding");
             } else {
               addStatus("Routing to app...");
@@ -114,7 +110,6 @@ export default function AuthCallback() {
 
           if (session) {
             dispatch(setSession(session));
-            addStatus("Session dispatched to Redux");
 
             // Check onboarding status
             const { data: profile } = await supabase
@@ -138,7 +133,7 @@ export default function AuthCallback() {
               router.replace("/(tabs)");
             }
           } else {
-            addStatus("❌ NO SESSION");
+            addStatus("❌ Something went wrong");
             addStatus("Redirecting to login in 5 seconds...");
             setTimeout(() => router.replace("/login"), 5000);
           }
