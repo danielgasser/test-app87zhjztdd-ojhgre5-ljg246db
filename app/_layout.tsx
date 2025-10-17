@@ -44,11 +44,15 @@ function RootLayoutNav() {
     const handleUrl = async ({ url }: { url: string }) => {
       console.log("🔗 Deep link received:", url);
 
-      // Just log it - let the callback screen handle the rest
       if (url.includes("safepath://callback")) {
         console.log(
           "✅ OAuth callback detected - navigating to callback screen"
         );
+        // Navigate WITH the URL as a param
+        router.push({
+          pathname: "/(auth)/callback",
+          params: { deepLinkUrl: url },
+        });
       }
     };
 

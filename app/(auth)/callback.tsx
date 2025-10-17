@@ -10,8 +10,8 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/services/supabase";
 import { theme } from "src/styles/theme";
 import { useAppDispatch } from "@/store/hooks";
-import { setSession } from "@/store/authSlice";
 import * as Linking from "expo-linking";
+import { useLocalSearchParams } from "expo-router";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -25,11 +25,14 @@ export default function AuthCallback() {
     ]);
   };
   useEffect(() => {
-    const handleCallback = async () => {
+    let handled = false;
+
+    const handleCallback = async (url: string | null) => {
+      if (handled) return; // Prevent double-handling
+      handled = true;
+
       try {
         addStatus("Starting callback...");
-
-        const url = await Linking.getInitialURL();
         addStatus(`URL: ${url ? url.substring(0, 100) : "NONE"}`);
 
         // Parse URL params
@@ -52,43 +55,26 @@ export default function AuthCallback() {
           data: { session },
           error,
         } = await supabase.auth.getSession();
-        addStatus(session ? "✅ Session FOUND" : "❌ Session NOT FOUND");
-        if (error) {
-          addStatus(`Session error: ${error.message}`);
-        }
-        addStatus(
-          session ? `✅ Session found: ${session.user.email}` : "❌ NO SESSION"
-        );
 
-        if (!session) {
-          addStatus("Redirecting to login in 5 seconds...");
-          setTimeout(() => router.replace("/login"), 1000);
-          return;
-        }
-
-        // Update Redux
-        dispatch(setSession(session));
-
-        // Check onboarding
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_complete")
-          .eq("user_id", session.user.id)
-          .single();
-
-        if (!profile || !profile.onboarding_complete) {
-          router.replace("/onboarding");
-        } else {
-          router.replace("/(tabs)");
-        }
+        // ... rest of your existing code in handleCallback
       } catch (error: any) {
         addStatus(`EXCEPTION: ${error.message}`);
         setTimeout(() => router.replace("/login"), 2000);
       }
     };
 
-    handleCallback();
-  }, [dispatch, router]);
+    // Listen for incoming URLs (when app is already running)
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      handleCallback(url);
+    });
+
+    // Check initial URL (when app was closed)
+    Linking.getInitialURL().then(handleCallback);
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
