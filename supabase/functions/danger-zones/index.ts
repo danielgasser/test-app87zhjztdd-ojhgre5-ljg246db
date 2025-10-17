@@ -69,7 +69,7 @@ serve(async (req) => {
     }
 
     // Get dangerous locations
-    const { data: dangerousLocations, error: locError } = await supabase
+    let query = supabase
       .from('safety_scores')
       .select(`
         *,
@@ -80,8 +80,14 @@ serve(async (req) => {
           place_type
         )
       `)
-      .lt('avg_overall_score', 3)
-      .or(demographicFilters.join(','))
+      .lt('avg_overall_score', 3);
+
+    // Add demographic filter only if user has demographics
+    if (demographicFilters.length > 0) {
+      query = query.or(demographicFilters.join(','));
+    }
+
+    const { data: dangerousLocations, error: locError } = await supabase
 
     if (locError) {
       console.error('Query error:', locError)
