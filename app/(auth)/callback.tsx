@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/services/supabase";
 import { theme } from "src/styles/theme";
 import { useAppDispatch } from "@/store/hooks";
+import { setSession } from "@/store/authSlice";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams } from "expo-router";
 
@@ -19,19 +20,22 @@ export default function AuthCallback() {
   const [status, setStatus] = useState("Processing...");
   const [statusHistory, setStatusHistory] = useState<string[]>([]);
   const { deepLinkUrl } = useLocalSearchParams<{ deepLinkUrl?: string }>();
+
   const addStatus = (message: string) => {
     setStatusHistory((prev) => [
       ...prev,
       `${new Date().toLocaleTimeString()}: ${message}`,
     ]);
   };
+
   useEffect(() => {
     let handled = false;
 
     const handleCallback = async (urlParam?: string | null) => {
-      const url = urlParam || deepLinkUrl || null;
-      if (handled) return; // Prevent double-handling
+      if (handled) return;
       handled = true;
+
+      const url = urlParam || deepLinkUrl || null;
 
       try {
         addStatus("Starting callback...");
@@ -53,8 +57,6 @@ export default function AuthCallback() {
         await new Promise((resolve) => setTimeout(resolve, 3000));
         addStatus("Calling getSession...");
 
-        addStatus("Calling getSession...");
-
         // First, try to exchange the URL hash for a session
         if (url && url.includes("#access_token=")) {
           addStatus("Found tokens in URL, exchanging...");
@@ -71,7 +73,32 @@ export default function AuthCallback() {
 
           if (data.session) {
             addStatus("✅ Session created from URL tokens!");
-            // Continue with existing session handling code...
+
+            // Update Redux with session
+            dispatch(setSession(data.session));
+            addStatus("Session dispatched to Redux");
+
+            // Check onboarding status
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("onboarding_complete")
+              .eq("user_id", data.session.user.id)
+              .single();
+
+            addStatus(
+              `Profile check: ${
+                profile?.onboarding_complete ? "Complete" : "Incomplete"
+              }`
+            );
+
+            // Route based on onboarding
+            if (!profile || !profile.onboarding_complete) {
+              addStatus("Routing to onboarding...");
+              router.replace("/onboarding");
+            } else {
+              addStatus("Routing to app...");
+              router.replace("/(tabs)");
+            }
           }
         } else {
           // Fallback to getSession
@@ -84,16 +111,49 @@ export default function AuthCallback() {
           if (error) {
             addStatus(`Session error: ${error.message}`);
           }
+
+          if (session) {
+            dispatch(setSession(session));
+            addStatus("Session dispatched to Redux");
+
+            // Check onboarding status
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("onboarding_complete")
+              .eq("user_id", session.user.id)
+              .single();
+
+            addStatus(
+              `Profile check: ${
+                profile?.onboarding_complete ? "Complete" : "Incomplete"
+              }`
+            );
+
+            // Route based on onboarding
+            if (!profile || !profile.onboarding_complete) {
+              addStatus("Routing to onboarding...");
+              router.replace("/onboarding");
+            } else {
+              addStatus("Routing to app...");
+              router.replace("/(tabs)");
+            }
+          } else {
+            addStatus("❌ NO SESSION");
+            addStatus("Redirecting to login in 5 seconds...");
+            setTimeout(() => router.replace("/login"), 5000);
+          }
         }
-        // ... rest of your existing code in handleCallback
       } catch (error: any) {
         addStatus(`EXCEPTION: ${error.message}`);
         setTimeout(() => router.replace("/login"), 2000);
       }
     };
+
+    // Call handleCallback immediately if we have deepLinkUrl from route params
     if (deepLinkUrl) {
       handleCallback(deepLinkUrl);
     }
+
     // Listen for incoming URLs (when app is already running)
     const subscription = Linking.addEventListener("url", ({ url }) => {
       handleCallback(url);
