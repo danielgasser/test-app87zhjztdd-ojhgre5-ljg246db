@@ -18,6 +18,7 @@ export default function AuthCallback() {
   const dispatch = useAppDispatch();
   const [status, setStatus] = useState("Processing...");
   const [statusHistory, setStatusHistory] = useState<string[]>([]);
+  const { deepLinkUrl } = useLocalSearchParams<{ deepLinkUrl?: string }>();
   const addStatus = (message: string) => {
     setStatusHistory((prev) => [
       ...prev,
@@ -27,7 +28,8 @@ export default function AuthCallback() {
   useEffect(() => {
     let handled = false;
 
-    const handleCallback = async (url: string | null) => {
+    const handleCallback = async (urlParam?: string | null) => {
+      const url = urlParam || deepLinkUrl || null;
       if (handled) return; // Prevent double-handling
       handled = true;
 
@@ -67,9 +69,6 @@ export default function AuthCallback() {
     const subscription = Linking.addEventListener("url", ({ url }) => {
       handleCallback(url);
     });
-
-    // Check initial URL (when app was closed)
-    Linking.getInitialURL().then(handleCallback);
 
     return () => {
       subscription.remove();
