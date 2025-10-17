@@ -12,11 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('1. Function started')
-
     const authHeader = req.headers.get('Authorization')
-    console.log('2. Auth header:', authHeader ? 'EXISTS' : 'MISSING')
-
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'No authorization header' }), {
         status: 401,
@@ -24,33 +20,105 @@ serve(async (req) => {
       })
     }
 
-    console.log('3. Creating supabase client')
+    // Create client with ANON_KEY for auth verification
+    const token = authHeader.replace('Bearer ', '')
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    console.log('4. Extracting token')
-    const token = authHeader.replace('Bearer ', '')
-    console.log('5. Token length:', token.length)
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
 
-    console.log('6. Calling getUser')
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-
-    console.log('7. getUser result - user:', user ? 'EXISTS' : 'NULL', 'error:', authError?.message || 'NONE')
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({
-        error: 'Unauthorized',
-        details: authError?.message,
-        debug: 'getUser failed'
-      }), {
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    return new Response(JSON.stringify({ success: true, user_id: user.id, message: 'Auth works!' }), {
+    const { review_id, vote_type } = await req.json()
+
+    if (!review_id || !vote_type || !['helpful', 'unhelpful'].includes(vote_type)) {
+      return new Response(JSON.stringify({ error: 'Invalid parameters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Create admin client for database operations
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const { data: existingVote } = await supabaseAdmin
+      .from('review_votes')
+      .select('*')
+      .eq('review_id', review_id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (existingVote) {
+      if (existingVote.vote_type !== vote_type) {
+        await supabaseAdmin
+          .from('review_votes')
+          .delete()
+          .eq('id', existingVote.id)
+
+        const oldCountField = existingVote.vote_type === 'helpful' ? 'helpful_count' : 'unhelpful_count'
+        await supabaseAdmin.rpc('decrement_review_count', {
+          review_id,
+          count_field: oldCountField
+        })
+
+        await supabaseAdmin
+          .from('review_votes')
+          .insert({ review_id, user_id: user.id, vote_type })
+
+        const newCountField = vote_type === 'helpful' ? 'helpful_count' : 'unhelpful_count'
+        await supabaseAdmin.rpc('increment_review_count', {
+          review_id,
+          count_field: newCountField
+        })
+
+        return new Response(JSON.stringify({ success: true, action: 'updated' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      } else {
+        await supabaseAdmin
+          .from('review_votes')
+          .delete()
+          .eq('id', existingVote.id)
+
+        const countField = vote_type === 'helpful' ? 'helpful_count' : 'unhelpful_count'
+        await supabaseAdmin.rpc('decrement_review_count', {
+          review_id,
+          count_field: countField
+        })
+
+        return new Response(JSON.stringify({ success: true, action: 'removed' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    } else {
+      await supabaseAdmin
+        .from('review_votes')
+        .insert({ review_id, user_id: user.id, vote_type })
+
+      const countField = vote_type === 'helpful' ? 'helpful_count' : 'unhelpful_count'
+      await supabaseAdmin.rpc('increment_review_count', {
+        review_id,
+        count_field: countField
+      })
+
+      return new Response(JSON.stringify({ success: true, action: 'added' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
-  })
+  }
+})
