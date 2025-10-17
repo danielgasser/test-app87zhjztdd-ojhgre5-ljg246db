@@ -23,6 +23,11 @@
     }
   },
   "submit": {
+    "development": {
+      "ios": {
+        "appleTeamId": "9KVXT96KRA"
+      }
+    },
     "production": {}
   }
 }
