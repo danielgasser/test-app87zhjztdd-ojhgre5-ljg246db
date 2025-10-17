@@ -24,7 +24,13 @@ export default function AuthCallback() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [status, setStatus] = useState("Processing...");
-
+  const [statusHistory, setStatusHistory] = useState<string[]>([]);
+  const addStatus = (message: string) => {
+    setStatusHistory((prev) => [
+      ...prev,
+      `${new Date().toLocaleTimeString()}: ${message}`,
+    ]);
+  };
   useEffect(() => {
     const handleCallback = async () => {
       try {
