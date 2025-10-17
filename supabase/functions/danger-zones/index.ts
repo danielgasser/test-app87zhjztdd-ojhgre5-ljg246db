@@ -87,7 +87,7 @@ serve(async (req) => {
       query = query.or(demographicFilters.join(','));
     }
 
-    const { data: dangerousLocations, error: locError } = await supabase
+    const { data: dangerousLocations, error: locError } = await query
 
     if (locError) {
       console.error('Query error:', locError)

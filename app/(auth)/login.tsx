@@ -252,18 +252,6 @@ export default function LoginScreen() {
             </Link>
           </View>
         </View>
-        {debugMessage ? (
-          <Text
-            style={{
-              color: "red",
-              fontSize: 12,
-              marginTop: 20,
-              textAlign: "center",
-            }}
-          >
-            Debug: {debugMessage}
-          </Text>
-        ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
