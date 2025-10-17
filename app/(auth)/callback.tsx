@@ -13,13 +13,6 @@ import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
 import * as Linking from "expo-linking";
 
-const [statusHistory, setStatusHistory] = useState<string[]>([]);
-const addStatus = (message: string) => {
-  setStatusHistory((prev) => [
-    ...prev,
-    `${new Date().toLocaleTimeString()}: ${message}`,
-  ]);
-};
 export default function AuthCallback() {
   const router = useRouter();
   const dispatch = useAppDispatch();
