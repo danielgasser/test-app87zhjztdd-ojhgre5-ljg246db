@@ -12,19 +12,23 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Verify JWT
-    const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      return new Response(JSON.stringify({ error: 'Unauthorized', details: authError?.message }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -39,7 +43,6 @@ serve(async (req) => {
       })
     }
 
-    // Check if user already voted
     const { data: existingVote } = await supabaseClient
       .from('review_votes')
       .select('*')
@@ -49,7 +52,6 @@ serve(async (req) => {
 
     if (existingVote) {
       if (existingVote.vote_type !== vote_type) {
-        // Switch vote
         await supabaseClient
           .from('review_votes')
           .delete()
@@ -75,7 +77,6 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       } else {
-        // Toggle off
         await supabaseClient
           .from('review_votes')
           .delete()
@@ -92,7 +93,6 @@ serve(async (req) => {
         })
       }
     } else {
-      // Add new vote
       await supabaseClient
         .from('review_votes')
         .insert({ review_id, user_id: user.id, vote_type })
