@@ -53,18 +53,47 @@ export default function AuthCallback() {
         await new Promise((resolve) => setTimeout(resolve, 3000));
         addStatus("Calling getSession...");
 
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+        addStatus("Calling getSession...");
 
+        // First, try to exchange the URL hash for a session
+        if (url && url.includes("#access_token=")) {
+          addStatus("Found tokens in URL, exchanging...");
+
+          const { data, error } = await supabase.auth.setSession({
+            access_token: url.split("access_token=")[1].split("&")[0],
+            refresh_token: url.split("refresh_token=")[1].split("&")[0],
+          });
+
+          if (error) {
+            addStatus(`❌ Exchange error: ${error.message}`);
+            throw error;
+          }
+
+          if (data.session) {
+            addStatus("✅ Session created from URL tokens!");
+            // Continue with existing session handling code...
+          }
+        } else {
+          // Fallback to getSession
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession();
+
+          addStatus(session ? "✅ Session FOUND" : "❌ Session NOT FOUND");
+          if (error) {
+            addStatus(`Session error: ${error.message}`);
+          }
+        }
         // ... rest of your existing code in handleCallback
       } catch (error: any) {
         addStatus(`EXCEPTION: ${error.message}`);
         setTimeout(() => router.replace("/login"), 2000);
       }
     };
-
+    if (deepLinkUrl) {
+      handleCallback(deepLinkUrl);
+    }
     // Listen for incoming URLs (when app is already running)
     const subscription = Linking.addEventListener("url", ({ url }) => {
       handleCallback(url);
@@ -73,7 +102,7 @@ export default function AuthCallback() {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [deepLinkUrl]);
 
   return (
     <View style={styles.container}>
