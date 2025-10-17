@@ -292,7 +292,16 @@ export default function MapScreen() {
 
   const handleToggleDangerZones = () => {
     if (!requireAuth(userId, "view danger zones")) return;
+    // Check if user has valid demographics
+    const hasValidDemographics =
+      userProfile &&
+      (userProfile.race_ethnicity?.length > 0 ||
+        userProfile.gender ||
+        userProfile.lgbtq_status);
 
+    if (!hasValidDemographics) {
+      return;
+    }
     dispatch(toggleDangerZones());
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
       console.log("🛡️ Fetching danger zones for userId:", userId);
@@ -464,7 +473,14 @@ export default function MapScreen() {
 
   // Fetch danger zones when user location is available
   useEffect(() => {
-    if (userId && userLocation) {
+    // Only fetch danger zones if user has completed profile with demographics
+    const hasValidDemographics =
+      userProfile &&
+      (userProfile.race_ethnicity?.length > 0 ||
+        userProfile.gender ||
+        userProfile.lgbtq_status);
+
+    if (userId && userLocation && hasValidDemographics) {
       dispatch(
         fetchDangerZones({
           userId: userId,
