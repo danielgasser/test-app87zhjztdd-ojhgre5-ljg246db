@@ -1,22 +1,21 @@
 import { createSlice, createAsyncThunk, PayloadAction, Draft } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
 import { Database } from '../types/database.types';
+import { APP_CONFIG } from '@/utils/appConfig';
+import { isFieldComplete } from '@/utils/profileValidation';
+import type { UserProfile } from '../types/supabase';
 
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;
 
-  // Profile is complete if user has filled at least some demographic info
-  return !!(
-    (profile.race_ethnicity && profile.race_ethnicity.length > 0) ||
-    profile.gender ||
-    profile.lgbtq_status !== undefined ||
-    (profile.disability_status && profile.disability_status.length > 0) ||
-    profile.religion ||
-    profile.age_range
+  // Check if mandatory fields are filled
+  const mandatoryFields = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
+
+  return mandatoryFields.every((field) =>
+    isFieldComplete(profile[field as keyof UserProfile])
   );
 };
 
-export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 
 
 interface UserState {
@@ -103,10 +102,10 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setProfile: (state, action: PayloadAction<UserProfile>) => {
+    setProfile: (state, action) => {
       state.profile = action.payload;
     },
-    setOnboardingComplete: (state, action: PayloadAction<boolean>) => {
+    setOnboardingComplete: (state, action) => {
       state.onboardingComplete = action.payload;
     },
     clearError: (state) => {
@@ -124,9 +123,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
-
       })
-
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch profile';
@@ -139,7 +136,6 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload;
-        // Set onboarding complete after successful profile update
         state.onboardingComplete = isProfileComplete(action.payload);
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
