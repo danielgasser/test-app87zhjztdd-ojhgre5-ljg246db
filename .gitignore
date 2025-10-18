@@ -41,3 +41,5 @@ yarn-error.*
 
 # scripts
 gitpush.sh
+ios/
+android/
