@@ -11,6 +11,8 @@ import {
   Alert,
   Platform,
   Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -274,259 +276,275 @@ export default function ReviewScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Write a Review</Text>
-          <View style={{ width: 24 }} />
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color={theme.colors.text}
+                />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Write a Review</Text>
+              <View style={{ width: 24 }} />
+            </View>
 
-        <View style={styles.locationInfo}>
-          <Text style={styles.locationName}>{locationName || "Location"}</Text>
-        </View>
-
-        {/* Location Name for New Locations */}
-        {isCreatingNew && (
-          <View style={styles.newLocationSection}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                📍 What is this place called?{" "}
-                <Text style={styles.required}>*</Text>
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder='e.g., "Joe&apos;s Pizza" or "Central Park"'
-                value={editableLocationName}
-                onChangeText={setEditableLocationName}
-                maxLength={100}
-                autoCapitalize="words"
-              />
-              <Text style={styles.helperText}>
-                Give this location a name so others can find it
+            <View style={styles.locationInfo}>
+              <Text style={styles.locationName}>
+                {locationName || "Location"}
               </Text>
             </View>
-          </View>
-        )}
 
-        <View style={styles.form}>
-          {/* Title */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              Review Title <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Summarize your experience"
-              value={formData.title}
-              onChangeText={(text) => setFormData({ ...formData, title: text })}
-              maxLength={100}
-            />
-          </View>
-          {/* Ratings */}
-          <RatingInput
-            label="Overall Experience"
-            value={formData.overall_rating}
-            onChange={(value) =>
-              setFormData({ ...formData, overall_rating: value })
-            }
-            required
-          />
-          <RatingInput
-            label="Safety"
-            value={formData.safety_rating}
-            onChange={(value) =>
-              setFormData({ ...formData, safety_rating: value })
-            }
-            required
-          />
-          <RatingInput
-            label="Comfort Level"
-            value={formData.comfort_rating}
-            onChange={(value) =>
-              setFormData({ ...formData, comfort_rating: value })
-            }
-            required
-          />
-          <RatingInput
-            label="Accessibility"
-            value={formData.accessibility_rating}
-            onChange={(value) =>
-              setFormData({ ...formData, accessibility_rating: value })
-            }
-          />
-          <RatingInput
-            label="Service Quality"
-            value={formData.service_rating}
-            onChange={(value) =>
-              setFormData({ ...formData, service_rating: value })
-            }
-          />
-          {/* Review Content */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              Your Review <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Share your experience at this location..."
-              value={formData.content}
-              onChangeText={(text) =>
-                setFormData({ ...formData, content: text })
-              }
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-              maxLength={1000}
-            />
-            <Text style={styles.charCount}>{formData.content.length}/1000</Text>
-          </View>
-          {/* Visit Details */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Visit Date</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {visitDateTime.toLocaleDateString()}
-              </Text>
-              <Ionicons
-                name="calendar"
-                size={20}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
-          {showDatePicker && (
-            <DateTimePicker
-              value={visitDateTime}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(Platform.OS === "ios");
-                if (selectedDate) {
-                  const newDateTime = new Date(visitDateTime);
-                  newDateTime.setFullYear(selectedDate.getFullYear());
-                  newDateTime.setMonth(selectedDate.getMonth());
-                  newDateTime.setDate(selectedDate.getDate());
-                  setVisitDateTime(newDateTime);
-                }
-              }}
-            />
-          )}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Visit Time</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowTimePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {visitDateTime.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-              <Ionicons
-                name="time"
-                size={20}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
-          {showTimePicker && (
-            <DateTimePicker
-              value={visitDateTime}
-              mode="time"
-              display="default"
-              onChange={(event, selectedTime) => {
-                setShowTimePicker(Platform.OS === "ios");
-                if (selectedTime) {
-                  const newDateTime = new Date(visitDateTime);
-                  newDateTime.setHours(selectedTime.getHours());
-                  newDateTime.setMinutes(selectedTime.getMinutes());
-                  setVisitDateTime(newDateTime);
-                }
-              }}
-            />
-          )}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Visit Type</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowVisitTypePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {formData.visit_type.charAt(0).toUpperCase() +
-                  formData.visit_type.slice(1)}
-              </Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.textSecondary}
-              />
-            </TouchableOpacity>
-          </View>
-          {/* Visit Type Modal */}
-          <Modal
-            visible={showVisitTypePicker}
-            transparent={true}
-            animationType="slide"
-          >
-            <TouchableOpacity
-              style={styles.modalOverlay}
-              onPress={() => setShowVisitTypePicker(false)}
-            >
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select Visit Type</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowVisitTypePicker(false)}
-                  >
-                    <Text style={styles.modalDone}>Done</Text>
-                  </TouchableOpacity>
+            {/* Location Name for New Locations */}
+            {isCreatingNew && (
+              <View style={styles.newLocationSection}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>
+                    📍 What is this place called?{" "}
+                    <Text style={styles.required}>*</Text>
+                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder='e.g., "Joe&apos;s Pizza" or "Central Park"'
+                    value={editableLocationName}
+                    onChangeText={setEditableLocationName}
+                    maxLength={100}
+                    autoCapitalize="words"
+                  />
+                  <Text style={styles.helperText}>
+                    Give this location a name so others can find it
+                  </Text>
                 </View>
-                <Picker
-                  selectedValue={formData.visit_type}
-                  onValueChange={(value) => {
-                    setFormData({ ...formData, visit_type: value });
-                    setShowVisitTypePicker(false);
-                  }}
-                  style={{ height: 200 }}
-                >
-                  <Picker.Item label="Solo" value="solo" />
-                  <Picker.Item label="Couple" value="couple" />
-                  <Picker.Item label="Family" value="family" />
-                  <Picker.Item label="Group" value="group" />
-                  <Picker.Item label="Business" value="business" />
-                </Picker>
               </View>
-            </TouchableOpacity>
-          </Modal>
-          {/* Demographic Context Note */}
-          <View style={styles.noteContainer}>
-            <Ionicons
-              name="information-circle"
-              size={20}
-              color={theme.colors.textSecondary}
-            />
-            <Text style={styles.noteText}>
-              Your demographic profile will be attached to this review to help
-              others who share similar identities make informed decisions.
-            </Text>
+            )}
+
+            <View style={styles.form}>
+              {/* Title */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>
+                  Review Title <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Summarize your experience"
+                  value={formData.title}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, title: text })
+                  }
+                  maxLength={100}
+                />
+              </View>
+              {/* Ratings */}
+              <RatingInput
+                label="Overall Experience"
+                value={formData.overall_rating}
+                onChange={(value) =>
+                  setFormData({ ...formData, overall_rating: value })
+                }
+                required
+              />
+              <RatingInput
+                label="Safety"
+                value={formData.safety_rating}
+                onChange={(value) =>
+                  setFormData({ ...formData, safety_rating: value })
+                }
+                required
+              />
+              <RatingInput
+                label="Comfort Level"
+                value={formData.comfort_rating}
+                onChange={(value) =>
+                  setFormData({ ...formData, comfort_rating: value })
+                }
+                required
+              />
+              <RatingInput
+                label="Accessibility"
+                value={formData.accessibility_rating}
+                onChange={(value) =>
+                  setFormData({ ...formData, accessibility_rating: value })
+                }
+              />
+              <RatingInput
+                label="Service Quality"
+                value={formData.service_rating}
+                onChange={(value) =>
+                  setFormData({ ...formData, service_rating: value })
+                }
+              />
+              {/* Review Content */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>
+                  Your Review <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Share your experience at this location..."
+                  value={formData.content}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, content: text })
+                  }
+                  multiline
+                  numberOfLines={6}
+                  textAlignVertical="top"
+                  maxLength={1000}
+                />
+                <Text style={styles.charCount}>
+                  {formData.content.length}/1000
+                </Text>
+              </View>
+              {/* Visit Details */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Visit Date</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={styles.dateButtonText}>
+                    {visitDateTime.toLocaleDateString()}
+                  </Text>
+                  <Ionicons
+                    name="calendar"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={visitDateTime}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(Platform.OS === "ios");
+                    if (selectedDate) {
+                      const newDateTime = new Date(visitDateTime);
+                      newDateTime.setFullYear(selectedDate.getFullYear());
+                      newDateTime.setMonth(selectedDate.getMonth());
+                      newDateTime.setDate(selectedDate.getDate());
+                      setVisitDateTime(newDateTime);
+                    }
+                  }}
+                />
+              )}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Visit Time</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowTimePicker(true)}
+                >
+                  <Text style={styles.dateButtonText}>
+                    {visitDateTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                  <Ionicons
+                    name="time"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+              {showTimePicker && (
+                <DateTimePicker
+                  value={visitDateTime}
+                  mode="time"
+                  display="default"
+                  onChange={(event, selectedTime) => {
+                    setShowTimePicker(Platform.OS === "ios");
+                    if (selectedTime) {
+                      const newDateTime = new Date(visitDateTime);
+                      newDateTime.setHours(selectedTime.getHours());
+                      newDateTime.setMinutes(selectedTime.getMinutes());
+                      setVisitDateTime(newDateTime);
+                    }
+                  }}
+                />
+              )}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Visit Type</Text>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={() => setShowVisitTypePicker(true)}
+                >
+                  <Text style={styles.dateButtonText}>
+                    {formData.visit_type.charAt(0).toUpperCase() +
+                      formData.visit_type.slice(1)}
+                  </Text>
+                  <Ionicons
+                    name="chevron-down"
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+              {/* Visit Type Modal */}
+              <Modal
+                visible={showVisitTypePicker}
+                transparent={true}
+                animationType="slide"
+              >
+                <TouchableOpacity
+                  style={styles.modalOverlay}
+                  onPress={() => setShowVisitTypePicker(false)}
+                >
+                  <View style={styles.modalContent}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Select Visit Type</Text>
+                      <TouchableOpacity
+                        onPress={() => setShowVisitTypePicker(false)}
+                      >
+                        <Text style={styles.modalDone}>Done</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <Picker
+                      selectedValue={formData.visit_type}
+                      onValueChange={(value) => {
+                        setFormData({ ...formData, visit_type: value });
+                        setShowVisitTypePicker(false);
+                      }}
+                      style={{ height: 200 }}
+                    >
+                      <Picker.Item label="Solo" value="solo" />
+                      <Picker.Item label="Couple" value="couple" />
+                      <Picker.Item label="Family" value="family" />
+                      <Picker.Item label="Group" value="group" />
+                      <Picker.Item label="Business" value="business" />
+                    </Picker>
+                  </View>
+                </TouchableOpacity>
+              </Modal>
+              {/* Demographic Context Note */}
+              <View style={styles.noteContainer}>
+                <Ionicons
+                  name="information-circle"
+                  size={20}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.noteText}>
+                  Your demographic profile will be attached to this review to
+                  help others who share similar identities make informed
+                  decisions.
+                </Text>
+              </View>
+              {/* Submit Button */}
+              <TouchableOpacity
+                style={[styles.submitButton, loading && styles.disabledButton]}
+                onPress={handleSubmit}
+                disabled={loading}
+              >
+                <Text style={styles.submitButtonText}>
+                  {loading ? "Submitting..." : "Submit Review"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          {/* Submit Button */}
-          <TouchableOpacity
-            style={[styles.submitButton, loading && styles.disabledButton]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            <Text style={styles.submitButtonText}>
-              {loading ? "Submitting..." : "Submit Review"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        </TouchableWithoutFeedback>
       </ScrollView>
     </View>
   );
@@ -628,7 +646,7 @@ const styles = StyleSheet.create({
     color: theme.colors.error,
   },
   input: {
-    backgroundColor: theme.colors.textOnPrimary,
+    backgroundColor: theme.colors.inputBackground,
     borderWidth: 1,
     borderColor: theme.colors.inputBorder,
     borderRadius: 8,
@@ -709,7 +727,7 @@ const styles = StyleSheet.create({
   noteText: {
     flex: 1,
     fontSize: 14,
-    color: theme.colors.success,
+    color: theme.colors.textOnPrimary,
     lineHeight: 20,
   },
   submitButton: {
