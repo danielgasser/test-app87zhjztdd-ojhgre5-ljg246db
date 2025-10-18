@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
@@ -33,6 +33,17 @@ const ONBOARDING_STEPS = [
   { id: "age", title: "Age Range" },
   { id: "privacy", title: "Privacy Settings" },
 ];
+
+const FIELD_TO_STEP_MAP: { [key: string]: number } = {
+  name: 1,
+  race_ethnicity: 2,
+  gender: 3,
+  lgbtq_status: 4,
+  disability_status: 5,
+  religion: 6,
+  age_range: 7,
+  privacy_level: 8,
+};
 
 const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
@@ -62,6 +73,17 @@ export default function OnboardingScreen() {
     religion_other: "",
     disability_other: "",
   });
+
+  // Get navigation params
+  const params = useLocalSearchParams();
+  const jumpToField = params.jumpToField as string | undefined;
+
+  // Jump to specific field if param provided
+  useEffect(() => {
+    if (jumpToField && FIELD_TO_STEP_MAP[jumpToField] !== undefined) {
+      setCurrentStep(FIELD_TO_STEP_MAP[jumpToField]);
+    }
+  }, [jumpToField]);
 
   useEffect(() => {
     // Check if user just confirmed email (within last 2 minutes)
