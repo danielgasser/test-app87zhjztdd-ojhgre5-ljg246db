@@ -20,7 +20,6 @@ import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
-const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -39,6 +38,7 @@ export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { profile, loading, error } = useAppSelector((state) => state.user);
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
