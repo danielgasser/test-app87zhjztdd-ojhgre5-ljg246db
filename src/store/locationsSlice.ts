@@ -18,6 +18,8 @@ import { APP_CONFIG } from '@/utils/appConfig';
 import { ReactNode } from 'react';
 import { RootState } from '.';
 import { Alert } from 'react-native';
+import { checkProfileCompleteness } from '@/utils/profileValidation';
+import { shouldShowBanner, incrementShowCount } from './profileBannerSlice';
 type Review = Database['public']['Tables']['reviews']['Row'];
 
 
@@ -835,8 +837,25 @@ export const fetchDangerZones = createAsyncThunk(
 
 export const fetchSimilarUsers = createAsyncThunk(
   'locations/fetchSimilarUsers',
-  async (userId: string) => {
+  async (userId: string, { getState, dispatch }) => {
     try {
+      const state = getState() as any;
+      const userProfile = state.user.profile;
+
+      // Check if profile meets SIMILARITY requirements
+      const validation = checkProfileCompleteness(userProfile, 'SIMILARITY');
+
+      // Show banner if profile incomplete AND banner should be shown
+      const bannerType = APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.SIMILARITY_FAILED;
+      if (!validation.canUseFeature && shouldShowBanner(state.profileBanner, bannerType)) {
+        // Increment show count
+        dispatch(incrementShowCount(bannerType));
+
+        // Banner will be shown in UI component that uses this data
+        console.log('⚠️ Similar users requires complete profile');
+      }
+
+      // Still make the API call (graceful degradation)
       const token = await getAuthToken();
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/similarity-calculator`, {
