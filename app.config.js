@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "SafePath",
     slug: "safepath",
-    version: "0.9.1",
+    version: "1.5.1",
     scheme: "safepath",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
