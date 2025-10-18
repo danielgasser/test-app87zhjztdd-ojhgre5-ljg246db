@@ -5,7 +5,9 @@ import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
-
+export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences'> & {
+  notification_preferences?: Record<string, any> | null;
+};
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;
 
@@ -49,14 +51,14 @@ export const fetchUserProfile = createAsyncThunk<UserProfile, string>(
     if (!data) {
       throw new Error('Profile not found');
     }
-    return data;
+    return data as UserProfile;
   }
 );
 
 // Create or update user profile
 export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string; profileData: Partial<UserProfile> }>(
   'user/updateProfile',
-  async ({ userId, profileData }: { userId: string; profileData: Partial<UserProfile> }) => {
+  async ({ userId, profileData }): Promise<UserProfile> => {
     // Check if profile exists
     const { data: existingProfile } = await supabase
       .from('user_profiles')
@@ -64,19 +66,19 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
       .eq('id', userId)
       .single();
 
+    let result;
+
     if (existingProfile) {
       // Update existing profile
       const { data, error } = await supabase
         .from('user_profiles')
-        .update({
-          ...profileData,
-        })
+        .update(profileData)
         .eq('id', userId)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      result = data;
     } else {
       // Create new profile
       const { data, error } = await supabase
@@ -90,9 +92,10 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
 
       if (error) throw error;
       if (!data) throw new Error('Failed to create profile');
-
-      return data;
+      result = data;
     }
+
+    return result as UserProfile;
   }
 );
 
