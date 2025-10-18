@@ -68,6 +68,10 @@ const profileBannerSlice = createSlice({
             state.dismissedBanners = action.payload;
             state.isLoaded = true;
         },
+        // ToDo: remove in production (before Realease)
+        resetAll: (state) => {
+            state.dismissedBanners = {};
+        },
     },
 });
 
@@ -90,7 +94,7 @@ export const saveDismissalsToStorage = async (
     }
 };
 
-export const { dismissBanner, incrementShowCount, resetBanner, loadDismissals } =
+export const { dismissBanner, incrementShowCount, resetBanner, loadDismissals, resetAll } =
     profileBannerSlice.actions;
 
 export default profileBannerSlice.reducer;

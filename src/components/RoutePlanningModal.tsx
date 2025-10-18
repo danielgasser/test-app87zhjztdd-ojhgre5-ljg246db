@@ -448,6 +448,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
+      {showProfileBanner && (
+        <ProfileBanner
+          bannerType={
+            APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
+              .ROUTING_INCOMPLETE
+          }
+          missingFields={profileCheck.missingFields}
+          visible={showProfileBanner}
+        />
+      )}
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>

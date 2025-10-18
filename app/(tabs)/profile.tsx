@@ -21,6 +21,7 @@ import { router } from "expo-router";
 import { decode } from "base64-arraybuffer";
 import ProfileCompletionWidget from "@/components/ProfileCompletionWidget";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -196,6 +197,10 @@ export default function ProfileScreen() {
     ));
   };
 
+  function resetAll(): any {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -272,7 +277,32 @@ export default function ProfileScreen() {
                 <Text style={styles.editText}>Edit Profile</Text>
               </TouchableOpacity>
             </View>
-
+            {/* Reset Banners Button (for testing)
+                    // ToDo: remove in production (before Realease)
+       */}
+            <TouchableOpacity
+              style={[
+                styles.menuItem,
+                { backgroundColor: theme.colors.warning },
+              ]}
+              onPress={async () => {
+                await AsyncStorage.removeItem("profile_banner_dismissals");
+                // Import resetAll from the slice
+                dispatch(resetAll());
+                Alert.alert("Success", "All banner dismissals cleared!");
+              }}
+            >
+              <Ionicons
+                name="refresh"
+                size={24}
+                color={theme.colors.background}
+              />
+              <Text
+                style={[styles.menuText, { color: theme.colors.background }]}
+              >
+                Reset Banners (Testing)
+              </Text>
+            </TouchableOpacity>
             {/* Demographics Card */}
             <View style={styles.demographicsCard}>{renderDemographics()}</View>
             {/* Profile Completion Widget - ADD THIS */}
