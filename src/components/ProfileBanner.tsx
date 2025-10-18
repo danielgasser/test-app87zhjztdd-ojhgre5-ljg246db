@@ -52,9 +52,8 @@ export default function ProfileBanner({
   onDismiss,
 }: ProfileBannerProps) {
   const dispatch = useAppDispatch();
-  const bannerKey = getBannerKey(bannerType);
   const dismissal = useAppSelector(
-    (state) => state.profileBanner.dismissedBanners[bannerKey]
+    (state) => state.profileBanner.dismissedBanners[bannerType as BannerType]
   );
 
   // Get banner content
@@ -80,7 +79,9 @@ export default function ProfileBanner({
   };
 
   const handleDismiss = (permanent: boolean = false) => {
-    dispatch(dismissBanner({ bannerType: bannerKey, permanent }));
+    dispatch(
+      dismissBanner({ bannerType: bannerType as BannerType, permanent })
+    );
     if (onDismiss) onDismiss();
   };
 
