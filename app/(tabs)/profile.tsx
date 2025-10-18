@@ -22,6 +22,7 @@ import { decode } from "base64-arraybuffer";
 import ProfileCompletionWidget from "@/components/ProfileCompletionWidget";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { resetAll } from "@/store/profileBannerSlice";
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -196,10 +197,6 @@ export default function ProfileScreen() {
       </Text>
     ));
   };
-
-  function resetAll(): any {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <SafeAreaView style={styles.container}>
