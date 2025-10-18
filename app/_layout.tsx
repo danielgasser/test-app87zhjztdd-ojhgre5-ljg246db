@@ -30,7 +30,7 @@ function RootLayoutNav() {
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === "SIGNED_IN" && session) {
+        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
           console.log("🔥 Auth state changed: SIGNED_IN");
           dispatch(setSession(session));
           // Don't route here - let deep link or callback screen handle it

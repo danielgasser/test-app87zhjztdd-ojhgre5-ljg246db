@@ -186,19 +186,24 @@ async function analyzeSegmentSafety(
     }
 
     // Check for danger zones
-    const dangerResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/danger-zones`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
-      },
-      body: JSON.stringify({
-        latitude: segment.center.latitude,
-        longitude: segment.center.longitude,
-        radius_miles: CONFIG.SCORING_RADIUS_MILES,
-        user_demographics: userDemographics
-      })
-    });
+    let dangerPenalty = 0;
+    let timePenalty = 0;
+
+    if (confidence > 0.5) {
+      const dangerResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/danger-zones`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+        },
+        body: JSON.stringify({
+          latitude: segment.center.latitude,
+          longitude: segment.center.longitude,
+          radius_miles: CONFIG.SCORING_RADIUS_MILES,
+          user_demographics: userDemographics
+        })
+      });
+    }
 
     let dangerPenalty = 0;
     if (dangerResponse.ok) {
@@ -223,7 +228,7 @@ async function analyzeSegmentSafety(
     }
 
     // Apply time-based penalties
-    let timePenalty = 0;
+    //let timePenalty = 0;
     const currentHour = new Date().getHours();
 
     if (currentHour >= CONFIG.TIME_PENALTIES.EVENING_START && currentHour < CONFIG.TIME_PENALTIES.NIGHT_START) {
@@ -232,6 +237,9 @@ async function analyzeSegmentSafety(
     } else if (currentHour >= CONFIG.TIME_PENALTIES.NIGHT_START || currentHour < CONFIG.TIME_PENALTIES.MORNING_END) {
       timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
       riskFactors.push('Night travel time');
+    } else {
+      // Low confidence - insufficient data
+      riskFactors.push('Limited safety data - stay alert');
     }
 
     // Calculate final safety score
