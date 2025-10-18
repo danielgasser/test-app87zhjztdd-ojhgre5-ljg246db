@@ -110,13 +110,7 @@ export const APP_CONFIG = {
     TRENDING_MIN_REVIEWS: 5,              // Minimum reviews to be considered trending
   },
 
-  // Banner behavior
-  BANNERS: {
-    COOLDOWN_HOURS: 24,              // Hours after "Maybe Later" before showing again
-    MAX_SHOWS_PER_FEATURE: 3,        // Max times to show banner per feature
-    SHOW_ON_FIRST_USE: true,         // Show immediately on first feature use
-    PERSIST_DISMISSALS: true,        // Save to AsyncStorage
-  },
+  
 
   PROFILE_COMPLETION: {
     // Mandatory fields for onboarding (3 required)
@@ -135,6 +129,19 @@ export const APP_CONFIG = {
       'disability_status',
       'age_range',
     ] as const,
+    // Banner behavior
+    BANNERS: {
+      COOLDOWN_HOURS: 24,              // Hours after "Maybe Later" before showing again
+      MAX_SHOWS_PER_FEATURE: 3,        // Max times to show banner per feature
+      SHOW_ON_FIRST_USE: true,         // Show immediately on first feature use
+      PERSIST_DISMISSALS: true,        // Save to AsyncStorage
+      BANNER_TYPES: {
+        INCOMPLETE_PROFILE_GENERAL: 'general',
+        RECOMMENDATIONS_INCOMPLETE: 'recommendations',
+        ROUTING_INCOMPLETE: 'routing',
+        SIMILARITY_FAILED: 'similarity',
+      },
+    },
   },
 
   // Allow "Prefer not to say" option
