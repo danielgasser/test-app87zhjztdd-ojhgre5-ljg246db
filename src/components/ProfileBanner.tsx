@@ -76,15 +76,15 @@ export default function ProfileBanner({
     if (onDismiss) onDismiss();
   };
 
-return (
+  return (
     <View style={styles.container}>
       <View style={styles.content}>
         {/* Icon and Title */}
         <View style={styles.header}>
-          <Ionicons 
-            name={bannerContent.icon} 
-            size={24} 
-            color={theme.colors.primary} 
+          <Ionicons
+            name={bannerContent.icon}
+            size={24}
+            color={theme.colors.primary}
           />
           <Text style={styles.title}>{bannerContent.title}</Text>
         </View>
@@ -97,22 +97,24 @@ return (
           <View style={styles.missingFieldsContainer}>
             <Text style={styles.missingFieldsLabel}>Missing:</Text>
             <Text style={styles.missingFieldsList}>
-              {missingFields.map(field => FIELD_DISPLAY_NAMES[field]).join(', ')}
+              {missingFields
+                .map((field) => FIELD_DISPLAY_NAMES[field])
+                .join(", ")}
             </Text>
           </View>
         )}
 
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.primaryButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.primaryButton]}
             onPress={handleCompleteProfile}
           >
             <Text style={styles.primaryButtonText}>Complete Profile</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.secondaryButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.secondaryButton]}
             onPress={() => handleDismiss(isLastShow)}
           >
             <Text style={styles.secondaryButtonText}>
@@ -123,7 +125,7 @@ return (
       </View>
     </View>
   );
-}}
+}
 const styles = StyleSheet.create({
   container: {
     margin: 16,
@@ -141,14 +143,14 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
     gap: 8,
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
     color: theme.colors.text,
     flex: 1,
   },
@@ -166,7 +168,7 @@ const styles = StyleSheet.create({
   },
   missingFieldsLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.textSecondary,
     marginBottom: 4,
   },
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   button: {
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   primaryButton: {
     backgroundColor: theme.colors.primary,
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: theme.colors.card,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   secondaryButton: {
     backgroundColor: theme.colors.background,
@@ -201,6 +203,6 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: theme.colors.textSecondary,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
