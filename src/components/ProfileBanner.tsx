@@ -10,7 +10,7 @@ import { theme } from "@/styles/theme";
 import type { BannerType } from "@/store/profileBannerSlice";
 
 interface ProfileBannerProps {
-  bannerType: BannerType;
+  bannerType: string;
   missingFields: string[];
   visible: boolean;
   onDismiss?: () => void;
@@ -45,6 +45,15 @@ const BANNER_MESSAGES = {
   },
 } as Record<string, { icon: any; title: string; description: string }>;
 
+// Map config values back to keys for Redux state lookup
+const getBannerKey = (bannerType: string): BannerType => {
+  const config = APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES;
+  const entry = Object.entries(config).find(
+    ([_, value]) => value === bannerType
+  );
+  return (entry?.[0] || bannerType) as BannerType;
+};
+
 export default function ProfileBanner({
   bannerType,
   missingFields,
@@ -53,8 +62,10 @@ export default function ProfileBanner({
 }: ProfileBannerProps) {
   const dispatch = useAppDispatch();
   const bannerState = useAppSelector(
-    (state) => state.profileBanner.dismissedBanners[bannerType]
-  );
+const bannerKey = getBannerKey(bannerType);
+  const dismissal = useAppSelector(
+    (state) => state.profileBanner.dismissedBanners[bannerKey]
+  );  );
 
   // Get banner content
   const bannerContent = BANNER_MESSAGES[bannerType];
