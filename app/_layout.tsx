@@ -4,9 +4,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
 import { store } from "src/store";
 import { supabase } from "@/services/supabase";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
 import { Linking } from "react-native";
+import {
+  loadDismissals,
+  loadDismissalsFromStorage,
+} from "@/store/profileBannerSlice";
 
 export default function RootLayout() {
   return (
@@ -71,6 +75,33 @@ function RootLayoutNav() {
   useEffect(() => {
     checkFirstLaunch();
   }, []);
+
+  useEffect(() => {
+    const initializeBannerState = async () => {
+      const dismissals = await loadDismissalsFromStorage();
+      dispatch(loadDismissals(dismissals));
+    };
+
+    initializeBannerState();
+  }, [dispatch]);
+
+  // Save banner dismissals to AsyncStorage whenever they change
+  const bannerDismissals = useAppSelector(
+    (state) => state.profileBanner.dismissedBanners
+  );
+
+  useEffect(() => {
+    const saveBannerState = async () => {
+      const { saveDismissalsToStorage } = await import(
+        "@/store/profileBannerSlice"
+      );
+      await saveDismissalsToStorage(bannerDismissals);
+    };
+
+    if (Object.keys(bannerDismissals).length > 0) {
+      saveBannerState();
+    }
+  }, [bannerDismissals]);
 
   // Handle first launch routing - ONLY if auth didn't handle it
   useEffect(() => {

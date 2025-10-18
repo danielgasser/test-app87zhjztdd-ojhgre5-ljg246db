@@ -8,8 +8,6 @@ import {
   Image,
   Alert,
   ActivityIndicator,
-  Platform,
-  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -21,6 +19,8 @@ import { supabase } from "src/services/supabase";
 import { theme } from "src/styles/theme";
 import { router } from "expo-router";
 import { decode } from "base64-arraybuffer";
+import ProfileCompletionWidget from "@/components/ProfileCompletionWidget";
+import { checkProfileCompleteness } from "@/utils/profileValidation";
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -41,6 +41,17 @@ export default function ProfileScreen() {
   const handleEditProfile = () => {
     router.push("/onboarding");
   };
+
+  // Calculate profile completion
+  const profileCompletion = React.useMemo(() => {
+    if (!profile) return { missingFields: [], completionPercentage: 0 };
+
+    const result = checkProfileCompleteness(profile);
+    return {
+      missingFields: result.missingFields,
+      completionPercentage: result.completionPercentage,
+    };
+  }, [profile]);
 
   const pickImage = async () => {
     // Request permissions
@@ -264,7 +275,13 @@ export default function ProfileScreen() {
 
             {/* Demographics Card */}
             <View style={styles.demographicsCard}>{renderDemographics()}</View>
-
+            {/* Profile Completion Widget - ADD THIS */}
+            <View style={{ paddingHorizontal: 20 }}>
+              <ProfileCompletionWidget
+                missingFields={profileCompletion.missingFields}
+                completionPercentage={profileCompletion.completionPercentage}
+              />
+            </View>
             {/* Settings Section */}
             <View style={styles.section}>
               <View style={styles.sectionHeaderSettings}>

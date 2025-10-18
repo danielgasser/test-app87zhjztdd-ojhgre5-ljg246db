@@ -67,7 +67,14 @@ export default function ProfileBanner({
   if (!visible) return null;
 
   const handleCompleteProfile = () => {
-    router.push("/onboarding");
+    if (missingFields.length > 0) {
+      router.push({
+        pathname: "/onboarding",
+        params: { jumpToField: missingFields[0] },
+      });
+    } else {
+      router.push("/onboarding");
+    }
     if (onDismiss) onDismiss();
   };
 
