@@ -1056,7 +1056,7 @@ export const getGoogleRoute = createAsyncThunk(
   }) => {
     const { origin, destination, waypoints } = payload;
 
-    const googleApiKey = process.env.GOOGLE_MAPS_API_KEY;
+    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!googleApiKey) {
       throw new Error('Google Maps API key not configured');
     }
