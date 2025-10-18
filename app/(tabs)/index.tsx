@@ -1166,7 +1166,9 @@ export default function MapScreen() {
           <View style={styles.routeStats}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {selectedRoute.safety_analysis.overall_route_score.toFixed(1)}
+                {selectedRoute.safety_analysis?.overall_route_score?.toFixed(
+                  1
+                ) ?? "3.0"}
               </Text>
               <Text style={styles.statLabel}>Safety Score</Text>
             </View>
@@ -1179,7 +1181,8 @@ export default function MapScreen() {
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
                 {(
-                  selectedRoute.safety_analysis.total_distance_meters / 1000
+                  (selectedRoute.safety_analysis?.total_distance_meters ??
+                    selectedRoute.distance_kilometers * 1000) / 1000
                 ).toFixed(1)}
                 km
               </Text>
