@@ -12,6 +12,9 @@ import {
   Platform,
   Alert,
   Linking,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Keyboard,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
@@ -164,94 +167,105 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>SafePath</Text>
-          <Text style={styles.subtitle}>Travel with confidence</Text>
-        </View>
-
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete="password"
-          />
-          <TouchableOpacity
-            onPress={handleForgotPassword}
-            style={styles.forgotPassword}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{ flex: 1, justifyContent: "center" }}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
           >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? "Signing in..." : "Sign In"}
-            </Text>
-          </TouchableOpacity>
-          {/* Social Login Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
+            <View style={styles.header}>
+              <Text style={styles.title}>SafePath</Text>
+              <Text style={styles.subtitle}>Travel with confidence</Text>
+            </View>
 
-          {/* Apple Sign In Button */}
-          {Platform.OS === "ios" && (
-            <TouchableOpacity
-              style={styles.appleButton}
-              onPress={handleAppleSignIn}
-            >
-              <Ionicons
-                name="logo-apple"
-                size={20}
-                color={theme.colors.background}
-                style={{ marginRight: 8 }}
+            <View style={styles.form}>
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
               />
-              <Text style={styles.appleButtonText}> Sign in with Apple</Text>
-            </TouchableOpacity>
-          )}
-          {/* Social Login Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
-          {/* Google Sign In Button */}
-          <TouchableOpacity
-            style={styles.googleButton}
-            onPress={handleGoogleSignIn}
-          >
-            <Ionicons
-              name="logo-google"
-              size={20}
-              color={theme.colors.background}
-              style={{ marginRight: 8 }}
-            />
-            <Text style={styles.googleButtonText}>Sign in with Google</Text>
-          </TouchableOpacity>
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <Link href="/register" asChild>
-              <TouchableOpacity>
-                <Text style={styles.link}>Sign Up</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+              />
+              <TouchableOpacity
+                onPress={handleForgotPassword}
+                style={styles.forgotPassword}
+              >
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? "Signing in..." : "Sign In"}
+                </Text>
+              </TouchableOpacity>
+              {/* Social Login Divider */}
+              <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.divider} />
+              </View>
+
+              {/* Apple Sign In Button */}
+              {Platform.OS === "ios" && (
+                <TouchableOpacity
+                  style={styles.appleButton}
+                  onPress={handleAppleSignIn}
+                >
+                  <Ionicons
+                    name="logo-apple"
+                    size={20}
+                    color={theme.colors.background}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.appleButtonText}>
+                    {" "}
+                    Sign in with Apple
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {/* Social Login Divider */}
+              <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.divider} />
+              </View>
+              {/* Google Sign In Button */}
+              <TouchableOpacity
+                style={styles.googleButton}
+                onPress={handleGoogleSignIn}
+              >
+                <Ionicons
+                  name="logo-google"
+                  size={20}
+                  color={theme.colors.background}
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+              </TouchableOpacity>
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Don't have an account? </Text>
+                <Link href="/register" asChild>
+                  <TouchableOpacity>
+                    <Text style={styles.link}>Sign Up</Text>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

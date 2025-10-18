@@ -6,7 +6,7 @@ import { store } from "src/store";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
-import { Linking } from "react-native";
+import { Keyboard, Linking, TouchableWithoutFeedback } from "react-native";
 import {
   loadDismissals,
   loadDismissalsFromStorage,
@@ -130,18 +130,20 @@ function RootLayoutNav() {
   };
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="welcome"
-        options={{
-          headerShown: false,
-          gestureEnabled: false,
-        }}
-      />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="review" />
-      <Stack.Screen name="onboarding" />
-    </Stack>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen
+          name="welcome"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+          }}
+        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="review" />
+        <Stack.Screen name="onboarding" />
+      </Stack>
+    </TouchableWithoutFeedback>
   );
 }
