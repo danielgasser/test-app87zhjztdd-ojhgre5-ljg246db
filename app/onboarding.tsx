@@ -32,7 +32,6 @@ const ONBOARDING_STEPS = [
   { id: "religion", title: "Religious Identity" },
   { id: "age", title: "Age Range" },
   { id: "privacy", title: "Privacy Settings" },
-  { id: "complete", title: "Setup Complete" },
 ];
 
 const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
@@ -831,46 +830,6 @@ export default function OnboardingScreen() {
     </View>
   );
 
-  const renderCompleteStep = () => (
-    <View style={styles.stepContainer}>
-      <Ionicons
-        name="checkmark-circle"
-        size={80}
-        color={theme.colors.primary}
-      />
-      <Text style={styles.stepTitle}>
-        {isEditing ? "Profile Updated!" : "You're All Set!"}
-      </Text>
-      <Text style={styles.stepDescription}>
-        {isEditing
-          ? "Your demographic information has been updated successfully."
-          : "Your profile is ready. You can now:"}
-      </Text>
-      {!isEditing && (
-        <View style={styles.bulletPoints}>
-          <View style={styles.bulletPoint}>
-            <Ionicons name="map" size={20} color={theme.colors.primary} />
-            <Text style={styles.bulletText}>
-              View safety ratings personalized for you
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Ionicons name="star" size={20} color={theme.colors.primary} />
-            <Text style={styles.bulletText}>
-              Leave reviews to help your community
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Ionicons name="settings" size={20} color={theme.colors.primary} />
-            <Text style={styles.bulletText}>
-              Update your profile anytime in Settings
-            </Text>
-          </View>
-        </View>
-      )}
-    </View>
-  );
-
   const renderCurrentStep = () => {
     switch (ONBOARDING_STEPS[currentStep].id) {
       case "welcome":
@@ -891,8 +850,6 @@ export default function OnboardingScreen() {
         return renderAgeStep();
       case "privacy":
         return renderPrivacyStep();
-      case "complete":
-        return renderCompleteStep();
       default:
         return renderWelcomeStep();
     }
