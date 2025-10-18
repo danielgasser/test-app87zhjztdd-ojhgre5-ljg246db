@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SmartRouteComparison } from "../store/locationsSlice";
 import { theme } from "@/styles/theme";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
@@ -185,7 +186,10 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
         const confidence =
           optimized_route.safety_analysis?.overall_confidence ??
           optimized_route.safety_analysis?.confidence;
-        return confidence !== undefined && confidence < 0.6;
+        return (
+          confidence !== undefined &&
+          confidence < APP_CONFIG.ROUTE_PLANNING.LOW_CONFIDENCE_THRESHOLD
+        );
       })() && (
         <View style={styles.warningBanner}>
           <Ionicons name="alert-circle" size={24} color={theme.colors.accent} />

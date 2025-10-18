@@ -1372,8 +1372,8 @@ export const generateSmartRoute = createAsyncThunk(
         distance_kilometers: Math.round(data.optimized_route.distance / 1000 * 10) / 10,
         safety_analysis: {
           overall_route_score: data.improvement_summary.optimized_safety_score,
-          overall_confidence: data.optimized_safety?.overall_confidence ?? 0.3,
-          confidence: data.optimized_safety?.overall_confidence ?? 0.3,
+          overall_confidence: data.optimized_safety?.overall_confidence ?? APP_CONFIG.ROUTE_PLANNING.FALLBACK_CONFIDENCE,
+          confidence: data.optimized_safety?.overall_confidence ?? APP_CONFIG.ROUTE_PLANNING.FALLBACK_CONFIDENCE,
           danger_zones_intersected: data.optimized_safety?.danger_zones_intersected ?? 0,
           high_risk_segments: data.optimized_safety?.high_risk_segments ?? 0,
           safety_notes: data.optimized_safety?.safety_notes ?? [
@@ -1386,7 +1386,7 @@ export const generateSmartRoute = createAsyncThunk(
             mixed_segments: 0,
             unsafe_segments: 0
           },
-          confidence_score: data.optimized_safety?.overall_confidence ?? 0.3,
+          confidence_score: data.optimized_safety?.overall_confidence ?? APP_CONFIG.ROUTE_PLANNING.FALLBACK_CONFIDENCE,
           route_summary: data.message
         },
         created_at: new Date().toISOString(),

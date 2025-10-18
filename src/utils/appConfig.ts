@@ -205,6 +205,10 @@ export const APP_CONFIG = {
     ROUTE_CACHE_TTL_MINUTES: 15,                     // Cache route calculations for 15 minutes
     MAX_CONCURRENT_ROUTE_REQUESTS: 3,                // Limit concurrent external API requests
     REQUEST_TIMEOUT_MS: 10000,                       // 10 second timeout for route requests
+    // Route Confidence Thresholds
+    LOW_CONFIDENCE_THRESHOLD: 0.6,        // Show warning banner when confidence < 0.6
+    FALLBACK_CONFIDENCE: 0.3,             // Default confidence when no data available
+    MIN_CONFIDENCE_BASELINE: 0.15,      // Minimum confidence floor
   },
 
   // Route Display & UI Configuration
