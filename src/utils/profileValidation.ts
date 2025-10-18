@@ -3,7 +3,6 @@ import {
     FEATURE_REQUIREMENTS,
     ALL_DEMOGRAPHIC_FIELDS,
     FIELD_DISPLAY_NAMES,
-    type DemographicField,
     type FeatureName,
 } from '@/constants/profileRequirements';
 import type { UserProfile } from '@/store/userSlice';
