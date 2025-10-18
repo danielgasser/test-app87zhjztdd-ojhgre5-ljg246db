@@ -18,7 +18,6 @@
         "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "@EXPO_PUBLIC_GOOGLE_MAPS_API_KEY",
         "EXPO_PUBLIC_PROJECT_ID": "@EXPO_PUBLIC_PROJECT_ID"
       },
-      "autoIncrement": true,
       "distribution": "store"
     }
   },
