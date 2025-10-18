@@ -4,7 +4,7 @@ import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 
-export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
+type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;
