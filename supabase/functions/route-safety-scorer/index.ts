@@ -237,10 +237,10 @@ async function analyzeSegmentSafety(
       } else if (currentHour >= CONFIG.TIME_PENALTIES.NIGHT_START || currentHour < CONFIG.TIME_PENALTIES.MORNING_END) {
         timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
         riskFactors.push('Night travel time');
-      } else {
-        // Low confidence - insufficient data
-        riskFactors.push('Limited safety data - stay alert');
       }
+    } else {
+      // Low confidence - insufficient data
+      riskFactors.push('Limited safety data - stay alert');
     }
 
     // Calculate final safety score
@@ -379,9 +379,17 @@ async function analyzeRouteSafety(request: RouteSafetyRequest): Promise<RouteSaf
   const totalScore = segmentScores.reduce((sum, seg) => sum + seg.safety_score, 0);
   const overallScore = segments.length > 0 ? totalScore / segments.length : 3.0;
 
-  const totalConfidence = segmentScores.reduce((sum, seg) => sum + seg.confidence, 0);
-  const overallConfidence = Math.min(0.95, totalConfidence / segments.length);
+  // Weight confidence by actual data - segments with more reviews get more weight
+  const totalWeightedConfidence = segmentScores.reduce((sum, seg) => {
+    // Segments with higher confidence likely have more review data
+    // Weight each segment's confidence by itself (more data = more influence)
+    return sum + (seg.confidence * seg.confidence);
+  }, 0);
 
+  const totalConfidenceWeight = segmentScores.reduce((sum, seg) => sum + seg.confidence, 0);
+  const overallConfidence = totalConfidenceWeight > 0
+    ? Math.min(0.95, totalWeightedConfidence / totalConfidenceWeight)
+    : 0.15; // Low baseline if no data
   const dangerZonesIntersected = segmentScores.reduce((sum, seg) => sum + seg.danger_zones, 0);
   const highRiskSegments = segmentScores.filter(seg => seg.safety_score < CONFIG.UNSAFE_THRESHOLD).length;
 
