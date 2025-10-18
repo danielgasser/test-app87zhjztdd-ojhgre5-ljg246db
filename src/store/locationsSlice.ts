@@ -1332,6 +1332,9 @@ export const generateSmartRoute = createAsyncThunk(
   async (routeRequest: RouteRequest, { rejectWithValue }) => {
     try {
       // Call the NEW smart-route-generator edge function
+      console.log('🚀 Route request:', routeRequest.origin, routeRequest.destination);
+      console.log('🚀 Route request destination:', routeRequest.destination);
+
       const { data, error } = await supabase.functions.invoke('smart-route-generator', {
         body: {
           origin: routeRequest.origin,
@@ -1369,20 +1372,21 @@ export const generateSmartRoute = createAsyncThunk(
         distance_kilometers: Math.round(data.optimized_route.distance / 1000 * 10) / 10,
         safety_analysis: {
           overall_route_score: data.improvement_summary.optimized_safety_score,
-          confidence: 0.85,
-          danger_zones_intersected: 0, // Update from actual data if available
-          high_risk_segments: 0,
-          safety_notes: [
+          overall_confidence: data.optimized_safety?.overall_confidence ?? 0.3,
+          confidence: data.optimized_safety?.overall_confidence ?? 0.3,
+          danger_zones_intersected: data.optimized_safety?.danger_zones_intersected ?? 0,
+          high_risk_segments: data.optimized_safety?.high_risk_segments ?? 0,
+          safety_notes: data.optimized_safety?.safety_notes ?? [
             `Safety improved by ${data.improvement_summary.safety_improvement.toFixed(1)} points`,
             `Avoids ${data.improvement_summary.danger_zones_avoided} danger zone(s)`,
             `Adds ${data.improvement_summary.time_added_minutes} minutes to journey`
           ],
-          safety_summary: {
+          safety_summary: data.optimized_safety?.safety_summary ?? {
             safe_segments: 0,
             mixed_segments: 0,
             unsafe_segments: 0
           },
-          confidence_score: 0.85,
+          confidence_score: data.optimized_safety?.overall_confidence ?? 0.3,
           route_summary: data.message
         },
         created_at: new Date().toISOString(),

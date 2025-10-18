@@ -64,6 +64,8 @@ interface SmartRouteResponse {
   };
   waypoints_added: SafeWaypoint[];
   message: string;
+  original_safety?: any;
+  optimized_safety?: any;
 }
 
 // ================================
@@ -479,7 +481,9 @@ async function generateOptimizedRoute(
       danger_zones_avoided: dangerZonesAvoided
     },
     waypoints_added: safeWaypoints,
-    message: `Found safer route (+${safetyImprovement.toFixed(1)} safety score, +${Math.round(timeAdded)} minutes)`
+    message: `Found safer route (+${safetyImprovement.toFixed(1)} safety score, +${Math.round(timeAdded)} minutes)`,
+    original_safety: originalSafety,
+    optimized_safety: optimizedSafety
   };
 }
 

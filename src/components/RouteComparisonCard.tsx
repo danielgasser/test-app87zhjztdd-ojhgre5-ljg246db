@@ -23,7 +23,10 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     improvement_summary,
     waypoints_added,
   } = comparison;
-
+  console.log(
+    "🔍 Route confidence:",
+    optimized_route.safety_analysis?.overall_confidence
+  );
   // Helper function to get safety score color
   const getSafetyColor = (score: number): string => {
     if (score >= 4.0) return theme.colors.success; // Green
@@ -175,6 +178,26 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               <Text style={styles.waypointReason}>{waypoint.reason}</Text>
             </View>
           ))}
+        </View>
+      )}
+      {/* Low-Confidence Warning Banner */}
+      {(() => {
+        const confidence =
+          optimized_route.safety_analysis?.overall_confidence ??
+          optimized_route.safety_analysis?.confidence;
+        return confidence !== undefined && confidence < 0.6;
+      })() && (
+        <View style={styles.warningBanner}>
+          <Ionicons name="alert-circle" size={24} color={theme.colors.accent} />
+          <View style={styles.warningContent}>
+            <Text style={styles.warningTitle}>
+              ⚠️ Limited reviews available for this route!
+            </Text>
+            <Text style={styles.warningText}>
+              Help improve safety. Be the first to review locations along the
+              way after your trip.
+            </Text>
+          </View>
         </View>
       )}
       {onStartNavigation && (
@@ -347,7 +370,31 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     flex: 1,
   },
-  // ADD THESE:
+  warningBanner: {
+    flexDirection: "row",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.accent,
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  warningContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  warningTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: theme.colors.accent,
+    marginBottom: 6,
+  },
+  warningText: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    lineHeight: 18,
+  },
   startNavigationButton: {
     backgroundColor: theme.colors.secondary,
     flexDirection: "row",
