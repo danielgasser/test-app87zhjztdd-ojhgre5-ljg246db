@@ -159,7 +159,10 @@ export default function MapScreen() {
     if (profileCheck.canUse) return false;
     // Show banner when heatmap or danger zones are active
     if (!heatMapVisible && !dangerZonesVisible) return false;
-    return shouldShowBanner(bannerState, "ROUTING_INCOMPLETE");
+    return shouldShowBanner(
+      bannerState,
+      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE
+    );
   }, [profileCheck.canUse, heatMapVisible, dangerZonesVisible, bannerState]);
 
   // ============= HELPER FUNCTIONS =============
@@ -1222,7 +1225,7 @@ const styles = StyleSheet.create({
     top: 10,
     left: 0,
     right: 0,
-    zIndex: 1000,
+    zIndex: 10000,
   },
   container: {
     flex: 1,

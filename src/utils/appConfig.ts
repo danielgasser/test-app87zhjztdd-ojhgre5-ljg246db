@@ -110,7 +110,7 @@ export const APP_CONFIG = {
     TRENDING_MIN_REVIEWS: 5,              // Minimum reviews to be considered trending
   },
 
-  
+
 
   PROFILE_COMPLETION: {
     // Mandatory fields for onboarding (3 required)
@@ -136,11 +136,12 @@ export const APP_CONFIG = {
       SHOW_ON_FIRST_USE: true,         // Show immediately on first feature use
       PERSIST_DISMISSALS: true,        // Save to AsyncStorage
       BANNER_TYPES: {
-        INCOMPLETE_PROFILE_GENERAL: 'general',
-        RECOMMENDATIONS_INCOMPLETE: 'recommendations',
-        ROUTING_INCOMPLETE: 'routing',
-        SIMILARITY_FAILED: 'similarity',
-      },
+        // Must be all caps!
+        INCOMPLETE_PROFILE_GENERAL: 'INCOMPLETE_PROFILE_GENERAL',
+        RECOMMENDATIONS_INCOMPLETE: 'RECOMMENDATIONS_INCOMPLETE',
+        ROUTING_INCOMPLETE: 'ROUTING_INCOMPLETE',
+        SIMILARITY_FAILED: 'SIMILARITY_FAILED',
+      }
     },
   },
 

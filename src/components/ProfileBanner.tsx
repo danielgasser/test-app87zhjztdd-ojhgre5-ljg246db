@@ -45,15 +45,6 @@ const BANNER_MESSAGES = {
   },
 } as Record<string, { icon: any; title: string; description: string }>;
 
-// Map config values back to keys for Redux state lookup
-const getBannerKey = (bannerType: string): BannerType => {
-  const config = APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES;
-  const entry = Object.entries(config).find(
-    ([_, value]) => value === bannerType
-  );
-  return (entry?.[0] || bannerType) as BannerType;
-};
-
 export default function ProfileBanner({
   bannerType,
   missingFields,
@@ -61,18 +52,17 @@ export default function ProfileBanner({
   onDismiss,
 }: ProfileBannerProps) {
   const dispatch = useAppDispatch();
-  const bannerState = useAppSelector(
-const bannerKey = getBannerKey(bannerType);
+  const bannerKey = getBannerKey(bannerType);
   const dismissal = useAppSelector(
     (state) => state.profileBanner.dismissedBanners[bannerKey]
-  );  );
+  );
 
   // Get banner content
   const bannerContent = BANNER_MESSAGES[bannerType];
 
   // Check if this is the 3rd show (change button to "Don't Show Again")
   const maxShows = APP_CONFIG.PROFILE_COMPLETION.BANNERS.MAX_SHOWS_PER_FEATURE;
-  const showCount = bannerState?.showCount || 0;
+  const showCount = dismissal?.showCount || 0;
   const isLastShow = showCount >= maxShows - 1;
 
   if (!visible) return null;
@@ -90,7 +80,7 @@ const bannerKey = getBannerKey(bannerType);
   };
 
   const handleDismiss = (permanent: boolean = false) => {
-    dispatch(dismissBanner({ bannerType, permanent }));
+    dispatch(dismissBanner({ bannerType: bannerKey, permanent }));
     if (onDismiss) onDismiss();
   };
 
@@ -149,9 +139,9 @@ const styles = StyleSheet.create({
     margin: 16,
     backgroundColor: theme.colors.card,
     borderRadius: 12,
-    borderLeftWidth: 4,
+    borderLeftWidth: 2,
     borderLeftColor: theme.colors.primary,
-    shadowColor: theme.colors.shadowDark,
+    shadowColor: theme.colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

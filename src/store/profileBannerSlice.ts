@@ -71,6 +71,14 @@ const profileBannerSlice = createSlice({
     },
 });
 
+// Add this to profileBannerSlice.ts
+export const BANNER_KEYS = {
+    INCOMPLETE_PROFILE_GENERAL: 'INCOMPLETE_PROFILE_GENERAL' as BannerType,
+    RECOMMENDATIONS_INCOMPLETE: 'RECOMMENDATIONS_INCOMPLETE' as BannerType,
+    ROUTING_INCOMPLETE: 'ROUTING_INCOMPLETE' as BannerType,
+    SIMILARITY_FAILED: 'SIMILARITY_FAILED' as BannerType,
+};
+
 // Save dismissals to AsyncStorage
 export const saveDismissalsToStorage = async (
     dismissals: { [key in BannerType]?: BannerDismissal }
