@@ -20,6 +20,7 @@ import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -33,6 +34,8 @@ const ONBOARDING_STEPS = [
   { id: "privacy", title: "Privacy Settings" },
   { id: "complete", title: "Setup Complete" },
 ];
+
+const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
@@ -82,6 +85,47 @@ export default function OnboardingScreen() {
       mainValue: value,
       customValue: "",
     };
+  };
+
+  // Validate mandatory fields before allowing next
+  const validateMandatoryFields = (stepId: string): boolean => {
+    // Only validate on mandatory field steps
+    if (stepId === "name") {
+      if (!formData.full_name || formData.full_name.trim() === "") {
+        Alert.alert(
+          "Required Field",
+          "Please enter your name or a nickname to continue."
+        );
+        return false;
+      }
+    }
+    if (stepId === "race") {
+      if (formData.race_ethnicity.length === 0) {
+        Alert.alert(
+          "Required Field",
+          "Please select at least one race/ethnicity option to continue."
+        );
+        return false;
+      }
+    }
+
+    if (stepId === "gender") {
+      if (!formData.gender || formData.gender === "") {
+        Alert.alert(
+          "Required Field",
+          "Please select your gender identity to continue."
+        );
+        return false;
+      }
+    }
+
+    if (stepId === "lgbtq") {
+      // lgbtq_status is boolean, so it's always set (defaults to false)
+      // No validation needed, just acknowledge user saw it
+      return true;
+    }
+
+    return true;
   };
 
   // Load existing profile data when component mounts
@@ -172,6 +216,13 @@ export default function OnboardingScreen() {
   }, [profile]);
 
   const handleNext = () => {
+    const currentStepId = ONBOARDING_STEPS[currentStep].id;
+
+    // Validate mandatory fields before proceeding
+    if (!validateMandatoryFields(currentStepId)) {
+      return;
+    }
+
     if (currentStep < ONBOARDING_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -380,10 +431,15 @@ export default function OnboardingScreen() {
   );
   const renderNameStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>What's your name?</Text>
+      <Text style={styles.stepTitle}>
+        What's your name? <Text style={styles.requiredIndicator}>*</Text>
+      </Text>
       <Text style={styles.stepDescription}>
         This helps personalize your experience. You can control who sees this in
         privacy settings.
+      </Text>
+      <Text style={styles.helpText}>
+        💡 Help others recognise your profile and reviews
       </Text>
       <TextInput
         style={styles.nameInput}
@@ -397,10 +453,15 @@ export default function OnboardingScreen() {
   );
   const renderRaceStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Race & Ethnicity</Text>
+      <Text style={styles.stepTitle}>
+        Race & Ethnicity <Text style={styles.requiredIndicator}>*</Text>
+      </Text>
       <Text style={styles.stepDescription}>
         Select all that apply. This helps us show you safety ratings from people
         with similar experiences.
+      </Text>
+      <Text style={styles.helpText}>
+        💡 See safety ratings from people like you
       </Text>
       <View style={styles.optionsContainer}>
         {DEMOGRAPHIC_OPTIONS.race.map((race) => (
@@ -447,10 +508,13 @@ export default function OnboardingScreen() {
 
   const renderGenderStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Gender Identity</Text>
+      <Text style={styles.stepTitle}>
+        Gender Identity <Text style={styles.requiredIndicator}>*</Text>
+      </Text>
       <Text style={styles.stepDescription}>
         How do you identify? This helps us provide relevant safety information.
       </Text>
+      <Text style={styles.helpText}>💡 Find routes safe for your gender</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.gender}
@@ -497,10 +561,15 @@ export default function OnboardingScreen() {
 
   const renderLGBTQStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>LGBTQ+ Identity</Text>
+      <Text style={styles.stepTitle}>
+        LGBTQ+ Identity <Text style={styles.requiredIndicator}>*</Text>
+      </Text>
       <Text style={styles.stepDescription}>
         Do you identify as LGBTQ+? This helps us show you safety information
         from other LGBTQ+ travelers.
+      </Text>
+      <Text style={styles.helpText}>
+        💡 Discover LGBTQ+ friendly businesses
       </Text>
       <View style={styles.toggleContainer}>
         <TouchableOpacity
@@ -541,10 +610,16 @@ export default function OnboardingScreen() {
 
   const renderDisabilityStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Disability Status</Text>
+      <Text style={styles.stepTitle}>
+        Disability Status Status{" "}
+        <Text style={styles.optionalBadge}>(Optional)</Text>
+      </Text>
       <Text style={styles.stepDescription}>
-        Select all that apply. This helps us show accessibility information
+        Select any that apply. This helps us show accessibility information
         relevant to your needs.
+      </Text>
+      <Text style={styles.helpText}>
+        ⭐ See accessibility ratings relevant to your needs
       </Text>
       <View style={styles.optionsContainer}>
         {["None", "Mobility", "Visual", "Hearing", "Cognitive", "Other"].map(
@@ -598,9 +673,14 @@ export default function OnboardingScreen() {
 
   const renderReligionStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Religious Identity</Text>
+      <Text style={styles.stepTitle}>
+        Religious Identity <Text style={styles.optionalBadge}>(Optional)</Text>
+      </Text>
       <Text style={styles.stepDescription}>
         What is your religious or spiritual identity?
+      </Text>
+      <Text style={styles.helpText}>
+        ⭐ Unlock prayer-friendly recommendations
       </Text>
       <View style={styles.pickerContainer}>
         <Picker
@@ -639,8 +719,13 @@ export default function OnboardingScreen() {
 
   const renderAgeStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Age Range</Text>
+      <Text style={styles.stepTitle}>
+        Age Range <Text style={styles.optionalBadge}>(Optional)</Text>
+      </Text>
       <Text style={styles.stepDescription}>Select your age range.</Text>
+      <Text style={styles.helpText}>
+        ⭐ See ratings from travelers in your age group
+      </Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.age_range}
@@ -875,7 +960,7 @@ export default function OnboardingScreen() {
                 : currentStep === ONBOARDING_STEPS.length - 1
                 ? isEditing
                   ? "Update Profile"
-                  : "Complete Setup"
+                  : "Travel Safely"
                 : "Next"}
             </Text>
           </TouchableOpacity>
@@ -891,7 +976,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     padding: 16,
-    backgroundColor: "#e8f5e9",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     borderLeftWidth: 4,
     borderLeftColor: theme.colors.primary,
@@ -915,7 +1000,7 @@ const styles = StyleSheet.create({
   },
   welcomeBannerSubtitle: {
     fontSize: 14,
-    color: "#2e7d32",
+    color: theme.colors.secondaryDark,
     lineHeight: 20,
   },
   container: {
@@ -959,7 +1044,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   stepDescription: {
-    fontSize: 16,
+    fontSize: 18,
     color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 24,
@@ -978,12 +1063,29 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
     color: theme.colors.text,
     marginLeft: 15,
   },
   optionsContainer: {
     alignSelf: "stretch",
+  },
+  requiredIndicator: {
+    color: theme.colors.error,
+    fontWeight: "bold",
+  },
+  optionalBadge: {
+    color: theme.colors.textSecondary,
+    fontSize: 14,
+    fontWeight: "normal",
+  },
+  helpText: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    marginTop: 8,
+    marginBottom: 16,
+    textAlign: "center",
+    fontStyle: "italic",
   },
   nameInput: {
     borderWidth: 1,
