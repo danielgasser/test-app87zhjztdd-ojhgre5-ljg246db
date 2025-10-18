@@ -203,43 +203,44 @@ async function analyzeSegmentSafety(
           user_demographics: userDemographics
         })
       });
-    }
 
-    let dangerPenalty = 0;
-    if (dangerResponse.ok) {
-      const dangerData = await dangerResponse.json();
-      if (dangerData.zones && dangerData.zones.length > 0) {
-        dangerZoneCount = dangerData.zones.length;
 
-        for (const zone of dangerData.zones) {
-          const severity = zone.severity_level || 1;
-          if (severity >= 3) {
-            dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.HIGH;
-            riskFactors.push(`High danger zone: ${zone.reason || 'Unknown'}`);
-          } else if (severity >= 2) {
-            dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.MEDIUM;
-            riskFactors.push(`Moderate danger zone: ${zone.reason || 'Unknown'}`);
-          } else {
-            dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.LOW;
-            riskFactors.push(`Low danger zone: ${zone.reason || 'Unknown'}`);
+      if (dangerResponse.ok) {
+        const dangerData = await dangerResponse.json();
+        if (dangerData.zones && dangerData.zones.length > 0) {
+          dangerZoneCount = dangerData.zones.length;
+
+          for (const zone of dangerData.zones) {
+            const severity = zone.severity_level || 1;
+            if (severity >= 3) {
+              dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.HIGH;
+              riskFactors.push(`High danger zone: ${zone.reason || 'Unknown'}`);
+            } else if (severity >= 2) {
+              dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.MEDIUM;
+              riskFactors.push(`Moderate danger zone: ${zone.reason || 'Unknown'}`);
+            } else {
+              dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.LOW;
+              riskFactors.push(`Low danger zone: ${zone.reason || 'Unknown'}`);
+            }
           }
         }
       }
-    }
 
-    // Apply time-based penalties
-    //let timePenalty = 0;
-    const currentHour = new Date().getHours();
 
-    if (currentHour >= CONFIG.TIME_PENALTIES.EVENING_START && currentHour < CONFIG.TIME_PENALTIES.NIGHT_START) {
-      timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.EVENING_MULTIPLIER - 1);
-      riskFactors.push('Evening travel time');
-    } else if (currentHour >= CONFIG.TIME_PENALTIES.NIGHT_START || currentHour < CONFIG.TIME_PENALTIES.MORNING_END) {
-      timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
-      riskFactors.push('Night travel time');
-    } else {
-      // Low confidence - insufficient data
-      riskFactors.push('Limited safety data - stay alert');
+      // Apply time-based penalties
+      //let timePenalty = 0;
+      const currentHour = new Date().getHours();
+
+      if (currentHour >= CONFIG.TIME_PENALTIES.EVENING_START && currentHour < CONFIG.TIME_PENALTIES.NIGHT_START) {
+        timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.EVENING_MULTIPLIER - 1);
+        riskFactors.push('Evening travel time');
+      } else if (currentHour >= CONFIG.TIME_PENALTIES.NIGHT_START || currentHour < CONFIG.TIME_PENALTIES.MORNING_END) {
+        timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
+        riskFactors.push('Night travel time');
+      } else {
+        // Low confidence - insufficient data
+        riskFactors.push('Limited safety data - stay alert');
+      }
     }
 
     // Calculate final safety score
