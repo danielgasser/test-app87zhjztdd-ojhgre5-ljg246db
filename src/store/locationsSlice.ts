@@ -19,7 +19,7 @@ import { ReactNode } from 'react';
 import { RootState } from '.';
 import { Alert } from 'react-native';
 import { checkProfileCompleteness } from '@/utils/profileValidation';
-import { shouldShowBanner, incrementShowCount } from './profileBannerSlice';
+import { shouldShowBanner, incrementShowCount, BannerType } from './profileBannerSlice';
 type Review = Database['public']['Tables']['reviews']['Row'];
 
 
@@ -846,7 +846,8 @@ export const fetchSimilarUsers = createAsyncThunk(
       const validation = checkProfileCompleteness(userProfile, 'SIMILARITY');
 
       // Show banner if profile incomplete AND banner should be shown
-      const bannerType = APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.SIMILARITY_FAILED;
+
+      const bannerType = 'SIMILARITY_FAILED' as BannerType;
       if (!validation.canUseFeature && shouldShowBanner(state.profileBanner, bannerType)) {
         // Increment show count
         dispatch(incrementShowCount(bannerType));

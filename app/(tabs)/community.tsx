@@ -26,6 +26,10 @@ import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { router } from "expo-router";
 import type { SafetyInsight } from "@/types/supabase";
+import ProfileBanner from "@/components/ProfileBanner";
+import { checkProfileCompleteness } from "@/utils/profileValidation";
+import { shouldShowBanner } from "@/store/profileBannerSlice";
+import type { BannerType } from "@/store/profileBannerSlice";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -41,6 +45,26 @@ export default function CommunityScreen() {
     communityFeedMode,
   } = useAppSelector((state) => state.locations);
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const { profile } = useAppSelector((state) => state.user);
+  const bannerState = useAppSelector((state) => state.profileBanner);
+
+  // Check profile completeness for recommendations
+  const profileCheck = React.useMemo(() => {
+    if (!profile) return { canUse: true, missingFields: [] };
+
+    const validation = checkProfileCompleteness(profile, "RECOMMENDATIONS");
+    return {
+      canUse: validation.canUseFeature,
+      missingFields: validation.missingFieldsForFeature,
+    };
+  }, [profile]);
+
+  // Determine if we should show the banner
+  const showProfileBanner = React.useMemo(() => {
+    if (profileCheck.canUse) return false;
+    return shouldShowBanner(bannerState, "RECOMMENDATIONS_INCOMPLETE");
+  }, [profileCheck.canUse, bannerState]);
 
   useRealtimeReviews();
 
