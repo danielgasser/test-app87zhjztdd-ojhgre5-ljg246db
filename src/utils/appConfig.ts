@@ -110,6 +110,36 @@ export const APP_CONFIG = {
     TRENDING_MIN_REVIEWS: 5,              // Minimum reviews to be considered trending
   },
 
+  // Banner behavior
+  BANNERS: {
+    COOLDOWN_HOURS: 24,              // Hours after "Maybe Later" before showing again
+    MAX_SHOWS_PER_FEATURE: 3,        // Max times to show banner per feature
+    SHOW_ON_FIRST_USE: true,         // Show immediately on first feature use
+    PERSIST_DISMISSALS: true,        // Save to AsyncStorage
+  },
+
+  PROFILE_COMPLETION: {
+    // Mandatory fields for onboarding (3 required)
+    MANDATORY_FIELDS: ['race_ethnicity', 'gender', 'lgbtq_status'],
+    // Feature-specific requirements
+    FEATURE_REQUIREMENTS: {
+      SIMILARITY: ['race_ethnicity', 'gender'],
+      RECOMMENDATIONS: ['race_ethnicity', 'gender'],
+      SAFE_ROUTING: ['race_ethnicity', 'gender', 'lgbtq_status', 'religion', 'disability_status', 'age_range'],
+    },
+    ALL_DEMOGRAPHIC_FIELDS: [
+      'race_ethnicity',
+      'gender',
+      'lgbtq_status',
+      'religion',
+      'disability_status',
+      'age_range',
+    ] as const,
+  },
+
+  // Allow "Prefer not to say" option
+  ALLOW_PREFER_NOT_TO_SAY: true,
+
   API_SETTINGS: {
     DEFAULT_PAGE_SIZE: 20,                // Default pagination size
     MAX_PAGE_SIZE: 100,                   // Maximum items per page
