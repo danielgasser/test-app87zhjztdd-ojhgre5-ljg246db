@@ -3,7 +3,8 @@ import { supabase } from '../services/supabase';
 import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
-import type { UserProfile } from '../types/supabase';
+
+export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;
@@ -69,7 +70,6 @@ export const updateUserProfile = createAsyncThunk(
         .from('user_profiles')
         .update({
           ...profileData,
-          updated_at: new Date().toISOString(),
         })
         .eq('id', userId)
         .select()
@@ -84,8 +84,6 @@ export const updateUserProfile = createAsyncThunk(
         .insert({
           id: userId,
           ...profileData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
         })
         .select()
         .single();
