@@ -34,7 +34,7 @@ const initialState: UserState = {
 };
 
 // Fetch user profile
-export const fetchUserProfile = createAsyncThunk(
+export const fetchUserProfile = createAsyncThunk<UserProfile, string>(
   'user/fetchProfile',
   async (userId: string) => {
     const { data, error } = await supabase
@@ -54,7 +54,7 @@ export const fetchUserProfile = createAsyncThunk(
 );
 
 // Create or update user profile
-export const updateUserProfile = createAsyncThunk(
+export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string; profileData: Partial<UserProfile> }>(
   'user/updateProfile',
   async ({ userId, profileData }: { userId: string; profileData: Partial<UserProfile> }) => {
     // Check if profile exists
