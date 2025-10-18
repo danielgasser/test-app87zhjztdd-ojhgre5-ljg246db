@@ -274,7 +274,7 @@ export default function MapScreen() {
   };
 
   const handleToggleHeatMap = () => {
-    if (!requireAuth(userId, "view danger zones")) return;
+    if (!requireAuth(userId, "view heatmap")) return;
 
     dispatch(toggleHeatMap());
     if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
