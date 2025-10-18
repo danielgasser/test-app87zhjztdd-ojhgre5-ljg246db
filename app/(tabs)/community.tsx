@@ -62,7 +62,11 @@ export default function CommunityScreen() {
   // Determine if we should show the banner
   const showProfileBanner = React.useMemo(() => {
     if (profileCheck.canUse) return false;
-    return shouldShowBanner(bannerState, "RECOMMENDATIONS_INCOMPLETE");
+    return shouldShowBanner(
+      bannerState,
+      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
+        .RECOMMENDATIONS_INCOMPLETE
+    );
   }, [profileCheck.canUse, bannerState]);
 
   useRealtimeReviews();
@@ -379,7 +383,10 @@ export default function CommunityScreen() {
       {/* Profile Completion Banner */}
       {showProfileBanner && (
         <ProfileBanner
-          bannerType="RECOMMENDATIONS_INCOMPLETE"
+          bannerType={
+            APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
+              .RECOMMENDATIONS_INCOMPLETE
+          }
           missingFields={profileCheck.missingFields}
           visible={showProfileBanner}
         />

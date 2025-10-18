@@ -26,7 +26,9 @@ import {
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
-import NavigationMode from "./NavigationMode";
+import ProfileBanner from "./ProfileBanner";
+import { checkProfileCompleteness } from "@/utils/profileValidation";
+import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 interface RoutePlanningModalProps {
@@ -67,6 +69,28 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const currentUser = useAppSelector((state) => state.auth.user);
   const userProfile = useAppSelector((state) => state.user.profile);
+
+  const bannerState = useAppSelector((state) => state.profileBanner);
+
+  // Check profile completeness for safe routing
+  const profileCheck = React.useMemo(() => {
+    if (!userProfile) return { canUse: true, missingFields: [] };
+
+    const validation = checkProfileCompleteness(userProfile, "SAFE_ROUTING");
+    return {
+      canUse: validation.canUseFeature,
+      missingFields: validation.missingFieldsForFeature,
+    };
+  }, [userProfile]);
+
+  // Determine if we should show the banner
+  const showProfileBanner = React.useMemo(() => {
+    if (profileCheck.canUse) return false;
+    return shouldShowBanner(
+      bannerState,
+      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE
+    );
+  }, [profileCheck.canUse, bannerState]);
 
   // Location state
   const [fromLocation, setFromLocation] = useState<LocationResult | null>(null);
