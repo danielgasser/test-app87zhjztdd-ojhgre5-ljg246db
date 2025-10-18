@@ -29,7 +29,6 @@ import type { SafetyInsight } from "@/types/supabase";
 import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
-import type { BannerType } from "@/store/profileBannerSlice";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -377,6 +376,14 @@ export default function CommunityScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Profile Completion Banner */}
+      {showProfileBanner && (
+        <ProfileBanner
+          bannerType="RECOMMENDATIONS_INCOMPLETE"
+          missingFields={profileCheck.missingFields}
+          visible={showProfileBanner}
+        />
+      )}
       <ScrollView
         style={styles.scrollView}
         refreshControl={

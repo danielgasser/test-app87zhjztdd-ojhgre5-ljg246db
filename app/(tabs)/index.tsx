@@ -53,6 +53,9 @@ import { supabase } from "@/services/supabase";
 import NavigationMode from "src/components/NavigationMode";
 import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
+import ProfileBanner from "@/components/ProfileBanner";
+import { checkProfileCompleteness } from "@/utils/profileValidation";
+import { shouldShowBanner } from "@/store/profileBannerSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -136,6 +139,28 @@ export default function MapScreen() {
 
   const userId = useAppSelector((state: any) => state.auth.user?.id);
   const userProfile = useAppSelector((state: any) => state.user.profile);
+
+  // ADD THIS NEW CODE HERE:
+  const bannerState = useAppSelector((state: any) => state.profileBanner);
+
+  // Check profile completeness for GENERAL (heatmap/danger zones need full profile)
+  const profileCheck = React.useMemo(() => {
+    if (!userProfile) return { canUse: true, missingFields: [] };
+
+    const validation = checkProfileCompleteness(userProfile, "SAFE_ROUTING");
+    return {
+      canUse: validation.canUseFeature,
+      missingFields: validation.missingFieldsForFeature,
+    };
+  }, [userProfile]);
+
+  // Determine if we should show the banner
+  const showProfileBanner = React.useMemo(() => {
+    if (profileCheck.canUse) return false;
+    // Show banner when heatmap or danger zones are active
+    if (!heatMapVisible && !dangerZonesVisible) return false;
+    return shouldShowBanner(bannerState, "ROUTING_INCOMPLETE");
+  }, [profileCheck.canUse, heatMapVisible, dangerZonesVisible, bannerState]);
 
   // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
@@ -592,6 +617,19 @@ export default function MapScreen() {
   // ============= MAIN RENDER =============
   return (
     <View style={styles.container}>
+      {/* Profile Completion Banner */}
+      {showProfileBanner && (
+        <View style={styles.bannerContainer}>
+          <ProfileBanner
+            bannerType={
+              APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
+                .ROUTING_INCOMPLETE
+            }
+            missingFields={profileCheck.missingFields}
+            visible={showProfileBanner}
+          />
+        </View>
+      )}
       <SearchBar
         onLocationSelect={handleLocationSelected}
         userLocation={userLocation || undefined}
@@ -1179,6 +1217,13 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
+  bannerContainer: {
+    position: "absolute",
+    top: 10,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+  },
   container: {
     flex: 1,
   },
