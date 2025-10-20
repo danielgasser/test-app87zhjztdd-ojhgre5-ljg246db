@@ -861,6 +861,7 @@ export default function MapScreen() {
             {renderRouteSegments(selectedRoute)}
           </>
         )}
+
         {routes
           .filter((route: { id: any }) => route.id !== selectedRoute?.id)
           .map(

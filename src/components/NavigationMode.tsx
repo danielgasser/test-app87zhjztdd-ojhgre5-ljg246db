@@ -48,6 +48,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
 
   const [distanceToNextTurn, setDistanceToNextTurn] = useState<number>(0);
   const [locationSubscription, setLocationSubscription] = useState<any>(null);
+  const [mapKey, setMapKey] = useState(0);
 
   // Start GPS tracking
   useEffect(() => {
@@ -114,6 +115,25 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
 
     checkReviewsAlongRoute();
   }, [communityReviews, selectedRoute, currentPosition, dispatch]);
+
+  useEffect(() => {
+    // Force map refresh every 30 seconds if position hasn't changed
+    const interval = setInterval(() => {
+      if (mapRef.current && currentPosition) {
+        mapRef.current.animateToRegion(
+          {
+            latitude: currentPosition.latitude,
+            longitude: currentPosition.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          },
+          300
+        );
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [currentPosition]);
 
   const startNavigation = async () => {
     try {
@@ -321,46 +341,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
     return null;
   })();
   return (
-    <View style={styles.container}>
-      {/* Map */}
-      <MapView
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        initialRegion={{
-          latitude: currentPosition.latitude,
-          longitude: currentPosition.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-        showsUserLocation={false} // We'll draw custom marker
-        showsMyLocationButton={false}
-        showsCompass={false}
-        rotateEnabled={true}
-        pitchEnabled={true}
-      >
-        {/* Route polyline */}
-        {selectedRoute.route_points && (
-          <Polyline
-            coordinates={selectedRoute.route_points}
-            strokeColor={theme.colors.primary}
-            strokeWidth={5}
-          />
-        )}
-
-        {/* User position marker */}
-        <Marker
-          coordinate={currentPosition}
-          anchor={{ x: 0.5, y: 0.5 }}
-          flat
-          rotation={currentPosition.heading || 0}
-        >
-          <View style={styles.userMarker}>
-            <Ionicons name="navigate" size={30} color={theme.colors.primary} />
-          </View>
-        </Marker>
-      </MapView>
-
+    <>
       {/* Top instruction panel */}
       <View style={styles.instructionPanel}>
         <View style={styles.distanceContainer}>
@@ -411,7 +392,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
           <Text style={styles.endButtonText}>End Navigation</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </>
   );
 };
 
@@ -419,18 +400,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  map: {
-    width,
-    height,
-  },
   instructionPanel: {
     position: "absolute",
-    top: 50,
+    bottom: 160,
     left: 20,
     right: 20,
     backgroundColor: theme.colors.primary,
     borderRadius: 16,
-    padding: 20,
+    padding: 12,
     shadowColor: theme.colors.shadowDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -440,10 +417,10 @@ const styles = StyleSheet.create({
   distanceContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   distanceText: {
-    fontSize: 48,
+    fontSize: 30,
     fontWeight: "bold",
     color: theme.colors.card,
     marginRight: 16,
@@ -451,21 +428,21 @@ const styles = StyleSheet.create({
   instructionTextContainer: {
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.3)",
-    paddingTop: 12,
+    paddingTop: 8,
   },
   instructionText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "600",
     color: theme.colors.card,
     marginBottom: 4,
   },
   nextInstructionText: {
-    fontSize: 14,
+    fontSize: 12,
     color: "rgba(255,255,255,0.8)",
   },
   controls: {
     position: "absolute",
-    bottom: 40,
+    bottom: 10,
     left: 20,
     right: 20,
   },
@@ -513,19 +490,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 8,
-  },
-  userMarker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.card,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: theme.colors.shadowDark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
   },
 });
 
