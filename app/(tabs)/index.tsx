@@ -110,7 +110,6 @@ export default function MapScreen() {
   >(null);
 
   const [fabMenuOpen, setFabMenuOpen] = useState(false);
-
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -1110,45 +1109,44 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
       )}
-      {!searchMarker && ( // Only show when not showing search marker button
-        <View style={styles.routeControls}>
-          {routeMode === "none" ? (
+      <View style={styles.routeControls}>
+        {routeMode === "none" ? (
+          <TouchableOpacity
+            style={styles.routeButton}
+            onPress={handleStartRouteSelection}
+          >
+            <Ionicons
+              name="navigate"
+              size={24}
+              color={theme.colors.background}
+            />
+            <Text style={styles.routeButtonText}>Plan Route</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.routeModeControls}>
+            <Text style={styles.routeModeText}>
+              {routeMode === "select_origin"
+                ? "Tap to set origin"
+                : "Tap to set destination"}
+            </Text>
             <TouchableOpacity
-              style={styles.routeButton}
-              onPress={handleStartRouteSelection}
+              style={styles.cancelButton}
+              onPress={handleCloseRoutePlanning}
             >
               <Ionicons
-                name="navigate"
-                size={24}
+                name="close"
+                size={20}
                 color={theme.colors.background}
               />
-              <Text style={styles.routeButtonText}>Plan Route</Text>
             </TouchableOpacity>
-          ) : (
-            <View style={styles.routeModeControls}>
-              <Text style={styles.routeModeText}>
-                {routeMode === "select_origin"
-                  ? "Tap to set origin"
-                  : "Tap to set destination"}
-              </Text>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={handleCloseRoutePlanning}
-              >
-                <Ionicons
-                  name="close"
-                  size={20}
-                  color={theme.colors.background}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-          <RoutePlanningModal
-            visible={showRoutePlanningModal}
-            onClose={handleCloseRoutePlanning}
-          />
-        </View>
-      )}
+          </View>
+        )}
+        <RoutePlanningModal
+          visible={showRoutePlanningModal}
+          onClose={handleCloseRoutePlanning}
+          initialDestination={searchMarker}
+        />
+      </View>
       {selectedRoute && !navigationActive && (
         <View style={styles.routeInfoPanel}>
           <View style={styles.routeInfoHeader}>
