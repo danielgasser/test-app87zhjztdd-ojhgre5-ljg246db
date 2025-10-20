@@ -74,6 +74,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         .select("*")
         .eq("location_id", locationId)
         .eq("status", "active")
+        .neq("user_profiles.privacy_level", "private")
         .order("created_at", { ascending: false })
         .limit(10);
 
