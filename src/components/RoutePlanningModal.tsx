@@ -25,6 +25,7 @@ import {
   setSmartRouteComparison,
   startNavigation,
   endNavigation,
+  clearRoutes,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -114,6 +115,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
 
+  useEffect(() => {
+    if (!visible) {
+      // Clear routes when modal closes
+      dispatch(clearRoutes());
+    }
+  }, [visible]);
   // Initialize from location with current location
   useEffect(() => {
     if (visible && userLocation && !fromLocation) {
@@ -485,263 +492,252 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           visible={showProfileBanner}
         />
       )}
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={true}
-      >
-        <View style={styles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Plan Safe Route</Text>
-            <View style={styles.headerSpacer} />
-          </View>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Plan Safe Route</Text>
+          <View style={styles.headerSpacer} />
+        </View>
 
-          {/* Search Mode */}
-          {activeInput ? (
-            <View style={styles.searchMode}>
-              <View style={styles.searchInputContainer}>
-                <Ionicons
-                  name="search"
-                  size={20}
-                  color={theme.colors.textSecondary}
-                />
-                <TextInput
-                  style={styles.searchInput}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholder={`Search for ${
-                    activeInput === "from" ? "starting point" : "destination"
-                  }`}
-                  autoFocus
-                />
-                {searchLoading && (
-                  <ActivityIndicator
-                    size="small"
-                    color={theme.colors.primary}
-                  />
-                )}
-              </View>
-
-              <FlatList
-                style={styles.searchResults}
-                data={allResults}
-                renderItem={renderSearchResult}
-                keyExtractor={(item) => item.id}
-                ListEmptyComponent={
-                  searchQuery.length > 0 && !searchLoading ? (
-                    <View style={styles.noResults}>
-                      <Text style={styles.noResultsText}>No results found</Text>
-                    </View>
-                  ) : null
-                }
+        {/* Search Mode */}
+        {activeInput ? (
+          <View style={styles.searchMode}>
+            <View style={styles.searchInputContainer}>
+              <Ionicons
+                name="search"
+                size={20}
+                color={theme.colors.textSecondary}
               />
+              <TextInput
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={`Search for ${
+                  activeInput === "from" ? "starting point" : "destination"
+                }`}
+                autoFocus
+              />
+              {searchLoading && (
+                <ActivityIndicator size="small" color={theme.colors.primary} />
+              )}
             </View>
-          ) : (
-            /* Route Planning Mode */
-            <ScrollView
-              style={styles.content}
-              contentContainerStyle={{ paddingBottom: 100 }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View>
-                  {/* Location Inputs */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Route Details</Text>
-                    <View style={styles.locationInputs}>
-                      {renderLocationInput(
-                        "from",
-                        fromLocation,
-                        "Choose starting point"
-                      )}
-                      {renderLocationInput(
-                        "to",
-                        toLocation,
-                        "Choose destination"
-                      )}
-                    </View>
+
+            <FlatList
+              style={styles.searchResults}
+              data={allResults}
+              renderItem={renderSearchResult}
+              keyExtractor={(item) => item.id}
+              ListEmptyComponent={
+                searchQuery.length > 0 && !searchLoading ? (
+                  <View style={styles.noResults}>
+                    <Text style={styles.noResultsText}>No results found</Text>
                   </View>
-
-                  {/* Safety Preferences */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Safety Preferences</Text>
-                    <View style={styles.priorityButtons}>
-                      {(
-                        ["speed_focused", "balanced", "safety_focused"] as const
-                      ).map((priority) => (
-                        <TouchableOpacity
-                          key={priority}
-                          style={[
-                            styles.priorityButton,
-                            routePreferences.safetyPriority === priority &&
-                              styles.activePriorityButton,
-                          ]}
-                          onPress={() => handleSafetyPriorityChange(priority)}
-                        >
-                          <Text
-                            style={[
-                              styles.priorityButtonText,
-                              routePreferences.safetyPriority === priority &&
-                                styles.activePriorityButtonText,
-                            ]}
-                          >
-                            {priority.replace("_", " ").toUpperCase()}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-
-                    <View style={styles.toggleRow}>
-                      <Text style={styles.toggleLabel}>
-                        Avoid evening dangers
-                      </Text>
-                      <TouchableOpacity
-                        style={[
-                          styles.toggle,
-                          routePreferences.avoidEveningDanger &&
-                            styles.toggleActive,
-                        ]}
-                        onPress={() =>
-                          dispatch(
-                            updateRoutePreferences({
-                              avoidEveningDanger:
-                                !routePreferences.avoidEveningDanger,
-                            })
-                          )
-                        }
-                      >
-                        {routePreferences.avoidEveningDanger && (
-                          <Ionicons
-                            name="checkmark"
-                            size={16}
-                            color={theme.colors.background}
-                          />
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-
-                  {/* Generate Route Button */}
-                  <TouchableOpacity
-                    style={[
-                      styles.generateButton,
-                      (routeLoading || !fromLocation || !toLocation) &&
-                        styles.disabledButton,
-                    ]}
-                    onPress={handleGenerateRoute}
-                    disabled={routeLoading || !fromLocation || !toLocation}
-                  >
-                    {routeLoading ? (
-                      <ActivityIndicator
-                        size="small"
-                        color={theme.colors.background}
-                      />
-                    ) : (
-                      <Ionicons
-                        name="navigate"
-                        size={20}
-                        color={theme.colors.background}
-                      />
+                ) : null
+              }
+            />
+          </View>
+        ) : (
+          /* Route Planning Mode */
+          <ScrollView
+            style={styles.content}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View>
+                {/* Location Inputs */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Route Details</Text>
+                  <View style={styles.locationInputs}>
+                    {renderLocationInput(
+                      "from",
+                      fromLocation,
+                      "Choose starting point"
                     )}
-                    <Text style={styles.generateButtonText}>
-                      {routeLoading
-                        ? "Finding safe route..."
-                        : "Generate Safe Route"}
+                    {renderLocationInput(
+                      "to",
+                      toLocation,
+                      "Choose destination"
+                    )}
+                  </View>
+                </View>
+
+                {/* Safety Preferences */}
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Safety Preferences</Text>
+                  <View style={styles.priorityButtons}>
+                    {(
+                      ["speed_focused", "balanced", "safety_focused"] as const
+                    ).map((priority) => (
+                      <TouchableOpacity
+                        key={priority}
+                        style={[
+                          styles.priorityButton,
+                          routePreferences.safetyPriority === priority &&
+                            styles.activePriorityButton,
+                        ]}
+                        onPress={() => handleSafetyPriorityChange(priority)}
+                      >
+                        <Text
+                          style={[
+                            styles.priorityButtonText,
+                            routePreferences.safetyPriority === priority &&
+                              styles.activePriorityButtonText,
+                          ]}
+                        >
+                          {priority.replace("_", " ").toUpperCase()}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>
+                      Avoid evening dangers
                     </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.toggle,
+                        routePreferences.avoidEveningDanger &&
+                          styles.toggleActive,
+                      ]}
+                      onPress={() =>
+                        dispatch(
+                          updateRoutePreferences({
+                            avoidEveningDanger:
+                              !routePreferences.avoidEveningDanger,
+                          })
+                        )
+                      }
+                    >
+                      {routePreferences.avoidEveningDanger && (
+                        <Ionicons
+                          name="checkmark"
+                          size={16}
+                          color={theme.colors.background}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-                  {/* Error Display */}
-                  {routeError && (
-                    <View style={styles.errorContainer}>
-                      <Ionicons
-                        name="warning"
-                        size={20}
-                        color={theme.colors.error}
-                      />
-                      <Text style={styles.errorText}>{routeError}</Text>
-                    </View>
-                  )}
-
-                  {/* Smart Route Comparison */}
-                  {showSmartRouteComparison && smartRouteComparison && (
-                    <RouteComparisonCard
-                      comparison={smartRouteComparison}
-                      onSelectOriginal={handleSelectOriginalRoute}
-                      onSelectOptimized={handleSelectOptimizedRoute}
-                      onStartNavigation={handleStartNavigation}
+                {/* Generate Route Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.generateButton,
+                    (routeLoading || !fromLocation || !toLocation) &&
+                      styles.disabledButton,
+                  ]}
+                  onPress={handleGenerateRoute}
+                  disabled={routeLoading || !fromLocation || !toLocation}
+                >
+                  {routeLoading ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.colors.background}
+                    />
+                  ) : (
+                    <Ionicons
+                      name="navigate"
+                      size={20}
+                      color={theme.colors.background}
                     />
                   )}
+                  <Text style={styles.generateButtonText}>
+                    {routeLoading
+                      ? "Finding safe route..."
+                      : "Generate Safe Route"}
+                  </Text>
+                </TouchableOpacity>
 
-                  {/* Selected Route Display */}
-                  {selectedRoute && !showSmartRouteComparison && (
-                    <View style={styles.routesSection}>
-                      <Text style={styles.sectionTitle}>Your Route</Text>
-                      <View
-                        style={[styles.routeCard, styles.selectedRouteCard]}
-                      >
-                        <View style={styles.routeHeader}>
-                          <View style={styles.routeInfo}>
-                            <Text style={styles.routeName}>
-                              {selectedRoute.name}
-                            </Text>
-                            <Text style={styles.routeType}>
-                              {selectedRoute.route_type} route
-                            </Text>
-                          </View>
-                          <View
-                            style={[
-                              styles.safetyBadge,
-                              {
-                                backgroundColor: getSafetyBadgeColor(
-                                  selectedRoute.safety_analysis
-                                    ?.overall_route_score || 0
-                                ),
-                              },
-                            ]}
-                          >
-                            <Text style={styles.safetyScore}>
-                              {Math.round(
+                {/* Error Display */}
+                {routeError && (
+                  <View style={styles.errorContainer}>
+                    <Ionicons
+                      name="warning"
+                      size={20}
+                      color={theme.colors.error}
+                    />
+                    <Text style={styles.errorText}>{routeError}</Text>
+                  </View>
+                )}
+
+                {/* Smart Route Comparison */}
+                {showSmartRouteComparison && smartRouteComparison && (
+                  <RouteComparisonCard
+                    comparison={smartRouteComparison}
+                    onSelectOriginal={handleSelectOriginalRoute}
+                    onSelectOptimized={handleSelectOptimizedRoute}
+                    onStartNavigation={handleStartNavigation}
+                  />
+                )}
+
+                {/* Selected Route Display */}
+                {selectedRoute && !showSmartRouteComparison && (
+                  <View style={styles.routesSection}>
+                    <Text style={styles.sectionTitle}>Your Route</Text>
+                    <View style={[styles.routeCard, styles.selectedRouteCard]}>
+                      <View style={styles.routeHeader}>
+                        <View style={styles.routeInfo}>
+                          <Text style={styles.routeName}>
+                            {selectedRoute.name}
+                          </Text>
+                          <Text style={styles.routeType}>
+                            {selectedRoute.route_type} route
+                          </Text>
+                        </View>
+                        <View
+                          style={[
+                            styles.safetyBadge,
+                            {
+                              backgroundColor: getSafetyBadgeColor(
                                 selectedRoute.safety_analysis
                                   ?.overall_route_score || 0
-                              )}
-                            </Text>
-                          </View>
+                              ),
+                            },
+                          ]}
+                        >
+                          <Text style={styles.safetyScore}>
+                            {Math.round(
+                              selectedRoute.safety_analysis
+                                ?.overall_route_score || 0
+                            )}
+                          </Text>
                         </View>
-                        <View style={styles.routeMetrics}>
-                          <View style={styles.metric}>
-                            <Ionicons
-                              name="time"
-                              size={16}
-                              color={theme.colors.textSecondary}
-                            />
-                            <Text style={styles.metricText}>
-                              {selectedRoute.estimated_duration_minutes} min
-                            </Text>
-                          </View>
-                          <View style={styles.metric}>
-                            <Ionicons
-                              name="navigate"
-                              size={16}
-                              color={theme.colors.textSecondary}
-                            />
-                            <Text style={styles.metricText}>
-                              {selectedRoute.distance_kilometers} km
-                            </Text>
-                          </View>
+                      </View>
+                      <View style={styles.routeMetrics}>
+                        <View style={styles.metric}>
+                          <Ionicons
+                            name="time"
+                            size={16}
+                            color={theme.colors.textSecondary}
+                          />
+                          <Text style={styles.metricText}>
+                            {selectedRoute.estimated_duration_minutes} min
+                          </Text>
+                        </View>
+                        <View style={styles.metric}>
+                          <Ionicons
+                            name="navigate"
+                            size={16}
+                            color={theme.colors.textSecondary}
+                          />
+                          <Text style={styles.metricText}>
+                            {selectedRoute.distance_kilometers} km
+                          </Text>
                         </View>
                       </View>
                     </View>
-                  )}
-                </View>
-              </TouchableWithoutFeedback>
-            </ScrollView>
-          )}
-        </View>
-      </ScrollView>
+                  </View>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 };
@@ -752,7 +748,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "90%", // Changed from maxHeight to height
+    maxHeight: "95%",
     backgroundColor: theme.colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
