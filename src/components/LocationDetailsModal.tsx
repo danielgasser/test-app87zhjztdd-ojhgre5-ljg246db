@@ -196,6 +196,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   };
 
   const renderDemographics = (profile: any) => {
+    // Respect privacy_level setting
+    if (profile?.privacy_level === "private") return null;
+    if (profile?.privacy_level === "anonymous") return null;
     if (!profile?.show_demographics) return null;
 
     const demographics = [];
@@ -220,6 +223,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       </Text>
     );
   };
+
   const userHasReviewed = reviews.some(
     (review) => review.user_id === currentUser?.id
   );
