@@ -19,6 +19,17 @@ export const useRealtimeReviews = () => {
                     filter: 'status=eq.active'
                 },
                 async (payload) => {
+                    // Check user's privacy setting
+                    const { data: userProfile } = await supabase
+                        .from('user_profiles')
+                        .select('privacy_level')
+                        .eq('id', payload.new.user_id)
+                        .single();
+
+                    // Skip if user has private reviews
+                    if (userProfile?.privacy_level === 'private') {
+                        return;
+                    }
                     // Fetch the location name for the new review
                     const { data: location } = await supabase
                         .from('locations')
