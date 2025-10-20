@@ -36,6 +36,15 @@ import { APP_CONFIG } from "@/utils/appConfig";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
+  initialSearchQuery?: string;
+  initialDestination?: {
+    id: string;
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    source?: "database" | "mapbox";
+  } | null;
 }
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
@@ -53,6 +62,7 @@ interface LocationResult {
 const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   visible,
   onClose,
+  initialDestination,
 }) => {
   const dispatch = useAppDispatch();
   const {
@@ -117,6 +127,22 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       });
     }
   }, [visible, userLocation, fromLocation]);
+
+  useEffect(() => {
+    if (visible && initialDestination && !toLocation) {
+      setToLocation({
+        id: initialDestination.id,
+        name: initialDestination.name,
+        address: initialDestination.address,
+        latitude: initialDestination.latitude,
+        longitude: initialDestination.longitude,
+        source: (initialDestination.source || "mapbox") as
+          | "database"
+          | "mapbox"
+          | "current_location",
+      });
+    }
+  }, [visible, initialDestination, toLocation]);
 
   // Clear state when modal closes
   useEffect(() => {
@@ -364,6 +390,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     priority: "speed_focused" | "balanced" | "safety_focused"
   ) => {
     dispatch(updateRoutePreferences({ safetyPriority: priority }));
+    if (smartRouteComparison || selectedRoute) {
+      handleGenerateRoute();
+    }
   };
 
   // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API

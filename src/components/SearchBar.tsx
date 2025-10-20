@@ -61,7 +61,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         radius: 50000, // 50km radius for location bias
         components: `country:${country}`,
       });
-      console.log(results[0].description);
+
       return results.slice(0, 5).map((result) => ({
         id: `google_${result.place_id}`,
         name: result.description.split(",")[0], // "Hauptstrasse 67"

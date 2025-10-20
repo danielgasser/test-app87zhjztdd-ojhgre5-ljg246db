@@ -543,49 +543,6 @@ export const searchLocations = createAsyncThunk(
         source: 'database' as const,
       }));
 
-      const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-      if (googleApiKey && searchResults.length < 5) {
-        const state = getState() as any;
-        const userCountry = state.locations.userCountry || 'us';
-        try {
-          let googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${googleApiKey}&region=${userCountry}&components=country:${userCountry}`;
-
-          if (latitude && longitude) {
-            googleUrl += `&location=${latitude},${longitude}`;
-          }
-
-          const googleResponse = await fetch(googleUrl);
-          const googleData = await googleResponse.json();
-
-          if (googleData.status === 'OK' && googleData.results) {
-            googleData.results.slice(0, 5 - searchResults.length).forEach((result: any) => {
-              let name = result.formatted_address.split(',')[0];
-              const addressComponents = result.address_components;
-              if (addressComponents && addressComponents.length > 0) {
-                // Priority: locality > administrative_area_level_1 > country
-                const locality = addressComponents.find((c: any) => c.types.includes('locality'));
-                const adminArea = addressComponents.find((c: any) => c.types.includes('administrative_area_level_1'));
-                const country = addressComponents.find((c: any) => c.types.includes('country'));
-
-                name = locality?.long_name || adminArea?.long_name || country?.long_name || name;
-              }
-              // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
-              searchResults.push({
-                id: result.place_id,
-                name: result.address_components?.[0]?.long_name || result.formatted_address.split(',')[0],
-                address: result.formatted_address,
-                latitude: result.geometry.location.lat,
-                longitude: result.geometry.location.lng,
-                place_type: result.types?.[0] || "location",
-                source: 'mapbox' as const,
-              });
-            });
-          }
-        } catch (error) {
-          console.error('Google Maps geocoding error:', error);
-        }
-      }
-
       return searchResults;
     } catch (error) {
       console.error('Search error:', error);
