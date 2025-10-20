@@ -1305,6 +1305,7 @@ export const generateSmartRoute = createAsyncThunk(
         console.error('❌ Smart route generation failed:', error);
         throw error;
       }
+      console.log('📦 Smart route raw response:', JSON.stringify(data, null, 2)); // ← ADD THIS
 
       if (!data.success) {
         console.log('⚠️ Smart route not better than original:', data.message);
@@ -1331,6 +1332,7 @@ export const generateSmartRoute = createAsyncThunk(
           overall_route_score: data.improvement_summary.optimized_safety_score,
           overall_confidence: data.optimized_safety?.overall_confidence ?? APP_CONFIG.ROUTE_PLANNING.FALLBACK_CONFIDENCE,
           confidence: data.optimized_safety?.overall_confidence ?? APP_CONFIG.ROUTE_PLANNING.FALLBACK_CONFIDENCE,
+          segment_scores: data.optimized_safety?.segment_scores,
           danger_zones_intersected: data.optimized_safety?.danger_zones_intersected ?? 0,
           high_risk_segments: data.optimized_safety?.high_risk_segments ?? 0,
           safety_notes: data.optimized_safety?.safety_notes ?? [
