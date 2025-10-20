@@ -471,14 +471,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (score >= 3.0) return APP_CONFIG.HEAT_MAP.COLORS.NEUTRAL;
     return theme.colors.error;
   };
+  if (!visible || navigationActive) return null;
 
   return (
-    <Modal
-      visible={visible && !navigationActive}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
+    <View style={styles.overlay}>
       {showProfileBanner && (
         <ProfileBanner
           bannerType={
@@ -734,11 +730,26 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           </ScrollView>
         )}
       </View>
-    </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  overlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "60%",
+    shadowColor: theme.colors.shadowDark,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,

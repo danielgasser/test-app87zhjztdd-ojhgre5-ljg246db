@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
+  Keyboard,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -280,7 +281,8 @@ export default function MapScreen() {
     }
   };
 
-  const handleMapLongPress = async (event: any) => {
+  const handleMapPress = async (event: any) => {
+    Keyboard.dismiss();
     if (!requireAuth(userId, "add marker")) return;
 
     const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -646,7 +648,7 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
-        onPress={handleMapLongPress}
+        onPress={handleMapPress}
         onMapReady={() => {
           setMapReady(true);
         }}
@@ -1076,7 +1078,7 @@ export default function MapScreen() {
         </View>
       )}
       {/* Add Location Button */}
-      {searchMarker && (
+      {searchMarker && !selectedRoute && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
             style={styles.addLocationButton}
