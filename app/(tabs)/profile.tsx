@@ -270,8 +270,11 @@ export default function ProfileScreen() {
               <Text style={styles.email}>{user.email}</Text>
 
               {/* Edit Profile Button */}
-              <TouchableOpacity onPress={handleEditProfile}>
-                <Text style={styles.editText}>Edit Profile</Text>
+              <TouchableOpacity
+                style={styles.setupButton}
+                onPress={handleEditProfile}
+              >
+                <Text style={styles.setupButtonText}>Edit Profile</Text>
               </TouchableOpacity>
             </View>
             {/* Reset Banners Button (for testing)
