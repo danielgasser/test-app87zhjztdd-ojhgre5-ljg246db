@@ -25,7 +25,6 @@ import {
   setSmartRouteComparison,
   startNavigation,
   endNavigation,
-  clearRoutes,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -115,12 +114,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
 
-  useEffect(() => {
-    if (!visible) {
-      // Clear routes when modal closes
-      dispatch(clearRoutes());
-    }
-  }, [visible]);
   // Initialize from location with current location
   useEffect(() => {
     if (visible && userLocation && !fromLocation) {
@@ -481,7 +474,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   if (!visible || navigationActive) return null;
 
   return (
-    <View style={styles.overlay}>
+    <Modal
+      visible={visible && !navigationActive}
+      animationType="slide"
+      presentationStyle="formSheet"
+      onRequestClose={onClose}
+    >
       {showProfileBanner && (
         <ProfileBanner
           bannerType={
@@ -543,7 +541,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           /* Route Planning Mode */
           <ScrollView
             style={styles.content}
-            contentContainerStyle={{ paddingBottom: 100 }}
             keyboardShouldPersistTaps="handled"
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -738,26 +735,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           </ScrollView>
         )}
       </View>
-    </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: "95%",
-    backgroundColor: theme.colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: theme.colors.shadowDark,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 10,
-  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
