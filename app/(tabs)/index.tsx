@@ -140,7 +140,6 @@ export default function MapScreen() {
   const userId = useAppSelector((state: any) => state.auth.user?.id);
   const userProfile = useAppSelector((state: any) => state.user.profile);
 
-  // ADD THIS NEW CODE HERE:
   const bannerState = useAppSelector((state: any) => state.profileBanner);
 
   // Check profile completeness for GENERAL (heatmap/danger zones need full profile)
@@ -399,31 +398,108 @@ export default function MapScreen() {
     }
   };
 
-  const renderRouteSegments = (route: any, forceShow: boolean = false) => {
-    console.log("🔍 renderRouteSegments called:", {
-      forceShow,
-      showRouteSegments,
-      hasAnalysis: !!route.safety_analysis,
-      hasSegments: !!route.safety_analysis?.segment_scores,
-      segmentCount: route.safety_analysis?.segment_scores?.length,
-      analysisKeys: route.safety_analysis
-        ? Object.keys(route.safety_analysis)
-        : [],
-      segmentScoresValue: route.safety_analysis?.segment_scores, // ← ADD THIS
-    });
+  /**
+   * Calculate distance between two coordinates in meters
+   */
+  const calculateDistance = (
+    coord1: { latitude: number; longitude: number },
+    coord2: { latitude: number; longitude: number }
+  ): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (coord1.latitude * Math.PI) / 180;
+    const φ2 = (coord2.latitude * Math.PI) / 180;
+    const Δφ = ((coord2.latitude - coord1.latitude) * Math.PI) / 180;
+    const Δλ = ((coord2.longitude - coord1.longitude) * Math.PI) / 180;
 
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
+  /**
+   * Split route_points into chunks matching segment boundaries
+   */
+  const splitRouteIntoSegments = (
+    routePoints: Array<{ latitude: number; longitude: number }>,
+    segmentScores: Array<any>
+  ): Array<Array<{ latitude: number; longitude: number }>> => {
+    if (
+      !routePoints ||
+      routePoints.length === 0 ||
+      !segmentScores ||
+      segmentScores.length === 0
+    ) {
+      return [];
+    }
+
+    const chunks: Array<Array<{ latitude: number; longitude: number }>> = [];
+    let currentChunk: Array<{ latitude: number; longitude: number }> = [
+      routePoints[0],
+    ];
+    let cumulativeDistance = 0;
+    let currentSegmentIndex = 0;
+
+    for (let i = 1; i < routePoints.length; i++) {
+      const segmentDistance = calculateDistance(
+        routePoints[i - 1],
+        routePoints[i]
+      );
+      cumulativeDistance += segmentDistance;
+      currentChunk.push(routePoints[i]);
+
+      // Check if we've reached the end of the current segment
+      if (currentSegmentIndex < segmentScores.length) {
+        const targetDistance =
+          segmentScores[currentSegmentIndex].distance_meters;
+
+        // If we've traveled the target distance (with 10% tolerance), start new chunk
+        if (cumulativeDistance >= targetDistance * 0.9) {
+          chunks.push([...currentChunk]);
+          currentChunk = [routePoints[i]]; // Start next chunk with current point
+          cumulativeDistance = 0;
+          currentSegmentIndex++;
+        }
+      }
+    }
+
+    // Add remaining points as last chunk
+    if (currentChunk.length > 1) {
+      chunks.push(currentChunk);
+    }
+
+    return chunks;
+  };
+
+  const renderRouteSegments = (route: any, forceShow: boolean = false) => {
+    console.log("🔍 renderRouteSegments entry:", {
+      forceShow,
+      hasSegmentScores: !!route.safety_analysis?.segment_scores,
+      hasRoutePoints: !!route.route_points,
+      routePointsCount: route.route_points?.length,
+    });
     if (
       (!showRouteSegments && !forceShow) ||
-      !route.safety_analysis?.segment_scores
+      !route.safety_analysis?.segment_scores ||
+      !route.route_points
     )
       return null;
-    console.log(
-      "🎨 Rendering segments:",
-      route.safety_analysis.segment_scores.length
+
+    const segmentChunks = splitRouteIntoSegments(
+      route.route_points,
+      route.safety_analysis.segment_scores
     );
-    console.log("First segment:", route.safety_analysis.segment_scores[0]);
+
+    console.log("🎨 Rendering", segmentChunks.length, "colored segment chunks");
+
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
+        if (!segmentChunks[index] || segmentChunks[index].length < 2) {
+          return null; // Skip if no coordinates for this segment
+        }
+
         const segmentColor =
           (segment.safety_score || segment.overall_score) >=
           APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
@@ -432,19 +508,13 @@ export default function MapScreen() {
               APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
             : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
-        console.log(
-          `Segment ${index}: score=${
-            segment.safety_score || segment.overall_score
-          }, color=${segmentColor}`
-        );
 
         return (
           <Polyline
             key={`segment-${index}`}
-            coordinates={[segment.start, segment.end]}
+            coordinates={segmentChunks[index]}
             strokeColor={segmentColor}
-            strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SEGMENT_HIGHLIGHT}
-            lineDashPattern={[5, 5]}
+            strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
           />
         );
       }
@@ -877,16 +947,18 @@ export default function MapScreen() {
         )}
         {selectedRoute && (
           <>
-            {!navigationActive && (
+            {/* Only show main line when NOT using colored segments */}
+            {!navigationActive && !showRouteSegments && (
               <Polyline
-                coordinates={[
-                  { latitude: segment.start_lat, longitude: segment.start_lng },
-                  { latitude: segment.end_lat, longitude: segment.end_lng },
-                ]}
+                coordinates={
+                  selectedRoute.route_points || selectedRoute.coordinates
+                }
                 strokeColor={getRouteLineColor(selectedRoute)}
                 strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
               />
             )}
+
+            {/* Show colored segments */}
             {navigationActive
               ? renderRouteSegments(selectedRoute, true)
               : showRouteSegments && renderRouteSegments(selectedRoute)}
