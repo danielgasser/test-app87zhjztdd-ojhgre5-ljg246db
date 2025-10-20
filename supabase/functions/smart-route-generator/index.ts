@@ -345,7 +345,9 @@ async function generateOptimizedRoute(
         danger_zones_avoided: 0
       },
       waypoints_added: [],
-      message: 'Original route is already safe - no detour needed'
+      message: 'Original route is already safe - no detour needed',
+      original_safety: originalSafety,
+      optimized_safety: originalSafety
     };
   }
 
@@ -368,7 +370,9 @@ async function generateOptimizedRoute(
         danger_zones_avoided: 0
       },
       waypoints_added: [],
-      message: 'No dangerous segments requiring bypass'
+      message: 'No dangerous segments requiring bypass',
+      original_safety: originalSafety,
+      optimized_safety: originalSafety
     };
   }
 

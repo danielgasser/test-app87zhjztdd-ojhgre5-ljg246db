@@ -399,20 +399,44 @@ export default function MapScreen() {
     }
   };
 
-  const renderRouteSegments = (route: any) => {
-    if (!showRouteSegments || !route.safety_analysis?.segment_scores)
-      return null;
+  const renderRouteSegments = (route: any, forceShow: boolean = false) => {
+    console.log("🔍 renderRouteSegments called:", {
+      forceShow,
+      showRouteSegments,
+      hasAnalysis: !!route.safety_analysis,
+      hasSegments: !!route.safety_analysis?.segment_scores,
+      segmentCount: route.safety_analysis?.segment_scores?.length,
+      analysisKeys: route.safety_analysis
+        ? Object.keys(route.safety_analysis)
+        : [],
+      segmentScoresValue: route.safety_analysis?.segment_scores, // ← ADD THIS
+    });
 
+    if (
+      (!showRouteSegments && !forceShow) ||
+      !route.safety_analysis?.segment_scores
+    )
+      return null;
+    console.log(
+      "🎨 Rendering segments:",
+      route.safety_analysis.segment_scores.length
+    );
+    console.log("First segment:", route.safety_analysis.segment_scores[0]);
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         const segmentColor =
-          segment.overall_score >=
+          (segment.safety_score || segment.overall_score) >=
           APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
-            : segment.overall_score >=
+            : (segment.safety_score || segment.overall_score) >=
               APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
             : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+        console.log(
+          `Segment ${index}: score=${
+            segment.safety_score || segment.overall_score
+          }, color=${segmentColor}`
+        );
 
         return (
           <Polyline
@@ -853,12 +877,19 @@ export default function MapScreen() {
         )}
         {selectedRoute && (
           <>
-            <Polyline
-              coordinates={selectedRoute.coordinates}
-              strokeColor={getRouteLineColor(selectedRoute)}
-              strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
-            />
-            {renderRouteSegments(selectedRoute)}
+            {!navigationActive && (
+              <Polyline
+                coordinates={[
+                  { latitude: segment.start_lat, longitude: segment.start_lng },
+                  { latitude: segment.end_lat, longitude: segment.end_lng },
+                ]}
+                strokeColor={getRouteLineColor(selectedRoute)}
+                strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+              />
+            )}
+            {navigationActive
+              ? renderRouteSegments(selectedRoute, true)
+              : showRouteSegments && renderRouteSegments(selectedRoute)}
           </>
         )}
 
