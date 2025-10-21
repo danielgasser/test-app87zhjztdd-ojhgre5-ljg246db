@@ -136,7 +136,6 @@ export default function MapScreen() {
     showRouteSegments,
     navigationIntent,
   } = useAppSelector((state: any) => state.locations);
-  console.log("📊 showRouteSegments:", showRouteSegments);
 
   const userId = useAppSelector((state: any) => state.auth.user?.id);
   const userProfile = useAppSelector((state: any) => state.user.profile);
