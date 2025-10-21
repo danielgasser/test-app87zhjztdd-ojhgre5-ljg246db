@@ -25,7 +25,7 @@ const { width, height } = Dimensions.get("window");
 
 interface NavigationModeProps {
   onExit: () => void;
-  mapRef: React.RefObject<MapView> | null;
+  mapRef: React.RefObject<MapView | null>;
 }
 
 const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
