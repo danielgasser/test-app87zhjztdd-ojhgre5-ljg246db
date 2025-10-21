@@ -298,17 +298,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
   };
 
   const handleEndNavigation = () => {
-    Alert.alert("End Navigation", "Are you sure you want to stop navigation?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "End",
-        style: "destructive",
-        onPress: () => {
-          dispatch(endNavigation());
-          onExit();
-        },
-      },
-    ]);
+    dispatch(endNavigation());
+    onExit();
   };
 
   if (!selectedRoute || !currentPosition) {
