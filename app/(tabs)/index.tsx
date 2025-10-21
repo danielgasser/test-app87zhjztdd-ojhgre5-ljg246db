@@ -84,8 +84,6 @@ interface SearchResult {
 }
 
 export default function MapScreen() {
-  notify.success("yeah");
-
   // ============= STATE VARIABLES =============
   const [region, setRegion] = useState({
     latitude: 37.78825,
@@ -518,7 +516,7 @@ export default function MapScreen() {
 
   const handleStartNavigationFromMap = () => {
     if (!selectedRoute) {
-      Alert.alert("Error", "No route selected");
+      notify.error("No route selected");
       return;
     }
 
@@ -564,9 +562,9 @@ export default function MapScreen() {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Location permission is required to show nearby locations"
+        notify.error(
+          "Location permission is required to show nearby locations",
+          "Permission Denied"
         );
         return;
       }

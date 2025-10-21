@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -37,7 +38,7 @@ export default function ProfileScreen() {
       await dispatch(signOut()).unwrap();
       router.replace("/(auth)/login");
     } catch (error) {
-      Alert.alert("Error", "Failed to sign out");
+      notify.error("Failed to sign out");
     }
   };
 
@@ -60,9 +61,18 @@ export default function ProfileScreen() {
     // Request permissions
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
+      notify.confirm(
+        "We need camera roll access to upload profile pictures. Would you like to open settings?",
         "Permission Denied",
-        "We need camera roll permissions to upload a profile picture."
+        [
+          { text: "Cancel", style: "cancel", onPress: () => {} },
+          {
+            text: "Open Settings",
+            style: "default",
+            onPress: () => Linking.openSettings(),
+          },
+        ],
+        "warning"
       );
       return;
     }
@@ -127,11 +137,10 @@ export default function ProfileScreen() {
 
       // Refresh the profile to ensure we have the latest data
       await dispatch(fetchUserProfile(user!.id));
-
-      Alert.alert("Success", "Profile picture updated!");
+      notify.success("Profile picture updated!", "Success");
     } catch (error: any) {
       console.error("Upload error:", error);
-      Alert.alert("Error", "Failed to upload image. Please try again.");
+      notify.error("Failed to upload image. Please try again.", "Upload Error");
     } finally {
       setUploading(false);
     }
@@ -140,14 +149,21 @@ export default function ProfileScreen() {
   const removeProfilePicture = async () => {
     try {
       setUploading(true);
+
+      // Update profile to remove avatar_url
       await dispatch(
         updateUserProfile({
           userId: user!.id,
-          profileData: { avatar_url: undefined },
+          profileData: { avatar_url: null }, // Changed from undefined to null
         })
       ).unwrap();
+
+      // Refresh profile to get updated data
+      await dispatch(fetchUserProfile(user!.id));
+
       notify.success("Profile picture removed!");
     } catch (error) {
+      console.error("Remove avatar error:", error); // ADD THIS to see the actual error
       notify.error("Failed to remove profile picture.");
     } finally {
       setUploading(false);
@@ -156,8 +172,8 @@ export default function ProfileScreen() {
 
   const handleRemoveProfilePicture = () => {
     notify.confirm(
-      "Remove Profile Picture",
       "Are you sure you want to remove your profile picture?",
+      "Remove Profile Picture",
       [
         { text: "Cancel", style: "cancel", onPress: () => {} },
         { text: "Remove", style: "destructive", onPress: removeProfilePicture },
@@ -235,6 +251,7 @@ export default function ProfileScreen() {
               {/* Avatar section */}
               <TouchableOpacity
                 onPress={pickImage}
+                onLongPress={handleRemoveProfilePicture}
                 disabled={uploading}
                 style={styles.avatarContainer}
               >
@@ -289,7 +306,7 @@ export default function ProfileScreen() {
                 await AsyncStorage.removeItem("profile_banner_dismissals");
                 // Import resetAll from the slice
                 dispatch(resetAll());
-                Alert.alert("Success", "All banner dismissals cleared!");
+                notify.success("All banner dismissals cleared!");
               }}
             >
               <Ionicons

@@ -24,6 +24,7 @@ import { supabase } from "src/services/supabase";
 import { Database } from "src/types/database.types";
 import { CreateReviewForm } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
+import { notify } from "@/utils/notificationService";
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
 interface RatingProps {
@@ -129,7 +130,7 @@ export default function EditReviewScreen() {
       }
     } catch (error: any) {
       console.error("Failed to fetch review:", error);
-      Alert.alert("Error", "Failed to load review data. Please try again.");
+      notify.error("Failed to load review data. Please try again.");
       router.back();
     } finally {
       setLoadingReview(false);
@@ -138,23 +139,23 @@ export default function EditReviewScreen() {
 
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
-      Alert.alert("Error", "Please enter a title for your review");
+      notify.error("Please enter a title for your review");
       return;
     }
     if (!formData.content.trim()) {
-      Alert.alert("Error", "Please write your review");
+      notify.error("Please write your review");
       return;
     }
     if (formData.overall_rating === 0) {
-      Alert.alert("Error", "Please provide an overall rating");
+      notify.error("Please provide an overall rating");
       return;
     }
     if (formData.safety_rating === 0) {
-      Alert.alert("Error", "Please provide a safety rating");
+      notify.error("Please provide a safety rating");
       return;
     }
     if (formData.comfort_rating === 0) {
-      Alert.alert("Error", "Please provide a comfort rating");
+      notify.error("Please provide a comfort rating");
       return;
     }
 
@@ -181,24 +182,25 @@ export default function EditReviewScreen() {
         updateReview({ id: reviewId as string, ...updateData })
       ).unwrap();
 
-      Alert.alert("Success", "Your review has been updated!", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      notify.confirm(
+        "Review Updated",
+        "Your review has been successfully updated!",
+        [{ text: "OK", onPress: () => router.back() }]
+      );
     } catch (error: any) {
       console.error("Review update error:", error);
-      Alert.alert(
-        "Error",
-        error.message || "Failed to update review. Please try again."
+      notify.error(
+        error?.message || "Failed to update review. Please try again."
       );
     }
   };
 
   const handleCancel = () => {
-    Alert.alert(
+    notify.confirm(
       "Discard Changes",
       "Are you sure you want to discard your changes?",
       [
-        { text: "Keep Editing", style: "cancel" },
+        { text: "Keep Editing", style: "cancel", onPress: () => {} },
         { text: "Discard", style: "destructive", onPress: () => router.back() },
       ]
     );

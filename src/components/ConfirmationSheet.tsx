@@ -16,7 +16,7 @@ const { height } = Dimensions.get("window");
 
 interface ConfirmationButton {
   text: string;
-  onPress: () => void;
+  onPress?: () => void;
   style?: "default" | "destructive" | "cancel";
 }
 
@@ -81,7 +81,7 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
   };
 
   const handleButtonPress = (button: ConfirmationButton) => {
-    button.onPress();
+    button.onPress?.();
     onDismiss();
   };
 

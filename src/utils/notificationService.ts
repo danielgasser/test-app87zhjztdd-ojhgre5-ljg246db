@@ -11,6 +11,7 @@ interface NotificationState {
     duration?: number;
     actionText?: string;
     onActionPress?: () => void;
+    title?: string;
 }
 
 interface ConfirmationButton {
@@ -52,28 +53,29 @@ class NotificationService {
     }
 
     // Show snackbar notification
-    show(message: string, type: SnackbarType = 'info', duration?: number) {
+    show(message: string, type: SnackbarType = 'info', duration?: number, title?: string) {
         const notification: NotificationState = {
             visible: true,
             message,
             type,
             duration,
+            title,
         };
         this.notificationListeners.forEach((listener) => listener(notification));
     }
 
     // Show success snackbar
-    success(message: string, duration?: number) {
+    success(message: string, title: string = 'Success', duration?: number) {
         this.show(message, 'success', duration);
     }
 
     // Show error snackbar
-    error(message: string, duration?: number) {
+    error(message: string, title: string = 'Error', duration?: number) {
         this.show(message, 'error', duration);
     }
 
     // Show info snackbar
-    info(message: string, duration?: number) {
+    info(message: string, title?: string, duration?: number) {
         this.show(message, 'info', duration);
     }
 

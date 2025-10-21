@@ -29,6 +29,7 @@ import type { SafetyInsight } from "@/types/supabase";
 import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
+import { notify } from "@/utils/notificationService";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -504,7 +505,7 @@ export default function CommunityScreen() {
             {safetyInsights.length > 0 && (
               <TouchableOpacity
                 onPress={() =>
-                  Alert.alert("Coming Soon", "Full insights view coming soon!")
+                  notify.info("Full insights view coming soon!", "Coming Soon")
                 }
               >
                 <Text style={styles.seeAllText}>See all</Text>
@@ -530,7 +531,7 @@ export default function CommunityScreen() {
             {trendingLocations.length > 0 && (
               <TouchableOpacity
                 onPress={() =>
-                  Alert.alert("Coming Soon", "Full list view coming soon!")
+                  notify.info("Full list view coming soon!", "Coming Soon")
                 }
               >
                 <Text style={styles.seeAllText}>See all</Text>

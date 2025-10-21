@@ -23,6 +23,7 @@ import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { notify } from "@/utils/notificationService";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -115,18 +116,18 @@ export default function OnboardingScreen() {
     // Only validate on mandatory field steps
     if (stepId === "name") {
       if (!formData.full_name || formData.full_name.trim() === "") {
-        Alert.alert(
-          "Required Field",
-          "Please enter your name or a nickname to continue."
+        notify.error(
+          "Please enter your name or a nickname to continue.",
+          "Required Field"
         );
         return false;
       }
     }
     if (stepId === "race") {
       if (formData.race_ethnicity.length === 0) {
-        Alert.alert(
-          "Required Field",
-          "Please select at least one race/ethnicity option to continue."
+        notify.error(
+          "Please select at least one race/ethnicity option to continue.",
+          "Required Field"
         );
         return false;
       }
@@ -134,9 +135,9 @@ export default function OnboardingScreen() {
 
     if (stepId === "gender") {
       if (!formData.gender || formData.gender === "") {
-        Alert.alert(
-          "Required Field",
-          "Please select your gender identity to continue."
+        notify.error(
+          "Please select your gender identity to continue.",
+          "Required Field"
         );
         return false;
       }
@@ -259,7 +260,7 @@ export default function OnboardingScreen() {
 
   const handleComplete = async () => {
     if (!user?.id) {
-      Alert.alert("Error", "User session not found. Please log in again.");
+      notify.error("User session not found. Please log in again.");
       return;
     }
 
@@ -299,31 +300,23 @@ export default function OnboardingScreen() {
         .update({ onboarding_complete: true })
         .eq("user_id", user.id);
 
-      Alert.alert(
-        isEditing ? "Profile Updated!" : "Welcome to SafePath!",
+      notify.success(
         isEditing
           ? "Your profile has been updated successfully."
           : "Your profile has been set up. You can now start using the app and contributing to our safety community.",
-        [
-          {
-            text: isEditing ? "Done" : "Get Started",
-            onPress: async () => {
-              router.replace("/(tabs)");
-
-              // Register for notifications after onboarding (only for new users, not editing)
-              if (!isEditing && user?.id) {
-                const pushToken =
-                  await notificationService.registerForPushNotifications();
-                if (pushToken) {
-                  await notificationService.savePushToken(user.id, pushToken);
-                }
-              }
-            },
-          },
-        ]
+        isEditing ? "Profile Updated!" : "Welcome to SafePath!"
       );
+      router.replace("/(tabs)");
+
+      if (!isEditing && user?.id) {
+        const pushToken =
+          await notificationService.registerForPushNotifications();
+        if (pushToken) {
+          await notificationService.savePushToken(user.id, pushToken);
+        }
+      }
     } catch (error) {
-      Alert.alert("Error", "Failed to save profile. Please try again.");
+      notify.error("Failed to save profile. Please try again.");
       console.error("Profile save error:", error);
     }
   };
@@ -334,10 +327,9 @@ export default function OnboardingScreen() {
       router.back();
     } else {
       // If initial setup, show alert that profile is required
-      Alert.alert(
-        "Profile Required",
+      notify.info(
         "Setting up your profile is required to use SafePath's personalized safety features. This helps us show you relevant safety information based on your travel needs.",
-        [{ text: "Continue Setup", style: "default" }]
+        "Profile Required"
       );
     }
   };
