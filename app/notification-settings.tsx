@@ -94,9 +94,6 @@ export default function NotificationSettings() {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Must-Have Notifications */}
-        <Text style={styles.sectionTitle}>Safety & Security</Text>
-
         <SettingToggle
           label="Safety Alerts"
           description="Get real-time alerts about unsafe areas on your route"
@@ -119,48 +116,6 @@ export default function NotificationSettings() {
           }}
         />
 
-        <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
-          Community
-        </Text>
-
-        <SettingToggle
-          label="Community Updates"
-          description="New reviews or safety info in your saved/favorite locations"
-          value={communityUpdates}
-          onToggle={async () => {
-            const newValue = !communityUpdates;
-            setCommunityUpdates(newValue);
-            await saveNotificationPreference("community_updates", newValue);
-          }}
-        />
-
-        <SettingToggle
-          label="Review Responses"
-          description="When someone responds to or upvotes your review"
-          value={reviewResponses}
-          onToggle={async () => {
-            const newValue = !reviewResponses;
-            setReviewResponses(newValue);
-            await saveNotificationPreference("review_responses", newValue);
-          }}
-        />
-
-        {/* Nice-to-Have Notifications */}
-        <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
-          Optional
-        </Text>
-
-        <SettingToggle
-          label="Weekly Digest"
-          description="Summary of community activity sent weekly"
-          value={weeklyDigest}
-          onToggle={async () => {
-            const newValue = !weeklyDigest;
-            setWeeklyDigest(newValue);
-            await saveNotificationPreference("weekly_digest", newValue);
-          }}
-        />
-
         <SettingToggle
           label="Location-Based Triggers"
           description="Get notified when you're near a highly-rated spot"
@@ -169,17 +124,6 @@ export default function NotificationSettings() {
             const newValue = !locationTriggers;
             setLocationTriggers(newValue);
             await saveNotificationPreference("location_triggers", newValue);
-          }}
-        />
-
-        <SettingToggle
-          label="Travel Reminders"
-          description="Reminders to check safety updates before your trip"
-          value={travelReminders}
-          onToggle={async () => {
-            const newValue = !travelReminders;
-            setTravelReminders(newValue);
-            await saveNotificationPreference("travel_reminders", newValue);
           }}
         />
       </ScrollView>

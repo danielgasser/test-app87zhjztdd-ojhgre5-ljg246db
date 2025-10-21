@@ -35,7 +35,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
   onActionPress,
   title,
 }) => {
-  const translateY = useRef(new Animated.Value(100)).current;
+  const translateY = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
     if (visible) {
@@ -57,7 +57,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
     } else {
       // Slide down
       Animated.timing(translateY, {
-        toValue: 100,
+        toValue: -100,
         duration: 200,
         useNativeDriver: true,
       }).start();
@@ -108,7 +108,6 @@ const Snackbar: React.FC<SnackbarProps> = ({
       <Ionicons name={getIcon()} size={24} color={theme.colors.background} />
 
       <View style={styles.textContainer}>
-        {" "}
         {/* WRAP TEXT */}
         {title && <Text style={styles.title}>{title}</Text>}
         <Text style={styles.message} numberOfLines={2}>
@@ -131,7 +130,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: 80,
+    top: 60,
     left: 16,
     right: 16,
     flexDirection: "row",

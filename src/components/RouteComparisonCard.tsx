@@ -48,7 +48,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           color={theme.colors.secondary}
         />
         <Text style={styles.improvementText}>
-          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
+          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}
           points
         </Text>
       </View>
@@ -132,7 +132,6 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               <Text style={styles.metricText}>
                 {optimized_route.estimated_duration_minutes} min
                 <Text style={styles.addedTime}>
-                  {" "}
                   (+{improvement_summary.time_added_minutes})
                 </Text>
               </Text>
@@ -163,7 +162,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               name="navigate-circle"
               size={16}
               color={theme.colors.primary}
-            />{" "}
+            />
             Safe Detours Added
           </Text>
           {waypoints_added.map((waypoint, index) => (

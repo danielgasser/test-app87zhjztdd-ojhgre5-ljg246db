@@ -626,7 +626,7 @@ export default function OnboardingScreen() {
   const renderDisabilityStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Disability Status Status{" "}
+        Disability Status Status
         <Text style={styles.optionalBadge}>(Optional)</Text>
       </Text>
       <Text style={styles.stepDescription}>

@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { supabase } from '../services/supabase';
-import { Database } from '../types/database.types';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { supabase } from "../services/supabase";
+import { Database } from "../types/database.types";
 
 import {
   LocationWithScores,
@@ -10,25 +10,25 @@ import {
   DangerZone,
   DangerZonesResponse,
   SafetyInsight
-} from '../types/supabase';
-import { mapMapboxPlaceType } from '../utils/placeTypeMappers';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "../types/supabase";
+import { mapMapboxPlaceType } from "../utils/placeTypeMappers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { APP_CONFIG } from '@/utils/appConfig';
-import { ReactNode } from 'react';
-import { RootState } from '.';
-import { Alert } from 'react-native';
-import { checkProfileCompleteness } from '@/utils/profileValidation';
-import { shouldShowBanner, incrementShowCount, BannerType } from './profileBannerSlice';
-import { notify } from '@/utils/notificationService';
-type Review = Database['public']['Tables']['reviews']['Row'];
+import { APP_CONFIG } from "@/utils/appConfig";
+import { ReactNode } from "react";
+import { RootState } from ".";
+import { Alert } from "react-native";
+import { checkProfileCompleteness } from "@/utils/profileValidation";
+import { shouldShowBanner, incrementShowCount, BannerType } from "./profileBannerSlice";
+import { notify } from "@/utils/notificationService";
+type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
 
 // Helper function to get the current auth token
 async function getAuthToken(): Promise<string> {
   const { data: { session }, error } = await supabase.auth.getSession();
   if (error || !session) {
-    throw new Error('User not authenticated');
+    throw new Error("User not authenticated");
   }
   return session.access_token;
 }
@@ -40,7 +40,7 @@ interface SearchLocation {
   latitude: number;
   longitude: number;
   place_type?: string;
-  source?: 'database' | 'mapbox';
+  source?: "database" | "mapbox";
 }
 
 interface NearbyReviewResponse {
@@ -167,7 +167,7 @@ export interface NavigationStep {
 export interface SafeRoute {
   id: string;
   name: string;
-  route_type: 'fastest' | 'safest' | 'balanced';
+  route_type: "fastest" | "safest" | "balanced";
   coordinates: RouteCoordinate[];
   route_points?: RouteCoordinate[];
   steps?: NavigationStep[]; //
@@ -175,6 +175,7 @@ export interface SafeRoute {
   distance_kilometers: number;
   safety_analysis: RouteSafetyAnalysis;
   created_at: string;
+  databaseId?: string;
   mapbox_data?: {
     duration: number;
     distance: number;
@@ -206,7 +207,7 @@ interface LocationsState {
   userLocation: { latitude: number; longitude: number } | null;
   userCountry: string | null;
   mapCenter: { latitude: number; longitude: number } | null;
-  communityFeedMode: 'near_me' | 'map_area';
+  communityFeedMode: "near_me" | "map_area";
   heatMapData: HeatMapPoint[];
   heatMapVisible: boolean;
   heatMapLoading: boolean;
@@ -239,7 +240,7 @@ interface LocationsState {
   showRouteSegments: boolean;
   selectedSegment: RouteSegment | null;
   routePreferences: {
-    safetyPriority: 'speed_focused' | 'balanced' | 'safety_focused';
+    safetyPriority: "speed_focused" | "balanced" | "safety_focused";
     avoidEveningDanger: boolean;
     maxDetourMinutes: number;
   };
@@ -254,9 +255,9 @@ interface LocationsState {
   smartRouteComparison: SmartRouteComparison | null;
   showSmartRouteComparison: boolean;
   navigationIntent: {
-    targetTab: 'map' | 'community' | 'profile';
+    targetTab: "map" | "community" | "profile";
     locationId?: string;
-    action: 'view_location' | 'center_map' | 'show_reviews';
+    action: "view_location" | "center_map" | "show_reviews";
     data?: any; // For future flexibility
   } | null;
   navigationActive: boolean;
@@ -307,7 +308,7 @@ const initialState: LocationsState = {
   userLocation: null,
   userCountry: null,
   mapCenter: null,
-  communityFeedMode: 'near_me',
+  communityFeedMode: "near_me",
   heatMapData: [],
   heatMapVisible: false,
   heatMapLoading: false,
@@ -334,7 +335,7 @@ const initialState: LocationsState = {
   showRouteSegments: false,
   selectedSegment: null,
   routePreferences: {
-    safetyPriority: 'balanced',
+    safetyPriority: "balanced",
     avoidEveningDanger: true,
     maxDetourMinutes: 15,
   },
@@ -348,7 +349,7 @@ const initialState: LocationsState = {
 
 
 export const fetchNearbyLocations = createAsyncThunk(
-  'locations/fetchNearby',
+  "locations/fetchNearby",
   async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS }: Coordinates & { radius?: number }, { getState }) => {
     // Get user profile from Redux state
     const state = getState() as any;
@@ -357,7 +358,7 @@ export const fetchNearbyLocations = createAsyncThunk(
     // Use demographic-aware function if user has profile, otherwise fallback
     if (userProfile && userProfile.race_ethnicity) {
 
-      const { data, error } = await (supabase.rpc as any)('get_nearby_locations_for_user', {
+      const { data, error } = await (supabase.rpc as any)("get_nearby_locations_for_user", {
         lat: latitude,
         lng: longitude,
         user_race_ethnicity: userProfile.race_ethnicity,
@@ -371,7 +372,7 @@ export const fetchNearbyLocations = createAsyncThunk(
     } else {
       // Fallback to standard function if no profile
 
-      const { data, error } = await (supabase.rpc as any)('get_nearby_locations', {
+      const { data, error } = await (supabase.rpc as any)("get_nearby_locations", {
         lat: latitude,
         lng: longitude,
         radius_meters: radius,
@@ -384,14 +385,14 @@ export const fetchNearbyLocations = createAsyncThunk(
 );
 
 export const fetchLocationDetails = createAsyncThunk(
-  'locations/fetchLocationDetails',
+  "locations/fetchLocationDetails",
   async (locationId: string) => {
-    const { data, error } = await (supabase.rpc as any)('get_location_with_coords', {
+    const { data, error } = await (supabase.rpc as any)("get_location_with_coords", {
       location_id: locationId,
     });
 
     if (error) {
-      console.error('Error fetching location details:', error);
+      console.error("Error fetching location details:", error);
       throw error;
     }
 
@@ -400,7 +401,7 @@ export const fetchLocationDetails = createAsyncThunk(
 );
 
 export const fetchSafetyInsights = createAsyncThunk(
-  'locations/fetchSafetyInsights',
+  "locations/fetchSafetyInsights",
   async ({
     latitude,
     longitude,
@@ -413,7 +414,7 @@ export const fetchSafetyInsights = createAsyncThunk(
     maxResults?: number;
   } = {}) => {
     try {
-      const { data, error } = await (supabase.rpc as any)('get_safety_insights', {
+      const { data, error } = await (supabase.rpc as any)("get_safety_insights", {
         user_lat: latitude || null,
         user_lng: longitude || null,
         radius_meters: radius,
@@ -421,20 +422,20 @@ export const fetchSafetyInsights = createAsyncThunk(
       });
 
       if (error) {
-        console.error('Error fetching safety insights:', error);
+        console.error("Error fetching safety insights:", error);
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('Safety insights fetch error:', error);
+      console.error("Safety insights fetch error:", error);
       throw error;
     }
   }
 );
 
 export const createLocation = createAsyncThunk(
-  'locations/createLocation',
+  "locations/createLocation",
   async (locationData: CreateLocationForm) => {
     const transformedData = {
       ...locationData,
@@ -442,10 +443,10 @@ export const createLocation = createAsyncThunk(
     };
     // Remove latitude/longitude fields
     const { latitude, longitude, ...dbData } = transformedData;
-    const { data, error } = await supabase.from('locations').insert(dbData).select().single();
+    const { data, error } = await supabase.from("locations").insert(dbData).select().single();
 
     if (error) {
-      console.error('Error creating location:', error);
+      console.error("Error creating location:", error);
       throw error;
     }
 
@@ -453,21 +454,181 @@ export const createLocation = createAsyncThunk(
   }
 );
 
+// ================================
+// SAVE ROUTE TO DATABASE
+// ================================
+
+export const saveRouteToDatabase = createAsyncThunk(
+  "locations/saveRouteToDatabase",
+  async (route: {
+    route_coordinates: RouteCoordinate[];
+    origin_name: string;
+    destination_name: string;
+    distance_km: number;
+    duration_minutes: number;
+    safety_score: number;
+  }, { rejectWithValue }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const { data, error } = await supabase
+        .from("routes")
+        .insert({
+          user_id: user.id,
+          route_coordinates: route.route_coordinates as any, // Cast to any for JSONB
+          origin_name: route.origin_name,
+          destination_name: route.destination_name,
+          distance_km: route.distance_km,
+          duration_minutes: route.duration_minutes,
+          safety_score: route.safety_score,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error saving route:", error);
+        throw error;
+      }
+
+      console.log("✅ Route saved to database:", data.id);
+      return data;
+    } catch (error) {
+      console.error("saveRouteToDatabase error:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to save route");
+    }
+  }
+);
+
+export const checkForActiveNavigation = createAsyncThunk(
+  "locations/checkForActiveNavigation",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from("routes")
+        .select("*")
+        .eq("user_id", user.id)
+        .not("navigation_started_at", "is", null)
+        .is("navigation_ended_at", null)
+        .order("navigation_started_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== "PGRST116") { // PGRST116 = no rows
+        throw error;
+      }
+
+      return data || null;
+    } catch (error) {
+      console.error("checkForActiveNavigation error:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to check active navigation");
+    }
+  }
+);
+
+// ================================
+// HELPER: Convert DB Route to SafeRoute
+// ================================
+
+function dbRouteToSafeRoute(dbRoute: any): SafeRoute {
+  return {
+    id: `db_route_${dbRoute.id}`,
+    name: `${dbRoute.origin_name} → ${dbRoute.destination_name}`,
+    route_type: "balanced",
+    coordinates: dbRoute.route_coordinates as RouteCoordinate[],
+    route_points: dbRoute.route_coordinates as RouteCoordinate[],
+    estimated_duration_minutes: dbRoute.duration_minutes,
+    distance_kilometers: dbRoute.distance_km,
+    safety_analysis: {
+      confidence_score: null,
+      overall_route_score: dbRoute.safety_score || 3.0,
+      overall_confidence: 0.5,
+      safety_notes: ["Route restored from previous session"],
+    },
+    created_at: dbRoute.created_at,
+    databaseId: dbRoute.id,
+  };
+}
+// ================================
+// NAVIGATION SESSION TRACKING
+// ================================
+
+export const startNavigationSession = createAsyncThunk(
+  "locations/startNavigationSession",
+  async (routeId: string, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from("routes")
+        .update({
+          navigation_started_at: new Date().toISOString(),
+        })
+        .eq("id", routeId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error starting navigation session:", error);
+        throw error;
+      }
+
+      console.log("✅ Navigation session started:", data.id);
+      return data;
+    } catch (error) {
+      console.error("startNavigationSession error:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to start navigation session");
+    }
+  }
+);
+
+export const endNavigationSession = createAsyncThunk(
+  "locations/endNavigationSession",
+  async (routeId: string, { rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from("routes")
+        .update({
+          navigation_ended_at: new Date().toISOString(),
+        })
+        .eq("id", routeId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error ending navigation session:", error);
+        throw error;
+      }
+
+      console.log("✅ Navigation session ended:", data.id);
+      return data;
+    } catch (error) {
+      console.error("endNavigationSession error:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to end navigation session");
+    }
+  }
+);
+
 export const submitReview = createAsyncThunk(
-  'locations/submitReview',
+  "locations/submitReview",
   async (reviewData: CreateReviewForm) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    if (!user) throw new Error("Not authenticated");
 
     const { time_of_day, ...dbReviewData } = reviewData;
 
-    const { data, error } = await supabase.from('reviews').insert({
+    const { data, error } = await supabase.from("reviews").insert({
       ...dbReviewData,
       user_id: user.id
     }).select().single();
 
     if (error) {
-      console.error('Error submitting review:', error);
+      console.error("Error submitting review:", error);
       throw error;
     }
 
@@ -476,12 +637,12 @@ export const submitReview = createAsyncThunk(
 );
 
 export const updateReview = createAsyncThunk(
-  'locations/updateReview',
+  "locations/updateReview",
   async ({ id, ...updateData }: { id: string } & Partial<CreateReviewForm>) => {
-    const { data, error } = await supabase.from('reviews').update(updateData).eq('id', id).select().single();
+    const { data, error } = await supabase.from("reviews").update(updateData).eq("id", id).select().single();
 
     if (error) {
-      console.error('Error updating review:', error);
+      console.error("Error updating review:", error);
       throw error;
     }
 
@@ -490,10 +651,10 @@ export const updateReview = createAsyncThunk(
 );
 
 export const fetchUserReviews = createAsyncThunk(
-  'locations/fetchUserReviews',
+  "locations/fetchUserReviews",
   async (userId: string) => {
     const { data, error } = await supabase
-      .from('reviews')
+      .from("reviews")
       .select(`
         *,
         locations (
@@ -504,12 +665,12 @@ export const fetchUserReviews = createAsyncThunk(
           longitude
         )
       `)
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Error fetching user reviews:', error);
+      console.error("Error fetching user reviews:", error);
       throw error;
     }
 
@@ -518,20 +679,20 @@ export const fetchUserReviews = createAsyncThunk(
 );
 
 export const searchLocations = createAsyncThunk(
-  'locations/searchLocations',
+  "locations/searchLocations",
   async ({ query, latitude, longitude }: { query: string; latitude?: number; longitude?: number }, { getState }) => {
     if (query.trim().length < 2) {
       return [];
     }
 
     try {
-      const { data: dbResults, error: dbError } = await (supabase.rpc as any)('search_locations_with_coords', {
+      const { data: dbResults, error: dbError } = await (supabase.rpc as any)("search_locations_with_coords", {
         search_query: query,
         result_limit: 5
       });
 
       if (dbError) {
-        console.error('Database search error:', dbError);
+        console.error("Database search error:", dbError);
       }
 
       const searchResults: SearchLocation[] = (dbResults || []).map((location: any) => ({
@@ -541,26 +702,26 @@ export const searchLocations = createAsyncThunk(
         latitude: location.latitude,
         longitude: location.longitude,
         place_type: location.place_type,
-        source: 'database' as const,
+        source: "database" as const,
       }));
 
       return searchResults;
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
       throw error;
     }
   }
 );
 
 export const createLocationFromSearch = createAsyncThunk(
-  'locations/createLocationFromSearch',
+  "locations/createLocationFromSearch",
   async ({ searchLocation, userId }: { searchLocation: SearchLocation; userId: string }) => {
-    if (searchLocation.source === 'database') {
+    if (searchLocation.source === "database") {
       return searchLocation.id;
     }
 
-    const [city, stateProvince, country] = searchLocation.address.split(',').map(s => s.trim());
-    const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type || 'poi');
+    const [city, stateProvince, country] = searchLocation.address.split(",").map(s => s.trim());
+    const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type || "poi");
 
     const locationData = {
       name: searchLocation.name,
@@ -572,13 +733,13 @@ export const createLocationFromSearch = createAsyncThunk(
       coordinates: `POINT(${searchLocation.longitude} ${searchLocation.latitude})`,
       place_type: mappedPlaceType,
       tags: null,
-      google_place_id: searchLocation.id.startsWith('google_') ? searchLocation.id.replace('google_', '') : null, created_by: userId,
+      google_place_id: searchLocation.id.startsWith("google_") ? searchLocation.id.replace("google_", "") : null, created_by: userId,
       verified: false,
       active: true,
     };
 
     const { data, error } = await supabase
-      .from('locations')
+      .from("locations")
       .insert(locationData)
       .select()
       .single();
@@ -592,33 +753,33 @@ export const createLocationFromSearch = createAsyncThunk(
 );
 
 export const loadCommunityFeedMode = createAsyncThunk(
-  'locations/loadCommunityFeedMode',
+  "locations/loadCommunityFeedMode",
   async () => {
     try {
-      const savedMode = await AsyncStorage.getItem('communityFeedMode');
-      return savedMode === 'map_area' ? 'map_area' : 'near_me';
+      const savedMode = await AsyncStorage.getItem("communityFeedMode");
+      return savedMode === "map_area" ? "map_area" : "near_me";
     } catch (error) {
-      console.error('Error loading community feed mode:', error);
-      return 'near_me'; // Default fallback
+      console.error("Error loading community feed mode:", error);
+      return "near_me"; // Default fallback
     }
   }
 );
 
 export const saveCommunityFeedMode = createAsyncThunk(
-  'locations/saveCommunityFeedMode',
-  async (mode: 'near_me' | 'map_area') => {
+  "locations/saveCommunityFeedMode",
+  async (mode: "near_me" | "map_area") => {
     try {
-      await AsyncStorage.setItem('communityFeedMode', mode);
+      await AsyncStorage.setItem("communityFeedMode", mode);
       return mode;
     } catch (error) {
-      console.error('Error saving community feed mode:', error);
+      console.error("Error saving community feed mode:", error);
       return mode;
     }
   }
 );
 
 export const fetchHeatMapData = createAsyncThunk(
-  'locations/fetchHeatMapData',
+  "locations/fetchHeatMapData",
   async ({
     latitude,
     longitude,
@@ -631,7 +792,7 @@ export const fetchHeatMapData = createAsyncThunk(
     userProfile?: any;
   }) => {
     try {
-      const { data, error } = await (supabase.rpc as any)('get_heatmap_data', {
+      const { data, error } = await (supabase.rpc as any)("get_heatmap_data", {
         center_lat: latitude,
         center_lng: longitude,
         radius_meters: radius,
@@ -643,7 +804,7 @@ export const fetchHeatMapData = createAsyncThunk(
         user_age_range: userProfile?.age_range || null,
       });
       if (error) {
-        console.error('Error fetching heat map data:', error);
+        console.error("Error fetching heat map data:", error);
         return [];
       }
 
@@ -663,14 +824,14 @@ export const fetchHeatMapData = createAsyncThunk(
 
       return heatMapPoints;
     } catch (error) {
-      console.error('Heat map data fetch error:', error);
+      console.error("Heat map data fetch error:", error);
       return [];
     }
   }
 );
 
 export const fetchRecentReviews = createAsyncThunk(
-  'locations/fetchRecentReviews',
+  "locations/fetchRecentReviews",
   async ({
     limit = 10,
     latitude,
@@ -688,14 +849,14 @@ export const fetchRecentReviews = createAsyncThunk(
         return []; // Return empty array instead of fetching all reviews
       }
 
-      const { data, error } = await supabase.rpc('get_nearby_reviews', {
+      const { data, error } = await supabase.rpc("get_nearby_reviews", {
         lat: latitude,
         lng: longitude,
         radius_meters: radius,
         review_limit: limit
       });
       if (error) {
-        console.error('Error fetching nearby reviews:', error);
+        console.error("Error fetching nearby reviews:", error);
         throw error;
       }
 
@@ -721,37 +882,37 @@ export const fetchRecentReviews = createAsyncThunk(
         },
       }));
     } catch (error) {
-      console.error('Recent reviews fetch error:', error);
+      console.error("Recent reviews fetch error:", error);
       throw error;
     }
   }
 );
 
 export const fetchTrendingLocations = createAsyncThunk(
-  'locations/fetchTrendingLocations',
+  "locations/fetchTrendingLocations",
   async ({ daysWindow = APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS, maxResults = APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE }: { daysWindow?: number; maxResults?: number } = {}) => {
     try {
-      const { data, error } = await (supabase.rpc as any)('get_trending_locations', {
+      const { data, error } = await (supabase.rpc as any)("get_trending_locations", {
         days_window: daysWindow,
         max_results: maxResults,
       });
 
       if (error) {
-        console.error('Error fetching trending locations:', error.message, error.code, error.details);
+        console.error("Error fetching trending locations:", error.message, error.code, error.details);
 
-        //console.error('Error fetching trending locations:', error);
+        //console.error("Error fetching trending locations:", error);
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('Trending locations fetch error:', error);
+      console.error("Trending locations fetch error:", error);
       throw error;
     }
   }
 );
 export const fetchDangerZones = createAsyncThunk(
-  'locations/fetchDangerZones',
+  "locations/fetchDangerZones",
   async ({
     userId,
     radius = 10000,
@@ -765,10 +926,10 @@ export const fetchDangerZones = createAsyncThunk(
       const token = await getAuthToken();
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           user_id: userId,
@@ -779,32 +940,32 @@ export const fetchDangerZones = createAsyncThunk(
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🛡️ Danger zones API error:', response.status, errorText);
+        console.error("🛡️ Danger zones API error:", response.status, errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
       return data.danger_zones || [];
     } catch (error) {
-      console.error('Error fetching danger zones:', error);
+      console.error("Error fetching danger zones:", error);
       return [];
     }
   }
 );
 
 export const fetchSimilarUsers = createAsyncThunk(
-  'locations/fetchSimilarUsers',
+  "locations/fetchSimilarUsers",
   async (userId: string, { getState, dispatch }) => {
     try {
       const state = getState() as any;
       const userProfile = state.user.profile;
 
       // Check if profile meets SIMILARITY requirements
-      const validation = checkProfileCompleteness(userProfile, 'SIMILARITY');
+      const validation = checkProfileCompleteness(userProfile, "SIMILARITY");
 
       // Show banner if profile incomplete AND banner should be shown
 
-      const bannerType = 'SIMILARITY_FAILED' as BannerType;
+      const bannerType = "SIMILARITY_FAILED" as BannerType;
       if (!validation.canUseFeature && shouldShowBanner(state.profileBanner, bannerType)) {
         // Increment show count
         dispatch(incrementShowCount(bannerType));
@@ -814,30 +975,30 @@ export const fetchSimilarUsers = createAsyncThunk(
       const token = await getAuthToken();
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/similarity-calculator`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ user_id: userId })
       });
 
       if (!response.ok) {
-        console.error('Similar users API error:', response.status);
+        console.error("Similar users API error:", response.status);
         return [];
       }
 
       const data = await response.json();
       return data.similar_users || [];
     } catch (error) {
-      console.error('Error fetching similar users:', error);
+      console.error("Error fetching similar users:", error);
       return [];
     }
   }
 );
 
 export const fetchMLPredictions = createAsyncThunk(
-  'locations/fetchMLPredictions',
+  "locations/fetchMLPredictions",
   async (locationId: string, { getState }) => {
     try {
       const state = getState() as any;
@@ -845,17 +1006,17 @@ export const fetchMLPredictions = createAsyncThunk(
       const userProfile = state.user.profile;
 
       if (!userId || !userProfile) {
-        throw new Error('User not authenticated or profile not loaded');
+        throw new Error("User not authenticated or profile not loaded");
       }
       const token = await getAuthToken();
 
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             location_id: locationId,
@@ -884,7 +1045,7 @@ export const fetchMLPredictions = createAsyncThunk(
         prediction
       };
     } catch (error) {
-      console.error('🤖 fetchMLPredictions error:', error);
+      console.error("🤖 fetchMLPredictions error:", error);
       throw error;
     }
   }
@@ -895,19 +1056,19 @@ export const fetchMLPredictions = createAsyncThunk(
 // ================================
 
 export const calculateRouteSafety = createAsyncThunk(
-  'locations/calculateRouteSafety',
+  "locations/calculateRouteSafety",
   async (payload: {
     route_coordinates: RouteCoordinate[];
     user_demographics: any;
     waypoints?: RouteCoordinate[];
   }) => {
     try {
-      const { data, error } = await supabase.functions.invoke('route-safety-scorer', {
+      const { data, error } = await supabase.functions.invoke("route-safety-scorer", {
         body: payload
       });
 
       if (error) {
-        console.warn('❌ Route safety scorer failed, using fallback method:', error);
+        console.warn("❌ Route safety scorer failed, using fallback method:", error);
         throw error;
       }
 
@@ -931,16 +1092,16 @@ export const calculateRouteSafety = createAsyncThunk(
           const token = await getAuthToken();
 
           const safetyResponse = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
               latitude: point.latitude,
               longitude: point.longitude,
               user_demographics: payload.user_demographics,
-              place_type: 'route_point'
+              place_type: "route_point"
             })
           });
 
@@ -957,7 +1118,7 @@ export const calculateRouteSafety = createAsyncThunk(
           totalSafety += pointSafety;
           validPoints++;
         } catch (pointError) {
-          console.error('Error analyzing point:', pointError);
+          console.error("Error analyzing point:", pointError);
           totalSafety += 3.0;
           validPoints++;
         }
@@ -966,11 +1127,11 @@ export const calculateRouteSafety = createAsyncThunk(
       const overallScore = validPoints > 0 ? totalSafety / validPoints : 3.0;
 
       if (overallScore >= 4.0) {
-        safetyNotes.push('This route is generally considered safe');
+        safetyNotes.push("This route is generally considered safe");
       } else if (overallScore >= 3.0) {
-        safetyNotes.push('This route has mixed safety characteristics');
+        safetyNotes.push("This route has mixed safety characteristics");
       } else {
-        safetyNotes.push('This route may have safety concerns');
+        safetyNotes.push("This route may have safety concerns");
       }
 
       if (highRiskSegments > 0) {
@@ -993,7 +1154,7 @@ export const calculateRouteSafety = createAsyncThunk(
           mixed_segments: overallScore >= 3.0 && overallScore < 4.0 ? validPoints : 0,
           unsafe_segments: overallScore < 3.0 ? validPoints : 0,
         },
-        route_summary: '',
+        route_summary: "",
         risk_factors: [],
       };
     }
@@ -1001,7 +1162,7 @@ export const calculateRouteSafety = createAsyncThunk(
 );
 
 export const getGoogleRoute = createAsyncThunk(
-  'locations/getGoogleRoute',
+  "locations/getGoogleRoute",
   async (payload: {
     origin: RouteCoordinate;
     destination: RouteCoordinate;
@@ -1012,15 +1173,15 @@ export const getGoogleRoute = createAsyncThunk(
 
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!googleApiKey) {
-      throw new Error('Google Maps API key not configured');
+      throw new Error("Google Maps API key not configured");
     }
 
     // Build waypoints string if provided
-    let waypointsParam = '';
+    let waypointsParam = "";
     if (waypoints && waypoints.length > 0) {
       const waypointCoords = waypoints
         .map(wp => `${wp.latitude},${wp.longitude}`)
-        .join('|');
+        .join("|");
       waypointsParam = `&waypoints=${waypointCoords}`;
     }
 
@@ -1035,13 +1196,13 @@ export const getGoogleRoute = createAsyncThunk(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Google API Error:', response.status, errorText);
+      console.error("❌ Google API Error:", response.status, errorText);
       throw new Error(`Google API error: ${response.status}`);
     }
 
     const data = await response.json();
 
-    if (data.status !== 'OK' || !data.routes || data.routes.length === 0) {
+    if (data.status !== "OK" || !data.routes || data.routes.length === 0) {
       throw new Error(`No routes found: ${data.status}`);
     }
 
@@ -1055,7 +1216,7 @@ export const getGoogleRoute = createAsyncThunk(
       route.legs.forEach((leg: any) => {
         leg.steps.forEach((step: any) => {
           steps.push({
-            instruction: step.html_instructions.replace(/<[^>]*>/g, ''), // Strip HTML tags
+            instruction: step.html_instructions.replace(/<[^>]*>/g, ""), // Strip HTML tags
             distance_meters: step.distance.value,
             duration_seconds: step.duration.value,
             start_location: {
@@ -1076,7 +1237,7 @@ export const getGoogleRoute = createAsyncThunk(
         distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
         geometry: {
           coordinates: coordinates,
-          type: 'LineString'
+          type: "LineString"
         },
         steps: steps, // ADD THIS
       };
@@ -1086,7 +1247,7 @@ export const getGoogleRoute = createAsyncThunk(
   }
 );
 
-// Helper function to decode Google's polyline format
+// Helper function to decode Google"s polyline format
 function decodePolyline(encoded: string): [number, number][] {
   const coordinates: [number, number][] = [];
   let index = 0;
@@ -1127,18 +1288,18 @@ function decodePolyline(encoded: string): [number, number][] {
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
 export const generateSafeRoute = createAsyncThunk(
-  'locations/generateSafeRoute',
+  "locations/generateSafeRoute",
   async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
     try {
       // Step 1: Get route from Mapbox
       const mapboxRoutes = await dispatch(getGoogleRoute({
         origin: routeRequest.origin,
         destination: routeRequest.destination,
-        profile: 'driving'
+        profile: "driving"
       })).unwrap();
 
       if (!mapboxRoutes || mapboxRoutes.length === 0) {
-        throw new Error('No routes found from Mapbox');
+        throw new Error("No routes found from Mapbox");
       }
 
       const primaryRoute = mapboxRoutes[0];
@@ -1183,32 +1344,32 @@ export const generateSafeRoute = createAsyncThunk(
       };
 
     } catch (error) {
-      console.error('❌ Route generation failed:', error);
-      return rejectWithValue(error instanceof Error ? error.message : 'Unknown error occurred');
+      console.error("❌ Route generation failed:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Unknown error occurred");
     }
   }
 );
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
 export const generateRouteAlternatives = createAsyncThunk(
-  'locations/generateRouteAlternatives',
+  "locations/generateRouteAlternatives",
   async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
     try {
       // Get Mapbox routes (with alternatives)
       const mapboxRoutes = await dispatch(getGoogleRoute({
         origin: routeRequest.origin,
         destination: routeRequest.destination,
-        profile: 'driving'
+        profile: "driving"
       })).unwrap();
 
       if (!mapboxRoutes || mapboxRoutes.length <= 1) {
-        console.log('⚠️ No alternative routes available from Mapbox');
+        console.log("⚠️ No alternative routes available from Mapbox");
         return [];
       }
 
       const alternatives: SafeRoute[] = [];
 
-      // Process alternative routes (skip the first one as it's the primary)
+      // Process alternative routes (skip the first one as it"s the primary)
       for (let i = 1; i < Math.min(mapboxRoutes.length, 4); i++) {
         const route = mapboxRoutes[i];
 
@@ -1226,21 +1387,21 @@ export const generateRouteAlternatives = createAsyncThunk(
           })).unwrap();
 
           // Determine route characteristics
-          let routeType: 'fastest' | 'safest' | 'balanced' = 'balanced';
+          let routeType: "fastest" | "safest" | "balanced" = "balanced";
           let routeName = `Alternative ${i}`;
 
           // Check if this is the fastest route
           const isFastest = mapboxRoutes.every((r: { duration: number; }, idx: number) => idx === i || r.duration >= route.duration);
           if (isFastest) {
-            routeType = 'fastest';
-            routeName = 'Fastest Route';
+            routeType = "fastest";
+            routeName = "Fastest Route";
           }
 
           // Check if this is the safest route
           const isSafest = safetyAnalysis.overall_route_score >= 4.0;
-          if (isSafest && routeType !== 'fastest') {
-            routeType = 'safest';
-            routeName = 'Safest Route';
+          if (isSafest && routeType !== "fastest") {
+            routeType = "safest";
+            routeName = "Safest Route";
           }
 
           const safeRoute: SafeRoute = {
@@ -1275,18 +1436,18 @@ export const generateRouteAlternatives = createAsyncThunk(
       return alternatives;
 
     } catch (error) {
-      console.error('❌ Alternative route generation failed:', error);
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to generate alternatives');
+      console.error("❌ Alternative route generation failed:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to generate alternatives");
     }
   }
 );
 
 export const generateSmartRoute = createAsyncThunk(
-  'locations/generateSmartRoute',
+  "locations/generateSmartRoute",
   async (routeRequest: RouteRequest, { rejectWithValue }) => {
     try {
       // Call the NEW smart-route-generator edge function
-      const { data, error } = await supabase.functions.invoke('smart-route-generator', {
+      const { data, error } = await supabase.functions.invoke("smart-route-generator", {
         body: {
           origin: routeRequest.origin,
           destination: routeRequest.destination,
@@ -1296,7 +1457,7 @@ export const generateSmartRoute = createAsyncThunk(
       });
 
       if (error) {
-        console.error('❌ Smart route generation failed:', error);
+        console.error("❌ Smart route generation failed:", error);
         throw error;
       }
 
@@ -1315,8 +1476,8 @@ export const generateSmartRoute = createAsyncThunk(
 
       const optimizedSafeRoute: SafeRoute = {
         id: `smart_route_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: 'Smart Safe Route',
-        route_type: 'safest',
+        name: "Smart Safe Route",
+        route_type: "safest",
         coordinates: optimizedCoords,
         route_points: optimizedCoords,
         estimated_duration_minutes: Math.round(data.optimized_route.duration / 60),
@@ -1360,22 +1521,22 @@ export const generateSmartRoute = createAsyncThunk(
 
       const originalSafeRoute: SafeRoute = {
         id: `original_route_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        name: 'Fastest Route',
-        route_type: 'fastest',
+        name: "Fastest Route",
+        route_type: "fastest",
         coordinates: originalCoords,
         estimated_duration_minutes: Math.round(data.original_route.duration / 60),
         distance_kilometers: Math.round(data.original_route.distance / 1000 * 10) / 10,
         safety_analysis: {
           overall_route_score: data.improvement_summary.original_safety_score,
           confidence: 0.85,
-          safety_notes: ['Standard fastest route - may pass through danger zones'],
+          safety_notes: ["Standard fastest route - may pass through danger zones"],
           safety_summary: {
             safe_segments: 0,
             mixed_segments: 0,
             unsafe_segments: 0
           },
           confidence_score: 0.85,
-          route_summary: 'Fastest route without safety optimization'
+          route_summary: "Fastest route without safety optimization"
         },
         created_at: new Date().toISOString(),
         mapbox_data: {
@@ -1393,14 +1554,14 @@ export const generateSmartRoute = createAsyncThunk(
       };
 
     } catch (error) {
-      console.error('❌ Smart route generation error:', error);
-      return rejectWithValue(error instanceof Error ? error.message : 'Unknown error occurred');
+      console.error("❌ Smart route generation error:", error);
+      return rejectWithValue(error instanceof Error ? error.message : "Unknown error occurred");
     }
   }
 );
 
 export const checkForReroute = createAsyncThunk(
-  'locations/checkForReroute',
+  "locations/checkForReroute",
   async (
     currentPosition: { latitude: number; longitude: number },
     { getState, dispatch }
@@ -1409,14 +1570,14 @@ export const checkForReroute = createAsyncThunk(
     const { selectedRoute, routeRequest } = state.locations;
 
     if (!selectedRoute || !routeRequest) {
-      console.log('❌ No route or request to reroute');
+      console.log("❌ No route or request to reroute");
       return;
     }
 
 
     // Show alert
     notify.info(
-      "You've gone off course. Finding a new route...",
+      "You've gone off course.Finding a new route...",
       "Recalculating Route",
     );
 
@@ -1463,7 +1624,7 @@ export const checkForReroute = createAsyncThunk(
       }
 
     } catch (error) {
-      console.error('❌ Rerouting failed:', error);
+      console.error("❌ Rerouting failed:", error);
       notify.confirm(
         "Rerouting Failed",
         "Could not calculate new route. Please try planning again.",
@@ -1490,24 +1651,24 @@ function determineBestRouteName(safetyAnalysis: RouteSafetyAnalysis): string {
   const { overall_route_score } = safetyAnalysis;
 
   if (overall_route_score >= 4.0) {
-    return 'Safe Route';
+    return "Safe Route";
   } else if (overall_route_score >= 3.0) {
-    return 'Moderate Safety Route';
+    return "Moderate Safety Route";
   } else {
-    return 'Caution Advised Route';
+    return "Caution Advised Route";
   }
 }
 
 function determineRouteType(
   safetyAnalysis: RouteSafetyAnalysis,
-  preferences: RouteRequest['route_preferences']
-): 'fastest' | 'safest' | 'balanced' {
+  preferences: RouteRequest["route_preferences"]
+): "fastest" | "safest" | "balanced" {
   if (preferences.prioritize_safety) {
-    return 'safest';
+    return "safest";
   } else if (safetyAnalysis.overall_route_score >= 4.0) {
-    return 'balanced';
+    return "balanced";
   } else {
-    return 'fastest';
+    return "fastest";
   }
 }
 
@@ -1516,7 +1677,7 @@ function determineRouteType(
 // ================================
 
 const locationsSlice = createSlice({
-  name: 'locations',
+  name: "locations",
   initialState,
   reducers: {
     setSelectedRoute: (state, action: PayloadAction<SafeRoute | null>) => {
@@ -1565,11 +1726,11 @@ const locationsSlice = createSlice({
       state.mapCenter = action.payload;
     },
 
-    setCommunityFeedMode: (state, action: PayloadAction<'near_me' | 'map_area'>) => {
+    setCommunityFeedMode: (state, action: PayloadAction<"near_me" | "map_area">) => {
       state.communityFeedMode = action.payload;
     },
 
-    setFilters: (state, action: PayloadAction<Partial<LocationsState['filters']>>) => {
+    setFilters: (state, action: PayloadAction<Partial<LocationsState["filters"]>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
 
@@ -1616,7 +1777,7 @@ const locationsSlice = createSlice({
     setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
       state.dangerZonesVisible = action.payload;
     },
-    setNavigationIntent: (state, action: PayloadAction<LocationsState['navigationIntent']>) => {
+    setNavigationIntent: (state, action: PayloadAction<LocationsState["navigationIntent"]>) => {
       state.navigationIntent = action.payload;
     },
 
@@ -1654,7 +1815,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchNearbyLocations.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch nearby locations';
+        state.error = action.error.message || "Failed to fetch nearby locations";
       })
 
       // Safety Insights
@@ -1667,7 +1828,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchSafetyInsights.rejected, (state, action) => {
         state.safetyInsightsLoading = false;
-        state.error = action.error.message || 'Failed to fetch safety insights';
+        state.error = action.error.message || "Failed to fetch safety insights";
       })
 
       // Fetch Location Details
@@ -1681,7 +1842,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchLocationDetails.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch location details';
+        state.error = action.error.message || "Failed to fetch location details";
       })
 
       // Create Location
@@ -1695,7 +1856,15 @@ const locationsSlice = createSlice({
       })
       .addCase(createLocation.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to create location';
+        state.error = action.error.message || "Failed to create location";
+      })
+
+      .addCase(saveRouteToDatabase.fulfilled, (state, action) => {
+        // Add the database ID to the selected route
+        if (state.selectedRoute) {
+          state.selectedRoute.databaseId = action.payload.id;
+        }
+        console.log("✅ Route saved with ID:", action.payload.id);
       })
 
       // Submit Review
@@ -1709,7 +1878,7 @@ const locationsSlice = createSlice({
       })
       .addCase(submitReview.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to submit review';
+        state.error = action.error.message || "Failed to submit review";
       })
 
       // Update Review
@@ -1726,7 +1895,7 @@ const locationsSlice = createSlice({
       })
       .addCase(updateReview.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to update review';
+        state.error = action.error.message || "Failed to update review";
       })
 
       // Fetch User Reviews
@@ -1740,7 +1909,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchUserReviews.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch user reviews';
+        state.error = action.error.message || "Failed to fetch user reviews";
       })
 
       // Search Locations
@@ -1754,7 +1923,7 @@ const locationsSlice = createSlice({
       })
       .addCase(searchLocations.rejected, (state, action) => {
         state.searchLoading = false;
-        state.error = action.error.message || 'Search failed';
+        state.error = action.error.message || "Search failed";
       })
 
       // Create Location from Search
@@ -1766,7 +1935,7 @@ const locationsSlice = createSlice({
       })
       .addCase(createLocationFromSearch.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to create location';
+        state.error = action.error.message || "Failed to create location";
       })
 
       // Load community feed mode
@@ -1789,7 +1958,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchHeatMapData.rejected, (state, action) => {
         state.heatMapLoading = false;
-        console.error('❌ Heatmap fetch FAILED:', action.error.message, action.error);
+        console.error("❌ Heatmap fetch FAILED:", action.error.message, action.error);
 
         state.heatMapData = [];
       })
@@ -1805,7 +1974,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchRecentReviews.rejected, (state, action) => {
         state.communityLoading = false;
-        state.error = action.error.message || 'Failed to fetch community reviews';
+        state.error = action.error.message || "Failed to fetch community reviews";
       })
       // Trending Locations
       .addCase(fetchTrendingLocations.pending, (state) => {
@@ -1818,7 +1987,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchTrendingLocations.rejected, (state, action) => {
         state.trendingLoading = false;
-        state.error = action.error.message || 'Failed to fetch trending locations';
+        state.error = action.error.message || "Failed to fetch trending locations";
       })
       // Danger Zones
       .addCase(fetchDangerZones.pending, (state) => {
@@ -1843,7 +2012,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchSimilarUsers.rejected, (state) => {
         state.similarUsersLoading = false;
-        state.error = 'Failed to fetch similar users';
+        state.error = "Failed to fetch similar users";
       })
 
       // ML Predictions
@@ -1874,7 +2043,7 @@ const locationsSlice = createSlice({
       })
       .addCase(calculateRouteSafety.rejected, (state, action) => {
         state.routeLoading = false;
-        state.routeError = action.error.message || 'Failed to calculate route safety';
+        state.routeError = action.error.message || "Failed to calculate route safety";
       })
 
       // Get Mapbox Route
@@ -1887,7 +2056,7 @@ const locationsSlice = createSlice({
       })
       .addCase(getGoogleRoute.rejected, (state, action) => {
         state.routeLoading = false;
-        state.routeError = action.error.message || 'Failed to get route from Mapbox';
+        state.routeError = action.error.message || "Failed to get route from Mapbox";
       })
 
       // Generate Safe Route
@@ -1903,18 +2072,18 @@ const locationsSlice = createSlice({
       })
       .addCase(generateSafeRoute.rejected, (state, action) => {
         state.routeLoading = false;
-        state.routeError = action.payload as string || 'Failed to generate safe route';
+        state.routeError = action.payload as string || "Failed to generate safe route";
       })
 
       // Generate Route Alternatives
       .addCase(generateRouteAlternatives.pending, (state) => {
-        // Don't show loading for alternatives
+        // Don"t show loading for alternatives
       })
       .addCase(generateRouteAlternatives.fulfilled, (state, action) => {
         state.routeAlternatives = action.payload;
       })
       .addCase(generateRouteAlternatives.rejected, (state, action) => {
-        console.error('Failed to generate alternatives:', action.payload);
+        console.error("Failed to generate alternatives:", action.payload);
       })
       // Generate Smart Route
       .addCase(generateSmartRoute.pending, (state) => {
@@ -1939,21 +2108,21 @@ const locationsSlice = createSlice({
             optimized_route: result.optimized_route,
             improvement_summary: result.improvement_summary,
             waypoints_added: result.smart_route_data?.waypoints_added || [],
-            message: result.smart_route_data?.message || 'Route optimized for safety'
+            message: result.smart_route_data?.message || "Route optimized for safety"
           };
 
           // Show comparison UI
           state.showSmartRouteComparison = true;
 
         } else {
-          // If smart routing didn't improve anything, just store basic route
+          // If smart routing didn"t improve anything, just store basic route
           state.smartRouteComparison = null;
           state.showSmartRouteComparison = false;
         }
       })
       .addCase(generateSmartRoute.rejected, (state, action) => {
         state.routeLoading = false;
-        state.routeError = action.payload as string || 'Failed to generate smart route';
+        state.routeError = action.payload as string || "Failed to generate smart route";
       })
   },
 });

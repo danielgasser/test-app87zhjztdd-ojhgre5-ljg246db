@@ -304,7 +304,7 @@ export default function ReviewScreen() {
               <View style={styles.newLocationSection}>
                 <View style={styles.inputGroup}>
                   <Text style={styles.label}>
-                    📍 What is this place called?{" "}
+                    📍 What is this place called?
                     <Text style={styles.required}>*</Text>
                   </Text>
                   <TextInput

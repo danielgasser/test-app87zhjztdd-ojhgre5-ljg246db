@@ -12,6 +12,18 @@ import {
   loadDismissalsFromStorage,
 } from "@/store/profileBannerSlice";
 import NotificationProvider from "@/components/NotificationProvider";
+import {
+  checkForActiveNavigation,
+  startNavigationSession,
+  endNavigationSession,
+  setSelectedRoute,
+  startNavigation,
+  SafeRoute,
+  RouteCoordinate,
+} from "@/store/locationsSlice";
+import { calculateRouteSafety } from "@/store/locationsSlice";
+import { formatDistanceToNow } from "date-fns";
+import { notify } from "@/utils/notificationService";
 
 export default function RootLayout() {
   return (
@@ -128,6 +140,114 @@ function RootLayoutNav() {
       setIsFirstLaunch(false);
     }
   };
+
+  // Check for unfinished navigation sessions on app start
+  useEffect(() => {
+    const checkNavigation = async () => {
+      try {
+        const activeRoute = await dispatch(checkForActiveNavigation()).unwrap();
+
+        if (!activeRoute) return; // No active navigation found
+
+        // Check if user is currently navigating
+        const state = store.getState();
+        const isCurrentlyNavigating = state.locations.navigationActive;
+
+        if (isCurrentlyNavigating) {
+          // User is already navigating, do nothing
+          return;
+        }
+        if (!activeRoute.navigation_started_at) {
+          console.error("Active route missing start time");
+          return;
+        }
+        // User has unfinished route but not currently navigating - ask them
+        const routeTime = new Date(activeRoute.navigation_started_at);
+        const timeAgo = formatDistanceToNow(routeTime, { addSuffix: true });
+
+        notify.confirm(
+          "Unfinished Route",
+          `You have a route from ${timeAgo}. Would you like to continue?`,
+          [
+            {
+              text: "Discard",
+              style: "destructive",
+              onPress: async () => {
+                await dispatch(endNavigationSession(activeRoute.id));
+              },
+            },
+            {
+              text: "Not Now",
+              style: "cancel",
+              onPress: () => {},
+            },
+            {
+              text: "Continue",
+              onPress: async () => {
+                try {
+      // Show loading indicator
+      notify.info("Recalculating route safety...");
+      
+      // Get user profile for demographics
+      const state = store.getState();
+      const userProfile = state.user.profile;
+      
+      if (!userProfile) {
+        notify.error("Profile required to calculate route safety");
+        return;
+      }
+      
+      // Re-calculate route safety with current data
+      const safetyAnalysis = await dispatch(
+        calculateRouteSafety({
+          route_coordinates: activeRoute.route_coordinates as RouteCoordinate[],
+          user_demographics: {
+            race_ethnicity: userProfile.race_ethnicity?.[0] || "",
+            gender: userProfile.gender || "",
+            lgbtq_status: String(userProfile.lgbtq_status ?? ""),
+            religion: userProfile.religion || "",
+            disability_status: userProfile.disability_status?.[0] || "",
+            age_range: userProfile.age_range || "",
+          },
+        })
+      ).unwrap();
+      
+      // Create SafeRoute with fresh analysis
+      const safeRoute: SafeRoute = {
+        id: `db_route_${activeRoute.id}`,
+        name: `${activeRoute.origin_name} → ${activeRoute.destination_name}`,
+        route_type: "balanced",
+        coordinates: activeRoute.route_coordinates as RouteCoordinate[],
+        route_points: activeRoute.route_coordinates as RouteCoordinate[],
+        estimated_duration_minutes: activeRoute.duration_minutes,
+        distance_kilometers: activeRoute.distance_km,
+        safety_analysis: safetyAnalysis,
+        created_at: activeRoute.created_at,
+        databaseId: activeRoute.id,
+      };
+      
+      // Load route into Redux
+      dispatch(setSelectedRoute(safeRoute));
+      
+      // Update navigation timestamp and start navigation
+      await dispatch(startNavigationSession(activeRoute.id));
+      dispatch(startNavigation());
+                await dispatch(startNavigationSession(activeRoute.id));
+                router.push("/(tabs)");
+              },
+            },
+          ]
+        );
+      } catch (error) {
+        console.error("Error checking active navigation:", error);
+      }
+    };
+
+    // Only check after auth is complete and user is logged in
+    if (authCheckComplete) {
+      checkNavigation();
+    }
+  }, [authCheckComplete, dispatch]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
