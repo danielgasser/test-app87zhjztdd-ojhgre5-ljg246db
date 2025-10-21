@@ -1239,7 +1239,7 @@ export const getGoogleRoute = createAsyncThunk(
           coordinates: coordinates,
           type: "LineString"
         },
-        steps: steps, // ADD THIS
+        steps: steps,
       };
     });
 

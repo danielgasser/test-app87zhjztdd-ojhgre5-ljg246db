@@ -16,6 +16,8 @@ import {
   updateNavigationProgress,
   checkForReroute,
   startNavigation,
+  startNavigationSession,
+  endNavigationSession,
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
@@ -53,9 +55,19 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   // Start GPS tracking
   useEffect(() => {
-    startNavigation();
+    const initNavigation = async () => {
+      // Update database timestamp
+      if (selectedRoute?.databaseId) {
+        await dispatch(startNavigationSession(selectedRoute.databaseId));
+      }
+      // Start GPS tracking
+      startNavigation();
+    };
+
+    initNavigation();
+
     return () => {
-      stopNavigation();
+      stopNavigation(); // Stop GPS tracking
     };
   }, []);
 
@@ -299,8 +311,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     return `${(meters / 1000).toFixed(1)}km`;
   };
 
-  const handleEndNavigation = () => {
+  const handleEndNavigation = async () => {
+    // Update database timestamp
+    if (selectedRoute?.databaseId) {
+      await dispatch(endNavigationSession(selectedRoute.databaseId));
+    }
+
+    // Redux state cleanup
     dispatch(endNavigation());
+    // Component cleanup
     onExit();
   };
 
