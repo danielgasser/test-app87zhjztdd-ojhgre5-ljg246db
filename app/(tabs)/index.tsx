@@ -85,6 +85,7 @@ interface SearchResult {
 
 export default function MapScreen() {
   // ============= STATE VARIABLES =============
+  const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -1303,7 +1304,9 @@ export default function MapScreen() {
         onClose={handleModalClose}
       />
       {/* Navigation Mode - ADD THIS */}
-      {navigationActive && <NavigationMode onExit={handleExitNavigation} />}
+      {navigationActive && (
+        <NavigationMode onExit={handleExitNavigation} mapRef={mapRef} />
+      )}
     </View>
   );
 }

@@ -15,6 +15,7 @@ import SettingToggle from "../src/components/SettingToggle";
 import { useAppSelector, useAppDispatch } from "../src/store/hooks";
 import { updateUserProfile } from "../src/store/userSlice";
 import { Alert } from "react-native";
+import { notify } from "@/utils/notificationService";
 
 export default function NotificationSettings() {
   const user = useAppSelector((state: any) => state.auth.user);
