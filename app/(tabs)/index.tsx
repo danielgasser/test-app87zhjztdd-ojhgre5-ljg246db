@@ -497,6 +497,7 @@ export default function MapScreen() {
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         if (!segmentChunks[index] || segmentChunks[index].length < 2) {
+          console.log(`⚠️ Skipping segment ${index} - no coordinates`);
           return null; // Skip if no coordinates for this segment
         }
 
@@ -509,6 +510,9 @@ export default function MapScreen() {
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
             : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
 
+        console.log(
+          `🎨 Segment ${index}: score=${segment.safety_score}, color=${segmentColor}, points=${segmentChunks[index].length}`
+        );
         return (
           <Polyline
             key={`segment-${index}`}
@@ -947,6 +951,11 @@ export default function MapScreen() {
         )}
         {selectedRoute && (
           <>
+            {console.log("🔵 Main polyline render check:", {
+              navigationActive,
+              showRouteSegments,
+              shouldRender: !navigationActive && !showRouteSegments,
+            })}
             {/* Only show main line when NOT using colored segments */}
             {!navigationActive && !showRouteSegments && (
               <Polyline
