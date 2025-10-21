@@ -219,10 +219,7 @@ export default function LoginScreen() {
                     color={theme.colors.background}
                     style={{ marginRight: 8 }}
                   />
-                  <Text style={styles.appleButtonText}>
-                    {" "}
-                    Sign in with Apple
-                  </Text>
+                  <Text style={styles.appleButtonText}>Sign in with Apple</Text>
                 </TouchableOpacity>
               )}
               {/* Social Login Divider */}

@@ -25,6 +25,7 @@ import {
   setSmartRouteComparison,
   startNavigation,
   endNavigation,
+  saveRouteToDatabase,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -362,6 +363,18 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
       if (result.optimized_route && result.original_route) {
         console.log("✅ Smart route comparison available");
+
+        await dispatch(
+          saveRouteToDatabase({
+            route_coordinates: result.optimized_route.coordinates,
+            origin_name: fromLocation.name,
+            destination_name: toLocation.name,
+            distance_km: result.optimized_route.distance_kilometers,
+            duration_minutes: result.optimized_route.estimated_duration_minutes,
+            safety_score:
+              result.optimized_route.safety_analysis.overall_route_score,
+          })
+        );
       } else {
         console.log("ℹ️ Original route is already optimal");
       }

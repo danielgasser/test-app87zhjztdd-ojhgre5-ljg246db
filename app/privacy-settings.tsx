@@ -233,7 +233,7 @@ export default function PrivacySettings() {
             );
           }}
         />
-
+        {/*}
         <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
           Location & History
         </Text>
@@ -244,6 +244,7 @@ export default function PrivacySettings() {
             size={24}
             color={theme.colors.primary}
           />
+         
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>Your Privacy Matters</Text>
             <Text style={styles.infoDescription}>
@@ -251,7 +252,7 @@ export default function PrivacySettings() {
               save locations when you explicitly leave a review.
             </Text>
           </View>
-        </View>
+        </View>{*/}
 
         {/* Account Management Section */}
         <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
@@ -365,7 +366,7 @@ export default function PrivacySettings() {
               Age Range: {profile?.age_range || "Not set"}
             </Text>
             <Text style={styles.dataText}>
-              Disability Status:{" "}
+              Disability Status:
               {profile?.disability_status?.join(", ") || "None"}
             </Text>
 

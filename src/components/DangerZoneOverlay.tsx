@@ -102,7 +102,6 @@ export default function DangerZoneOverlay({
                   <Text style={styles.sectionTitle}>Affected Groups:</Text>
                   {zone.affected_demographics.map((demo, idx) => (
                     <Text key={idx} style={styles.demographicItem}>
-                      •{" "}
                       {demo.charAt(0).toUpperCase() +
                         demo.slice(1).replace(/_/g, ", ")}
                     </Text>
