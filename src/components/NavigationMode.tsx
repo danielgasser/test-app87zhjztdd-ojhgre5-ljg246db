@@ -25,13 +25,13 @@ const { width, height } = Dimensions.get("window");
 
 interface NavigationModeProps {
   onExit: () => void;
+  mapRef: React.RefObject<MapView> | null;
 }
 
-const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
+const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useRealtimeReviews(); // This already listens for new reviews!
 
   const dispatch = useAppDispatch();
-  const mapRef = useRef<MapView>(null);
   const { communityReviews } = useAppSelector((state) => state.locations);
 
   const {
@@ -121,7 +121,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
   useEffect(() => {
     // Force map refresh every 30 seconds if position hasn't changed
     const interval = setInterval(() => {
-      if (mapRef.current && currentPosition) {
+      if (mapRef?.current && currentPosition) {
         mapRef.current.animateToRegion(
           {
             latitude: currentPosition.latitude,
@@ -166,7 +166,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
           setCurrentPosition(newPosition);
 
           // Update map camera to follow user
-          if (mapRef.current) {
+          if (mapRef?.current) {
             mapRef.current.animateCamera(
               {
                 center: newPosition,
