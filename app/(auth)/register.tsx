@@ -18,6 +18,7 @@ import {
 import { Link, useRouter } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { signUp } from "src/store/authSlice";
+import { notify } from "@/utils/notificationService";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
@@ -29,12 +30,12 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields");
+      notify.error("Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      notify.error("Passwords do not match");
       return;
     }
 
@@ -43,7 +44,7 @@ export default function RegisterScreen() {
       // Check if email confirmation is required
       if (result.user && !result.session) {
         // Email confirmation required
-        Alert.alert(
+        notify.confirm(
           "Check Your Email",
           "We've sent you a confirmation email. Please check your inbox and click the link to verify your account.",
           [{ text: "OK", onPress: () => router.replace("/login") }]
@@ -53,7 +54,7 @@ export default function RegisterScreen() {
         router.replace("/onboarding");
       }
     } catch (err: any) {
-      Alert.alert("Registration Failed", err.message || "Please try again");
+      notify.error(err.message || "Please try again", "Registration Failed");
     }
   };
 

@@ -20,6 +20,7 @@ import { RootState } from '.';
 import { Alert } from 'react-native';
 import { checkProfileCompleteness } from '@/utils/profileValidation';
 import { shouldShowBanner, incrementShowCount, BannerType } from './profileBannerSlice';
+import { notify } from '@/utils/notificationService';
 type Review = Database['public']['Tables']['reviews']['Row'];
 
 
@@ -1414,10 +1415,9 @@ export const checkForReroute = createAsyncThunk(
 
 
     // Show alert
-    Alert.alert(
-      "Recalculating Route",
+    notify.info(
       "You've gone off course. Finding a new route...",
-      [{ text: "OK" }]
+      "Recalculating Route",
     );
 
     try {
@@ -1439,10 +1439,9 @@ export const checkForReroute = createAsyncThunk(
           // Use the safer route
           dispatch(setSelectedRoute(result.optimized_route));
 
-          Alert.alert(
-            "Route Updated",
+          notify.info(
             "New safer route calculated from your current position",
-            [{ text: "OK" }]
+            "Route Updated",
           );
         } else {
           // Fall back to basic safe route
@@ -1456,17 +1455,16 @@ export const checkForReroute = createAsyncThunk(
         if (basicResult.route) {
           dispatch(setSelectedRoute(basicResult.route));
 
-          Alert.alert(
-            "Route Updated",
+          notify.info(
             "New route calculated from your current position",
-            [{ text: "OK" }]
+            "Route Updated",
           );
         }
       }
 
     } catch (error) {
       console.error('❌ Rerouting failed:', error);
-      Alert.alert(
+      notify.confirm(
         "Rerouting Failed",
         "Could not calculate new route. Please try planning again.",
         [
@@ -1475,7 +1473,9 @@ export const checkForReroute = createAsyncThunk(
             style: "destructive",
             onPress: () => dispatch(endNavigation()),
           },
-          { text: "Continue", style: "cancel" },
+          {
+            text: "Continue", style: "cancel", onPress: () => { },
+          },
         ]
       );
     }

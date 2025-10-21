@@ -27,6 +27,7 @@ import {
 } from "src/store/locationsSlice";
 import { LocationWithScores } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
+import { notify } from "@/utils/notificationService";
 
 interface RatingProps {
   label: string;
@@ -109,13 +110,13 @@ export default function ReviewScreen() {
   const [editableLocationName, setEditableLocationName] = useState("");
   useEffect(() => {
     if (!isCreatingNew && !typedLocationId) {
-      Alert.alert("Error", "No location specified");
+      notify.error("No location specified");
       router.back();
       return;
     }
 
     if (isCreatingNew && !parsedLocationData) {
-      Alert.alert("Error", "No location data provided");
+      notify.error("No location data provided");
       router.back();
       return;
     }
@@ -126,22 +127,22 @@ export default function ReviewScreen() {
 
     // Validation
     if (!formData.title.trim()) {
-      Alert.alert("Error", "Please enter a review title");
+      notify.error("Please enter a review title");
       return;
     }
 
     if (isCreatingNew && !editableLocationName.trim()) {
-      Alert.alert("Error", "Please enter a name for this location");
+      notify.error("Please enter a name for this location");
       return;
     }
 
     if (!formData.content.trim()) {
-      Alert.alert("Error", "Please enter review content");
+      notify.error("Please enter review content");
       return;
     }
 
     if (!formData.overall_rating || !formData.safety_rating) {
-      Alert.alert("Error", "Please provide both overall and safety ratings");
+      notify.error("Please provide both overall and safety ratings");
       return;
     }
 
@@ -232,23 +233,23 @@ export default function ReviewScreen() {
           })
         );
       }
-      Alert.alert("Success", "Review submitted successfully!", [
+      notify.confirm("Success", "Review submitted successfully!", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
       console.error("🚨 Review submission error:", error);
 
       if (error.code === "23505") {
-        Alert.alert(
-          "Already Reviewed",
-          "You have already reviewed this location. You can edit your existing review instead."
+        notify.success(
+          "You have already reviewed this location. You can edit your existing review instead.",
+          "Already Reviewed"
         );
         return;
       }
 
-      Alert.alert(
+      notify.error(
         "Error",
-        error.message || "Failed to submit review. Please try again."
+        error?.message || "Failed to submit review. Please try again."
       );
     }
   };

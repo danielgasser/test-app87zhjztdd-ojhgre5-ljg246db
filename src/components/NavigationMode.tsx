@@ -19,6 +19,7 @@ import {
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
+import { notify } from "@/utils/notificationService";
 
 const { width, height } = Dimensions.get("window");
 
@@ -92,7 +93,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
           .map((r) => r.location_name)
           .join(", ");
 
-        Alert.alert(
+        notify.confirm(
           "⚠️ SAFETY ALERT ON YOUR ROUTE",
           `Safety concern just reported at: ${locationNames}\n\nWould you like to find a safer route?`,
           [
@@ -107,6 +108,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
             {
               text: "Continue Anyway",
               style: "cancel",
+              onPress: () => {},
             },
           ]
         );
@@ -139,9 +141,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission needed",
-          "Location permission is required for navigation"
+        notify.error(
+          "Location permission is required for navigation",
+          "Permission needed"
         );
         onExit();
         return;
@@ -208,7 +210,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit }) => {
       setLocationSubscription(subscription);
     } catch (error) {
       console.error("Navigation start error:", error);
-      Alert.alert("Error", "Could not start navigation");
+      notify.error("Could not start navigation");
       onExit();
     }
   };

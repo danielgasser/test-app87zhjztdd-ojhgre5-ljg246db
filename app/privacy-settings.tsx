@@ -22,6 +22,7 @@ import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "../src/store/hooks";
 import { signOut } from "../src/store/authSlice";
 import { fetchRecentReviews } from "@/store/locationsSlice";
+import { notify } from "@/utils/notificationService";
 
 export default function PrivacySettings() {
   const user = useAppSelector((state: any) => state.auth.user);
@@ -62,7 +63,7 @@ export default function PrivacySettings() {
         );
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to save setting. Please try again.");
+      notify.error("Failed to save setting. Please try again.");
       console.error("Save error:", error);
     }
   };
@@ -126,7 +127,7 @@ export default function PrivacySettings() {
         );
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to export data. Please try again.");
+      notify.error("Failed to export data. Please try again.");
       console.error("Export error:", error);
     }
   };
@@ -140,7 +141,7 @@ export default function PrivacySettings() {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        Alert.alert("Error", "You must be logged in to delete your account.");
+        notify.error("You must be logged in to delete your account.");
         return;
       }
 
@@ -163,14 +164,14 @@ export default function PrivacySettings() {
       // Rest of success handling...
       await dispatch(signOut()).unwrap();
 
-      Alert.alert(
+      notify.confirm(
         "Account Deleted",
         "Your account has been permanently deleted.",
         [{ text: "OK", onPress: () => router.replace("/welcome") }]
       );
     } catch (error) {
       console.error("=== DELETE ERROR ===", error);
-      Alert.alert("Error", `Failed to delete account: `);
+      notify.error(`Failed to delete account: `);
     }
   };
 

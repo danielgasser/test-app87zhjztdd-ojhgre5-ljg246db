@@ -10,6 +10,7 @@ interface NotificationState {
   duration?: number;
   actionText?: string;
   onActionPress?: () => void;
+  title?: string;
 }
 
 interface ConfirmationButton {
@@ -70,6 +71,7 @@ const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         duration={notification.duration}
         actionText={notification.actionText}
         onActionPress={notification.onActionPress}
+        title={notification.title}
         onDismiss={() => setNotification({ ...notification, visible: false })}
       />
 

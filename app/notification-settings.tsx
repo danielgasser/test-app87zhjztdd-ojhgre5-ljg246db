@@ -67,7 +67,7 @@ export default function NotificationSettings() {
         })
       ).unwrap();
     } catch (error) {
-      Alert.alert("Error", "Failed to save setting. Please try again.");
+      notify.error("Failed to save setting. Please try again.");
       console.error("Save error:", error);
     }
   };

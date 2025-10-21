@@ -26,6 +26,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri } from "expo-auth-session";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
+import { notify } from "@/utils/notificationService";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -37,7 +38,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      notify.error("Please fill in all fields");
       return;
     }
 
@@ -45,13 +46,13 @@ export default function LoginScreen() {
       await dispatch(signIn({ email, password })).unwrap();
       router.replace("/(tabs)");
     } catch (err) {
-      Alert.alert("Login Failed", error || "Invalid credentials");
+      notify.error(error || "Invalid credentials", "Login Failed");
     }
   };
 
   const handleForgotPassword = async () => {
     if (!email) {
-      Alert.alert("Error", "Please enter your email address first");
+      notify.error("Please enter your email address first");
       return;
     }
 
@@ -62,12 +63,12 @@ export default function LoginScreen() {
 
       if (error) throw error;
 
-      Alert.alert(
-        "Check your email",
-        "We sent you a password reset link. Please check your email."
+      notify.info(
+        "We sent you a password reset link. Please check your email.",
+        "Check your email"
       );
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      notify.error(error.message);
     }
   };
 
@@ -110,16 +111,12 @@ export default function LoginScreen() {
       if (error.code === "ERR_REQUEST_CANCELED") {
         return; // User canceled
       }
-      Alert.alert("Error", error.message || "Failed to sign in with Apple");
+      notify.error(error.message || "Failed to sign in with Apple");
     }
   };
 
-  const [debugMessage, setDebugMessage] = useState("");
-
   const handleGoogleSignIn = async () => {
     try {
-      setDebugMessage("Step 1: Requesting OAuth URL...");
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -128,36 +125,28 @@ export default function LoginScreen() {
       });
 
       if (error) {
-        setDebugMessage(`OAuth Error: ${error.message}`);
-        Alert.alert("Error", error.message);
+        notify.error(error?.message);
         return;
       }
 
       if (!data?.url) {
-        setDebugMessage("Error: No URL returned from Supabase");
-        Alert.alert("Error", "No OAuth URL returned");
+        notify.error("No OAuth URL returned");
         return;
       }
-
-      setDebugMessage(`Step 2: Got URL, checking if can open...`);
 
       const canOpen = await Linking.canOpenURL(data.url);
 
       if (!canOpen) {
-        setDebugMessage(`Error: Cannot open URL: ${data.url}`);
-        Alert.alert(
-          "Error",
-          `Cannot open URL: ${data.url.substring(0, 50)}...`
+        notify.error(
+          `Cannot open URL: ${data.url.substring(0, 50)}...`,
+          "Error"
         );
         return;
       }
 
-      setDebugMessage(`Step 3: Opening URL...`);
       await Linking.openURL(data.url);
-      setDebugMessage(`Step 4: URL opened successfully`);
     } catch (error: any) {
-      setDebugMessage(`Exception: ${error.message}`);
-      Alert.alert("Error", error.message);
+      notify.error(error.message);
     }
   };
 

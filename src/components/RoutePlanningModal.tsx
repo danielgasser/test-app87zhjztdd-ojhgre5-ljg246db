@@ -33,6 +33,7 @@ import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { notify } from "@/utils/notificationService";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -213,7 +214,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Handle starting navigation
   const handleStartNavigation = () => {
     if (!smartRouteComparison?.optimized_route) {
-      Alert.alert("Error", "No route selected for navigation");
+      notify.error("No route selected for navigation");
       return;
     }
     dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
@@ -284,14 +285,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         setSearchQuery("");
         setMapboxResults([]);
       } else {
-        Alert.alert(
-          "Error",
-          "Unable to get location details. Please try again."
-        );
+        notify.error("Unable to get location details. Please try again.");
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
-      Alert.alert("Error", "Unable to get location details. Please try again.");
+      notify.error("Unable to get location details. Please try again.");
     }
   };
 
@@ -309,12 +307,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (smartRouteComparison?.optimized_route) {
       dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
       dispatch(setSmartRouteComparison(null));
-      /*
-      Alert.alert(
-        "Route Selected",
-        "Using safer route with danger zone avoidance."
+      notify.info(
+        "Using safer route with danger zone avoidance.",
+        "Route Selected"
       );
-      */
       onClose();
     }
   };
@@ -322,17 +318,17 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Handle route generation
   const handleGenerateRoute = async () => {
     if (!fromLocation || !toLocation) {
-      Alert.alert(
-        "Missing Information",
-        "Please set both origin and destination"
+      notify.error(
+        "Please set both origin and destination",
+        "Missing Information"
       );
       return;
     }
 
     if (!userProfile) {
-      Alert.alert(
-        "Profile Required",
-        "Please complete your profile to get personalized safety routes"
+      notify.error(
+        "Please complete your profile to get personalized safety routes",
+        "Profile Required"
       );
       return;
     }
@@ -371,16 +367,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       }
     } catch (error) {
       console.error("Route generation error:", error);
-      Alert.alert(
-        "Route Error",
-        error instanceof Error ? error.message : "Failed to generate route"
+      notify.error(
+        error instanceof Error ? error.message : "Failed to generate route",
+        "Route Error"
       );
 
       // Fallback to basic route generation
       try {
         await dispatch(generateSafeRoute(routeRequest)).unwrap();
       } catch (fallbackError) {
-        Alert.alert("Unable to generate route. Please try again.");
+        notify.error("Unable to generate route. Please try again.");
       }
     }
   };

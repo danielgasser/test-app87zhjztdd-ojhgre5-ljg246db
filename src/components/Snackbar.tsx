@@ -22,6 +22,7 @@ interface SnackbarProps {
   onDismiss: () => void;
   actionText?: string;
   onActionPress?: () => void;
+  title?: string;
 }
 
 const Snackbar: React.FC<SnackbarProps> = ({
@@ -32,6 +33,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
   onDismiss,
   actionText,
   onActionPress,
+  title,
 }) => {
   const translateY = useRef(new Animated.Value(100)).current;
 
@@ -105,10 +107,14 @@ const Snackbar: React.FC<SnackbarProps> = ({
     >
       <Ionicons name={getIcon()} size={24} color={theme.colors.background} />
 
-      <Text style={styles.message} numberOfLines={2}>
-        {message}
-      </Text>
-
+      <View style={styles.textContainer}>
+        {" "}
+        {/* WRAP TEXT */}
+        {title && <Text style={styles.title}>{title}</Text>}
+        <Text style={styles.message} numberOfLines={2}>
+          {message}
+        </Text>
+      </View>
       {actionText && onActionPress && (
         <TouchableOpacity onPress={onActionPress} style={styles.actionButton}>
           <Text style={styles.actionText}>{actionText}</Text>
@@ -140,12 +146,22 @@ const styles = StyleSheet.create({
     elevation: 6,
     zIndex: 9999,
   },
+  textContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  title: {
+    color: theme.colors.background,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
   message: {
     flex: 1,
     color: theme.colors.background,
-    fontSize: 15,
+    fontSize: 14, // Smaller than before
     fontWeight: "500",
-    marginLeft: 12,
+    // Remove marginLeft since it's in textContainer now
   },
   actionButton: {
     marginLeft: 12,
