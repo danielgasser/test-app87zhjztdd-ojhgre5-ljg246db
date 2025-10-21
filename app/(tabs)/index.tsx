@@ -136,6 +136,7 @@ export default function MapScreen() {
     showRouteSegments,
     navigationIntent,
   } = useAppSelector((state: any) => state.locations);
+  console.log("📊 Redux state showRouteSegments:", showRouteSegments);
 
   const userId = useAppSelector((state: any) => state.auth.user?.id);
   const userProfile = useAppSelector((state: any) => state.user.profile);
@@ -474,11 +475,10 @@ export default function MapScreen() {
   };
 
   const renderRouteSegments = (route: any, forceShow: boolean = false) => {
-    console.log("🔍 renderRouteSegments entry:", {
+    console.log("🔍 renderRouteSegments CALLED!", {
       forceShow,
-      hasSegmentScores: !!route.safety_analysis?.segment_scores,
-      hasRoutePoints: !!route.route_points,
-      routePointsCount: route.route_points?.length,
+      showRouteSegments,
+      navigationActive,
     });
     if (
       (!showRouteSegments && !forceShow) ||
@@ -491,14 +491,12 @@ export default function MapScreen() {
       route.route_points,
       route.safety_analysis.segment_scores
     );
-
-    console.log("🎨 Rendering", segmentChunks.length, "colored segment chunks");
+    console.log("✅ About to return", segmentChunks.length, "polylines"); // ADD THIS
 
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         if (!segmentChunks[index] || segmentChunks[index].length < 2) {
-          console.log(`⚠️ Skipping segment ${index} - no coordinates`);
-          return null; // Skip if no coordinates for this segment
+          return null;
         }
 
         const segmentColor =
@@ -510,16 +508,16 @@ export default function MapScreen() {
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
             : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
 
-        console.log(
-          `🎨 Segment ${index}: score=${segment.safety_score}, color=${segmentColor}, points=${segmentChunks[index].length}`
-        );
+        // Try wrapping in Fragment with timestamp key to force re-render
         return (
-          <Polyline
-            key={`segment-${index}`}
-            coordinates={segmentChunks[index]}
-            strokeColor={segmentColor}
-            strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
-          />
+          <React.Fragment key={`segment-${index}-${Date.now()}`}>
+            <Polyline
+              key={`segment-${index}`}
+              coordinates={segmentChunks[index]}
+              strokeColors={[segmentColor]}
+              strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+            />
+          </React.Fragment>
         );
       }
     );
@@ -951,22 +949,22 @@ export default function MapScreen() {
         )}
         {selectedRoute && (
           <>
-            {console.log("🔵 Main polyline render check:", {
-              navigationActive,
-              showRouteSegments,
-              shouldRender: !navigationActive && !showRouteSegments,
-            })}
             {/* Only show main line when NOT using colored segments */}
             {!navigationActive && !showRouteSegments && (
-              <Polyline
-                coordinates={
-                  selectedRoute.route_points || selectedRoute.coordinates
-                }
-                strokeColor={getRouteLineColor(selectedRoute)}
-                strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
-              />
+              <>
+                {console.log(
+                  "🔵 RENDERING MAIN POLYLINE! Color:",
+                  getRouteLineColor(selectedRoute)
+                )}
+                <Polyline
+                  coordinates={
+                    selectedRoute.route_points || selectedRoute.coordinates
+                  }
+                  strokeColors={[getRouteLineColor(selectedRoute)]}
+                  strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+                />
+              </>
             )}
-
             {/* Show colored segments */}
             {navigationActive
               ? renderRouteSegments(selectedRoute, true)
@@ -1268,7 +1266,11 @@ export default function MapScreen() {
             <Text style={styles.routeInfoTitle}>{selectedRoute.name}</Text>
             <TouchableOpacity
               style={styles.segmentToggle}
-              onPress={() => dispatch(toggleRouteSegments())}
+              onPress={() => {
+                console.log(showRouteSegments);
+                dispatch(toggleRouteSegments());
+                setMapKey((prev) => prev + 1);
+              }}
             >
               <Text style={styles.segmentToggleText}>
                 {showRouteSegments ? "Hide" : "Show"} Segments
