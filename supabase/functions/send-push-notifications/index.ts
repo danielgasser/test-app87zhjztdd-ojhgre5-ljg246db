@@ -15,7 +15,29 @@ interface PushNotification {
   body: string;
   data?: any;
 }
+// Helper: Calculate distance between two coordinates in meters
+function calculateDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
+function toRad(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
 serve(async (req) => {
   // Handle CORS
   if (req.method === "OPTIONS") {
@@ -95,6 +117,74 @@ serve(async (req) => {
         }
       }
     }
+    console.log("🗺️ Checking for users navigating near this location...");
+
+    // Get the location details for this review
+    const { data: location } = await supabaseClient
+      .from("locations")
+      .select("latitude, longitude")
+      .eq("id", review.location_id)
+      .single();
+
+    if (location) {
+      // Find active navigation sessions
+      const { data: activeRoutes } = await supabaseClient
+        .from("routes")
+        .select(`
+      id,
+      user_id,
+      route_coordinates,
+      origin_name,
+      destination_name,
+      user_profiles!inner(push_token, notification_preferences)
+    `)
+        .not("navigation_started_at", "is", null)
+        .is("navigation_ended_at", null);
+
+      if (activeRoutes && activeRoutes.length > 0) {
+        console.log(`🚗 Found ${activeRoutes.length} active navigation sessions`);
+
+        for (const route of activeRoutes) {
+          const prefs = route.user_profiles?.notification_preferences || {};
+
+          // Skip if user has safety alerts disabled
+          if (prefs.safety_alerts === false || !route.user_profiles?.push_token) {
+            continue;
+          }
+
+          // Check if review location is near the route (within 500m of any point)
+          const routeCoords = route.route_coordinates as Array<{ latitude: number, longitude: number }>;
+          const isNearRoute = routeCoords.some((coord: any) => {
+            const distance = calculateDistance(
+              location.latitude,
+              location.longitude,
+              coord.latitude,
+              coord.longitude
+            );
+            return distance < 500; // 500 meters
+          });
+
+          if (isNearRoute) {
+            console.log(`⚠️ Route ${route.id} passes near dangerous location!`);
+
+            notifications.push({
+              to: route.user_profiles.push_token,
+              sound: "default",
+              title: "🚨 SAFETY ALERT ON YOUR ROUTE",
+              body: `Danger reported ahead: ${review.location_name} (${review.safety_rating}/5.0). Consider alternate route.`,
+              data: {
+                type: "route_safety_alert",
+                locationId: review.location_id,
+                reviewId: review.id,
+                locationName: review.location_name,
+                routeId: route.id,
+                safetyRating: review.safety_rating,
+              },
+            });
+          }
+        }
+      }
+    }
 
     // Send all notifications to Expo
     if (notifications.length > 0) {
@@ -142,7 +232,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("❌ Error sending notifications:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
