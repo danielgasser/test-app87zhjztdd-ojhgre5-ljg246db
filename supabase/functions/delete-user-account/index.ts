@@ -41,7 +41,6 @@ serve(async (req) => {
         }
 
         const userId = user.id;
-        console.log(`Deleting account for user: ${userId}`);
 
         // Create admin client for deletion operations
         const supabaseAdmin = createClient(

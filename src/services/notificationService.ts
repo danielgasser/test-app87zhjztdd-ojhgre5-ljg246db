@@ -21,7 +21,7 @@ export const notificationService = {
     async registerForPushNotifications(): Promise<string | null> {
         // Check if device is physical (push notifications don't work on simulators)
         if (!Device.isDevice) {
-            console.log('Push notifications only work on physical devices');
+            setStatus('Push notifications only work on physical devices');
             return null;
         }
 
@@ -35,7 +35,6 @@ export const notificationService = {
         }
 
         if (finalStatus !== 'granted') {
-            console.log('Permission not granted for push notifications');
             return null;
         }
 
@@ -45,7 +44,6 @@ export const notificationService = {
                 projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
             });
 
-            console.log('Push token:', tokenData.data);
             return tokenData.data;
         } catch (error) {
             console.error('Error getting push token:', error);
@@ -68,8 +66,6 @@ export const notificationService = {
 
             if (error) {
                 console.error('Error saving push token:', error);
-            } else {
-                console.log('Push token saved successfully');
             }
         } catch (error) {
             console.error('Error in savePushToken:', error);
@@ -97,3 +93,7 @@ export const notificationService = {
         }
     },
 };
+
+function setStatus(arg0: string) {
+    throw new Error('Function not implemented.');
+}

@@ -684,7 +684,6 @@ export const fetchRecentReviews = createAsyncThunk(
     try {
       // Only fetch reviews if location is provided
       if (latitude === undefined || longitude === undefined) {
-        console.log('No location provided for community reviews');
         return []; // Return empty array instead of fetching all reviews
       }
 
@@ -808,9 +807,6 @@ export const fetchSimilarUsers = createAsyncThunk(
       if (!validation.canUseFeature && shouldShowBanner(state.profileBanner, bannerType)) {
         // Increment show count
         dispatch(incrementShowCount(bannerType));
-
-        // Banner will be shown in UI component that uses this data
-        console.log('⚠️ Similar users requires complete profile');
       }
 
       // Still make the API call (graceful degradation)
@@ -1289,9 +1285,6 @@ export const generateSmartRoute = createAsyncThunk(
   async (routeRequest: RouteRequest, { rejectWithValue }) => {
     try {
       // Call the NEW smart-route-generator edge function
-      console.log('🚀 Route request:', routeRequest.origin, routeRequest.destination);
-      console.log('🚀 Route request destination:', routeRequest.destination);
-
       const { data, error } = await supabase.functions.invoke('smart-route-generator', {
         body: {
           origin: routeRequest.origin,
@@ -1305,10 +1298,8 @@ export const generateSmartRoute = createAsyncThunk(
         console.error('❌ Smart route generation failed:', error);
         throw error;
       }
-      //console.log('📦 Smart route raw response:', JSON.stringify(data, null, 2)); // ← ADD THIS
 
       if (!data.success) {
-        console.log('⚠️ Smart route not better than original:', data.message);
         // Still return the data so UI can show the comparison
         return data;
       }
@@ -1421,7 +1412,6 @@ export const checkForReroute = createAsyncThunk(
       return;
     }
 
-    console.log('🔄 User deviated from route. Recalculating...');
 
     // Show alert
     Alert.alert(
@@ -1459,7 +1449,6 @@ export const checkForReroute = createAsyncThunk(
           throw new Error("Smart route not better");
         }
       } catch (smartRouteError) {
-        console.log('⚠️ Smart route failed, using basic route');
 
         // Fallback to basic route generation
         const basicResult = await dispatch(generateSafeRoute(newRouteRequest)).unwrap();

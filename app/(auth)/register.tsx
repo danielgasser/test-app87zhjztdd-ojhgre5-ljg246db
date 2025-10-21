@@ -40,13 +40,6 @@ export default function RegisterScreen() {
 
     try {
       const result = await dispatch(signUp({ email, password })).unwrap();
-      console.log("SignUp Result:", {
-        hasUser: !!result.user,
-        hasSession: !!result.session,
-        user: result.user,
-        session: result.session,
-      });
-
       // Check if email confirmation is required
       if (result.user && !result.session) {
         // Email confirmation required
