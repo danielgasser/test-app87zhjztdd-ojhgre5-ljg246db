@@ -40,7 +40,77 @@ function RootLayoutNav() {
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+  // Inside RootLayoutNav, before the useEffect
+  const handleContinueNavigation = async (activeRoute: any) => {
+    try {
+      // Validate route coordinates structure
+      if (
+        !Array.isArray(activeRoute.route_coordinates) ||
+        activeRoute.route_coordinates.length === 0 ||
+        !activeRoute.route_coordinates.every(
+          (coord: any) =>
+            typeof coord === "object" &&
+            coord !== null &&
+            typeof coord.latitude === "number" &&
+            typeof coord.longitude === "number"
+        )
+      ) {
+        notify.error("Invalid route data format");
+        console.error(
+          "Invalid route_coordinates:",
+          activeRoute.route_coordinates
+        );
+        return;
+      }
 
+      const routeCoords =
+        activeRoute.route_coordinates as unknown as RouteCoordinate[];
+      notify.info("Recalculating route safety...");
+
+      const state = store.getState();
+      const userProfile = state.user.profile;
+
+      if (!userProfile) {
+        notify.error("Profile required to calculate route safety");
+        return;
+      }
+
+      const safetyAnalysis = await dispatch(
+        calculateRouteSafety({
+          route_coordinates: routeCoords,
+          user_demographics: {
+            race_ethnicity: userProfile.race_ethnicity?.[0] || "",
+            gender: userProfile.gender || "",
+            lgbtq_status: String(userProfile.lgbtq_status ?? ""),
+            religion: userProfile.religion || "",
+            disability_status: userProfile.disability_status?.[0] || "",
+            age_range: userProfile.age_range || "",
+          },
+        })
+      ).unwrap();
+
+      const safeRoute: SafeRoute = {
+        id: `db_route_${activeRoute.id}`,
+        name: `${activeRoute.origin_name} → ${activeRoute.destination_name}`,
+        route_type: "balanced",
+        coordinates: routeCoords,
+        route_points: routeCoords,
+        estimated_duration_minutes: activeRoute.duration_minutes,
+        distance_kilometers: activeRoute.distance_km,
+        safety_analysis: safetyAnalysis,
+        created_at: activeRoute.created_at,
+        databaseId: activeRoute.id,
+      };
+
+      dispatch(setSelectedRoute(safeRoute));
+      await dispatch(startNavigationSession(activeRoute.id));
+      dispatch(startNavigation());
+      router.push("/(tabs)");
+    } catch (error) {
+      console.error("Error restoring route:", error);
+      notify.error("Failed to restore route. Please try again.");
+    }
+  };
   // Auth state listener
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -183,75 +253,8 @@ function RootLayoutNav() {
             },
             {
               text: "Continue",
-              onPress: async () => {
-                try {
-                   if (
-  !Array.isArray(activeRoute.route_coordinates) ||
-  activeRoute.route_coordinates.length === 0 ||
-  !activeRoute.route_coordinates.every(
-    (coord: any) =>
-      typeof coord === "object" &&
-      coord !== null &&
-      typeof coord.latitude === "number" &&
-      typeof coord.longitude === "number"
-  )
-) {
-  notify.error("Invalid route data format");
-  console.error("Invalid route_coordinates:", activeRoute.route_coordinates);
-  return;
-}
-
-// Now TypeScript knows it's valid, cast it
-const routeCoords = activeRoute.route_coordinates as unknown as RouteCoordinate[];
-      // Show loading indicator
-      notify.info("Recalculating route safety...");
-      
-      // Get user profile for demographics
-      const state = store.getState();
-      const userProfile = state.user.profile;
-      
-      if (!userProfile) {
-        notify.error("Profile required to calculate route safety");
-        return;
-      }
-     
-      // Re-calculate route safety with current data
-      const safetyAnalysis = await dispatch(
-        calculateRouteSafety({
-          route_coordinates: routeCoords,
-          user_demographics: {
-            race_ethnicity: userProfile.race_ethnicity?.[0] || "",
-            gender: userProfile.gender || "",
-            lgbtq_status: String(userProfile.lgbtq_status ?? ""),
-            religion: userProfile.religion || "",
-            disability_status: userProfile.disability_status?.[0] || "",
-            age_range: userProfile.age_range || "",
-          },
-        })
-      ).unwrap();
-      
-      // Create SafeRoute with fresh analysis
-      const safeRoute: SafeRoute = {
-        id: `db_route_${activeRoute.id}`,
-        name: `${activeRoute.origin_name} → ${activeRoute.destination_name}`,
-        route_type: "balanced",
-        coordinates: routeCoords,
-        route_points: routeCoords,
-        estimated_duration_minutes: activeRoute.duration_minutes,
-        distance_kilometers: activeRoute.distance_km,
-        safety_analysis: safetyAnalysis,
-        created_at: activeRoute.created_at,
-        databaseId: activeRoute.id,
-      };
-      
-      // Load route into Redux
-      dispatch(setSelectedRoute(safeRoute));
-      
-      // Update navigation timestamp and start navigation
-      await dispatch(startNavigationSession(activeRoute.id));
-      dispatch(startNavigation());
-                await dispatch(startNavigationSession(activeRoute.id));
-                router.push("/(tabs)");
+              onPress: () => {
+                handleContinueNavigation(activeRoute);
               },
             },
           ]
