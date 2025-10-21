@@ -57,6 +57,7 @@ import { theme } from "@/styles/theme";
 import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
+import { notify } from "@/utils/notificationService";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -83,6 +84,8 @@ interface SearchResult {
 }
 
 export default function MapScreen() {
+  notify.success("yeah");
+
   // ============= STATE VARIABLES =============
   const [region, setRegion] = useState({
     latitude: 37.78825,
@@ -115,7 +118,6 @@ export default function MapScreen() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const mapRef = React.useRef<MapView>(null);
-
   // Redux selectors
   const {
     nearbyLocations,

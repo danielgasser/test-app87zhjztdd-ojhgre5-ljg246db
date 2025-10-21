@@ -11,11 +11,14 @@ import {
   loadDismissals,
   loadDismissalsFromStorage,
 } from "@/store/profileBannerSlice";
+import NotificationProvider from "@/components/NotificationProvider";
 
 export default function RootLayout() {
   return (
     <Provider store={store}>
-      <RootLayoutNav />
+      <NotificationProvider>
+        <RootLayoutNav />
+      </NotificationProvider>
     </Provider>
   );
 }

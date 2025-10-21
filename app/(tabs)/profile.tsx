@@ -23,6 +23,7 @@ import ProfileCompletionWidget from "@/components/ProfileCompletionWidget";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetAll } from "@/store/profileBannerSlice";
+import { notify } from "@/utils/notificationService";
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -137,32 +138,31 @@ export default function ProfileScreen() {
   };
 
   const removeProfilePicture = async () => {
-    Alert.alert(
+    try {
+      setUploading(true);
+      await dispatch(
+        updateUserProfile({
+          userId: user!.id,
+          profileData: { avatar_url: undefined },
+        })
+      ).unwrap();
+      notify.success("Profile picture removed!");
+    } catch (error) {
+      notify.error("Failed to remove profile picture.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveProfilePicture = () => {
+    notify.confirm(
       "Remove Profile Picture",
       "Are you sure you want to remove your profile picture?",
       [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setUploading(true);
-              await dispatch(
-                updateUserProfile({
-                  userId: user!.id,
-                  profileData: { avatar_url: undefined },
-                })
-              ).unwrap();
-              Alert.alert("Success", "Profile picture removed!");
-            } catch (error) {
-              Alert.alert("Error", "Failed to remove profile picture.");
-            } finally {
-              setUploading(false);
-            }
-          },
-        },
-      ]
+        { text: "Cancel", style: "cancel", onPress: () => {} },
+        { text: "Remove", style: "destructive", onPress: removeProfilePicture },
+      ],
+      "warning"
     );
   };
 
