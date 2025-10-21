@@ -23,12 +23,8 @@ export default function NotificationSettings() {
 
   // Notification preferences state
   const [safetyAlerts, setSafetyAlerts] = useState(true);
-  const [communityUpdates, setCommunityUpdates] = useState(true);
-  const [reviewResponses, setReviewResponses] = useState(true);
   const [routeSafetyChanges, setRouteSafetyChanges] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(false);
   const [locationTriggers, setLocationTriggers] = useState(false);
-  const [travelReminders, setTravelReminders] = useState(false);
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
 
@@ -44,12 +40,8 @@ export default function NotificationSettings() {
     if (profile) {
       const prefs = profile.notification_preferences || {};
       setSafetyAlerts(prefs.safety_alerts ?? true);
-      setCommunityUpdates(prefs.community_updates ?? true);
-      setReviewResponses(prefs.review_responses ?? true);
       setRouteSafetyChanges(prefs.route_safety_changes ?? true);
-      setWeeklyDigest(prefs.weekly_digest ?? false);
       setLocationTriggers(prefs.location_triggers ?? false);
-      setTravelReminders(prefs.travel_reminders ?? false);
       setLoading(false);
     }
   }, [profile]);
