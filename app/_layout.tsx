@@ -47,9 +47,6 @@ function RootLayoutNav() {
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
       if (url.includes("safepath://callback")) {
-        console.log(
-          "✅ OAuth callback detected - navigating to callback screen"
-        );
         // Navigate WITH the URL as a param
         router.push({
           pathname: "/(auth)/callback",

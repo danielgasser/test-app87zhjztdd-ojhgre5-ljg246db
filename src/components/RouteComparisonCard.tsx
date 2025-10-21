@@ -24,10 +24,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     improvement_summary,
     waypoints_added,
   } = comparison;
-  console.log(
-    "🔍 Route confidence:",
-    optimized_route.safety_analysis?.overall_confidence
-  );
+
   // Helper function to get safety score color
   const getSafetyColor = (score: number): string => {
     if (score >= 4.0) return theme.colors.success; // Green

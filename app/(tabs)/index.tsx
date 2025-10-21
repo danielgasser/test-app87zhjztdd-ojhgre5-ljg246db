@@ -136,7 +136,7 @@ export default function MapScreen() {
     showRouteSegments,
     navigationIntent,
   } = useAppSelector((state: any) => state.locations);
-  console.log("📊 Redux state showRouteSegments:", showRouteSegments);
+  console.log("📊 showRouteSegments:", showRouteSegments);
 
   const userId = useAppSelector((state: any) => state.auth.user?.id);
   const userProfile = useAppSelector((state: any) => state.user.profile);
@@ -307,7 +307,6 @@ export default function MapScreen() {
 
     dispatch(toggleHeatMap());
     if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
-      console.log("🔥 Fetching heatmap data...");
       dispatch(
         fetchHeatMapData({
           latitude: userLocation.latitude,
@@ -333,7 +332,6 @@ export default function MapScreen() {
     }
     dispatch(toggleDangerZones());
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
-      console.log("🛡️ Fetching danger zones for userId:", userId);
       dispatch(
         fetchDangerZones({
           userId: userId,
@@ -475,11 +473,6 @@ export default function MapScreen() {
   };
 
   const renderRouteSegments = (route: any, forceShow: boolean = false) => {
-    console.log("🔍 renderRouteSegments CALLED!", {
-      forceShow,
-      showRouteSegments,
-      navigationActive,
-    });
     if (
       (!showRouteSegments && !forceShow) ||
       !route.safety_analysis?.segment_scores ||
@@ -491,7 +484,6 @@ export default function MapScreen() {
       route.route_points,
       route.safety_analysis.segment_scores
     );
-    console.log("✅ About to return", segmentChunks.length, "polylines"); // ADD THIS
 
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
@@ -634,30 +626,17 @@ export default function MapScreen() {
   // Handle navigation intents from other tabs - using useFocusEffect so it runs when tab is focused
   useFocusEffect(
     useCallback(() => {
-      console.log(
-        "🗺️ Map focused, checking for navigation intent:",
-        navigationIntent
-      );
-
       if (
         navigationIntent?.targetTab === "map" &&
         navigationIntent?.locationId
       ) {
-        console.log(
-          "🎯 Found navigation intent for location:",
-          navigationIntent.locationId
-        );
-
         dispatch(clearNavigationIntent());
 
         setTimeout(async () => {
           try {
-            console.log("📍 Fetching location details...");
             const locationDetails = await dispatch(
               fetchLocationDetails(navigationIntent.locationId)
             ).unwrap();
-
-            console.log("✅ Location details:", locationDetails);
 
             const location = Array.isArray(locationDetails)
               ? locationDetails[0]
@@ -671,14 +650,12 @@ export default function MapScreen() {
                 longitudeDelta: 0.01,
               };
 
-              console.log("🎬 Animating to region:", newRegion);
               setRegion(newRegion);
 
               // Wait a bit longer for Redux to update selectedLocation
               setTimeout(() => {
                 if (mapRef.current) {
                   mapRef.current.animateToRegion(newRegion, 1000);
-                  console.log("✨ Animation triggered");
                 }
 
                 // Open modal AFTER redux has time to update
@@ -952,10 +929,6 @@ export default function MapScreen() {
             {/* Only show main line when NOT using colored segments */}
             {!navigationActive && !showRouteSegments && (
               <>
-                {console.log(
-                  "🔵 RENDERING MAIN POLYLINE! Color:",
-                  getRouteLineColor(selectedRoute)
-                )}
                 <Polyline
                   coordinates={
                     selectedRoute.route_points || selectedRoute.coordinates
@@ -1267,7 +1240,6 @@ export default function MapScreen() {
             <TouchableOpacity
               style={styles.segmentToggle}
               onPress={() => {
-                console.log(showRouteSegments);
                 dispatch(toggleRouteSegments());
                 setMapKey((prev) => prev + 1);
               }}
