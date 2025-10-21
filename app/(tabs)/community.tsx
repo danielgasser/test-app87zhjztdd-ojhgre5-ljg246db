@@ -98,7 +98,6 @@ export default function CommunityScreen() {
               maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
             })
           ).unwrap(),
-          // ADD THIS:
           dispatch(
             fetchSafetyInsights({
               latitude: coords.latitude,

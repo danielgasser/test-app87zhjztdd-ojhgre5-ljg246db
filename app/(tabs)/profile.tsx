@@ -163,7 +163,7 @@ export default function ProfileScreen() {
 
       notify.success("Profile picture removed!");
     } catch (error) {
-      console.error("Remove avatar error:", error); // ADD THIS to see the actual error
+      console.error("Remove avatar error:", error);
       notify.error("Failed to remove profile picture.");
     } finally {
       setUploading(false);
