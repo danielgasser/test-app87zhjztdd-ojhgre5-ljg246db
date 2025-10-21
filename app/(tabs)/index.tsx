@@ -116,7 +116,6 @@ export default function MapScreen() {
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const mapRef = React.useRef<MapView>(null);
   // Redux selectors
   const {
     nearbyLocations,
@@ -1303,7 +1302,7 @@ export default function MapScreen() {
         googlePlaceId={selectedGooglePlaceId}
         onClose={handleModalClose}
       />
-      {/* Navigation Mode - ADD THIS */}
+      {/* Navigation Mode */}
       {navigationActive && (
         <NavigationMode onExit={handleExitNavigation} mapRef={mapRef} />
       )}
