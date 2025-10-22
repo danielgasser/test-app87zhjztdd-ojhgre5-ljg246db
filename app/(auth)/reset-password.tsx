@@ -17,6 +17,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
+import * as ExpoLinking from "expo-linking";
+
+import * as QueryParams from "expo-auth-session/build/QueryParams";
 
 export default function ResetPasswordScreen() {
   const [newPassword, setNewPassword] = useState("");
@@ -28,42 +31,39 @@ export default function ResetPasswordScreen() {
   const [isValidatingToken, setIsValidatingToken] = useState(true);
 
   useEffect(() => {
-    // Supabase automatically handles the token from the URL hash
-    // We just need to listen for the auth state change
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth event:", event, "Session:", !!session);
+    // Parse URL and establish session
+    const handleDeepLink = async () => {
+      const url = await ExpoLinking.getInitialURL();
 
-      if (event === "PASSWORD_RECOVERY") {
-        // Token is valid, user can now reset password
-        setIsValidatingToken(false);
-      } else if (event === "SIGNED_IN" && session) {
-        // Token processed successfully
-        setIsValidatingToken(false);
+      if (url) {
+        // Supabase uses # instead of ? for query params
+        const parsedUrl = url.replace("#", "?");
+        const { queryParams } = ExpoLinking.parse(parsedUrl);
+
+        const access_token = queryParams?.access_token as string;
+        const refresh_token = queryParams?.refresh_token as string;
+
+        if (access_token && refresh_token) {
+          // Manually set the session
+          const { error } = await supabase.auth.setSession({
+            access_token,
+            refresh_token,
+          });
+
+          if (!error) {
+            setIsValidatingToken(false);
+          } else {
+            notify.error("Invalid or expired reset link.");
+            router.replace("/forgot-password");
+          }
+        } else {
+          notify.error("Invalid reset link.");
+          router.replace("/forgot-password");
+        }
       }
-    });
-
-    // Also check current session after a brief delay
-    const timer = setTimeout(async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (session) {
-        setIsValidatingToken(false);
-      } else {
-        notify.error(
-          "Invalid or expired reset link. Please request a new one."
-        );
-        router.replace("/forgot-password");
-      }
-    }, 1500);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timer);
     };
+
+    handleDeepLink();
   }, []);
 
   const validatePassword = (password: string): boolean => {
