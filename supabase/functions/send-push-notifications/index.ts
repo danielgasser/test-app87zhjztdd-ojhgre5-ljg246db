@@ -134,7 +134,7 @@ serve(async (req) => {
 
     // Get user profiles separately for the active routes
     if (activeRoutes && activeRoutes.length > 0) {
-      const userIds = (activeRoutes as RouteWithProfile[]).map(route: RouteWithProfile => route.user_id);
+      const userIds = (activeRoutes as RouteWithProfile[]).map((route: RouteWithProfile) => route.user_id);
       const { data: profiles } = await supabaseClient
         .from("user_profiles")
         .select("id, push_token, notification_preferences")
