@@ -121,6 +121,8 @@ export const APP_CONFIG = {
       RECOMMENDATIONS: ['race_ethnicity', 'gender'],
       SAFE_ROUTING: ['race_ethnicity', 'gender', 'lgbtq_status', 'religion', 'disability_status', 'age_range'],
     },
+    // Allow "Prefer not to say" option
+    ALLOW_PREFER_NOT_TO_SAY: true,
     ALL_DEMOGRAPHIC_FIELDS: [
       'race_ethnicity',
       'gender',
@@ -145,8 +147,6 @@ export const APP_CONFIG = {
     },
   },
 
-  // Allow "Prefer not to say" option
-  ALLOW_PREFER_NOT_TO_SAY: true,
 
   API_SETTINGS: {
     DEFAULT_PAGE_SIZE: 20,                // Default pagination size
