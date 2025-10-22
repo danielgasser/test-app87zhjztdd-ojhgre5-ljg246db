@@ -3,14 +3,12 @@
 // Used by multiple notification Edge Functions
 // ============================================
 
-// SEVERITY LEVELS FOR ALERTS
-export const SEVERITY_LEVELS = {
-    CRITICAL: { min: 1.0, max: 1.9, emoji: "🚨", label: "CRITICAL", priority: 3 },
-    WARNING: { min: 2.0, max: 2.4, emoji: "⚠️", label: "WARNING", priority: 2 },
-    NOTICE: { min: 2.5, max: 2.9, emoji: "ℹ️", label: "NOTICE", priority: 1 },
-};
+import { APP_CONFIG } from "@/utils/appConfig";
+import { EDGE_CONFIG } from "./config";
 
-export type SeverityLevel = typeof SEVERITY_LEVELS[keyof typeof SEVERITY_LEVELS];
+
+
+export type SeverityLevel = typeof EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS[keyof typeof EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS];
 
 /**
  * Get severity level for a safety rating
@@ -18,14 +16,14 @@ export type SeverityLevel = typeof SEVERITY_LEVELS[keyof typeof SEVERITY_LEVELS]
  * @returns Severity level object or null if rating is >= 3.0
  */
 export function getSeverityLevel(rating: number): SeverityLevel | null {
-    if (rating >= SEVERITY_LEVELS.CRITICAL.min && rating <= SEVERITY_LEVELS.CRITICAL.max) {
-        return SEVERITY_LEVELS.CRITICAL;
+    if (rating >= EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.CRITICAL.min && rating <= EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.CRITICAL.max) {
+        return EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.CRITICAL;
     }
-    if (rating >= SEVERITY_LEVELS.WARNING.min && rating <= SEVERITY_LEVELS.WARNING.max) {
-        return SEVERITY_LEVELS.WARNING;
+    if (rating >= EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.WARNING.min && rating <= EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.WARNING.max) {
+        return EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.WARNING;
     }
-    if (rating >= SEVERITY_LEVELS.NOTICE.min && rating <= SEVERITY_LEVELS.NOTICE.max) {
-        return SEVERITY_LEVELS.NOTICE;
+    if (rating >= EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.NOTICE.min && rating <= EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.NOTICE.max) {
+        return EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.NOTICE;
     }
     return null;
 }
