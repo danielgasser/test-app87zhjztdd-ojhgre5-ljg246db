@@ -87,6 +87,10 @@ export default function ReviewScreen() {
   useEffect(() => {
     requireAuth(user?.id, "write reviews");
   }, [user]);
+  const navigationActive = useAppSelector(
+    (state) => state.locations.navigationActive
+  );
+
   const [visitDateTime, setVisitDateTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -194,7 +198,7 @@ export default function ReviewScreen() {
       };
 
       await dispatch(submitReview(reviewData)).unwrap();
-      if (isCreatingNew && parsedLocationData) {
+      if (isCreatingNew && parsedLocationData && !navigationActive) {
         const newLocationWithScores: LocationWithScores = {
           id: finalLocationId,
           name: parsedLocationData.name,
@@ -223,7 +227,7 @@ export default function ReviewScreen() {
           updated_at: new Date().toISOString(),
           demographic_safety_score: undefined,
         };
-
+        /*
         dispatch(addLocationToNearby(newLocationWithScores));
         dispatch(
           fetchNearbyLocations({
@@ -231,7 +235,7 @@ export default function ReviewScreen() {
             longitude: parsedLocationData.longitude,
             radius: 10000,
           })
-        );
+        );*/
       }
       notify.confirm("Success", "Review submitted successfully!", [
         { text: "OK", onPress: () => router.back() },
