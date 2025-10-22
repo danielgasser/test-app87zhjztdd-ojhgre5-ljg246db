@@ -162,6 +162,12 @@ serve(async (req) => {
 
         // Check if review location is near the route (within 500m of any point)
         const routeCoords = route.route_coordinates as Array<{ latitude: number, longitude: number }>;
+        console.log(`📍 Review at: ${reviewLocation.latitude}, ${reviewLocation.longitude}`);
+        console.log(`🛣️ Checking ${routeCoords.length} route points...`);
+
+        let minDistance = Infinity;
+        let closestPoint = null;
+
         const isNearRoute = routeCoords.some((coord: any) => {
           const distance = calculateDistance(
             reviewLocation.latitude,
@@ -169,6 +175,10 @@ serve(async (req) => {
             coord.latitude,
             coord.longitude
           );
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestPoint = coord;
+          }
           return distance < 500; // 500 meters
         });
 
