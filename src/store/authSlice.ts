@@ -19,9 +19,11 @@ const initialState: AuthState = {
 export const signIn = createAsyncThunk(
   'auth/signIn',
   async ({ email, password }: { email: string; password: string }) => {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: trimmedEmail,
+      password: trimmedPassword,
     });
     if (error) throw error;
     return data;
@@ -31,9 +33,11 @@ export const signIn = createAsyncThunk(
 export const signUp = createAsyncThunk(
   'auth/signUp',
   async ({ email, password }: { email: string; password: string }) => {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: trimmedEmail,
+      password: trimmedPassword,
     });
     if (error) throw error;
     return data;

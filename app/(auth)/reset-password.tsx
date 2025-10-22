@@ -17,11 +17,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
-import * as ExpoLinking from "expo-linking";
-
-import * as QueryParams from "expo-auth-session/build/QueryParams";
+import { useLocalSearchParams } from "expo-router";
 
 export default function ResetPasswordScreen() {
+  const params = useLocalSearchParams();
+  console.log("Reset-password URL params:", params);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,24 +31,23 @@ export default function ResetPasswordScreen() {
   const [isValidatingToken, setIsValidatingToken] = useState(true);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth event:", event);
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      if (event === "PASSWORD_RECOVERY") {
-        // User clicked reset link and has valid session
+      if (session) {
+        console.log("✅ Valid session found");
         setIsValidatingToken(false);
-      } else if (!session) {
-        // No session = invalid/expired link
+      } else {
+        console.log("❌ No session");
         notify.error("Invalid or expired reset link.");
         router.replace("/forgot-password");
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    checkSession();
   }, []);
-
   const validatePassword = (password: string): boolean => {
     // At least 8 characters
     if (password.length < 8) {

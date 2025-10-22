@@ -25,14 +25,15 @@ export default function ForgotPasswordScreen() {
   const [emailSent, setEmailSent] = useState(false);
 
   const handleResetPassword = async () => {
-    if (!email) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       notify.error("Please enter your email address");
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       notify.error("Please enter a valid email address");
       return;
     }
@@ -40,8 +41,12 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        trimmedEmail,
+        {
+          redirectTo: "safepath://reset-password",
+        }
+      );
       if (error) throw error;
 
       setEmailSent(true);
