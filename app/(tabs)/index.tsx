@@ -1161,7 +1161,7 @@ export default function MapScreen() {
         </View>
       )}
       {/* Add Location Button */}
-      {searchMarker && !selectedRoute && (
+      {searchMarker && selectedRoute && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
             style={styles.addLocationButton}
@@ -1343,7 +1343,7 @@ const styles = StyleSheet.create({
   },
   addLocationContainer: {
     position: "absolute",
-    bottom: 40,
+    bottom: 10,
     left: 16,
     right: 16,
     flexDirection: "row",
@@ -1353,7 +1353,10 @@ const styles = StyleSheet.create({
   },
   closeSearchButton: {
     marginLeft: 12,
-    padding: 8,
+    padding: 12,
+    zIndex: 1000,
+    backgroundColor: theme.colors.background,
+    borderRadius: 12,
   },
   addLocationButton: {
     flexDirection: "row",

@@ -24,6 +24,7 @@ import {
 import { calculateRouteSafety } from "@/store/locationsSlice";
 import { formatDistanceToNow } from "date-fns";
 import { notify } from "@/utils/notificationService";
+import { notificationService } from "@/services/notificationService";
 
 export default function RootLayout() {
   return (
@@ -118,6 +119,23 @@ function RootLayoutNav() {
         if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
           console.log("🔥 Auth state changed: SIGNED_IN");
           dispatch(setSession(session));
+
+          // Register for push notifications on login
+          if (session.user?.id) {
+            try {
+              const pushToken =
+                await notificationService.registerForPushNotifications();
+              if (pushToken) {
+                await notificationService.savePushToken(
+                  session.user.id,
+                  pushToken
+                );
+                console.log("✅ Push token registered on login");
+              }
+            } catch (error) {
+              console.error("Failed to register push token:", error);
+            }
+          }
           // Don't route here - let deep link or callback screen handle it
         }
       }

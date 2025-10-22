@@ -82,6 +82,25 @@ serve(async (req) => {
 
     console.log("⚠️ Dangerous review detected! Finding affected users...");
 
+    // FETCH THE LOCATION DETAILS (name, latitude, longitude)
+    const { data: reviewLocation } = await supabaseClient
+      .from("locations")
+      .select("name, latitude, longitude")
+      .eq("id", review.location_id)
+      .single();
+
+    if (!reviewLocation) {
+      console.error("❌ Location not found for review:", review.location_id);
+      return new Response(
+        JSON.stringify({ message: "Location not found" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        }
+      );
+    }
+
+    const locationName = reviewLocation.name || "Unknown Location";
     const notifications: PushNotification[] = [];
 
     // 1. SAFETY ALERTS - Find users with push tokens and safety_alerts enabled
@@ -106,12 +125,12 @@ serve(async (req) => {
             to: user.push_token,
             sound: "default",
             title: "⚠️ Safety Alert",
-            body: `${review.location_name}: New safety concern reported (${review.safety_rating}/5.0)`,
+            body: `${locationName}: New safety concern reported (${review.safety_rating}/5.0)`,
             data: {
               type: "safety_alert",
               locationId: review.location_id,
               reviewId: review.id,
-              locationName: review.location_name,
+              locationName: locationName,
             },
           });
         }
@@ -122,7 +141,7 @@ serve(async (req) => {
     // Get the location details for this review
     const { data: location } = await supabaseClient
       .from("locations")
-      .select("latitude, longitude")
+      .select("name, latitude, longitude")
       .eq("id", review.location_id)
       .single();
 
@@ -232,7 +251,9 @@ serve(async (req) => {
   } catch (error) {
     console.error("❌ Error sending notifications:", error);
     return new Response(
-      JSON.stringify({ error: error }),
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error occurred"
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
