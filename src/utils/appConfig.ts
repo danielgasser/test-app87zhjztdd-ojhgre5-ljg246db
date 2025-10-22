@@ -108,6 +108,12 @@ export const APP_CONFIG = {
     REVIEWS_PER_PAGE: 5,                  // Pagination size for reviews
     TRENDING_TIMEFRAME_DAYS: 7,           // Days to consider for trending locations
     TRENDING_MIN_REVIEWS: 5,              // Minimum reviews to be considered trending
+    LOCATIONS_ALERT: {
+      CHECK_INTERVAL_MS: 30000,              // Check every 30 seconds
+      NOTIFICATION_RADIUS_METERS: 200,       // Notify within 200m
+      MIN_RATING_THRESHOLD: 4.0,             // Only notify for ≥4.0★
+      RATE_LIMIT_HOURS: 12,
+    }
   },
 
 

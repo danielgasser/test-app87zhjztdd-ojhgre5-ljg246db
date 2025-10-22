@@ -25,6 +25,7 @@ import { calculateRouteSafety } from "@/store/locationsSlice";
 import { formatDistanceToNow } from "date-fns";
 import { notify } from "@/utils/notificationService";
 import { notificationService } from "@/services/notificationService";
+import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 
 export default function RootLayout() {
   return (
@@ -291,6 +292,7 @@ function RootLayoutNav() {
     }
   }, [authCheckComplete, dispatch]);
 
+  useLocationTriggers();
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <Stack screenOptions={{ headerShown: false }}>
