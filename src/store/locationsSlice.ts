@@ -1866,6 +1866,9 @@ const locationsSlice = createSlice({
         if (state.selectedRoute) {
           state.selectedRoute.databaseId = action.payload.id;
         }
+        if (state.smartRouteComparison?.optimized_route) {
+          state.smartRouteComparison.optimized_route.databaseId = action.payload.id;
+        }
         console.log("✅ Route saved with ID:", action.payload.id);
       })
 
