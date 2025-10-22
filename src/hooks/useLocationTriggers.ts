@@ -13,6 +13,7 @@ import { locationTriggerService } from '../services/locationTriggerService';
  * Starts when user is logged in and app is active
  * Stops when user logs out or app goes to background
  */
+
 export function useLocationTriggers() {
     const user = useAppSelector((state) => state.auth.user);
     const profile = useAppSelector((state) => state.user.profile);
