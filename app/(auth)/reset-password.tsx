@@ -72,17 +72,19 @@ export default function ResetPasswordScreen() {
   };
 
   const handleResetPassword = async () => {
-    if (!newPassword || !confirmPassword) {
+    const trimmedNewPassword = newPassword.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+    if (!trimmedNewPassword || !trimmedConfirmPassword) {
       notify.error("Please fill in all fields");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    if (trimmedNewPassword !== trimmedConfirmPassword) {
       notify.error("Passwords do not match");
       return;
     }
 
-    if (!validatePassword(newPassword)) {
+    if (!validatePassword(trimmedNewPassword)) {
       return;
     }
 
@@ -90,7 +92,7 @@ export default function ResetPasswordScreen() {
 
     try {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+        password: trimmedNewPassword,
       });
 
       if (error) throw error;
