@@ -15,6 +15,18 @@ interface PushNotification {
   body: string;
   data?: any;
 }
+interface RouteWithProfile {
+  id: string;
+  user_id: string;
+  route_coordinates: any;
+  origin_name: string;
+  destination_name: string;
+  user_profile?: {
+    id: string;
+    push_token: string | null;
+    notification_preferences: any;
+  };
+}
 // Helper: Calculate distance between two coordinates in meters
 function calculateDistance(
   lat1: number,
@@ -111,15 +123,28 @@ serve(async (req) => {
     const { data: activeRoutes, error: routesError } = await supabaseClient
       .from("routes")
       .select(`
-            id,
-            user_id,
-            route_coordinates,
-            origin_name,
-            destination_name,
-            user_profiles!inner(push_token, notification_preferences)
-          `)
+    id,
+    user_id,
+    route_coordinates,
+    origin_name,
+    destination_name
+  `)
       .not("navigation_started_at", "is", null)
       .is("navigation_ended_at", null);
+
+    // Get user profiles separately for the active routes
+    if (activeRoutes && activeRoutes.length > 0) {
+      const userIds = (activeRoutes as RouteWithProfile[]).map(route: RouteWithProfile => route.user_id);
+      const { data: profiles } = await supabaseClient
+        .from("user_profiles")
+        .select("id, push_token, notification_preferences")
+        .in("id", userIds);
+
+      // Attach profiles to routes
+      (activeRoutes as RouteWithProfile[]).forEach((route: RouteWithProfile) => {
+        route.user_profile = profiles?.find((p: any) => p.id === route.user_id);
+      });
+    }
     console.log("🔍 Active routes query result:", {
       count: activeRoutes?.length || 0,
       error: routesError,
@@ -129,10 +154,9 @@ serve(async (req) => {
       console.log(`🚗 Found ${activeRoutes.length} active navigation sessions`);
 
       for (const route of activeRoutes) {
-        const prefs = route.user_profiles?.notification_preferences || {};
+        const prefs = route.user_profile?.notification_preferences || {};
 
-        // Skip if user has safety alerts disabled
-        if (prefs.safety_alerts === false || !route.user_profiles?.push_token) {
+        if (prefs.safety_alerts === false || !route.user_profile?.push_token) {
           continue;
         }
 
@@ -140,8 +164,8 @@ serve(async (req) => {
         const routeCoords = route.route_coordinates as Array<{ latitude: number, longitude: number }>;
         const isNearRoute = routeCoords.some((coord: any) => {
           const distance = calculateDistance(
-            location.latitude,
-            location.longitude,
+            reviewLocation.latitude,
+            reviewLocation.longitude,
             coord.latitude,
             coord.longitude
           );
@@ -152,7 +176,7 @@ serve(async (req) => {
           console.log(`⚠️ Route ${route.id} passes near dangerous location!`);
 
           notifications.push({
-            to: route.user_profiles.push_token,
+            to: route.user_profile.push_token,
             sound: "default",
             title: "🚨 SAFETY ALERT ON YOUR ROUTE",
             body: `Danger reported ahead: ${review.location_name} (${review.safety_rating}/5.0). Consider alternate route.`,
