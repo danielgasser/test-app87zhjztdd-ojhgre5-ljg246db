@@ -1,6 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { EDGE_CONFIG } from '../_shared/config.ts';
+import {
+  getSeverityLevel,
+  isDemographicallyRelevant,
+  wasRecentlyNotifiedForRoute,
+  logNotification,
+  calculateDistance,
+  type PushNotification,
+  type UserProfile,
+} from "../_shared/notification-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,81 +29,7 @@ const SEVERITY_LEVELS = {
   NOTICE: EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.NOTICE,
 };
 
-// Helper: Get severity level for a rating
-function getSeverityLevel(rating: number): typeof SEVERITY_LEVELS[keyof typeof SEVERITY_LEVELS] | null {
-  if (rating >= SEVERITY_LEVELS.CRITICAL.min && rating <= SEVERITY_LEVELS.CRITICAL.max) {
-    return SEVERITY_LEVELS.CRITICAL;
-  }
-  if (rating >= SEVERITY_LEVELS.WARNING.min && rating <= SEVERITY_LEVELS.WARNING.max) {
-    return SEVERITY_LEVELS.WARNING;
-  }
-  if (rating >= SEVERITY_LEVELS.NOTICE.min && rating <= SEVERITY_LEVELS.NOTICE.max) {
-    return SEVERITY_LEVELS.NOTICE;
-  }
-  return null;
-}
-
 // Helper: Check if review is demographically relevant to user
-function isDemographicallyRelevant(
-  reviewerDemographics: any,
-  userDemographics: any
-): boolean {
-  if (!reviewerDemographics || !userDemographics) {
-    return true; // If demographics missing, show to everyone (fail open)
-  }
-
-  let matchScore = 0;
-  let totalChecks = 0;
-
-  // Race/ethnicity match
-  if (reviewerDemographics.race_ethnicity && userDemographics.race_ethnicity) {
-    totalChecks++;
-    const intersection = reviewerDemographics.race_ethnicity.filter((r: string) =>
-      userDemographics.race_ethnicity.includes(r)
-    );
-    if (intersection.length > 0) matchScore++;
-  }
-
-  // Gender match
-  if (reviewerDemographics.gender && userDemographics.gender) {
-    totalChecks++;
-    if (reviewerDemographics.gender === userDemographics.gender) matchScore++;
-  }
-
-  // LGBTQ status match
-  if (reviewerDemographics.lgbtq_status !== null && userDemographics.lgbtq_status !== null) {
-    totalChecks++;
-    if (reviewerDemographics.lgbtq_status === userDemographics.lgbtq_status) matchScore++;
-  }
-
-  // Disability status match
-  if (reviewerDemographics.disability_status && userDemographics.disability_status) {
-    totalChecks++;
-    const intersection = reviewerDemographics.disability_status.filter((d: string) =>
-      userDemographics.disability_status.includes(d)
-    );
-    if (intersection.length > 0) matchScore++;
-  }
-
-  // Religion match
-  if (reviewerDemographics.religion && userDemographics.religion) {
-    totalChecks++;
-    if (reviewerDemographics.religion === userDemographics.religion) matchScore++;
-  }
-
-  // If at least one demographic matches, it's relevant
-  // If no demographics were compared (totalChecks === 0), show to everyone
-  return matchScore > 0 || totalChecks === 0;
-}
-
-interface PushNotification {
-  to: string;
-  sound: "default";
-  title: string;
-  body: string;
-  data?: any;
-  priority?: "default" | "normal" | "high";
-}
 
 interface RouteWithProfile {
   id: string;
@@ -121,26 +56,6 @@ interface NotificationLog {
   notification_type: string;
   sent_at: string;
   review_ids: string[];
-}
-
-// Helper: Calculate distance between two coordinates in meters
-function calculateDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const R = 6371000; // Earth's radius in meters
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-    Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
 }
 
 function toRad(degrees: number): number {
@@ -171,29 +86,6 @@ async function wasRecentlyNotified(
   }
 
   return data && data.length > 0;
-}
-
-// Log that a notification was sent
-async function logNotification(
-  supabase: any,
-  log: NotificationLog
-): Promise<void> {
-  const { error } = await supabase
-    .from("notification_logs")
-    .insert({
-      user_id: log.user_id,
-      route_id: log.route_id,
-      notification_type: log.notification_type,
-      sent_at: log.sent_at,
-      review_ids: log.review_ids,
-      metadata: {
-        batch_size: log.review_ids.length,
-      },
-    });
-
-  if (error) {
-    console.error("Error logging notification:", error);
-  }
 }
 
 serve(async (req) => {
