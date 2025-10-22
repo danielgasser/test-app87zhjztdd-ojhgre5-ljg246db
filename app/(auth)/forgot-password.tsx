@@ -11,12 +11,14 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
+import * as ExpoLinking from "expo-linking";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -37,10 +39,11 @@ export default function ForgotPasswordScreen() {
     }
 
     setLoading(true);
+    const redirectUrl = ExpoLinking.createURL("/reset-password");
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "safepath://reset-password",
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;
