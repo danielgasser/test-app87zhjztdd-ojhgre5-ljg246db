@@ -50,28 +50,6 @@ export default function LoginScreen() {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      notify.error("Please enter your email address first");
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "safepath://reset-password",
-      });
-
-      if (error) throw error;
-
-      notify.info(
-        "We sent you a password reset link. Please check your email.",
-        "Check your email"
-      );
-    } catch (error: any) {
-      notify.error(error.message);
-    }
-  };
-
   const handleAppleSignIn = async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -186,7 +164,7 @@ export default function LoginScreen() {
                 autoComplete="password"
               />
               <TouchableOpacity
-                onPress={handleForgotPassword}
+                onPress={() => router.push("/forgot-password")}
                 style={styles.forgotPassword}
               >
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
