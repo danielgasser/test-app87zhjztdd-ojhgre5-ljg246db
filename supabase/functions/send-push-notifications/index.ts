@@ -100,17 +100,6 @@ serve(async (req) => {
       );
     }
 
-    if (!reviewLocation) {
-      console.error("❌ Location not found for review:", review.location_id);
-      return new Response(
-        JSON.stringify({ message: "Location not found" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
-        }
-      );
-    }
-
     const locationName = reviewLocation.name || "Unknown Location";
     const notifications: PushNotification[] = [];
 
@@ -118,72 +107,64 @@ serve(async (req) => {
     console.log("🗺️ Checking for users navigating near this location...");
 
     // Get the location details for this review
-    const { data: location } = await supabaseClient
-      .from("locations")
-      .select("name, latitude, longitude")
-      .eq("id", review.location_id)
-      .single();
+    // Find active navigation sessions
+    const { data: activeRoutes, error: routesError } = await supabaseClient
+      .from("routes")
+      .select(`
+            id,
+            user_id,
+            route_coordinates,
+            origin_name,
+            destination_name,
+            user_profiles!inner(push_token, notification_preferences)
+          `)
+      .not("navigation_started_at", "is", null)
+      .is("navigation_ended_at", null);
+    console.log("🔍 Active routes query result:", {
+      count: activeRoutes?.length || 0,
+      error: routesError,
+      routes: activeRoutes
+    });
+    if (activeRoutes && activeRoutes.length > 0) {
+      console.log(`🚗 Found ${activeRoutes.length} active navigation sessions`);
 
-    if (location) {
-      // Find active navigation sessions
-      const { data: activeRoutes, error: routesError } = await supabaseClient
-        .from("routes")
-        .select(`
-      id,
-      user_id,
-      route_coordinates,
-      origin_name,
-      destination_name,
-      user_profiles!inner(push_token, notification_preferences)
-    `)
-        .not("navigation_started_at", "is", null)
-        .is("navigation_ended_at", null);
-      console.log("🔍 Active routes query result:", {
-        count: activeRoutes?.length || 0,
-        error: routesError,
-        routes: activeRoutes
-      });
-      if (activeRoutes && activeRoutes.length > 0) {
-        console.log(`🚗 Found ${activeRoutes.length} active navigation sessions`);
+      for (const route of activeRoutes) {
+        const prefs = route.user_profiles?.notification_preferences || {};
 
-        for (const route of activeRoutes) {
-          const prefs = route.user_profiles?.notification_preferences || {};
+        // Skip if user has safety alerts disabled
+        if (prefs.safety_alerts === false || !route.user_profiles?.push_token) {
+          continue;
+        }
 
-          // Skip if user has safety alerts disabled
-          if (prefs.safety_alerts === false || !route.user_profiles?.push_token) {
-            continue;
-          }
+        // Check if review location is near the route (within 500m of any point)
+        const routeCoords = route.route_coordinates as Array<{ latitude: number, longitude: number }>;
+        const isNearRoute = routeCoords.some((coord: any) => {
+          const distance = calculateDistance(
+            location.latitude,
+            location.longitude,
+            coord.latitude,
+            coord.longitude
+          );
+          return distance < 500; // 500 meters
+        });
 
-          // Check if review location is near the route (within 500m of any point)
-          const routeCoords = route.route_coordinates as Array<{ latitude: number, longitude: number }>;
-          const isNearRoute = routeCoords.some((coord: any) => {
-            const distance = calculateDistance(
-              location.latitude,
-              location.longitude,
-              coord.latitude,
-              coord.longitude
-            );
-            return distance < 500; // 500 meters
+        if (isNearRoute) {
+          console.log(`⚠️ Route ${route.id} passes near dangerous location!`);
+
+          notifications.push({
+            to: route.user_profiles.push_token,
+            sound: "default",
+            title: "🚨 SAFETY ALERT ON YOUR ROUTE",
+            body: `Danger reported ahead: ${review.location_name} (${review.safety_rating}/5.0). Consider alternate route.`,
+            data: {
+              type: "route_safety_alert",
+              locationId: review.location_id,
+              reviewId: review.id,
+              locationName: review.location_name,
+              routeId: route.id,
+              safetyRating: review.safety_rating,
+            },
           });
-
-          if (isNearRoute) {
-            console.log(`⚠️ Route ${route.id} passes near dangerous location!`);
-
-            notifications.push({
-              to: route.user_profiles.push_token,
-              sound: "default",
-              title: "🚨 SAFETY ALERT ON YOUR ROUTE",
-              body: `Danger reported ahead: ${review.location_name} (${review.safety_rating}/5.0). Consider alternate route.`,
-              data: {
-                type: "route_safety_alert",
-                locationId: review.location_id,
-                reviewId: review.id,
-                locationName: review.location_name,
-                routeId: route.id,
-                safetyRating: review.safety_rating,
-              },
-            });
-          }
         }
       }
     }
