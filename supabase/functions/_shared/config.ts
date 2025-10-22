@@ -58,5 +58,11 @@ export const EDGE_CONFIG = {
             OVERALL_SCORE: 0.1,                 // 10% weight for overall rating
         },
     },
+    NAVIGATION: {
+        NOTIFICATIONS: {
+            RATE_LIMIT_WINDOW_MINUTES: 10,
+            BATCH_WINDOW_SECONDS: 30
+        }
+    }
 
 }
