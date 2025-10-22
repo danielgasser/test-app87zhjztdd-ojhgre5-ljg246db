@@ -31,39 +31,22 @@ export default function ResetPasswordScreen() {
   const [isValidatingToken, setIsValidatingToken] = useState(true);
 
   useEffect(() => {
-    // Parse URL and establish session
-    const handleDeepLink = async () => {
-      const url = await ExpoLinking.getInitialURL();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth event:", event);
 
-      if (url) {
-        // Supabase uses # instead of ? for query params
-        const parsedUrl = url.replace("#", "?");
-        const { queryParams } = ExpoLinking.parse(parsedUrl);
-
-        const access_token = queryParams?.access_token as string;
-        const refresh_token = queryParams?.refresh_token as string;
-
-        if (access_token && refresh_token) {
-          // Manually set the session
-          const { error } = await supabase.auth.setSession({
-            access_token,
-            refresh_token,
-          });
-
-          if (!error) {
-            setIsValidatingToken(false);
-          } else {
-            notify.error("Invalid or expired reset link.");
-            router.replace("/forgot-password");
-          }
-        } else {
-          notify.error("Invalid reset link.");
-          router.replace("/forgot-password");
-        }
+      if (event === "PASSWORD_RECOVERY") {
+        // User clicked reset link and has valid session
+        setIsValidatingToken(false);
+      } else if (!session) {
+        // No session = invalid/expired link
+        notify.error("Invalid or expired reset link.");
+        router.replace("/forgot-password");
       }
-    };
+    });
 
-    handleDeepLink();
+    return () => subscription.unsubscribe();
   }, []);
 
   const validatePassword = (password: string): boolean => {
