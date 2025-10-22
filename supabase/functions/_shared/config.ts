@@ -62,6 +62,11 @@ export const EDGE_CONFIG = {
         NOTIFICATIONS: {
             RATE_LIMIT_WINDOW_MINUTES: 10,
             BATCH_WINDOW_SECONDS: 30
+        },
+        SEVERITY_LEVELS: {
+            CRITICAL: { min: 1.0, max: 1.9, emoji: "🚨", label: "CRITICAL", priority: 3 },
+            WARNING: { min: 2.0, max: 2.4, emoji: "⚠️", label: "WARNING", priority: 2 },
+            NOTICE: { min: 2.5, max: 2.9, emoji: "ℹ️", label: "NOTICE", priority: 1 },
         }
     }
 
