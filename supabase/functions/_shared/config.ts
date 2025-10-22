@@ -68,6 +68,9 @@ export const EDGE_CONFIG = {
             WARNING: { min: 2.0, max: 2.4, emoji: "⚠️", label: "WARNING", priority: 2 },
             NOTICE: { min: 2.5, max: 2.9, emoji: "ℹ️", label: "NOTICE", priority: 1 },
         }
+    },
+    REVIEWS: {
+        RATE_LIMIT_WINDOW_HOURS: 24
     }
 
 }
