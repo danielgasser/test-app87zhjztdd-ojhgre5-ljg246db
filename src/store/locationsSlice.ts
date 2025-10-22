@@ -566,6 +566,8 @@ export const startNavigationSession = createAsyncThunk(
     console.log("startNavigationSession", startNavigationSession);
 
     try {
+      const timestamp = new Date().toISOString();
+      console.log("🕐 Setting navigation_started_at to:", timestamp);
       const { data, error } = await supabase
         .from("routes")
         .update({
@@ -574,16 +576,24 @@ export const startNavigationSession = createAsyncThunk(
         .eq("id", routeId)
         .select()
         .single();
+      console.log("📊 Supabase response:", { data, error });
 
       if (error) {
-        console.error("Error starting navigation session:", error);
+        console.error("❌ Error starting navigation session:", error);
         throw error;
       }
-
-      console.log("✅ Navigation session started:", data.id);
+      if (!data) {
+        console.error("❌ No data returned from update");
+        throw new Error("No data returned");
+      }
+      console.log("✅ Navigation session started:", {
+        id: data.id,
+        navigation_started_at: data.navigation_started_at,
+        navigation_ended_at: data.navigation_ended_at
+      });
       return data;
     } catch (error) {
-      console.error("startNavigationSession error:", error);
+      console.error("🚨 startNavigationSession error:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Failed to start navigation session");
     }
   }
