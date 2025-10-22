@@ -563,6 +563,8 @@ function dbRouteToSafeRoute(dbRoute: any): SafeRoute {
 export const startNavigationSession = createAsyncThunk(
   "locations/startNavigationSession",
   async (routeId: string, { rejectWithValue }) => {
+    console.log("startNavigationSession", startNavigationSession);
+
     try {
       const { data, error } = await supabase
         .from("routes")
