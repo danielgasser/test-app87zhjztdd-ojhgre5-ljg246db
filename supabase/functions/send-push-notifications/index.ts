@@ -82,11 +82,23 @@ serve(async (req) => {
     console.log("⚠️ Dangerous review detected! Finding affected users...");
 
     // FETCH THE LOCATION DETAILS (name, latitude, longitude)
-    const { data: reviewLocation } = await supabaseClient
-      .from("locations")
-      .select("name, latitude, longitude")
-      .eq("id", review.location_id)
-      .single();
+    const { data: reviewLocation, error: locationError } = await supabaseClient
+      .rpc("get_location_with_coords", { location_id: review.location_id });
+
+    if (locationError) {
+      console.error("❌ Error fetching location:", locationError);
+    }
+
+    if (!reviewLocation) {
+      console.error("❌ Location not found for review:", review.location_id);
+      return new Response(
+        JSON.stringify({ message: "Location not found" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        }
+      );
+    }
 
     if (!reviewLocation) {
       console.error("❌ Location not found for review:", review.location_id);
@@ -102,39 +114,7 @@ serve(async (req) => {
     const locationName = reviewLocation.name || "Unknown Location";
     const notifications: PushNotification[] = [];
 
-    // 1. SAFETY ALERTS - Find users with push tokens and safety_alerts enabled
-    const { data: users, error: usersError } = await supabaseClient
-      .from("user_profiles")
-      .select("id, push_token, notification_preferences")
-      .not("push_token", "is", null);
 
-    if (usersError) {
-      console.error("Error fetching users:", usersError);
-    }
-
-    if (users) {
-      console.log(`👥 Found ${users.length} users with push tokens`);
-
-      for (const user of users) {
-        const prefs = user.notification_preferences || {};
-
-        // Check if user has safety_alerts enabled (default true)
-        if (prefs.safety_alerts !== false && user.push_token) {
-          notifications.push({
-            to: user.push_token,
-            sound: "default",
-            title: "⚠️ Safety Alert",
-            body: `${locationName}: New safety concern reported (${review.safety_rating}/5.0)`,
-            data: {
-              type: "safety_alert",
-              locationId: review.location_id,
-              reviewId: review.id,
-              locationName: locationName,
-            },
-          });
-        }
-      }
-    }
     console.log("🗺️ Checking for users navigating near this location...");
 
     // Get the location details for this review
