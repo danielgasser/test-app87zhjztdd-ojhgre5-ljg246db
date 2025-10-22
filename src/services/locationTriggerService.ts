@@ -23,11 +23,11 @@ const RATE_LIMIT_HOURS = 12; // Don't notify about same location twice in 12 hou
 
 interface UserProfile {
     id: string;
-    race_ethnicity?: string[];
-    gender?: string;
-    lgbtq_status?: boolean;
-    disability_status?: string[];
-    religion?: string;
+    race_ethnicity?: string[] | null;
+    gender?: string | null;
+    lgbtq_status?: boolean | null;
+    disability_status?: string[] | null;
+    religion?: string | null;
     notification_preferences?: {
         location_triggers?: boolean;
     };
