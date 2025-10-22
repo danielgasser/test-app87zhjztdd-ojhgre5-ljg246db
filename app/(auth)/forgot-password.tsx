@@ -18,7 +18,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
-import * as ExpoLinking from "expo-linking";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -39,12 +38,9 @@ export default function ForgotPasswordScreen() {
     }
 
     setLoading(true);
-    const redirectUrl = ExpoLinking.createURL("/reset-password");
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
 
       if (error) throw error;
 
