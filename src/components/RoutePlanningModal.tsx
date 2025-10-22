@@ -220,11 +220,25 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       return;
     }
     const optimizedRoute = smartRouteComparison.optimized_route;
+    console.log("🚀 Starting navigation with route:", {
+      hasRoute: !!optimizedRoute,
+      databaseId: optimizedRoute.databaseId,
+      routeName: optimizedRoute.name,
+    });
     dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
 
     if (optimizedRoute.databaseId) {
+      console.log(
+        "📞 Calling startNavigationSession with ID:",
+        optimizedRoute.databaseId
+      );
       await dispatch(startNavigationSession(optimizedRoute.databaseId));
+    } else {
+      console.warn(
+        "⚠️ Route has no databaseId - navigation_started_at will not be set"
+      );
     }
+
     // Dispatch start navigation action
     dispatch(startNavigation());
     onClose();
