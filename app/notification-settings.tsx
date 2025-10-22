@@ -106,7 +106,7 @@ export default function NotificationSettings() {
         />
 
         <SettingToggle
-          label="Route Safety Changes"
+          label="Location Safety Changes"
           description="Alerts when a previously-safe location gets new negative reviews"
           value={routeSafetyChanges}
           onToggle={async () => {

@@ -11,7 +11,81 @@ const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
 // NOTIFICATION RATE LIMITING CONFIG
 const RATE_LIMIT_WINDOW_MINUTES = EDGE_CONFIG.NAVIGATION.NOTIFICATIONS.RATE_LIMIT_WINDOW_MINUTES; // Don't send duplicate alerts within 15 minutes
-const BATCH_WINDOW_SECONDS = EDGE_CONFIG.NAVIGATION.NOTIFICATIONS.BATCH_WINDOW_SECONDS;; // Wait 30 seconds to batch multiple reviews
+const BATCH_WINDOW_SECONDS = EDGE_CONFIG.NAVIGATION.NOTIFICATIONS.BATCH_WINDOW_SECONDS; // Wait 30 seconds to batch multiple reviews
+
+// SEVERITY LEVELS FOR ALERTS
+const SEVERITY_LEVELS = {
+  CRITICAL: EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.CRITICAL,
+  WARNING: EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.WARNING,
+  NOTICE: EDGE_CONFIG.NAVIGATION.SEVERITY_LEVELS.NOTICE,
+};
+
+// Helper: Get severity level for a rating
+function getSeverityLevel(rating: number): typeof SEVERITY_LEVELS[keyof typeof SEVERITY_LEVELS] | null {
+  if (rating >= SEVERITY_LEVELS.CRITICAL.min && rating <= SEVERITY_LEVELS.CRITICAL.max) {
+    return SEVERITY_LEVELS.CRITICAL;
+  }
+  if (rating >= SEVERITY_LEVELS.WARNING.min && rating <= SEVERITY_LEVELS.WARNING.max) {
+    return SEVERITY_LEVELS.WARNING;
+  }
+  if (rating >= SEVERITY_LEVELS.NOTICE.min && rating <= SEVERITY_LEVELS.NOTICE.max) {
+    return SEVERITY_LEVELS.NOTICE;
+  }
+  return null;
+}
+
+// Helper: Check if review is demographically relevant to user
+function isDemographicallyRelevant(
+  reviewerDemographics: any,
+  userDemographics: any
+): boolean {
+  if (!reviewerDemographics || !userDemographics) {
+    return true; // If demographics missing, show to everyone (fail open)
+  }
+
+  let matchScore = 0;
+  let totalChecks = 0;
+
+  // Race/ethnicity match
+  if (reviewerDemographics.race_ethnicity && userDemographics.race_ethnicity) {
+    totalChecks++;
+    const intersection = reviewerDemographics.race_ethnicity.filter((r: string) =>
+      userDemographics.race_ethnicity.includes(r)
+    );
+    if (intersection.length > 0) matchScore++;
+  }
+
+  // Gender match
+  if (reviewerDemographics.gender && userDemographics.gender) {
+    totalChecks++;
+    if (reviewerDemographics.gender === userDemographics.gender) matchScore++;
+  }
+
+  // LGBTQ status match
+  if (reviewerDemographics.lgbtq_status !== null && userDemographics.lgbtq_status !== null) {
+    totalChecks++;
+    if (reviewerDemographics.lgbtq_status === userDemographics.lgbtq_status) matchScore++;
+  }
+
+  // Disability status match
+  if (reviewerDemographics.disability_status && userDemographics.disability_status) {
+    totalChecks++;
+    const intersection = reviewerDemographics.disability_status.filter((d: string) =>
+      userDemographics.disability_status.includes(d)
+    );
+    if (intersection.length > 0) matchScore++;
+  }
+
+  // Religion match
+  if (reviewerDemographics.religion && userDemographics.religion) {
+    totalChecks++;
+    if (reviewerDemographics.religion === userDemographics.religion) matchScore++;
+  }
+
+  // If at least one demographic matches, it's relevant
+  // If no demographics were compared (totalChecks === 0), show to everyone
+  return matchScore > 0 || totalChecks === 0;
+}
 
 interface PushNotification {
   to: string;
@@ -19,6 +93,7 @@ interface PushNotification {
   title: string;
   body: string;
   data?: any;
+  priority?: "default" | "normal" | "high";
 }
 
 interface RouteWithProfile {
@@ -31,6 +106,11 @@ interface RouteWithProfile {
     id: string;
     push_token: string | null;
     notification_preferences: any;
+    race_ethnicity?: string[];
+    gender?: string;
+    lgbtq_status?: boolean;
+    disability_status?: string[];
+    religion?: string;
   };
 }
 
@@ -156,10 +236,22 @@ serve(async (req) => {
       );
     }
 
-    console.log("⚠️ Dangerous review detected! Finding affected users...");
+    // Get severity level
+    const severity = getSeverityLevel(review.safety_rating);
+    if (!severity) {
+      console.log("⚠️ Review rating doesn't match any severity level");
+      return new Response(
+        JSON.stringify({ message: "Invalid rating for severity" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
+
+    console.log(`${severity.emoji} ${severity.label} alert detected! Finding affected users...`);
 
     // FETCH THE LOCATION DETAILS (name, latitude, longitude)
-    // FIX: Get first element from array response
     const { data: reviewLocationArray, error: locationError } = await supabaseClient
       .rpc("get_location_with_coords", { location_id: review.location_id });
 
@@ -179,16 +271,28 @@ serve(async (req) => {
       );
     }
 
-    // FIX: Extract first element
     const reviewLocation = reviewLocationArray[0];
     console.log(`📍 Review at: ${reviewLocation.latitude}, ${reviewLocation.longitude}`);
+
+    // FETCH REVIEWER'S DEMOGRAPHICS (for matching)
+    const { data: reviewerProfile, error: reviewerError } = await supabaseClient
+      .from("user_profiles")
+      .select("race_ethnicity, gender, lgbtq_status, disability_status, religion")
+      .eq("id", review.user_id)
+      .single();
+
+    if (reviewerError) {
+      console.error("⚠️ Could not fetch reviewer demographics:", reviewerError);
+    }
+
+    console.log("👤 Reviewer demographics:", reviewerProfile ? "✓ Available" : "✗ Not available");
 
     const notifications: PushNotification[] = [];
     const notificationLogs: NotificationLog[] = [];
 
     console.log("🗺️ Checking for users navigating near this location...");
 
-    // Find active navigation sessions
+    // Find active navigation sessions with user profiles
     const { data: activeRoutes, error: routesError } = await supabaseClient
       .from("routes")
       .select(`
@@ -196,110 +300,122 @@ serve(async (req) => {
         user_id,
         route_coordinates,
         origin_name,
-        destination_name
+        destination_name,
+        user_profile:user_profiles!routes_user_id_fkey (
+          id,
+          push_token,
+          notification_preferences,
+          race_ethnicity,
+          gender,
+          lgbtq_status,
+          disability_status,
+          religion
+        )
       `)
       .not("navigation_started_at", "is", null)
       .is("navigation_ended_at", null);
 
-    // Get user profiles separately for the active routes
-    if (activeRoutes && activeRoutes.length > 0) {
-      const userIds = (activeRoutes as RouteWithProfile[]).map(
-        (route: RouteWithProfile) => route.user_id
-      );
-      const { data: profiles } = await supabaseClient
-        .from("user_profiles")
-        .select("id, push_token, notification_preferences")
-        .in("id", userIds);
-
-      // Attach profiles to routes
-      (activeRoutes as RouteWithProfile[]).forEach((route: RouteWithProfile) => {
-        route.user_profile = profiles?.find((p: any) => p.id === route.user_id);
-      });
+    if (routesError) {
+      console.error("❌ Error fetching routes:", routesError);
+      throw routesError;
     }
 
-    console.log("🔍 Active routes query result:", {
-      count: activeRoutes?.length || 0,
-      error: routesError,
-      routes: activeRoutes?.length,
-    });
+    console.log(`📊 Found ${activeRoutes?.length || 0} active navigation sessions`);
 
-    if (activeRoutes && activeRoutes.length > 0) {
-      console.log(`🚗 Found ${activeRoutes.length} active navigation sessions`);
-
-      for (const route of activeRoutes) {
-        const prefs = route.user_profile?.notification_preferences || {};
-
-        // Skip if user disabled safety alerts or has no push token
-        if (prefs.safety_alerts === false || !route.user_profile?.push_token) {
-          continue;
+    if (!activeRoutes || activeRoutes.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "No active navigators found" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
         }
+      );
+    }
 
-        // ✅ RATE LIMITING: Check if user was recently notified for this route
-        const recentlyNotified = await wasRecentlyNotified(
-          supabaseClient,
-          route.user_id,
-          route.id
+    // For each active route, check if it's near the review location
+    for (const route of activeRoutes as RouteWithProfile[]) {
+      if (!route.user_profile?.push_token) {
+        console.log(`⏭️ Skipping user ${route.user_id}: No push token`);
+        continue;
+      }
+
+      // Check rate limiting
+      const wasNotified = await wasRecentlyNotified(
+        supabaseClient,
+        route.user_id,
+        route.id
+      );
+
+      if (wasNotified) {
+        console.log(`⏭️ Skipping user ${route.user_id}: Recently notified`);
+        continue;
+      }
+
+      // CHECK DEMOGRAPHIC MATCHING
+      const isRelevant = isDemographicallyRelevant(
+        reviewerProfile,
+        route.user_profile
+      );
+
+      if (!isRelevant) {
+        console.log(`⏭️ Skipping user ${route.user_id}: Demographics don't match (${reviewerProfile ? 'reviewer has profile' : 'no reviewer profile'})`);
+        continue;
+      }
+
+      console.log(`✓ User ${route.user_id}: Demographically relevant`);
+
+      // Calculate distance to the route
+      const routeCoords = route.route_coordinates?.coordinates || [];
+      let minDistance = Infinity;
+
+      for (const coord of routeCoords) {
+        const distance = calculateDistance(
+          reviewLocation.latitude,
+          reviewLocation.longitude,
+          coord[1],
+          coord[0]
+        );
+        minDistance = Math.min(minDistance, distance);
+      }
+
+      // If location is within 500m of route, send notification
+      if (minDistance <= 500) {
+        console.log(
+          `🚨 Sending ${severity.label} alert to user ${route.user_id}: ${Math.round(minDistance)}m from route`
         );
 
-        if (recentlyNotified) {
-          console.log(
-            `⏱️ User ${route.user_id} was recently notified for route ${route.id}, skipping...`
-          );
-          continue;
-        }
-
-        // Check if review location is near the route
-        const routeCoords = route.route_coordinates as Array<{
-          latitude: number;
-          longitude: number;
-        }>;
-        console.log(`🛣️ Checking ${routeCoords.length} route points...`);
-
-        let minDistance = Infinity;
-
-        const isNearRoute = routeCoords.some((coord: any) => {
-          const distance = calculateDistance(
-            reviewLocation.latitude,
-            reviewLocation.longitude,
-            coord.latitude,
-            coord.longitude
-          );
-          if (distance < minDistance) {
-            minDistance = distance;
-          }
-          return distance < 500; // 500 meters
+        // Create notification with severity-based priority
+        notifications.push({
+          to: route.user_profile.push_token,
+          sound: "default",
+          priority: severity.priority === 3 ? "high" : "default",
+          title: `${severity.emoji} ${severity.label}: Safety Alert on Your Route`,
+          body: `${reviewLocation.name} - ${Math.round(minDistance)}m ahead. Rating: ${review.safety_rating}★. Stay alert.`,
+          data: {
+            type: "route_safety_alert",
+            locationId: review.location_id,
+            reviewId: review.id,
+            locationName: reviewLocation.name,
+            routeId: route.id,
+            safetyRating: review.safety_rating,
+            distance: Math.round(minDistance),
+            severity: severity.label,
+            severityEmoji: severity.emoji,
+          },
         });
 
-        if (isNearRoute) {
-          console.log(`⚠️ Route ${route.id} passes near dangerous location!`);
-          console.log(`📏 Closest distance: ${Math.round(minDistance)}m`);
-
-          // Create notification
-          notifications.push({
-            to: route.user_profile.push_token,
-            sound: "default",
-            title: "🚨 SAFETY ALERT ON YOUR ROUTE",
-            body: `Danger reported ${Math.round(minDistance)}m from your route: ${reviewLocation.name} (${review.safety_rating}/5.0 safety rating). Stay alert.`,
-            data: {
-              type: "route_safety_alert",
-              locationId: review.location_id,
-              reviewId: review.id,
-              locationName: reviewLocation.name,
-              routeId: route.id,
-              safetyRating: review.safety_rating,
-              distance: Math.round(minDistance),
-            },
-          });
-
-          // Log for rate limiting
-          notificationLogs.push({
-            user_id: route.user_id,
-            route_id: route.id,
-            notification_type: "route_safety_alert",
-            sent_at: new Date().toISOString(),
-            review_ids: [review.id],
-          });
-        }
+        // Log for rate limiting
+        notificationLogs.push({
+          user_id: route.user_id,
+          route_id: route.id,
+          notification_type: "route_safety_alert",
+          sent_at: new Date().toISOString(),
+          review_ids: [review.id],
+        });
+      } else {
+        console.log(
+          `⏭️ Skipping user ${route.user_id}: Too far (${Math.round(minDistance)}m)`
+        );
       }
     }
 
@@ -329,6 +445,7 @@ serve(async (req) => {
           success: true,
           message: "Notifications sent",
           count: notifications.length,
+          severity: severity.label,
           result,
         }),
         {
@@ -338,12 +455,13 @@ serve(async (req) => {
       );
     }
 
-    console.log("ℹ️ No notifications to send");
+    console.log("ℹ️ No demographically-relevant users to notify");
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "No notifications to send",
+        message: "No relevant users to notify",
+        severity: severity.label,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
