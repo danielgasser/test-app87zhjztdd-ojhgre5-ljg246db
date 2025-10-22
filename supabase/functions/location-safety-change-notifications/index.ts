@@ -7,7 +7,6 @@ import {
   type PushNotification,
   type UserProfile,
 } from "../_shared/notification-helpers.ts";
-import { EDGE_CONFIG } from "../_shared/config.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,8 +15,6 @@ const corsHeaders = {
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
-// RATE LIMITING: Don't notify same user about same location within 24 hours
-const RATE_LIMIT_WINDOW_HOURS = EDGE_CONFIG.REVIEWS.RATE_LIMIT_WINDOW_HOURS;
 
 serve(async (req) => {
   // Handle CORS
@@ -159,11 +156,11 @@ serve(async (req) => {
         reviewer.user_id,
         review.location_id,
         "location_safety_change",
-        RATE_LIMIT_WINDOW_HOURS
+        EDGE_CONFIG.REVIEWS.RATE_LIMIT_WINDOW_HOURS
       );
 
       if (wasNotifiedRecently) {
-        console.log(`⏭️ Skipping user ${reviewer.user_id}: Recently notified about this location (within ${RATE_LIMIT_WINDOW_HOURS}h)`);
+        console.log(`⏭️ Skipping user ${reviewer.user_id}: Recently notified about this location (within ${EDGE_CONFIG.REVIEWS.RATE_LIMIT_WINDOW_HOURS}h)`);
         continue;
       }
 

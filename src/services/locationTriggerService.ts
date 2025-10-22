@@ -7,15 +7,7 @@ import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { supabase } from './supabase';
 import { calculateDistance } from '../utils/distanceCalculator';
-
-// ============================================
-// CONFIGURATION
-// ============================================
-
-const CHECK_INTERVAL_MS = 30000; // Check every 30 seconds
-const NOTIFICATION_RADIUS_METERS = 200; // Notify within 200m
-const MIN_RATING_THRESHOLD = 4.0; // Only notify for highly-rated spots (≥4.0)
-const RATE_LIMIT_HOURS = 12; // Don't notify about same location twice in 12 hours
+import { APP_CONFIG } from '@/utils/appConfig';
 
 // ============================================
 // TYPES
@@ -28,9 +20,8 @@ interface UserProfile {
     lgbtq_status?: boolean | null;
     disability_status?: string[] | null;
     religion?: string | null;
-    notification_preferences?: {
-        location_triggers?: boolean;
-    };
+    notification_preferences?: Record<string, any> | null;
+
 }
 
 interface NearbyLocation {
@@ -100,7 +91,7 @@ class LocationTriggerService {
         // Start checking location
         this.intervalId = setInterval(() => {
             this.checkNearbyLocations();
-        }, CHECK_INTERVAL_MS);
+        }, APP_CONFIG.COMMUNITY.LOCATIONS_ALERT.CHECK_INTERVAL_MS);
 
         // Run immediately on start
         this.checkNearbyLocations();
@@ -147,7 +138,7 @@ class LocationTriggerService {
                     user_race_ethnicity: this.currentUserProfile.race_ethnicity || [],
                     user_gender: this.currentUserProfile.gender || '',
                     user_lgbtq_status: this.currentUserProfile.lgbtq_status || false,
-                    radius_meters: NOTIFICATION_RADIUS_METERS,
+                    radius_meters: APP_CONFIG.COMMUNITY.LOCATIONS_ALERT.NOTIFICATION_RADIUS_METERS,
                 }
             );
 
@@ -182,7 +173,7 @@ class LocationTriggerService {
     ): Promise<void> {
         // Check rating threshold
         const rating = location.demographic_safety_score || location.avg_safety_score;
-        if (!rating || rating < MIN_RATING_THRESHOLD) {
+        if (!rating || rating < APP_CONFIG.COMMUNITY.LOCATIONS_ALERT.MIN_RATING_THRESHOLD) {
             return;
         }
 
@@ -199,7 +190,7 @@ class LocationTriggerService {
             location.longitude
         );
 
-        if (distance > NOTIFICATION_RADIUS_METERS) {
+        if (distance > APP_CONFIG.COMMUNITY.LOCATIONS_ALERT.NOTIFICATION_RADIUS_METERS) {
             return;
         }
 
@@ -271,7 +262,7 @@ class LocationTriggerService {
         const hoursSinceNotification =
             (Date.now() - lastNotified.getTime()) / (1000 * 60 * 60);
 
-        return hoursSinceNotification < RATE_LIMIT_HOURS;
+        return hoursSinceNotification < APP_CONFIG.COMMUNITY.LOCATIONS_ALERT.RATE_LIMIT_HOURS;
     }
 
     /**
