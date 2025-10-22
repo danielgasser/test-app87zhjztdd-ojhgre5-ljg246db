@@ -3,7 +3,7 @@ module.exports = {
     name: "SafePath",
     slug: "safepath",
     //version: "1.6.0",
-    version: "0.9.2",
+    version: "0.9.3",
     scheme: "safepath",
     orientation: "portrait",
     icon: "./assets/images/icon.png",

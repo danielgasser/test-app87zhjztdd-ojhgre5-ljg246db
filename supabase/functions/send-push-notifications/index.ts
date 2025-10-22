@@ -52,9 +52,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get the review data from the webhook
-    const { type, record } = await req.json();
-
     console.log("📬 Received webhook:", type, "for review:", record.id);
 
     // Only process INSERT events
