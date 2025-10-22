@@ -160,6 +160,33 @@ function RootLayoutNav() {
           params: { deepLinkUrl: url },
         });
       }
+      if (url.includes("safepath://reset-password")) {
+        // Parse tokens from URL hash
+        const hashPart = url.split("#")[1];
+        if (hashPart) {
+          const params = new URLSearchParams(hashPart);
+          const accessToken = params.get("access_token");
+          const refreshToken = params.get("refresh_token");
+          const type = params.get("type");
+
+          if (type === "recovery" && accessToken && refreshToken) {
+            console.log("🔑 Setting recovery session");
+            // Set session BEFORE navigating
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (!error) {
+              // Now navigate - session is already set
+              router.push("/(auth)/reset-password");
+              return;
+            }
+          }
+        }
+        // If no tokens or error, still go to reset-password (will show error)
+        router.push("/(auth)/reset-password");
+      }
     };
 
     const subscription = Linking.addEventListener("url", handleUrl);

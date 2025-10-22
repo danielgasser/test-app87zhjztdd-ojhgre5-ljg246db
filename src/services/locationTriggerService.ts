@@ -86,8 +86,6 @@ class LocationTriggerService {
         this.currentUserProfile = userProfile;
         this.isMonitoring = true;
 
-        console.log('✅ Location trigger service started');
-
         // Start checking location
         this.intervalId = setInterval(() => {
             this.checkNearbyLocations();
@@ -108,7 +106,6 @@ class LocationTriggerService {
         this.isMonitoring = false;
         this.currentUserId = null;
         this.currentUserProfile = null;
-        console.log('🛑 Location trigger service stopped');
     }
 
     /**
@@ -127,7 +124,6 @@ class LocationTriggerService {
 
             const { latitude, longitude } = location.coords;
 
-            console.log(`📍 Checking nearby locations at (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`);
 
             // Query nearby locations from database
             const { data: nearbyLocations, error } = await supabase.rpc(
@@ -148,7 +144,6 @@ class LocationTriggerService {
             }
 
             if (!nearbyLocations || nearbyLocations.length === 0) {
-                console.log('📍 No nearby locations found');
                 return;
             }
 

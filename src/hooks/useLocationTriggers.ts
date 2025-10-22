@@ -31,11 +31,9 @@ export function useLocationTriggers() {
         const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
             if (nextAppState === 'active') {
                 // App came to foreground - resume monitoring
-                console.log('📱 App active - starting location triggers');
                 locationTriggerService.start(user.id, profile);
             } else if (nextAppState === 'background' || nextAppState === 'inactive') {
                 // App went to background - stop monitoring
-                console.log('📱 App backgrounded - stopping location triggers');
                 locationTriggerService.stop();
             }
         });
