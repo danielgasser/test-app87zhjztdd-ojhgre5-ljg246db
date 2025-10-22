@@ -126,7 +126,7 @@ serve(async (req) => {
 
     if (location) {
       // Find active navigation sessions
-      const { data: activeRoutes } = await supabaseClient
+      const { data: activeRoutes, error: routesError } = await supabaseClient
         .from("routes")
         .select(`
       id,
@@ -138,7 +138,11 @@ serve(async (req) => {
     `)
         .not("navigation_started_at", "is", null)
         .is("navigation_ended_at", null);
-
+      console.log("🔍 Active routes query result:", {
+        count: activeRoutes?.length || 0,
+        error: routesError,
+        routes: activeRoutes
+      });
       if (activeRoutes && activeRoutes.length > 0) {
         console.log(`🚗 Found ${activeRoutes.length} active navigation sessions`);
 
