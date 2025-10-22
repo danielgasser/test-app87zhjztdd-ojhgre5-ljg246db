@@ -43,7 +43,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-
+  const { type, record } = await req.json();
+  console.log("📬 Received webhook:", type, "for review:", record.id);
+  await new Promise(resolve => setTimeout(resolve, 1000));
   try {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
