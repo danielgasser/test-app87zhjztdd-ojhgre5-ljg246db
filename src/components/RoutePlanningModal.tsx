@@ -26,6 +26,7 @@ import {
   startNavigation,
   endNavigation,
   saveRouteToDatabase,
+  startNavigationSession,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -213,13 +214,17 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   );
 
   // Handle starting navigation
-  const handleStartNavigation = () => {
+  const handleStartNavigation = async () => {
     if (!smartRouteComparison?.optimized_route) {
       notify.error("No route selected for navigation");
       return;
     }
+    const optimizedRoute = smartRouteComparison.optimized_route;
     dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
 
+    if (optimizedRoute.databaseId) {
+      await dispatch(startNavigationSession(optimizedRoute.databaseId));
+    }
     // Dispatch start navigation action
     dispatch(startNavigation());
     onClose();
