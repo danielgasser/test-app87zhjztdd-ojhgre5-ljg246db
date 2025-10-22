@@ -122,19 +122,22 @@ function RootLayoutNav() {
 
           // Register for push notifications on login
           if (session.user?.id) {
-            try {
-              const pushToken =
-                await notificationService.registerForPushNotifications();
-              if (pushToken) {
-                await notificationService.savePushToken(
-                  session.user.id,
-                  pushToken
-                );
+            notificationService
+              .registerForPushNotifications()
+              .then((pushToken) => {
+                if (pushToken) {
+                  return notificationService.savePushToken(
+                    session.user.id,
+                    pushToken
+                  );
+                }
+              })
+              .then(() => {
                 console.log("✅ Push token registered on login");
-              }
-            } catch (error) {
-              console.error("Failed to register push token:", error);
-            }
+              })
+              .catch((error) => {
+                console.error("Failed to register push token:", error);
+              });
           }
           // Don't route here - let deep link or callback screen handle it
         }
