@@ -3,10 +3,11 @@ import * as Sentry from "@sentry/react-native";
 export const logger = {
     error: (message: string, error?: Error | unknown, context?: Record<string, any>) => {
         // Log to console in development
+        /*
         if (__DEV__) {
-            console.error(message, error, context);
+            console.error(message, error ? error : '', context ? JSON.stringify(context) : '');
         }
-
+*/
         // Always send to Sentry
         if (context) {
             Sentry.setContext("error_context", context);

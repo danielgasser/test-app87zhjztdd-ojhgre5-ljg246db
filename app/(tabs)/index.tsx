@@ -1337,7 +1337,7 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   errorText: {
-    fontSize: 20,
+    fontSize: 18,
     color: theme.colors.error,
     textAlign: "center",
     paddingHorizontal: 20,
