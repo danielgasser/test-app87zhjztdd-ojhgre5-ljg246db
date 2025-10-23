@@ -187,25 +187,31 @@ export default function LoginScreen() {
 
               {/* Apple Sign In Button */}
               {Platform.OS === "ios" && (
-                <TouchableOpacity
-                  style={styles.appleButton}
-                  onPress={handleAppleSignIn}
-                >
-                  <Ionicons
-                    name="logo-apple"
-                    size={20}
-                    color={theme.colors.background}
-                    style={{ marginRight: 8 }}
-                  />
-                  <Text style={styles.appleButtonText}>Sign in with Apple</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity
+                    style={styles.appleButton}
+                    onPress={handleAppleSignIn}
+                  >
+                    <Ionicons
+                      name="logo-apple"
+                      size={20}
+                      color={theme.colors.background}
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text style={styles.appleButtonText}>
+                      Sign in with Apple
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Move the OR divider inside the Platform check */}
+                  <View style={styles.dividerContainer}>
+                    <View style={styles.divider} />
+                    <Text style={styles.dividerText}>OR</Text>
+                    <View style={styles.divider} />
+                  </View>
+                </>
               )}
-              {/* Social Login Divider */}
-              <View style={styles.dividerContainer}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>OR</Text>
-                <View style={styles.divider} />
-              </View>
+
               {/* Google Sign In Button */}
               <TouchableOpacity
                 style={styles.googleButton}
