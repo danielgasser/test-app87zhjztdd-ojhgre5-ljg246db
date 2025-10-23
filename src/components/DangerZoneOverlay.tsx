@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { DangerZone } from "../types/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { theme } from "@/styles/theme";
-
+import { logger } from "@/utils/logger";
 interface DangerZoneOverlayProps {
   dangerZones: DangerZone[];
   visible: boolean;
@@ -50,11 +50,8 @@ export default function DangerZoneOverlay({
           !zone.center_lng ||
           (zone.center_lat === 0 && zone.center_lng === 0)
         ) {
-          logger.warn(
-            `Invalid coordinates for zone ${zone.id}:`,
-            zone.center_lat,
-            zone.center_lng
-          );
+          const warnMessage = `coordinates data for zone ${zone.id}: lat: ${zone.center_lat}, lng: ${zone.center_lng}`;
+          logger.warn(warnMessage);
           return null; // Skip rendering this zone
         }
         return (
