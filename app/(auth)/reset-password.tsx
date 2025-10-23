@@ -18,6 +18,7 @@ import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
 import { useLocalSearchParams } from "expo-router";
+import { logger } from "@/utils/logger";
 
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();
@@ -103,7 +104,7 @@ export default function ResetPasswordScreen() {
         router.replace("/login");
       }, 1500);
     } catch (error: any) {
-      console.error("Password reset error:", error);
+      logger.error("Password reset error:", error);
       notify.error(
         error.message || "Failed to reset password. Please try again.",
         "Error"

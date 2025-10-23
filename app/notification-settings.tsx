@@ -14,8 +14,8 @@ import { theme } from "../src/styles/theme";
 import SettingToggle from "../src/components/SettingToggle";
 import { useAppSelector, useAppDispatch } from "../src/store/hooks";
 import { updateUserProfile } from "../src/store/userSlice";
-import { Alert } from "react-native";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 export default function NotificationSettings() {
   const user = useAppSelector((state: any) => state.auth.user);
@@ -61,7 +61,7 @@ export default function NotificationSettings() {
       ).unwrap();
     } catch (error) {
       notify.error("Failed to save setting. Please try again.");
-      console.error("Save error:", error);
+      logger.error("Save error:", error);
     }
   };
 

@@ -58,6 +58,7 @@ import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -368,7 +369,7 @@ export default function MapScreen() {
         dispatch(setUserCountry(countryCode));
       }
     } catch (error) {
-      console.error("Location permission error:", error);
+      logger.error("Location permission error:", error);
       setLocationPermission(false);
     }
   };
@@ -663,7 +664,7 @@ export default function MapScreen() {
               }, 800); // <- Increased delay
             }
           } catch (error) {
-            console.error("❌ Error handling navigation:", error);
+            logger.error("❌ Error handling navigation:", error);
           }
         }, 100);
       }

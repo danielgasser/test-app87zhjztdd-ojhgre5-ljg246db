@@ -1,7 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
 import { supabase } from './supabase';
+import { logger } from "@/utils/logger";
+
 
 // Configure how notifications are handled when app is in foreground
 Notifications.setNotificationHandler({
@@ -21,7 +22,7 @@ export const notificationService = {
     async registerForPushNotifications(): Promise<string | null> {
         // Check if device is physical (push notifications don't work on simulators)
         if (!Device.isDevice) {
-            console.error('Push notifications only work on physical devices');
+            logger.error('Push notifications only work on physical devices');
             return null;
         }
 
@@ -46,7 +47,7 @@ export const notificationService = {
 
             return tokenData.data;
         } catch (error) {
-            console.error('Error getting push token:', error);
+            logger.error('Error getting push token:', error);
             return null;
         }
     },
@@ -65,10 +66,10 @@ export const notificationService = {
                 .eq('id', userId);
 
             if (error) {
-                console.error('Error saving push token:', error);
+                logger.error('Error saving push token:', error);
             }
         } catch (error) {
-            console.error('Error in savePushToken:', error);
+            logger.error('Error in savePushToken:', error);
         }
     },
 
@@ -86,10 +87,10 @@ export const notificationService = {
                 .eq('id', userId);
 
             if (error) {
-                console.error('Error removing push token:', error);
+                logger.error('Error removing push token:', error);
             }
         } catch (error) {
-            console.error('Error in removePushToken:', error);
+            logger.error('Error in removePushToken:', error);
         }
     },
 };

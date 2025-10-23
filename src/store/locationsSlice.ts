@@ -21,6 +21,9 @@ import { Alert } from "react-native";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner, incrementShowCount, BannerType } from "./profileBannerSlice";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
+
+
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
 
@@ -392,7 +395,7 @@ export const fetchLocationDetails = createAsyncThunk(
     });
 
     if (error) {
-      console.error("Error fetching location details:", error);
+      logger.error("Error fetching location details:", error);
       throw error;
     }
 
@@ -422,13 +425,13 @@ export const fetchSafetyInsights = createAsyncThunk(
       });
 
       if (error) {
-        console.error("Error fetching safety insights:", error);
+        logger.error("Error fetching safety insights:", error);
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error("Safety insights fetch error:", error);
+      logger.error("Safety insights fetch error:", error);
       throw error;
     }
   }
@@ -446,7 +449,7 @@ export const createLocation = createAsyncThunk(
     const { data, error } = await supabase.from("locations").insert(dbData).select().single();
 
     if (error) {
-      console.error("Error creating location:", error);
+      logger.error("Error creating location:", error);
       throw error;
     }
 
@@ -524,7 +527,7 @@ export const checkForActiveNavigation = createAsyncThunk(
 
       return data || null;
     } catch (error) {
-      console.error("checkForActiveNavigation error:", error);
+      logger.error("checkForActiveNavigation error:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Failed to check active navigation");
     }
   }
@@ -623,7 +626,7 @@ export const submitReview = createAsyncThunk(
     }).select().single();
 
     if (error) {
-      console.error("Error submitting review:", error);
+      logger.error("Error submitting review:", error);
       throw error;
     }
 
@@ -637,7 +640,7 @@ export const updateReview = createAsyncThunk(
     const { data, error } = await supabase.from("reviews").update(updateData).eq("id", id).select().single();
 
     if (error) {
-      console.error("Error updating review:", error);
+      logger.error("Error updating review:", error);
       throw error;
     }
 
@@ -665,7 +668,7 @@ export const fetchUserReviews = createAsyncThunk(
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching user reviews:", error);
+      logger.error("Error fetching user reviews:", error);
       throw error;
     }
 
@@ -687,7 +690,7 @@ export const searchLocations = createAsyncThunk(
       });
 
       if (dbError) {
-        console.error("Database search error:", dbError);
+        logger.error("Database search error:", dbError);
       }
 
       const searchResults: SearchLocation[] = (dbResults || []).map((location: any) => ({
@@ -702,7 +705,7 @@ export const searchLocations = createAsyncThunk(
 
       return searchResults;
     } catch (error) {
-      console.error("Search error:", error);
+      logger.error("Search error:", error);
       throw error;
     }
   }
@@ -754,7 +757,7 @@ export const loadCommunityFeedMode = createAsyncThunk(
       const savedMode = await AsyncStorage.getItem("communityFeedMode");
       return savedMode === "map_area" ? "map_area" : "near_me";
     } catch (error) {
-      console.error("Error loading community feed mode:", error);
+      logger.error("Error loading community feed mode:", error);
       return "near_me"; // Default fallback
     }
   }
@@ -767,7 +770,7 @@ export const saveCommunityFeedMode = createAsyncThunk(
       await AsyncStorage.setItem("communityFeedMode", mode);
       return mode;
     } catch (error) {
-      console.error("Error saving community feed mode:", error);
+      logger.error("Error saving community feed mode:", error);
       return mode;
     }
   }
@@ -799,7 +802,7 @@ export const fetchHeatMapData = createAsyncThunk(
         user_age_range: userProfile?.age_range || null,
       });
       if (error) {
-        console.error("Error fetching heat map data:", error);
+        logger.error("Error fetching heat map data:", error);
         return [];
       }
 
@@ -819,7 +822,7 @@ export const fetchHeatMapData = createAsyncThunk(
 
       return heatMapPoints;
     } catch (error) {
-      console.error("Heat map data fetch error:", error);
+      logger.error("Heat map data fetch error:", error);
       return [];
     }
   }
@@ -851,7 +854,7 @@ export const fetchRecentReviews = createAsyncThunk(
         review_limit: limit
       });
       if (error) {
-        console.error("Error fetching nearby reviews:", error);
+        logger.error("Error fetching nearby reviews:", error);
         throw error;
       }
 
@@ -877,7 +880,7 @@ export const fetchRecentReviews = createAsyncThunk(
         },
       }));
     } catch (error) {
-      console.error("Recent reviews fetch error:", error);
+      logger.error("Recent reviews fetch error:", error);
       throw error;
     }
   }
@@ -893,15 +896,16 @@ export const fetchTrendingLocations = createAsyncThunk(
       });
 
       if (error) {
-        console.error("Error fetching trending locations:", error.message, error.code, error.details);
+        const errorMessage = `error message: ${error.message}, error code: ${error.code}, error details: ${error.details}`;
+        logger.error("Error fetching trending locations:", errorMessage);
 
-        //console.error("Error fetching trending locations:", error);
+        //logger.error("Error fetching trending locations:", error);
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error("Trending locations fetch error:", error);
+      logger.error("Trending locations fetch error:", error);
       throw error;
     }
   }
@@ -935,14 +939,14 @@ export const fetchDangerZones = createAsyncThunk(
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("🛡️ Danger zones API error:", response.status, errorText);
+        logger.error("🛡️ Danger zones API error:", errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
       return data.danger_zones || [];
     } catch (error) {
-      console.error("Error fetching danger zones:", error);
+      logger.error("Error fetching danger zones:", error);
       return [];
     }
   }
@@ -979,14 +983,14 @@ export const fetchSimilarUsers = createAsyncThunk(
       });
 
       if (!response.ok) {
-        console.error("Similar users API error:", response.status);
+        logger.error("Similar users API error:", response.status);
         return [];
       }
 
       const data = await response.json();
       return data.similar_users || [];
     } catch (error) {
-      console.error("Error fetching similar users:", error);
+      logger.error("Error fetching similar users:", error);
       return [];
     }
   }
@@ -1040,7 +1044,7 @@ export const fetchMLPredictions = createAsyncThunk(
         prediction
       };
     } catch (error) {
-      console.error("🤖 fetchMLPredictions error:", error);
+      logger.error("🤖 fetchMLPredictions error:", error);
       throw error;
     }
   }
@@ -1063,7 +1067,7 @@ export const calculateRouteSafety = createAsyncThunk(
       });
 
       if (error) {
-        console.warn("❌ Route safety scorer failed, using fallback method:", error);
+        logger.warn("❌ Route safety scorer failed, using fallback method:", error);
         throw error;
       }
 
@@ -1113,7 +1117,7 @@ export const calculateRouteSafety = createAsyncThunk(
           totalSafety += pointSafety;
           validPoints++;
         } catch (pointError) {
-          console.error("Error analyzing point:", pointError);
+          logger.error("Error analyzing point:", pointError);
           totalSafety += 3.0;
           validPoints++;
         }
@@ -1191,7 +1195,7 @@ export const getGoogleRoute = createAsyncThunk(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Google API Error:", response.status, errorText);
+      logger.error("❌ Google API Error:", errorText);
       throw new Error(`Google API error: ${response.status}`);
     }
 
@@ -1339,7 +1343,7 @@ export const generateSafeRoute = createAsyncThunk(
       };
 
     } catch (error) {
-      console.error("❌ Route generation failed:", error);
+      logger.error("❌ Route generation failed:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Unknown error occurred");
     }
   }
@@ -1417,7 +1421,7 @@ export const generateRouteAlternatives = createAsyncThunk(
           alternatives.push(safeRoute);
 
         } catch (error) {
-          console.error(`Error analyzing alternative route ${i}:`, error);
+          logger.error(`Error analyzing alternative route ${i}:`, error);
           // Continue with other routes even if one fails
         }
       }
@@ -1430,7 +1434,7 @@ export const generateRouteAlternatives = createAsyncThunk(
       return alternatives;
 
     } catch (error) {
-      console.error("❌ Alternative route generation failed:", error);
+      logger.error("❌ Alternative route generation failed:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Failed to generate alternatives");
     }
   }
@@ -1451,7 +1455,7 @@ export const generateSmartRoute = createAsyncThunk(
       });
 
       if (error) {
-        console.error("❌ Smart route generation failed:", error);
+        logger.error("❌ Smart route generation failed:", error);
         throw error;
       }
 
@@ -1548,7 +1552,7 @@ export const generateSmartRoute = createAsyncThunk(
       };
 
     } catch (error) {
-      console.error("❌ Smart route generation error:", error);
+      logger.error("❌ Smart route generation error:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Unknown error occurred");
     }
   }
@@ -1617,7 +1621,7 @@ export const checkForReroute = createAsyncThunk(
       }
 
     } catch (error) {
-      console.error("❌ Rerouting failed:", error);
+      logger.error("❌ Rerouting failed:", error);
       notify.confirm(
         "Rerouting Failed",
         "Could not calculate new route. Please try planning again.",
@@ -1953,7 +1957,7 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchHeatMapData.rejected, (state, action) => {
         state.heatMapLoading = false;
-        console.error("❌ Heatmap fetch FAILED:", action.error.message, action.error);
+        logger.error("❌ Heatmap fetch FAILED:", action.error.message, action.error);
 
         state.heatMapData = [];
       })
@@ -2078,7 +2082,7 @@ const locationsSlice = createSlice({
         state.routeAlternatives = action.payload;
       })
       .addCase(generateRouteAlternatives.rejected, (state, action) => {
-        console.error("Failed to generate alternatives:", action.payload);
+        logger.error("Failed to generate alternatives:", action.payload);
       })
       // Generate Smart Route
       .addCase(generateSmartRoute.pending, (state) => {

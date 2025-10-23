@@ -50,7 +50,7 @@ export default function DangerZoneOverlay({
           !zone.center_lng ||
           (zone.center_lat === 0 && zone.center_lng === 0)
         ) {
-          console.warn(
+          logger.warn(
             `Invalid coordinates for zone ${zone.id}:`,
             zone.center_lat,
             zone.center_lng

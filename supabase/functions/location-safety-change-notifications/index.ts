@@ -7,7 +7,7 @@ import {
   type PushNotification,
   type UserProfile,
 } from "../_shared/notification-helpers.ts";
-import { EDGE_CONFIG } from "@_shared/config.ts";
+import { EDGE_CONFIG } from '../_shared/config.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

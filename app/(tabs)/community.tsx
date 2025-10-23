@@ -30,6 +30,7 @@ import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -108,7 +109,7 @@ export default function CommunityScreen() {
           ).unwrap(),
         ]);
       } catch (error) {
-        console.error("Error loading community data:", error);
+        logger.error("Error loading community data:", error);
       }
     };
 
@@ -151,7 +152,7 @@ export default function CommunityScreen() {
         ).unwrap(),
       ]);
     } catch (error) {
-      console.error("Error loading community data:", error);
+      logger.error("Error loading community data:", error);
     }
   };
 

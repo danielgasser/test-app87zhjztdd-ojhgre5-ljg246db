@@ -17,6 +17,7 @@
     "@react-native-picker/picker": "2.11.1",
     "@react-navigation/native": "^7.1.6",
     "@reduxjs/toolkit": "^2.8.2",
+    "@sentry/react-native": "~7.2.0",
     "@supabase/supabase-js": "^2.52.0",
     "base64-arraybuffer": "^1.0.2",
     "date-fns": "^4.1.0",

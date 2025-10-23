@@ -25,6 +25,7 @@ import { checkProfileCompleteness } from "@/utils/profileValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetAll } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -139,7 +140,7 @@ export default function ProfileScreen() {
       await dispatch(fetchUserProfile(user!.id));
       notify.success("Profile picture updated!", "Success");
     } catch (error: any) {
-      console.error("Upload error:", error);
+      logger.error("Upload error:", error);
       notify.error("Failed to upload image. Please try again.", "Upload Error");
     } finally {
       setUploading(false);
@@ -163,7 +164,7 @@ export default function ProfileScreen() {
 
       notify.success("Profile picture removed!");
     } catch (error) {
-      console.error("Remove avatar error:", error);
+      logger.error("Remove avatar error:", error);
       notify.error("Failed to remove profile picture.");
     } finally {
       setUploading(false);

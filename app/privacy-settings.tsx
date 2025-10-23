@@ -23,6 +23,7 @@ import { useAppDispatch } from "../src/store/hooks";
 import { signOut } from "../src/store/authSlice";
 import { fetchRecentReviews } from "@/store/locationsSlice";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 export default function PrivacySettings() {
   const user = useAppSelector((state: any) => state.auth.user);
@@ -127,7 +128,7 @@ export default function PrivacySettings() {
       }
     } catch (error) {
       notify.error("Failed to export data. Please try again.");
-      console.error("Export error:", error);
+      logger.error("Export error:", error);
     }
   };
 
@@ -169,7 +170,7 @@ export default function PrivacySettings() {
         [{ text: "OK", onPress: () => router.replace("/welcome") }]
       );
     } catch (error) {
-      console.error("=== DELETE ERROR ===", error);
+      logger.error("=== DELETE ERROR ===", error);
       notify.error(`Failed to delete account: `);
     }
   };

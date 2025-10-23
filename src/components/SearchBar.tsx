@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { searchLocations } from "src/store/locationsSlice";
 import { googlePlacesService } from "@/services/googlePlaces";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -73,7 +74,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         source: "mapbox" as const, // NOTE: Legacy naming, actually Google Places
       }));
     } catch (error) {
-      console.error("Google Places search error:", error);
+      logger.error("Google Places search error:", error);
       return [];
     }
   };
@@ -138,7 +139,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         notify.error("Unable to get location details. Please try again.");
       }
     } catch (error) {
-      console.error("Error fetching place details:", error);
+      logger.error("Error fetching place details:", error);
       notify.error("Unable to get location details. Please try again.");
     }
   };

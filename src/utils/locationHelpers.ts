@@ -1,4 +1,5 @@
 import { notify } from "./notificationService";
+import { logger } from '@/utils/logger';
 
 /**
  * Get the user's country code from their coordinates using reverse geocoding
@@ -28,7 +29,7 @@ export const getUserCountry = async (
 
         return 'us';
     } catch (error) {
-        console.error('no user country found', error)
+        logger.error('no user country found', error)
         notify.error('❌ We couldn\'t get your country:');
         return 'us';
     }

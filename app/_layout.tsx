@@ -26,8 +26,18 @@ import { formatDistanceToNow } from "date-fns";
 import { notify } from "@/utils/notificationService";
 import { notificationService } from "@/services/notificationService";
 import { useLocationTriggers } from "@/hooks/useLocationTriggers";
+import * as Sentry from "@sentry/react-native";
+import { logger } from "@/utils/logger";
 
-export default function RootLayout() {
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: __DEV__, // Enable debug logs in development
+  tracesSampleRate: 1.0, // Capture 100% of transactions for performance monitoring
+  environment: __DEV__ ? "development" : "production",
+});
+
+function RootLayout() {
   return (
     <Provider store={store}>
       <NotificationProvider>
@@ -128,7 +138,7 @@ function RootLayoutNav() {
                 }
               })
               .catch((error) => {
-                console.error("Failed to register push token:", error);
+                logger.error("Failed to register push token:", error);
                 notify.error("Something went wrong. Please try again");
               });
           }
@@ -246,7 +256,7 @@ function RootLayoutNav() {
         setIsFirstLaunch(false);
       }
     } catch (error) {
-      console.error("Error checking first launch:", error);
+      logger.error("Error checking first launch:", error);
       setIsFirstLaunch(false);
     }
   };
@@ -268,7 +278,7 @@ function RootLayoutNav() {
           return;
         }
         if (!activeRoute.navigation_started_at) {
-          console.error("Active route missing start time");
+          logger.error("Active route missing start time");
           return;
         }
         // User has unfinished route but not currently navigating - ask them
@@ -300,7 +310,7 @@ function RootLayoutNav() {
           ]
         );
       } catch (error) {
-        console.error("Error checking active navigation:", error);
+        logger.error("Error checking active navigation:", error);
       }
     };
 
@@ -329,3 +339,4 @@ function RootLayoutNav() {
     </TouchableWithoutFeedback>
   );
 }
+export default Sentry.wrap(RootLayout);
