@@ -30,11 +30,39 @@ import * as Sentry from "@sentry/react-native";
 import { logger } from "@/utils/logger";
 
 // Initialize Sentry
+// Initialize Sentry
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  debug: __DEV__, // Enable debug logs in development
-  tracesSampleRate: 1.0, // Capture 100% of transactions for performance monitoring
+  debug: false, // ← No debug logs
+
+  // Reduce performance tracking drastically
+  tracesSampleRate: __DEV__ ? 0 : 0.1, // 0% dev, 10% production
+  enableAutoPerformanceTracing: false, // ← Disable automatic perf tracking
+
   environment: __DEV__ ? "development" : "production",
+
+  // ⭐ KEY: Disable breadcrumb collection
+  integrations: [
+    Sentry.breadcrumbsIntegration({
+      console: false, // ← No console.log breadcrumbs
+      dom: false, // ← No click/touch breadcrumbs
+      fetch: false, // ← No HTTP request breadcrumbs
+      xhr: false, // ← No XMLHttpRequest breadcrumbs
+    }),
+  ],
+
+  // ⭐ Extra filter: Only capture errors/warnings
+  beforeBreadcrumb(breadcrumb, hint) {
+    // Only allow error-level breadcrumbs through
+    if (
+      breadcrumb.level &&
+      breadcrumb.level !== "error" &&
+      breadcrumb.level !== "warning"
+    ) {
+      return null;
+    }
+    return breadcrumb;
+  },
 });
 
 function RootLayout() {
