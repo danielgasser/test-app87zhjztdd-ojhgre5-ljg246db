@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_CONFIG } from '@/utils/appConfig';
-
+import { logger } from '@/utils/logger';
 const BANNER_STORAGE_KEY = '@safepath_banner_dismissals';
 
 // Import banner types from config instead of defining enum
@@ -90,7 +90,7 @@ export const saveDismissalsToStorage = async (
     try {
         await AsyncStorage.setItem(BANNER_STORAGE_KEY, JSON.stringify(dismissals));
     } catch (error) {
-        console.error('Failed to save banner dismissals:', error);
+        logger.error('Failed to save banner dismissals:', error);
     }
 };
 
@@ -105,7 +105,7 @@ export const loadDismissalsFromStorage = async () => {
         const stored = await AsyncStorage.getItem(BANNER_STORAGE_KEY);
         return stored ? JSON.parse(stored) : {};
     } catch (error) {
-        console.error('Failed to load banner dismissals:', error);
+        logger.error('Failed to load banner dismissals:', error);
         return {};
     }
 };
@@ -115,7 +115,7 @@ export const clearDismissalsFromStorage = async () => {
     try {
         await AsyncStorage.removeItem(BANNER_STORAGE_KEY);
     } catch (error) {
-        console.error('Failed to clear banner dismissals:', error);
+        logger.error('Failed to clear banner dismissals:', error);
     }
 };
 

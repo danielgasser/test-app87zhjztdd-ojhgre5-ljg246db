@@ -18,6 +18,7 @@ import PredictionBadge from "./PredictionBadge";
 import { googlePlacesService, PlaceDetails } from "@/services/googlePlaces";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { logger } from "@/utils/logger";
 
 interface LocationDetailsModalProps {
   visible: boolean;
@@ -133,7 +134,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         setPlaceDetails(details);
       }
     } catch (error) {
-      console.error("Error fetching place details:", error);
+      logger.error("Error fetching place details:", error);
     }
   };
 

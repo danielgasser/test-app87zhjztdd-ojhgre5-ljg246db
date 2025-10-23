@@ -24,6 +24,7 @@ import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -317,7 +318,7 @@ export default function OnboardingScreen() {
       }
     } catch (error) {
       notify.error("Failed to save profile. Please try again.");
-      console.error("Profile save error:", error);
+      logger.error("Profile save error:", error);
     }
   };
 

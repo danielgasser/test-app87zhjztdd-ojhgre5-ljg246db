@@ -9,6 +9,8 @@
  */
 
 import { mapGooglePlaceType } from '@/utils/placeTypeMappers';
+import { logger } from "@/utils/logger";
+
 
 // ================================
 // TYPES
@@ -211,7 +213,7 @@ export async function getPlaceAutocomplete(
         const data = await fetchGoogleApi(url);
         return data.predictions || [];
     } catch (error) {
-        console.error('Autocomplete error:', error);
+        logger.error('Autocomplete error:', error);
         return [];
     }
 }
@@ -270,7 +272,7 @@ export async function getPlaceDetails(
 
         return data.result || null;
     } catch (error) {
-        console.error('Place details error:', error);
+        logger.error('Place details error:', error);
         if (clearSession) {
             sessionTokenManager.clear();
         }
@@ -333,7 +335,7 @@ export async function getNearbyPlaces(
         const data = await fetchGoogleApi(url);
         return data.results || [];
     } catch (error) {
-        console.error('Nearby search error:', error);
+        logger.error('Nearby search error:', error);
         return [];
     }
 }
@@ -377,7 +379,7 @@ export async function forwardGeocode(
         const data = await fetchGoogleApi(url);
         return data.results || [];
     } catch (error) {
-        console.error('Forward geocoding error:', error);
+        logger.error('Forward geocoding error:', error);
         return [];
     }
 }
@@ -415,7 +417,7 @@ export async function reverseGeocode(
         const data = await fetchGoogleApi(url);
         return data.results || [];
     } catch (error) {
-        console.error('Reverse geocoding error:', error);
+        logger.error('Reverse geocoding error:', error);
         return [];
     }
 }

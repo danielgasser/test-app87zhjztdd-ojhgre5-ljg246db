@@ -18,6 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ export default function ForgotPasswordScreen() {
         "Check Your Inbox"
       );
     } catch (error: any) {
-      console.error("Password reset error:", error);
+      logger.error("Password reset error:", error);
       notify.error(
         error.message || "Failed to send reset email. Please try again.",
         "Error"

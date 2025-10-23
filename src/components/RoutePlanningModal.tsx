@@ -36,6 +36,8 @@ import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
+
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -183,7 +185,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         source: "mapbox" as const, // Legacy naming
       }));
     } catch (error) {
-      console.error("Google Places search error:", error);
+      logger.error("Google Places search error:", error);
       return [];
     }
   };
@@ -295,7 +297,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         notify.error("Unable to get location details. Please try again.");
       }
     } catch (error) {
-      console.error("Error fetching place details:", error);
+      logger.error("Error fetching place details:", error);
       notify.error("Unable to get location details. Please try again.");
     }
   };
@@ -381,7 +383,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         );
       }
     } catch (error) {
-      console.error("Route generation error:", error);
+      logger.error("Route generation error:", error);
       notify.error(
         error instanceof Error ? error.message : "Failed to generate route",
         "Route Error"

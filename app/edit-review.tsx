@@ -25,6 +25,8 @@ import { Database } from "src/types/database.types";
 import { CreateReviewForm } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
+
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
 interface RatingProps {
@@ -129,7 +131,7 @@ export default function EditReviewScreen() {
         }
       }
     } catch (error: any) {
-      console.error("Failed to fetch review:", error);
+      logger.error("Failed to fetch review:", error);
       notify.error("Failed to load review data. Please try again.");
       router.back();
     } finally {
@@ -188,7 +190,7 @@ export default function EditReviewScreen() {
         [{ text: "OK", onPress: () => router.back() }]
       );
     } catch (error: any) {
-      console.error("Review update error:", error);
+      logger.error("Review update error:", error);
       notify.error(
         error?.message || "Failed to update review. Please try again."
       );

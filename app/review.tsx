@@ -28,6 +28,7 @@ import {
 import { LocationWithScores } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 interface RatingProps {
   label: string;
@@ -241,7 +242,7 @@ export default function ReviewScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      console.error("🚨 Review submission error:", error);
+      logger.error("🚨 Review submission error:", error);
 
       if (error.code === "23505") {
         notify.success(

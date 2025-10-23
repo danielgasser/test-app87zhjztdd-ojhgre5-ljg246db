@@ -22,6 +22,7 @@ import {
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
+import { logger } from "@/utils/logger";
 
 const { width, height } = Dimensions.get("window");
 
@@ -221,7 +222,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
       setLocationSubscription(subscription);
     } catch (error) {
-      console.error("Navigation start error:", error);
+      logger.error("Navigation start error:", error);
       notify.error("Could not start navigation");
       onExit();
     }

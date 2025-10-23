@@ -8,6 +8,8 @@ import * as Notifications from 'expo-notifications';
 import { supabase } from './supabase';
 import { calculateDistance } from '../utils/distanceCalculator';
 import { APP_CONFIG } from '@/utils/appConfig';
+import { logger } from "@/utils/logger";
+
 
 // ============================================
 // TYPES
@@ -135,7 +137,7 @@ class LocationTriggerService {
             );
 
             if (error) {
-                console.error('❌ Error fetching nearby locations:', error);
+                logger.error('❌ Error fetching nearby locations:', error);
                 return;
             }
 
@@ -147,7 +149,7 @@ class LocationTriggerService {
                 await this.considerLocationForNotification(loc, latitude, longitude);
             }
         } catch (error) {
-            console.error('❌ Error checking nearby locations:', error);
+            logger.error('❌ Error checking nearby locations:', error);
         }
     }
 
@@ -232,7 +234,7 @@ class LocationTriggerService {
                 });
             }
         } catch (error) {
-            console.error('❌ Error sending notification:', error);
+            logger.error('❌ Error sending notification:', error);
         }
     }
 
