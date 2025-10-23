@@ -220,23 +220,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       return;
     }
     const optimizedRoute = smartRouteComparison.optimized_route;
-    console.log("🚀 Starting navigation with route:", {
-      hasRoute: !!optimizedRoute,
-      databaseId: optimizedRoute.databaseId,
-      routeName: optimizedRoute.name,
-    });
     dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
 
     if (optimizedRoute.databaseId) {
-      console.log(
-        "📞 Calling startNavigationSession with ID:",
-        optimizedRoute.databaseId
-      );
       await dispatch(startNavigationSession(optimizedRoute.databaseId));
-    } else {
-      console.warn(
-        "⚠️ Route has no databaseId - navigation_started_at will not be set"
-      );
     }
 
     // Dispatch start navigation action
@@ -381,8 +368,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
 
       if (result.optimized_route && result.original_route) {
-        console.log("✅ Smart route comparison available");
-
         await dispatch(
           saveRouteToDatabase({
             route_coordinates: result.optimized_route.coordinates,
@@ -394,8 +379,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               result.optimized_route.safety_analysis.overall_route_score,
           })
         );
-      } else {
-        console.log("ℹ️ Original route is already optimal");
       }
     } catch (error) {
       console.error("Route generation error:", error);

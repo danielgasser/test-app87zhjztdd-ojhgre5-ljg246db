@@ -64,7 +64,6 @@ export default function PrivacySettings() {
       }
     } catch (error) {
       notify.error("Failed to save setting. Please try again.");
-      console.error("Save error:", error);
     }
   };
 

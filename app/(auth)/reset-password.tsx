@@ -21,7 +21,6 @@ import { useLocalSearchParams } from "expo-router";
 
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();
-  console.log("Reset-password URL params:", params);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,10 +36,8 @@ export default function ResetPasswordScreen() {
       } = await supabase.auth.getSession();
 
       if (session) {
-        console.log("✅ Valid session found");
         setIsValidatingToken(false);
       } else {
-        console.log("❌ No session");
         notify.error("Invalid or expired reset link.");
         router.replace("/forgot-password");
       }

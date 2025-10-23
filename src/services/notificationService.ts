@@ -21,7 +21,7 @@ export const notificationService = {
     async registerForPushNotifications(): Promise<string | null> {
         // Check if device is physical (push notifications don't work on simulators)
         if (!Device.isDevice) {
-            console.log('Push notifications only work on physical devices');
+            console.error('Push notifications only work on physical devices');
             return null;
         }
 

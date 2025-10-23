@@ -58,10 +58,6 @@ function RootLayoutNav() {
         )
       ) {
         notify.error("Invalid route data format");
-        console.error(
-          "Invalid route_coordinates:",
-          activeRoute.route_coordinates
-        );
         return;
       }
 
@@ -109,7 +105,6 @@ function RootLayoutNav() {
       dispatch(startNavigation());
       router.push("/(tabs)");
     } catch (error) {
-      console.error("Error restoring route:", error);
       notify.error("Failed to restore route. Please try again.");
     }
   };
@@ -118,7 +113,6 @@ function RootLayoutNav() {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-          console.log("🔥 Auth state changed: SIGNED_IN");
           dispatch(setSession(session));
 
           // Register for push notifications on login
@@ -133,11 +127,9 @@ function RootLayoutNav() {
                   );
                 }
               })
-              .then(() => {
-                console.log("✅ Push token registered on login");
-              })
               .catch((error) => {
                 console.error("Failed to register push token:", error);
+                notify.error("Something went wrong. Please try again");
               });
           }
           // Don't route here - let deep link or callback screen handle it
@@ -170,7 +162,6 @@ function RootLayoutNav() {
           const type = params.get("type");
 
           if (type === "recovery" && accessToken && refreshToken) {
-            console.log("🔑 Setting recovery session");
             // Set session BEFORE navigating
             const { error } = await supabase.auth.setSession({
               access_token: accessToken,
