@@ -97,7 +97,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         setReviews((data || []) as ReviewWithUser[]);
       }
     } catch (error) {
-      console.error("Error fetching reviews:", error);
     } finally {
       setLoadingReviews(false);
     }
@@ -108,7 +107,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     const placeIdToFetch = googlePlaceId || selectedLocation?.google_place_id;
 
     if (!placeIdToFetch) {
-      console.log("No Google Place ID available");
       return;
     }
 

@@ -1,3 +1,5 @@
+import { notify } from "./notificationService";
+
 /**
  * Get the user's country code from their coordinates using reverse geocoding
  * Returns ISO 3166-1 alpha-2 country code (e.g., 'ch', 'us', 'de')
@@ -8,7 +10,6 @@ export const getUserCountry = async (
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!googleApiKey || !userLocation) {
-        console.log('⚠️ No API key or location, defaulting to US');
         return 'us';
     }
 
@@ -22,13 +23,13 @@ export const getUserCountry = async (
                 (c: any) => c.types.includes('country')
             );
             const countryCode = countryComponent?.short_name?.toLowerCase() || 'us';
-            console.log('✅ User country detected:', countryCode);
             return countryCode;
         }
 
         return 'us';
     } catch (error) {
-        console.error('❌ Error getting user country:', error);
+        console.error('no user country found', error)
+        notify.error('❌ We couldn\'t get your country:');
         return 'us';
     }
 };

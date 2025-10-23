@@ -38,23 +38,13 @@ export default function AuthCallback() {
       const url = urlParam || deepLinkUrl || null;
 
       try {
-        addStatus(`URL: ${url ? url.substring(0, 100) : "NONE"}`);
-
         // Parse URL params
         if (url) {
           const parsed = Linking.parse(url);
-          addStatus(`Path: ${parsed.path || "none"}`);
-          addStatus(
-            `Params: ${JSON.stringify(parsed.queryParams || {}).substring(
-              0,
-              150
-            )}`
-          );
         }
 
-        addStatus("Waiting 3 seconds...");
+        addStatus("Waiting for session...");
         await new Promise((resolve) => setTimeout(resolve, 500));
-        addStatus("Calling getSession...");
 
         // First, try to exchange the URL hash for a session
         if (url && url.includes("#access_token=")) {
@@ -81,18 +71,12 @@ export default function AuthCallback() {
               .eq("user_id", data.session.user.id)
               .single();
 
-            addStatus(
-              `Profile check: ${
-                profile?.onboarding_complete ? "Complete" : "Incomplete"
-              }`
-            );
-
             // Route based on onboarding
             if (!profile || !profile.onboarding_complete) {
               addStatus("Signing you in...");
               router.replace("/onboarding");
             } else {
-              addStatus("Routing to app...");
+              addStatus("Getting started...");
               router.replace("/(tabs)");
             }
           }
@@ -103,7 +87,6 @@ export default function AuthCallback() {
             error,
           } = await supabase.auth.getSession();
 
-          addStatus(session ? "✅ Session FOUND" : "❌ Session NOT FOUND");
           if (error) {
             addStatus(`Session error: ${error.message}`);
           }
@@ -117,12 +100,6 @@ export default function AuthCallback() {
               .select("onboarding_complete")
               .eq("user_id", session.user.id)
               .single();
-
-            addStatus(
-              `Profile check: ${
-                profile?.onboarding_complete ? "Complete" : "Incomplete"
-              }`
-            );
 
             // Route based on onboarding
             if (!profile || !profile.onboarding_complete) {

@@ -490,14 +490,11 @@ export const saveRouteToDatabase = createAsyncThunk(
         .single();
 
       if (error) {
-        console.error("Error saving route:", error);
         throw error;
       }
 
-      console.log("✅ Route saved to database:", data.id);
       return data;
     } catch (error) {
-      console.error("saveRouteToDatabase error:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Failed to save route");
     }
   }
@@ -563,11 +560,9 @@ function dbRouteToSafeRoute(dbRoute: any): SafeRoute {
 export const startNavigationSession = createAsyncThunk(
   "locations/startNavigationSession",
   async (routeId: string, { rejectWithValue }) => {
-    console.log("startNavigationSession", startNavigationSession);
 
     try {
       const timestamp = new Date().toISOString();
-      console.log("🕐 Setting navigation_started_at to:", timestamp);
       const { data, error } = await supabase
         .from("routes")
         .update({
@@ -576,24 +571,15 @@ export const startNavigationSession = createAsyncThunk(
         .eq("id", routeId)
         .select()
         .single();
-      console.log("📊 Supabase response:", { data, error });
 
       if (error) {
-        console.error("❌ Error starting navigation session:", error);
         throw error;
       }
       if (!data) {
-        console.error("❌ No data returned from update");
         throw new Error("No data returned");
       }
-      console.log("✅ Navigation session started:", {
-        id: data.id,
-        navigation_started_at: data.navigation_started_at,
-        navigation_ended_at: data.navigation_ended_at
-      });
       return data;
     } catch (error) {
-      console.error("🚨 startNavigationSession error:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Failed to start navigation session");
     }
   }
@@ -613,14 +599,11 @@ export const endNavigationSession = createAsyncThunk(
         .single();
 
       if (error) {
-        console.error("Error ending navigation session:", error);
         throw error;
       }
 
-      console.log("✅ Navigation session ended:", data.id);
       return data;
     } catch (error) {
-      console.error("endNavigationSession error:", error);
       return rejectWithValue(error instanceof Error ? error.message : "Failed to end navigation session");
     }
   }
@@ -1375,7 +1358,6 @@ export const generateRouteAlternatives = createAsyncThunk(
       })).unwrap();
 
       if (!mapboxRoutes || mapboxRoutes.length <= 1) {
-        console.log("⚠️ No alternative routes available from Mapbox");
         return [];
       }
 
@@ -1582,14 +1564,13 @@ export const checkForReroute = createAsyncThunk(
     const { selectedRoute, routeRequest } = state.locations;
 
     if (!selectedRoute || !routeRequest) {
-      console.log("❌ No route or request to reroute");
       return;
     }
 
 
     // Show alert
     notify.info(
-      "You've gone off course.Finding a new route...",
+      "You've gone off course. Finding a new route...",
       "Recalculating Route",
     );
 
@@ -1879,7 +1860,6 @@ const locationsSlice = createSlice({
         if (state.smartRouteComparison?.optimized_route) {
           state.smartRouteComparison.optimized_route.databaseId = action.payload.id;
         }
-        console.log("✅ Route saved with ID:", action.payload.id);
       })
 
       // Submit Review

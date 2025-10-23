@@ -55,13 +55,11 @@ class LocationTriggerService {
      */
     async start(userId: string, userProfile: UserProfile): Promise<void> {
         if (this.isMonitoring) {
-            console.log('📍 Location trigger service already running');
             return;
         }
 
         // Check if user has enabled this feature
         if (!userProfile.notification_preferences?.location_triggers) {
-            console.log('📍 Location triggers disabled by user');
             return;
         }
 
@@ -70,7 +68,6 @@ class LocationTriggerService {
         if (status !== 'granted') {
             const { status: newStatus } = await Notifications.requestPermissionsAsync();
             if (newStatus !== 'granted') {
-                console.log('❌ Notification permissions not granted');
                 return;
             }
         }
@@ -78,7 +75,6 @@ class LocationTriggerService {
         // Check location permission
         const { status: locationStatus } = await Location.getForegroundPermissionsAsync();
         if (locationStatus !== 'granted') {
-            console.log('❌ Location permissions not granted');
             return;
         }
 
@@ -146,9 +142,6 @@ class LocationTriggerService {
             if (!nearbyLocations || nearbyLocations.length === 0) {
                 return;
             }
-
-            console.log(`📍 Found ${nearbyLocations.length} nearby locations`);
-
             // Filter and notify
             for (const loc of nearbyLocations) {
                 await this.considerLocationForNotification(loc, latitude, longitude);
@@ -204,8 +197,6 @@ class LocationTriggerService {
         distance: number
     ): Promise<void> {
         const rating = location.demographic_safety_score || location.avg_safety_score;
-
-        console.log(`🔔 Sending notification for ${location.name} (${rating}★ - ${distance}m away)`);
 
         try {
             await Notifications.scheduleNotificationAsync({

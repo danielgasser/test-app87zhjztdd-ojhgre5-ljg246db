@@ -3,8 +3,7 @@
 // Used by multiple notification Edge Functions
 // ============================================
 
-import { APP_CONFIG } from "@/utils/appConfig";
-import { EDGE_CONFIG } from "./config";
+import { EDGE_CONFIG } from "./config.ts";
 
 
 
