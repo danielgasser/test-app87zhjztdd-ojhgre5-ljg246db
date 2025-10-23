@@ -2,13 +2,18 @@ import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   Animated,
   TouchableOpacity,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
+import {
+  notificationStyles,
+  getSnackbarBackgroundColor,
+  getSnackbarIcon,
+} from "@/styles/notificationStyles";
+const styles = notificationStyles;
 
 const { width } = Dimensions.get("window");
 
@@ -74,109 +79,44 @@ const Snackbar: React.FC<SnackbarProps> = ({
     });
   };
 
-  const getIcon = () => {
-    switch (type) {
-      case "success":
-        return "checkmark-circle";
-      case "error":
-        return "alert-circle";
-      case "info":
-        return "information-circle";
-    }
-  };
+  const getIcon = () => getSnackbarIcon(type);
 
-  const getBackgroundColor = () => {
-    switch (type) {
-      case "success":
-        return theme.colors.secondary; // Green
-      case "error":
-        return theme.colors.error; // Red
-      case "info":
-        return theme.colors.primary; // Blue
-    }
-  };
+  const getBackgroundColor = () => getSnackbarBackgroundColor(type);
 
   if (!visible) return null;
 
   return (
     <Animated.View
       style={[
-        styles.container,
+        styles.snackbarContainer,
         { backgroundColor: getBackgroundColor(), transform: [{ translateY }] },
       ]}
     >
       <Ionicons name={getIcon()} size={24} color={theme.colors.background} />
 
-      <View style={styles.textContainer}>
+      <View style={styles.snackbarTextContainer}>
         {/* WRAP TEXT */}
-        {title && <Text style={styles.title}>{title}</Text>}
-        <Text style={styles.message} numberOfLines={2}>
+        {title && <Text style={styles.snackbarTitle}>{title}</Text>}
+        <Text style={styles.snackbarMessage} numberOfLines={2}>
           {message}
         </Text>
       </View>
       {actionText && onActionPress && (
-        <TouchableOpacity onPress={onActionPress} style={styles.actionButton}>
-          <Text style={styles.actionText}>{actionText}</Text>
+        <TouchableOpacity
+          onPress={onActionPress}
+          style={styles.snackbarActionButton}
+        >
+          <Text style={styles.snackbarActionText}>{actionText}</Text>
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity onPress={dismissSnackbar} style={styles.closeButton}>
-        <Ionicons name="close" size={20} color={theme.colors.background} />
+      <TouchableOpacity
+        onPress={dismissSnackbar}
+        style={styles.snackbarCloseButton}
+      >
+        <Ionicons name="close" size={28} color={theme.colors.background} />
       </TouchableOpacity>
     </Animated.View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 60,
-    left: 16,
-    right: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    shadowColor: theme.colors.shadowMedium,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 6,
-    zIndex: 9999,
-  },
-  textContainer: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  title: {
-    color: theme.colors.background,
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 2,
-  },
-  message: {
-    flex: 1,
-    color: theme.colors.background,
-    fontSize: 14, // Smaller than before
-    fontWeight: "500",
-    // Remove marginLeft since it's in textContainer now
-  },
-  actionButton: {
-    marginLeft: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  actionText: {
-    color: theme.colors.background,
-    fontSize: 14,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  closeButton: {
-    marginLeft: 8,
-    padding: 4,
-  },
-});
-
 export default Snackbar;

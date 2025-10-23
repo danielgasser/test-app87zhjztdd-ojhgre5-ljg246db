@@ -1647,7 +1647,7 @@ const styles = StyleSheet.create({
   },
   routeControls: {
     position: "absolute",
-    top: 0, // Adjust based on your layout
+    top: 10,
     left: 20,
     right: 20,
     zIndex: 1000,
@@ -1659,7 +1659,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 25,
+    borderRadius: 8,
   },
   routeButtonText: {
     color: theme.colors.background,

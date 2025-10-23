@@ -11,6 +11,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
+import {
+  notificationStyles,
+  getConfirmationIcon,
+  getConfirmationIconColor,
+} from "@/styles/notificationStyles";
 
 const { height } = Dimensions.get("window");
 
@@ -28,6 +33,7 @@ interface ConfirmationSheetProps {
   onDismiss: () => void;
   icon?: "warning" | "info" | "question";
 }
+const styles = notificationStyles;
 
 const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
   visible,
@@ -56,29 +62,9 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
     }
   }, [visible]);
 
-  const getIconName = () => {
-    switch (icon) {
-      case "warning":
-        return "warning";
-      case "info":
-        return "information-circle";
-      case "question":
-        return "help-circle";
-      default:
-        return "alert-circle";
-    }
-  };
+  const getIconName = () => getConfirmationIcon(icon);
 
-  const getIconColor = () => {
-    switch (icon) {
-      case "warning":
-        return theme.colors.accent;
-      case "info":
-        return theme.colors.primary;
-      default:
-        return theme.colors.textSecondary;
-    }
-  };
+  const getIconColor = () => getConfirmationIconColor(icon);
 
   const handleButtonPress = (button: ConfirmationButton) => {
     button.onPress?.();
@@ -88,22 +74,31 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
   const getButtonStyle = (style?: string) => {
     switch (style) {
       case "destructive":
-        return [styles.button, styles.destructiveButton];
+        return [
+          styles.confirmationButton,
+          styles.confirmationButtonDestructive,
+        ];
       case "cancel":
-        return [styles.button, styles.cancelButton];
+        return [styles.confirmationButton, styles.confirmationButtonCancel];
       default:
-        return [styles.button, styles.defaultButton];
+        return [styles.confirmationButton, styles.confirmationButtonDefault];
     }
   };
 
   const getButtonTextStyle = (style?: string) => {
     switch (style) {
       case "destructive":
-        return [styles.buttonText, styles.destructiveButtonText];
+        return [
+          styles.confirmationButtonText,
+          styles.confirmationButtonDestructive,
+        ];
       case "cancel":
-        return [styles.buttonText, styles.cancelButtonText];
+        return [styles.confirmationButtonText, styles.confirmationButtonCancel];
       default:
-        return [styles.buttonText, styles.defaultButtonText];
+        return [
+          styles.confirmationButtonText,
+          styles.confirmationButtonDefault,
+        ];
     }
   };
 
@@ -115,16 +110,16 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
       onRequestClose={onDismiss}
     >
       <TouchableWithoutFeedback onPress={onDismiss}>
-        <View style={styles.overlay}>
+        <View style={styles.confirmationOverlay}>
           <TouchableWithoutFeedback>
             <Animated.View
               style={[
-                styles.container,
+                styles.confirmationContainer,
                 { transform: [{ translateY: slideAnim }] },
               ]}
             >
               {icon && (
-                <View style={styles.iconContainer}>
+                <View style={styles.confirmationIconContainer}>
                   <Ionicons
                     name={getIconName()}
                     size={48}
@@ -133,10 +128,10 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
                 </View>
               )}
 
-              <Text style={styles.title}>{title}</Text>
-              <Text style={styles.message}>{message}</Text>
+              <Text style={styles.confirmationTitle}>{title}</Text>
+              <Text style={styles.confirmationMessage}>{message}</Text>
 
-              <View style={styles.buttonsContainer}>
+              <View style={styles.confirmationButtonsContainer}>
                 {buttons.map((button, index) => (
                   <TouchableOpacity
                     key={index}
@@ -156,68 +151,5 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: theme.colors.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: 40,
-  },
-  iconContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: theme.colors.text,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  message: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    marginBottom: 24,
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  buttonsContainer: {
-    gap: 12,
-  },
-  button: {
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  defaultButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  destructiveButton: {
-    backgroundColor: theme.colors.error,
-  },
-  cancelButton: {
-    backgroundColor: theme.colors.background,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  defaultButtonText: {
-    color: theme.colors.background,
-  },
-  destructiveButtonText: {
-    color: theme.colors.background,
-  },
-  cancelButtonText: {
-    color: theme.colors.text,
-  },
-});
 
 export default ConfirmationSheet;
