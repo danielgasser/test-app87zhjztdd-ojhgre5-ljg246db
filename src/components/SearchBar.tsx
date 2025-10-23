@@ -271,7 +271,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 50,
+    top: 60,
     left: 16,
     right: 16,
     zIndex: 1000,
