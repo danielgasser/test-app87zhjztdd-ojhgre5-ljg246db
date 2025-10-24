@@ -288,6 +288,13 @@ export default function CommunityScreen() {
         </Text>
 
         <View style={styles.reviewFooter}>
+          {review.user_demographics.full_name?.length > 0 && (
+            <View style={styles.userInfoName}>
+              <Text style={styles.demographicsText}>
+                Review by {review.user_demographics.full_name}
+              </Text>
+            </View>
+          )}
           <View style={styles.userInfo}>
             {review.user_demographics?.show_demographics ? (
               <Text style={styles.demographicsText}>
@@ -778,10 +785,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  userInfo: {
+  userInfoName: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 2,
   },
   demographicsText: {
     fontSize: 12,
