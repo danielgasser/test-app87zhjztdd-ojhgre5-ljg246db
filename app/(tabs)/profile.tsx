@@ -187,32 +187,43 @@ export default function ProfileScreen() {
     if (!profile) return null;
 
     const demographics = [];
+
     if (profile.race_ethnicity && profile.race_ethnicity.length > 0) {
-      demographics.push(`Race/Ethnicity: ${profile.race_ethnicity.join(", ")}`);
+      demographics.push(...profile.race_ethnicity);
     }
     if (profile.gender) {
-      demographics.push(`Gender: ${profile.gender}`);
+      demographics.push(profile.gender);
     }
-    if (profile.lgbtq_status !== undefined) {
-      demographics.push(`LGBTQ+: ${profile.lgbtq_status ? "Yes" : "No"}`);
+    if (profile.lgbtq_status) {
+      demographics.push("LGBTQ+");
     }
     if (profile.disability_status && profile.disability_status.length > 0) {
       demographics.push(
-        `Disabilities: ${profile.disability_status.join(", ")}`
+        ...profile.disability_status.map((d) => `Disability: ${d}`)
       );
     }
     if (profile.religion) {
-      demographics.push(`Religion: ${profile.religion}`);
+      demographics.push(profile.religion);
     }
     if (profile.age_range) {
-      demographics.push(`Age: ${profile.age_range}`);
+      demographics.push(profile.age_range);
     }
 
-    return demographics.map((demo, index) => (
-      <Text key={index} style={styles.demographicText}>
-        {demo}
-      </Text>
-    ));
+    if (demographics.length === 0) {
+      return (
+        <Text style={styles.noDemographicsText}>No demographics added yet</Text>
+      );
+    }
+
+    return (
+      <View style={styles.demographicsChipContainer}>
+        {demographics.map((demo, index) => (
+          <View key={index} style={styles.demographicChip}>
+            <Text style={styles.demographicChipText}>{demo}</Text>
+          </View>
+        ))}
+      </View>
+    );
   };
 
   return (
@@ -323,7 +334,6 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             {/* Demographics Card */}
             <View style={styles.demographicsCard}>{renderDemographics()}</View>
-            {/* Profile Completion Widget - ADD THIS */}
             <View style={{ paddingHorizontal: 20 }}>
               <ProfileCompletionWidget
                 missingFields={profileCompletion.missingFields}
@@ -514,6 +524,29 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     backgroundColor: theme.colors.inputBackground,
     borderRadius: 8,
+  },
+  demographicsChipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingVertical: 8,
+  },
+  demographicChip: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  demographicChipText: {
+    fontSize: 14,
+    color: theme.colors.text,
+  },
+  noDemographicsText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 12,
   },
   demographicText: {
     fontSize: 18,
