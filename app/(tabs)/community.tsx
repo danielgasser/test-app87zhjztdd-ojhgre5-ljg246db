@@ -356,7 +356,7 @@ export default function CommunityScreen() {
       <TouchableOpacity
         key={id}
         style={styles.trendingCard}
-        onPress={handleTrendingPress} // <- ADD THIS
+        onPress={handleTrendingPress}
       >
         <View>
           <Text style={styles.trendingName}>{name}</Text>
