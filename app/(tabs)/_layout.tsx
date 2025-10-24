@@ -5,14 +5,20 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUserProfile } from "@/store/userSlice";
 import { RootState } from "@/store";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import * as ExpoConstants from "expo-constants";
 const appConfig = require("../../app.config.js");
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
-  console.log("APP version:", appConfig.expo?.version);
+
+  console.log(
+    "APP version:",
+    appConfig.expo?.version,
+    "Platform:",
+    Platform.OS
+  );
 
   useEffect(() => {
     if (user?.id) {

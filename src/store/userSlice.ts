@@ -3,6 +3,7 @@ import { supabase } from '../services/supabase';
 import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
+import { PublicUserProfile } from '@/types/supabase';
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences'> & {
@@ -26,6 +27,9 @@ interface UserState {
   loading: boolean;
   error: string | null;
   onboardingComplete: boolean;
+  publicProfile: PublicUserProfile | null;
+  publicProfileLoading: boolean;
+  publicProfileError: string | null;
 }
 
 const initialState: UserState = {
@@ -33,6 +37,9 @@ const initialState: UserState = {
   loading: false,
   error: null,
   onboardingComplete: false,
+  publicProfile: null,
+  publicProfileLoading: false,
+  publicProfileError: null,
 };
 
 // Fetch user profile
@@ -99,6 +106,26 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
   }
 );
 
+// Fetch public user profile (for viewing other users' profiles)
+export const fetchPublicUserProfile = createAsyncThunk<PublicUserProfile, string>(
+  'user/fetchPublicProfile',
+  async (userId: string) => {
+    const { data, error } = await supabase
+      .rpc('get_user_public_profile', { profile_user_id: userId });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('Profile not found');
+    }
+
+    // Return the first result (RPC returns array)
+    return data[0] as PublicUserProfile;
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -142,6 +169,20 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to update profile';
+      })
+      // Fetch public user profile
+      .addCase(fetchPublicUserProfile.pending, (state) => {
+        state.publicProfileLoading = true;
+        state.publicProfileError = null;
+      })
+      .addCase(fetchPublicUserProfile.fulfilled, (state, action: PayloadAction<PublicUserProfile>) => {
+        state.publicProfileLoading = false;
+        state.publicProfile = action.payload;
+        state.publicProfileError = null;
+      })
+      .addCase(fetchPublicUserProfile.rejected, (state, action) => {
+        state.publicProfileLoading = false;
+        state.publicProfileError = action.error.message || 'Failed to fetch public profile';
       });
   },
 });
