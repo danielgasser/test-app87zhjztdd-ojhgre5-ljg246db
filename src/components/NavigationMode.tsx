@@ -5,9 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Alert,
 } from "react-native";
-import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -15,7 +14,6 @@ import {
   endNavigation,
   updateNavigationProgress,
   checkForReroute,
-  startNavigation,
   startNavigationSession,
   endNavigationSession,
 } from "@/store/locationsSlice";

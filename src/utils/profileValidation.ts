@@ -1,4 +1,3 @@
-import { APP_CONFIG } from '@/utils/appConfig';
 import {
     FEATURE_REQUIREMENTS,
     ALL_DEMOGRAPHIC_FIELDS,

@@ -8,7 +8,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   Platform,
   Modal,
   TouchableWithoutFeedback,
@@ -17,13 +16,12 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { fetchNearbyLocations, submitReview } from "src/store/locationsSlice";
+import { submitReview } from "src/store/locationsSlice";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   createLocationFromSearch,
   setUserLocation,
-  addLocationToNearby,
 } from "src/store/locationsSlice";
 import { LocationWithScores } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";

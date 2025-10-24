@@ -8,7 +8,6 @@
  * - Geocoding: Address <-> Coordinates conversion
  */
 
-import { mapGooglePlaceType } from '@/utils/placeTypeMappers';
 import { logger } from "@/utils/logger";
 
 

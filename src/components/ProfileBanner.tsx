@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { dismissBanner, incrementShowCount } from "@/store/profileBannerSlice";
+import { dismissBanner } from "@/store/profileBannerSlice";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { FIELD_DISPLAY_NAMES } from "@/constants/profileRequirements";
 import { theme } from "@/styles/theme";

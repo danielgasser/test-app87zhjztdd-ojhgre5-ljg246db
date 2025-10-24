@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
   TextInput,
   FlatList,
   TouchableWithoutFeedback,
@@ -24,7 +23,6 @@ import {
   RouteRequest,
   setSmartRouteComparison,
   startNavigation,
-  endNavigation,
   saveRouteToDatabase,
   startNavigationSession,
 } from "../store/locationsSlice";
