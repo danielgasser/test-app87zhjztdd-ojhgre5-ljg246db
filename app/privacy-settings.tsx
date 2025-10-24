@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Modal,
   Share,
   Platform,

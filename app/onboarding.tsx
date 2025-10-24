@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Alert,
   Platform,
   TextInput,
   TouchableWithoutFeedback,

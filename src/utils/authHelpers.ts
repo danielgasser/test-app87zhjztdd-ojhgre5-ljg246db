@@ -1,4 +1,3 @@
-import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { notify } from './notificationService';
 

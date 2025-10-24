@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
-  Alert,
   Modal,
   TouchableWithoutFeedback,
   Keyboard,

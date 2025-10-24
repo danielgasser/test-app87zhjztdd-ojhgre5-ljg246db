@@ -2,12 +2,9 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   StyleSheet,
-  Alert,
   Text,
   ActivityIndicator,
   TouchableOpacity,
-  Animated,
-  PanResponder,
   Keyboard,
 } from "react-native";
 import MapView, {
@@ -34,7 +31,6 @@ import {
   toggleRouteSegments,
   clearRoutes,
   RouteCoordinate,
-  setNavigationIntent,
   clearNavigationIntent,
   endNavigation,
   startNavigation,

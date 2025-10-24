@@ -6,7 +6,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUserProfile } from "@/store/userSlice";
 import { RootState } from "@/store";
 import { View, Text, StyleSheet, Platform } from "react-native";
-import * as ExpoConstants from "expo-constants";
 const appConfig = require("../../app.config.js");
 
 export default function TabLayout() {

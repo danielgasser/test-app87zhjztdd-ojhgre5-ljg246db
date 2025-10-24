@@ -10,7 +10,6 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Linking,
   TouchableWithoutFeedback,
   ScrollView,
@@ -21,11 +20,8 @@ import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { signIn, setSession } from "src/store/authSlice";
 import { supabase } from "@/services/supabase";
 import * as AppleAuthentication from "expo-apple-authentication";
-import * as Crypto from "expo-crypto";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import { makeRedirectUri } from "expo-auth-session";
-import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { notify } from "@/utils/notificationService";
 
 WebBrowser.maybeCompleteAuthSession();
