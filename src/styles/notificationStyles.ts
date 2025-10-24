@@ -124,10 +124,10 @@ export const notificationStyles = StyleSheet.create({
         fontWeight: "600",
     },
     confirmationButtonTextDefault: {
-        color: theme.colors.background,
+        color: theme.colors.text,
     },
     confirmationButtonTextDestructive: {
-        color: theme.colors.background,
+        color: theme.colors.text,
     },
     confirmationButtonTextCancel: {
         color: theme.colors.text,

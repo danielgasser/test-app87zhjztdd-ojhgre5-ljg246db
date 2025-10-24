@@ -61,9 +61,7 @@ const RatingInput: React.FC<RatingProps> = ({
               name={star <= value ? "star" : "star-outline"}
               size={32}
               color={
-                star <= value
-                  ? theme.colors.mixedYellow
-                  : theme.colors.backgroundSecondary
+                star <= value ? theme.colors.mixedYellow : theme.colors.border
               }
             />
           </TouchableOpacity>
