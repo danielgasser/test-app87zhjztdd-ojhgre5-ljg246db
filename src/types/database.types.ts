@@ -1028,6 +1028,24 @@ export type Database = {
           trend_percentage: number
         }[]
       }
+      get_user_public_profile: {
+        Args: { profile_user_id: string }
+        Returns: {
+          age_range: string
+          created_at: string
+          disability_status: string[]
+          full_name: string
+          gender: string
+          is_public: boolean
+          lgbtq_status: boolean
+          privacy_level: string
+          race_ethnicity: string[]
+          religion: string
+          show_demographics: boolean
+          total_reviews: number
+          user_id: string
+        }[]
+      }
       gettransactionid: { Args: never; Returns: unknown }
       increment_review_count: {
         Args: { count_field: string; review_id: string }
