@@ -288,13 +288,6 @@ export default function CommunityScreen() {
         </Text>
 
         <View style={styles.reviewFooter}>
-          {review.user_demographics.full_name?.length > 0 && (
-            <View style={styles.userInfoName}>
-              <Text style={styles.demographicsText}>
-                Review by {review.user_demographics.full_name}
-              </Text>
-            </View>
-          )}
           <View style={styles.userInfo}>
             {review.user_demographics?.show_demographics ? (
               <Text style={styles.demographicsText}>
