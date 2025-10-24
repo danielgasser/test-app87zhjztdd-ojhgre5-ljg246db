@@ -208,6 +208,7 @@ export default function MapScreen() {
 
   // ============= EVENT HANDLERS =============
   const handleMarkerPress = async (locationId: string) => {
+    console.log("marker pressed", locationId);
     setSelectedLocationId(locationId);
     setModalVisible(true);
 
@@ -258,11 +259,12 @@ export default function MapScreen() {
   };
 
   const handleAddLocation = async () => {
+    console.log("🔵 userId:", userId);
     if (!requireAuth(userId, "add location")) return;
 
     if (!searchMarker) return;
 
-    if (searchMarker.source === "database" && searchMarker.id) {
+    if ((searchMarker.source || "database") === "database" && searchMarker.id) {
       await handleMarkerPress(searchMarker.id);
     } else {
       router.push({
@@ -344,33 +346,71 @@ export default function MapScreen() {
 
   const requestLocationPermission = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      setLocationPermission(status === "granted");
+      const permissionPromise = Location.requestForegroundPermissionsAsync();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Permission timeout")), 5000)
+      );
+      const { status } = (await Promise.race([
+        permissionPromise,
+        timeoutPromise,
+      ])) as any;
+      console.log("🟢 Permission status:", status);
+      //setLocationPermission(status === "granted");
 
-      if (status === "granted") {
+      if (status === "granted" || status === undefined) {
+        setLocationPermission(true);
         const location = await Location.getCurrentPositionAsync({});
-        const newRegion = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        };
-        setRegion(newRegion);
-        dispatch(
-          setUserLocation({
+        if (location) {
+          const newRegion = {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
-          })
-        );
-        const countryCode = await getUserCountry({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-        dispatch(setUserCountry(countryCode));
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          };
+          setRegion(newRegion);
+          dispatch(
+            setUserLocation({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            })
+          );
+          const countryCode = await getUserCountry({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+          dispatch(setUserCountry(countryCode));
+        }
       }
     } catch (error) {
-      logger.error("Location permission error:", error);
-      setLocationPermission(false);
+      console.log("❌ Permission error - trying fallback:", error);
+      // Android emulator workaround - try to get last known location
+      try {
+        const lastKnown = await Location.getLastKnownPositionAsync();
+        if (lastKnown) {
+          setLocationPermission(true);
+          const newRegion = {
+            latitude: lastKnown.coords.latitude,
+            longitude: lastKnown.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          };
+          setRegion(newRegion);
+          dispatch(
+            setUserLocation({
+              latitude: lastKnown.coords.latitude,
+              longitude: lastKnown.coords.longitude,
+            })
+          );
+          const countryCode = await getUserCountry({
+            latitude: lastKnown.coords.latitude,
+            longitude: lastKnown.coords.longitude,
+          });
+          dispatch(setUserCountry(countryCode));
+        }
+      } catch (fallbackError) {
+        logger.error("Location permission failed", fallbackError);
+        setLocationPermission(false);
+      }
     }
   };
 
@@ -906,6 +946,7 @@ export default function MapScreen() {
                 : "Tap + to add this location"
             }
             pinColor={theme.colors.primary}
+            //onPress={handleAddLocation}
           />
         )}
         {routeOrigin && (
@@ -1162,7 +1203,7 @@ export default function MapScreen() {
         </View>
       )}
       {/* Add Location Button */}
-      {searchMarker && selectedRoute && (
+      {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
             style={styles.addLocationButton}
