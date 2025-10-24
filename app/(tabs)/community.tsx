@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -31,6 +31,7 @@ import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import UserProfileModal from "@/components/UserProfileModal";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -49,7 +50,8 @@ export default function CommunityScreen() {
 
   const { profile } = useAppSelector((state) => state.user);
   const bannerState = useAppSelector((state) => state.profileBanner);
-
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   // Check profile completeness for recommendations
   const profileCheck = React.useMemo(() => {
     if (!profile) return { canUse: true, missingFields: [] };
@@ -122,6 +124,11 @@ export default function CommunityScreen() {
     communityFeedMode,
     dispatch,
   ]);
+
+  const handleUserProfilePress = (userId: string) => {
+    setSelectedUserId(userId);
+    setProfileModalVisible(true);
+  };
 
   const loadCommunityData = async () => {
     const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
@@ -288,6 +295,17 @@ export default function CommunityScreen() {
         </Text>
 
         <View style={styles.reviewFooter}>
+          {review.user_demographics.full_name?.length > 0 &&
+            review.user_demographics.show_demographics && (
+              <TouchableOpacity
+                style={styles.userInfoName}
+                onPress={() => handleUserProfilePress(review.user_id)}
+              >
+                <Text style={[styles.demographicsText, styles.clickableName]}>
+                  Review by {review.user_demographics.full_name}
+                </Text>
+              </TouchableOpacity>
+            )}
           <View style={styles.userInfo}>
             {review.user_demographics?.show_demographics ? (
               <Text style={styles.demographicsText}>
@@ -573,6 +591,15 @@ export default function CommunityScreen() {
         {/* Bottom padding */}
         <View style={{ height: 20 }} />
       </ScrollView>
+      {/* User Profile Modal */}
+      <UserProfileModal
+        visible={profileModalVisible}
+        userId={selectedUserId}
+        onClose={() => {
+          setProfileModalVisible(false);
+          setSelectedUserId(null);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -777,6 +804,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  clickableName: {
+    textDecorationLine: "underline",
+    color: theme.colors.primary,
   },
   userInfoName: {
     flexDirection: "row",
