@@ -498,3 +498,32 @@ export interface DangerZonesResponse {
     }
     generated_at: string
 }
+
+// Public Profile Types
+export interface PublicUserProfile {
+    user_id: string;
+    full_name: string | null;
+    race_ethnicity: string[] | null;
+    gender: string | null;
+    lgbtq_status: boolean | null;
+    disability_status: string[] | null;
+    religion: string | null;
+    age_range: string | null;
+    privacy_level: 'public' | 'anonymous' | 'private';
+    show_demographics: boolean;
+    total_reviews: number;
+    created_at: string;
+    is_public: boolean;
+}
+
+export interface PublicUserReview {
+    id: string;
+    location_id: string;
+    location_name: string;
+    location_address: string;
+    overall_rating: number;
+    safety_rating: number;
+    title: string;
+    content: string;
+    created_at: string;
+}
