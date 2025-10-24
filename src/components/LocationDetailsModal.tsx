@@ -198,14 +198,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
   const renderDemographics = (profile: any) => {
     // Respect privacy_level setting
-    //if (profile?.privacy_level === "private") return null;
-    //if (profile?.privacy_level === "anonymous") return null;
-    //if (!profile?.show_demographics) return null;
+    if (profile?.privacy_level === "private") return null;
+    if (profile?.privacy_level === "anonymous") return null;
+    if (!profile?.show_demographics) return null;
 
     const demographics = [];
-    if (profile.full_name?.length > 0 && profile?.privacy_level === "private") {
-      demographics.push(profile.full_name.join(", "));
-    }
     if (
       profile.race_ethnicity?.length > 0 &&
       profile?.privacy_level !== "anonymous"
