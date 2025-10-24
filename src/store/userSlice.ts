@@ -3,7 +3,7 @@ import { supabase } from '../services/supabase';
 import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
-import { PublicUserProfile } from '@/types/supabase';
+import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences'> & {
@@ -30,6 +30,8 @@ interface UserState {
   publicProfile: PublicUserProfile | null;
   publicProfileLoading: boolean;
   publicProfileError: string | null;
+  publicReviews: PublicUserReview[];
+  publicReviewsLoading: boolean;
 }
 
 const initialState: UserState = {
@@ -40,6 +42,8 @@ const initialState: UserState = {
   publicProfile: null,
   publicProfileLoading: false,
   publicProfileError: null,
+  publicReviews: [],
+  publicReviewsLoading: false,
 };
 
 // Fetch user profile
@@ -126,6 +130,24 @@ export const fetchPublicUserProfile = createAsyncThunk<PublicUserProfile, string
   }
 );
 
+// Fetch public user reviews (for viewing other users' reviews)
+export const fetchPublicUserReviews = createAsyncThunk<PublicUserReview[], string>(
+  'user/fetchPublicReviews',
+  async (userId: string) => {
+    const { data, error } = await supabase
+      .rpc('get_user_public_reviews', {
+        profile_user_id: userId,
+        review_limit: 10
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data || []) as PublicUserReview[];
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -183,6 +205,18 @@ const userSlice = createSlice({
       .addCase(fetchPublicUserProfile.rejected, (state, action) => {
         state.publicProfileLoading = false;
         state.publicProfileError = action.error.message || 'Failed to fetch public profile';
+      })
+      // Fetch public user reviews
+      .addCase(fetchPublicUserReviews.pending, (state) => {
+        state.publicReviewsLoading = true;
+      })
+      .addCase(fetchPublicUserReviews.fulfilled, (state, action: PayloadAction<PublicUserReview[]>) => {
+        state.publicReviewsLoading = false;
+        state.publicReviews = action.payload;
+      })
+      .addCase(fetchPublicUserReviews.rejected, (state) => {
+        state.publicReviewsLoading = false;
+        state.publicReviews = [];
       });
   },
 });

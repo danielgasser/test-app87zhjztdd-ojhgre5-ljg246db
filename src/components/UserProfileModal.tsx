@@ -8,11 +8,15 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../styles/theme";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchPublicUserProfile } from "../store/userSlice";
+import {
+  fetchPublicUserProfile,
+  fetchPublicUserReviews,
+} from "../store/userSlice";
 
 interface UserProfileModalProps {
   visible: boolean;
@@ -26,12 +30,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onClose,
 }) => {
   const dispatch = useAppDispatch();
-  const { publicProfile, publicProfileLoading, publicProfileError } =
-    useAppSelector((state) => state.user);
+  const {
+    publicProfile,
+    publicProfileLoading,
+    publicProfileError,
+    publicReviews,
+    publicReviewsLoading,
+  } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     if (visible && userId) {
+      console.log("🔍 Fetching profile and reviews for userId:", userId);
+
       dispatch(fetchPublicUserProfile(userId));
+      dispatch(fetchPublicUserReviews(userId));
     }
   }, [visible, userId, dispatch]);
 
@@ -83,6 +95,44 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     );
   };
 
+  const renderReviews = () => {
+    if (publicReviewsLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+        </View>
+      );
+    }
+
+    if (publicReviews.length === 0) {
+      return <Text style={styles.noReviewsText}>No reviews yet</Text>;
+    }
+
+    return publicReviews.map((review) => (
+      <View key={review.id} style={styles.reviewItem}>
+        <View style={styles.reviewHeader}>
+          <Text style={styles.reviewLocationName} numberOfLines={1}>
+            {review.location_name}
+          </Text>
+          <View style={styles.reviewRating}>
+            <Ionicons name="star" size={16} color={theme.colors.mixedYellow} />
+            <Text style={styles.reviewRatingText}>
+              {review.overall_rating.toFixed(1)}
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.reviewTitle} numberOfLines={1}>
+          {review.title}
+        </Text>
+        <Text style={styles.reviewContent} numberOfLines={2}>
+          {review.content}
+        </Text>
+        <Text style={styles.reviewDate}>
+          {new Date(review.created_at).toLocaleDateString()}
+        </Text>
+      </View>
+    ));
+  };
   return (
     <Modal
       visible={visible}
@@ -134,14 +184,22 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
             ) : publicProfile ? (
               <>
                 {/* Name Section */}
+                {/* Name Section */}
                 <View style={styles.nameSection}>
-                  <View style={styles.avatarPlaceholder}>
-                    <Ionicons
-                      name="person"
-                      size={40}
-                      color={theme.colors.textSecondary}
+                  {publicProfile.avatar_url ? (
+                    <Image
+                      source={{ uri: publicProfile.avatar_url }}
+                      style={styles.avatar}
                     />
-                  </View>
+                  ) : (
+                    <View style={styles.avatarPlaceholder}>
+                      <Ionicons
+                        name="person"
+                        size={40}
+                        color={theme.colors.textSecondary}
+                      />
+                    </View>
+                  )}
                   <Text style={styles.userName}>
                     {publicProfile.full_name || "SafePath User"}
                   </Text>
@@ -167,7 +225,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {/* Reviews section will be added in next step */}
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Recent Reviews</Text>
-                  <Text style={styles.comingSoonText}>Coming soon...</Text>
+                  {renderReviews()}
                 </View>
               </>
             ) : null}
@@ -273,6 +331,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 16,
+  },
   userName: {
     fontSize: 24,
     fontWeight: "600",
@@ -333,6 +397,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     fontStyle: "italic",
+  },
+  noReviewsText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontStyle: "italic",
+    textAlign: "center",
+    paddingVertical: 20,
+  },
+  reviewItem: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  reviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  reviewLocationName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: theme.colors.text,
+    flex: 1,
+    marginRight: 8,
+  },
+  reviewRating: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  reviewRatingText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+  },
+  reviewTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: theme.colors.text,
+    marginBottom: 4,
+  },
+  reviewContent: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: theme.colors.textLight,
   },
 });
 
