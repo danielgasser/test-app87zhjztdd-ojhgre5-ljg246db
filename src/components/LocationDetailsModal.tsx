@@ -19,7 +19,7 @@ import { googlePlacesService, PlaceDetails } from "@/services/googlePlaces";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { logger } from "@/utils/logger";
-
+import UserProfileModal from "./UserProfileModal";
 interface LocationDetailsModalProps {
   visible: boolean;
   locationId: string | null;
@@ -48,6 +48,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const mlPredictionsLoading = useAppSelector(
     (state) => state.locations.mlPredictionsLoading
   );
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (locationId && visible) {
@@ -102,6 +104,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     } finally {
       setLoadingReviews(false);
     }
+  };
+
+  const handleUserProfilePress = (userId: string) => {
+    setSelectedUserId(userId);
+    setProfileModalVisible(true);
   };
 
   const fetchPlaceDetails = async () => {
@@ -444,16 +451,29 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         )}
                         <View style={styles.reviewHeader}>
                           <View>
-                            <Text style={styles.reviewerName}>
-                              {review.user_profiles?.show_demographics
-                                ? review.user_profiles?.full_name || "Anonymous"
-                                : "Anonymous"}
-                            </Text>
+                            {review.user_profiles?.show_demographics &&
+                            review.user_profiles?.full_name ? (
+                              <TouchableOpacity
+                                onPress={() =>
+                                  handleUserProfilePress(review.user_id)
+                                }
+                              >
+                                <Text
+                                  style={[
+                                    styles.reviewerName,
+                                    styles.clickableReviewerName,
+                                  ]}
+                                >
+                                  {review.user_profiles.full_name}
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <Text style={styles.reviewerName}>Anonymous</Text>
+                            )}
                             {renderDemographics(review.user_profiles)}
                           </View>
                           {renderStars(review.overall_rating)}
                         </View>
-
                         <Text style={styles.reviewTitle}>{review.title}</Text>
                         <Text style={styles.reviewContent}>
                           {review.content}
@@ -518,6 +538,15 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
             </ScrollView>
           ) : null}
         </View>
+        {/* User Profile Modal */}
+        <UserProfileModal
+          visible={profileModalVisible}
+          userId={selectedUserId}
+          onClose={() => {
+            setProfileModalVisible(false);
+            setSelectedUserId(null);
+          }}
+        />
       </View>
     </Modal>
   );
@@ -556,6 +585,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  clickableReviewerName: {
+    textDecorationLine: "underline",
+    color: theme.colors.primary,
   },
   editButtonText: {
     fontSize: 14,

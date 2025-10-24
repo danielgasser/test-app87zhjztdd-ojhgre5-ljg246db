@@ -1032,6 +1032,7 @@ export type Database = {
         Args: { profile_user_id: string }
         Returns: {
           age_range: string
+          avatar_url: string
           created_at: string
           disability_status: string[]
           full_name: string
@@ -1044,6 +1045,20 @@ export type Database = {
           show_demographics: boolean
           total_reviews: number
           user_id: string
+        }[]
+      }
+      get_user_public_reviews: {
+        Args: { profile_user_id: string; review_limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          location_address: string
+          location_id: string
+          location_name: string
+          overall_rating: number
+          safety_rating: number
+          title: string
         }[]
       }
       gettransactionid: { Args: never; Returns: unknown }

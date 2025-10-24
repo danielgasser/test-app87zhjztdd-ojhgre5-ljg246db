@@ -503,6 +503,7 @@ export interface DangerZonesResponse {
 export interface PublicUserProfile {
     user_id: string;
     full_name: string | null;
+    avatar_url: string | null;
     race_ethnicity: string[] | null;
     gender: string | null;
     lgbtq_status: boolean | null;
