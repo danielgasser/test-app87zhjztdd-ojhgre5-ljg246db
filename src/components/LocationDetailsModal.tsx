@@ -75,7 +75,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         .select("*")
         .eq("location_id", locationId)
         .eq("status", "active")
-        .neq("user_profiles.privacy_level", "private")
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -95,9 +94,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
         setReviews(reviewsWithProfiles as ReviewWithUser[]);
       } else {
-        setReviews((data || []) as ReviewWithUser[]);
+        setReviews([]);
       }
     } catch (error) {
+      logger.error("Error fetching reviews:", error);
+      setReviews([]);
     } finally {
       setLoadingReviews(false);
     }
@@ -197,21 +198,30 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
   const renderDemographics = (profile: any) => {
     // Respect privacy_level setting
-    if (profile?.privacy_level === "private") return null;
-    if (profile?.privacy_level === "anonymous") return null;
-    if (!profile?.show_demographics) return null;
+    //if (profile?.privacy_level === "private") return null;
+    //if (profile?.privacy_level === "anonymous") return null;
+    //if (!profile?.show_demographics) return null;
 
     const demographics = [];
-    if (profile.race_ethnicity?.length > 0) {
+    if (profile.full_name?.length > 0 && profile?.privacy_level === "private") {
+      demographics.push(profile.full_name.join(", "));
+    }
+    if (
+      profile.race_ethnicity?.length > 0 &&
+      profile?.privacy_level !== "anonymous"
+    ) {
       demographics.push(profile.race_ethnicity.join(", "));
     }
-    if (profile.gender) {
+    if (profile.gender && profile?.privacy_level !== "anonymous") {
       demographics.push(profile.gender);
     }
-    if (profile.lgbtq_status) {
+    if (profile.lgbtq_status && profile?.privacy_level !== "anonymous") {
       demographics.push("LGBTQ+");
     }
-    if (profile.disability_status?.length > 0) {
+    if (
+      profile.disability_status?.length > 0 &&
+      profile?.privacy_level !== "anonymous"
+    ) {
       demographics.push("Disability: " + profile.disability_status.join(", "));
     }
 
