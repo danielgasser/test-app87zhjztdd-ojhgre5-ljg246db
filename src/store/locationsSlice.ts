@@ -613,23 +613,45 @@ export const endNavigationSession = createAsyncThunk(
 
 export const submitReview = createAsyncThunk(
   "locations/submitReview",
-  async (reviewData: CreateReviewForm) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
+  async (reviewData: CreateReviewForm, { rejectWithValue }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-    const { time_of_day, ...dbReviewData } = reviewData;
+      const { time_of_day, ...dbReviewData } = reviewData;
 
-    const { data, error } = await supabase.from("reviews").insert({
-      ...dbReviewData,
-      user_id: user.id
-    }).select().single();
+      // Check network connectivity
+      const NetInfo = (await import('@react-native-community/netinfo')).default;
+      const netInfo = await NetInfo.fetch();
 
-    if (error) {
-      logger.error("Error submitting review:", error);
-      throw error;
+      if (!netInfo.isConnected) {
+        // Queue for later
+        const { offlineQueue } = await import('../services/offlineQueue');
+        await offlineQueue.add(dbReviewData, user.id);
+        return { queued: true, message: 'Review saved - will sync when online' };
+      }
+
+      // Try to submit
+      const { data, error } = await supabase
+        .from("reviews")
+        .insert({ ...dbReviewData, user_id: user.id })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      // If submission failed, queue it
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { offlineQueue } = await import('../services/offlineQueue');
+        const { time_of_day, ...dbReviewData } = reviewData;
+        await offlineQueue.add(dbReviewData, user.id);
+        return { queued: true, message: 'Review saved - will sync when online' };
+      }
+      return rejectWithValue(error instanceof Error ? error.message : "Failed to submit review");
     }
-
-    return data;
   }
 );
 
@@ -1872,7 +1894,10 @@ const locationsSlice = createSlice({
       })
       .addCase(submitReview.fulfilled, (state, action) => {
         state.loading = false;
-        state.userReviews.unshift(action.payload as any);
+        // Check if this was queued or actually submitted
+        if (action.payload && !('queued' in action.payload)) {
+          state.userReviews.unshift(action.payload as any);
+        }
       })
       .addCase(submitReview.rejected, (state, action) => {
         state.loading = false;
