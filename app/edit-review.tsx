@@ -25,6 +25,7 @@ import { CreateReviewForm } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -113,6 +114,25 @@ export default function EditReviewScreen() {
       if (error) throw error;
 
       if (review) {
+        if (!review.created_at) {
+          notify.error("Invalid review timestamp");
+          router.back();
+          return;
+        }
+
+        const hoursSinceCreation =
+          (Date.now() - new Date(review.created_at).getTime()) /
+          (1000 * 60 * 60);
+
+        if (
+          hoursSinceCreation > APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME
+        ) {
+          notify.error(
+            `This review can no longer be edited. Reviews can only be edited within ${APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME} hours of creation.`
+          );
+          router.back();
+          return;
+        }
         setOriginalReview(review);
         setFormData({
           title: review.title,
