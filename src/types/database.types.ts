@@ -876,26 +876,6 @@ export type Database = {
           severity: string
         }[]
       }
-      get_heatmap_data: {
-        Args: {
-          center_lat: number
-          center_lng: number
-          radius_meters?: number
-          user_age_range?: string
-          user_disability_status?: string[]
-          user_gender?: string
-          user_lgbtq_status?: boolean
-          user_race_ethnicity?: string[]
-          user_religion?: string
-        }
-        Returns: {
-          heat_weight: number
-          latitude: number
-          longitude: number
-          review_count: number
-          safety_score: number
-        }[]
-      }
       get_location_with_coords: {
         Args: { location_id: string }
         Returns: {

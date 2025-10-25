@@ -23,8 +23,6 @@ import {
   fetchLocationDetails,
   setUserLocation,
   setUserCountry,
-  fetchHeatMapData,
-  toggleHeatMap,
   fetchDangerZones,
   toggleDangerZones,
   fetchMLPredictions,
@@ -41,7 +39,7 @@ import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import RoutePlanningModal from "src/components/RoutePlanningModal";
-import { setMapCenter, HeatMapPoint } from "src/store/locationsSlice";
+import { setMapCenter } from "src/store/locationsSlice";
 import { getUserCountry } from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/utils/appConfig";
@@ -109,7 +107,6 @@ export default function MapScreen() {
     string | null
   >(null);
 
-  const [fabMenuOpen, setFabMenuOpen] = useState(false);
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -117,12 +114,8 @@ export default function MapScreen() {
   const {
     nearbyLocations,
     loading,
-    error,
     userLocation,
     navigationActive,
-    heatMapData,
-    heatMapVisible,
-    heatMapLoading,
     dangerZones,
     dangerZonesVisible,
     dangerZonesLoading,
@@ -139,7 +132,7 @@ export default function MapScreen() {
 
   const bannerState = useAppSelector((state: any) => state.profileBanner);
 
-  // Check profile completeness for GENERAL (heatmap/danger zones need full profile)
+  // Check profile completeness for GENERAL (danger zones need full profile)
   const profileCheck = React.useMemo(() => {
     if (!userProfile) return { canUse: true, missingFields: [] };
 
@@ -153,13 +146,7 @@ export default function MapScreen() {
   // Determine if we should show the banner
   const showProfileBanner = React.useMemo(() => {
     if (profileCheck.canUse) return false;
-    // Show banner when heatmap or danger zones are active
-    if (!heatMapVisible && !dangerZonesVisible) return false;
-    return shouldShowBanner(
-      bannerState,
-      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE
-    );
-  }, [profileCheck.canUse, heatMapVisible, dangerZonesVisible, bannerState]);
+  }, [profileCheck.canUse, , dangerZonesVisible, bannerState]);
 
   // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
@@ -298,22 +285,6 @@ export default function MapScreen() {
     };
 
     setSearchMarker(newMarker);
-  };
-
-  const handleToggleHeatMap = () => {
-    if (!requireAuth(userId, "view heatmap")) return;
-
-    dispatch(toggleHeatMap());
-    if (!heatMapVisible && heatMapData.length === 0 && userLocation) {
-      dispatch(
-        fetchHeatMapData({
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
-          userProfile,
-        })
-      );
-    }
   };
 
   const handleToggleDangerZones = () => {
@@ -797,44 +768,6 @@ export default function MapScreen() {
           }
         }}
       >
-        {/* Heat Map Overlay */}
-        {heatMapVisible &&
-          heatMapData.length > 0 &&
-          heatMapData.map((point: HeatMapPoint, index: any) => {
-            const getHeatColor = (safetyScore: number) => {
-              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.VERY_SAFE)
-                return APP_CONFIG.HEAT_MAP.COLORS.VERY_SAFE;
-              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.SAFE)
-                return APP_CONFIG.HEAT_MAP.COLORS.SAFE;
-              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.NEUTRAL)
-                return APP_CONFIG.HEAT_MAP.COLORS.NEUTRAL;
-              if (safetyScore >= APP_CONFIG.HEAT_MAP.THRESHOLDS.UNSAFE)
-                return APP_CONFIG.HEAT_MAP.COLORS.UNSAFE;
-              return APP_CONFIG.HEAT_MAP.COLORS.VERY_UNSAFE;
-            };
-
-            const baseRadius = Math.min(
-              APP_CONFIG.HEAT_MAP.MAX_RADIUS,
-              Math.max(
-                APP_CONFIG.HEAT_MAP.MIN_RADIUS,
-                APP_CONFIG.HEAT_MAP.BASE_RADIUS + point.weight * 100
-              )
-            );
-            return (
-              <Circle
-                key={`heat-${index}`}
-                center={{
-                  latitude: point.latitude,
-                  longitude: point.longitude,
-                }}
-                radius={baseRadius}
-                fillColor={getHeatColor(point.safety_score)}
-                strokeColor="transparent"
-                strokeWidth={0}
-              />
-            );
-          })}
-
         <DangerZoneOverlay
           dangerZones={dangerZones}
           visible={dangerZonesVisible}
@@ -1000,84 +933,34 @@ export default function MapScreen() {
           )}
       </MapView>
       {/* Map Controls */}
-      <View style={styles.fabContainer}>
-        {/* Menu Items - only show when open */}
-        {fabMenuOpen && (
-          <View style={styles.fabMenu}>
-            <View style={styles.heatMapContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.heatMapToggle,
-                  heatMapVisible && styles.heatMapToggleActive,
-                ]}
-                onPress={() => {
-                  handleToggleHeatMap();
-                }}
-              >
-                <Ionicons
-                  name={heatMapVisible ? "thermometer" : "thermometer-outline"}
-                  size={24}
-                  color={
-                    heatMapVisible
-                      ? theme.colors.textOnPrimary
-                      : theme.colors.overlay
-                  }
-                />
-                <Text
-                  style={[
-                    styles.heatMapToggleText,
-                    heatMapVisible && styles.heatMapToggleTextActive,
-                  ]}
-                >
-                  {heatMapLoading ? "Loading..." : "Heat Map"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.dangerZoneContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.controlButton,
-                  dangerZonesVisible && styles.controlButtonActive,
-                ]}
-                onPress={() => {
-                  handleToggleDangerZones();
-                }}
-              >
-                <Ionicons
-                  name={dangerZonesVisible ? "shield" : "shield-outline"}
-                  size={24}
-                  color={
-                    dangerZonesVisible
-                      ? theme.colors.textOnPrimary
-                      : theme.colors.overlay
-                  }
-                />
-                <Text
-                  style={[
-                    styles.controlButtonText,
-                    dangerZonesVisible && styles.controlButtonTextActive,
-                  ]}
-                >
-                  {dangerZonesLoading ? "Loading..." : "Danger Zones"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* FAB Button */}
+      {/* Danger Zones Control */}
+      <View style={styles.dangerZoneContainer}>
         <TouchableOpacity
-          style={[commonStyles.primaryButton, fabMenuOpen && styles.fabOpen]}
-          onPress={() => setFabMenuOpen(!fabMenuOpen)}
+          style={[
+            styles.controlButton,
+            dangerZonesVisible && styles.controlButtonActive,
+          ]}
+          onPress={() => {
+            handleToggleDangerZones();
+          }}
         >
           <Ionicons
-            name={fabMenuOpen ? "close" : "map"}
-            size={28}
+            name={dangerZonesVisible ? "shield" : "shield-outline"}
+            size={24}
             color={
-              fabMenuOpen ? theme.colors.primary : theme.colors.textOnPrimary
+              dangerZonesVisible
+                ? theme.colors.textOnPrimary
+                : theme.colors.overlay
             }
           />
+          <Text
+            style={[
+              styles.controlButtonText,
+              dangerZonesVisible && styles.controlButtonTextActive,
+            ]}
+          >
+            {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -1125,41 +1008,7 @@ export default function MapScreen() {
           <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>
         </View>
       )}
-      {/* Heat Map Legend */}
-      {heatMapVisible && (
-        <View style={styles.heatMapLegend}>
-          <Text style={styles.legendTitle}>Safety for People Like You</Text>
-          <View style={styles.legendItems}>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: theme.colors.secondary },
-                ]}
-              />
-              <Text style={styles.legendText}>Safe</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: theme.colors.mixedYellow },
-                ]}
-              />
-              <Text style={styles.legendText}>Mixed</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: theme.colors.error },
-                ]}
-              />
-              <Text style={styles.legendText}>Unsafe</Text>
-            </View>
-          </View>
-        </View>
-      )}
+
       {/* Danger Zones Legend */}
       {dangerZonesVisible && dangerZones.length > 0 && (
         <View style={styles.dangerZoneLegend}>
@@ -1490,12 +1339,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: theme.colors.text,
   },
-  heatMapContainer: {
-    position: "absolute",
-    bottom: 80,
-    right: 0,
-    zIndex: 1000,
-  },
   dangerZoneContainer: {
     position: "absolute",
     bottom: 20,
@@ -1521,34 +1364,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  heatMapToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.card,
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: theme.colors.secondary,
-    shadowColor: theme.colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  heatMapToggleActive: {
-    backgroundColor: theme.colors.secondary,
-    borderColor: theme.colors.secondary,
-  },
-  heatMapToggleText: {
-    marginLeft: 6,
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  heatMapToggleTextActive: {
-    color: theme.colors.textOnPrimary,
-  },
   controlButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -1563,7 +1378,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 8,
-    marginTop: 10,
+    marginTop: 0,
+    marginBottom: 100,
+    marginRight: 10,
   },
   controlButtonActive: {
     backgroundColor: theme.colors.error,
@@ -1578,22 +1395,9 @@ const styles = StyleSheet.create({
   controlButtonTextActive: {
     color: theme.colors.textOnPrimary,
   },
-  heatMapLegend: {
-    position: "absolute",
-    bottom: 100,
-    left: 20,
-    backgroundColor: theme.colors.card,
-    padding: 12,
-    borderRadius: 8,
-    shadowColor: theme.colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
   dangerZoneLegend: {
     position: "absolute",
-    bottom: 180,
+    bottom: 20,
     left: 20,
     backgroundColor: theme.colors.card,
     padding: 12,

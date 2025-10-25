@@ -66,12 +66,6 @@ interface NearbyReviewResponse {
   user_lgbtq_status: boolean;
   user_disability_status: string[];
 }
-export interface HeatMapPoint {
-  latitude: number;
-  longitude: number;
-  weight: number;
-  safety_score: number;
-}
 
 interface CommunityReview {
   id: string;
@@ -210,9 +204,6 @@ interface LocationsState {
   userCountry: string | null;
   mapCenter: { latitude: number; longitude: number } | null;
   communityFeedMode: "near_me" | "map_area";
-  heatMapData: HeatMapPoint[];
-  heatMapVisible: boolean;
-  heatMapLoading: boolean;
   communityReviews: CommunityReview[];
   communityLoading: boolean;
   trendingLocations: any[];
@@ -311,9 +302,6 @@ const initialState: LocationsState = {
   userCountry: null,
   mapCenter: null,
   communityFeedMode: "near_me",
-  heatMapData: [],
-  heatMapVisible: false,
-  heatMapLoading: false,
   communityReviews: [],
   communityLoading: false,
   trendingLocations: [],
@@ -767,7 +755,7 @@ export const createLocationFromSearch = createAsyncThunk(
 
     const locationData = {
       name: searchLocation.name,
-      address: city,
+      address: searchLocation.name,
       city: city,
       state_province: stateProvince,
       country: country,
@@ -816,58 +804,6 @@ export const saveCommunityFeedMode = createAsyncThunk(
     } catch (error) {
       logger.error("Error saving community feed mode:", error);
       return mode;
-    }
-  }
-);
-
-export const fetchHeatMapData = createAsyncThunk(
-  "locations/fetchHeatMapData",
-  async ({
-    latitude,
-    longitude,
-    radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
-    userProfile
-  }: {
-    latitude: number;
-    longitude: number;
-    radius?: number;
-    userProfile?: any;
-  }) => {
-    try {
-      const { data, error } = await (supabase.rpc as any)("get_heatmap_data", {
-        center_lat: latitude,
-        center_lng: longitude,
-        radius_meters: radius,
-        user_race_ethnicity: userProfile?.race_ethnicity || null,
-        user_gender: userProfile?.gender || null,
-        user_lgbtq_status: userProfile?.lgbtq_status || null,
-        user_disability_status: userProfile?.disability_status || null,
-        user_religion: userProfile?.religion || null,
-        user_age_range: userProfile?.age_range || null,
-      });
-      if (error) {
-        logger.error("Error fetching heat map data:", error);
-        return [];
-      }
-
-      if (!data || data.length === 0) {
-        return [];
-      }
-      if (!data || data.length === 0) {
-        return [];
-      }
-
-      const heatMapPoints: HeatMapPoint[] = data.map((location: any) => ({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        weight: Math.max(0.1, Math.min(1.0, (location.safety_score || 3) / 5)),
-        safety_score: location.safety_score || 3,
-      }));
-
-      return heatMapPoints;
-    } catch (error) {
-      logger.error("Heat map data fetch error:", error);
-      return [];
     }
   }
 );
@@ -1803,14 +1739,6 @@ const locationsSlice = createSlice({
       }
     },
 
-    toggleHeatMap: (state) => {
-      state.heatMapVisible = !state.heatMapVisible;
-    },
-
-    setHeatMapVisible: (state, action: PayloadAction<boolean>) => {
-      state.heatMapVisible = action.payload;
-    },
-
     toggleDangerZones: (state) => {
       state.dangerZonesVisible = !state.dangerZonesVisible;
     },
@@ -1994,21 +1922,6 @@ const locationsSlice = createSlice({
         state.communityFeedMode = action.payload;
       })
 
-      // Heat Map Data
-      .addCase(fetchHeatMapData.pending, (state) => {
-        state.heatMapLoading = true;
-      })
-      .addCase(fetchHeatMapData.fulfilled, (state, action) => {
-        state.heatMapLoading = false;
-        state.heatMapData = action.payload;
-      })
-      .addCase(fetchHeatMapData.rejected, (state, action) => {
-        state.heatMapLoading = false;
-        logger.error("❌ Heatmap fetch FAILED:", action.error.message, action.error);
-
-        state.heatMapData = [];
-      })
-
       // Recent Reviews
       .addCase(fetchRecentReviews.pending, (state) => {
         state.communityLoading = true;
@@ -2187,8 +2100,6 @@ export const {
   setUserLocation,
   setUserCountry,
   addLocationToNearby,
-  toggleHeatMap,
-  setHeatMapVisible,
   setMapCenter,
   setCommunityFeedMode,
   toggleDangerZones,

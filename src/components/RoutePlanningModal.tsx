@@ -478,8 +478,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Get safety badge color
   const getSafetyBadgeColor = (score: number): string => {
-    if (score >= 4.0) return APP_CONFIG.HEAT_MAP.COLORS.VERY_SAFE;
-    if (score >= 3.0) return APP_CONFIG.HEAT_MAP.COLORS.NEUTRAL;
+    if (score >= 4.0) return APP_CONFIG.MAP_MARKERS.COLOR_SAFE;
+    if (score >= 3.0) return APP_CONFIG.MAP_MARKERS.COLOR_MEDIUM;
     return theme.colors.error;
   };
   if (!visible || navigationActive) return null;
