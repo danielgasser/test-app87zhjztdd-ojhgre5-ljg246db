@@ -34,6 +34,12 @@ export default function PrivacySettings() {
   const [loading, setLoading] = useState(true);
   const [viewDataModalVisible, setViewDataModalVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [activityStats, setActivityStats] = useState<{
+    review_count: number;
+    route_count: number;
+  } | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -43,6 +49,12 @@ export default function PrivacySettings() {
       setLoading(false);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (viewDataModalVisible) {
+      fetchActivityStats();
+    }
+  }, [viewDataModalVisible]);
 
   const savePrivacySetting = async (field: string, value: any) => {
     try {
@@ -64,6 +76,30 @@ export default function PrivacySettings() {
       }
     } catch (error) {
       notify.error("Failed to save setting. Please try again.");
+    }
+  };
+
+  const fetchActivityStats = async () => {
+    if (!user?.id) return;
+
+    setLoadingStats(true);
+    try {
+      const { data, error } = await supabase.rpc("get_user_activity_stats", {
+        p_user_id: user.id,
+      });
+
+      if (error) {
+        logger.error("Error fetching activity stats:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setActivityStats(data[0]);
+      }
+    } catch (error) {
+      logger.error("Exception fetching activity stats:", error);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -347,7 +383,6 @@ export default function PrivacySettings() {
             <Text style={styles.dataText}>
               Account Created: {new Date(user?.created_at).toLocaleDateString()}
             </Text>
-
             <Text style={styles.dataSection}>Demographic Data</Text>
             <Text style={styles.dataText}>
               Race/Ethnicity: {profile?.race_ethnicity?.join(", ") || "Not set"}
@@ -368,7 +403,6 @@ export default function PrivacySettings() {
               Disability Status:
               {profile?.disability_status?.join(", ") || "None"}
             </Text>
-
             <Text style={styles.dataSection}>Privacy Settings</Text>
             <Text style={styles.dataText}>
               Privacy Level: {profile?.privacy_level || "public"}
@@ -376,10 +410,24 @@ export default function PrivacySettings() {
             <Text style={styles.dataText}>
               Show Demographics: {profile?.show_demographics ? "Yes" : "No"}
             </Text>
-
             <Text style={styles.dataSection}>Activity</Text>
-            <Text style={styles.dataText}>Reviews Posted: Coming soon</Text>
-            <Text style={styles.dataText}>Routes Planned: Not tracked</Text>
+            {loadingStats ? (
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+            ) : activityStats ? (
+              <>
+                <Text style={styles.dataText}>
+                  Reviews Posted: {activityStats.review_count}
+                </Text>
+                <Text style={styles.dataText}>
+                  Routes Planned: {activityStats.route_count}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.dataText}>Reviews Posted: 0</Text>
+                <Text style={styles.dataText}>Routes Planned: 0</Text>
+              </>
+            )}
           </ScrollView>
         </SafeAreaView>
       </Modal>

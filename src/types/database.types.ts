@@ -1028,6 +1028,13 @@ export type Database = {
           trend_percentage: number
         }[]
       }
+      get_user_activity_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          review_count: number
+          route_count: number
+        }[]
+      }
       get_user_public_profile: {
         Args: { profile_user_id: string }
         Returns: {
