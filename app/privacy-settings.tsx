@@ -105,7 +105,87 @@ export default function PrivacySettings() {
 
   const handleExportData = async () => {
     try {
-      // Gather all user data
+      // Fetch user's reviews with location details
+      const { data: reviews, error: reviewsError } = await supabase
+        .from("reviews")
+        .select(
+          `
+        id,
+        title,
+        content,
+        overall_rating,
+        safety_rating,
+        comfort_rating,
+        accessibility_rating,
+        service_rating,
+        visit_type,
+        created_at,
+        updated_at,
+        visited_at,
+        locations (
+          name,
+          address
+        )
+      `
+        )
+        .eq("user_id", user?.id)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (reviewsError) {
+        logger.error("Error fetching reviews for export:", reviewsError);
+      }
+
+      // Fetch user's routes
+      const { data: routes, error: routesError } = await supabase
+        .from("routes")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (routesError) {
+        logger.error("Error fetching routes for export:", routesError);
+      }
+
+      // Format reviews for export
+      const formattedReviews =
+        reviews?.map((review) => ({
+          review_id: review.id,
+          location_name: review.locations?.name || "Unknown",
+          location_address: review.locations?.address || "",
+          title: review.title,
+          content: review.content,
+          ratings: {
+            overall: review.overall_rating,
+            safety: review.safety_rating,
+            comfort: review.comfort_rating,
+            accessibility: review.accessibility_rating,
+            service: review.service_rating,
+          },
+          visit_type: review.visit_type,
+          created_at: review.created_at,
+          updated_at: review.updated_at,
+          visited_at: review.visited_at,
+        })) || [];
+
+      // Format routes for export
+      const formattedRoutes =
+        routes?.map((route) => ({
+          route_id: route.id,
+          origin: route.origin_name,
+          destination: route.destination_name,
+          distance_km: route.distance_km,
+          duration_minutes: route.duration_minutes,
+          safety_score: route.safety_score,
+          waypoints_count: Array.isArray(route.route_coordinates)
+            ? route.route_coordinates.length
+            : 0,
+          created_at: route.created_at,
+          navigation_started: route.navigation_started_at,
+          navigation_completed: route.navigation_ended_at,
+        })) || [];
+
+      // Gather all user data including reviews and routes
       const exportData = {
         account: {
           email: user?.email,
@@ -123,6 +203,12 @@ export default function PrivacySettings() {
           privacy_level: profile?.privacy_level,
           show_demographics: profile?.show_demographics,
         },
+        activity: {
+          total_reviews: formattedReviews.length,
+          total_routes_planned: formattedRoutes.length,
+        },
+        reviews: formattedReviews,
+        routes: formattedRoutes,
         privacy_settings: {
           demographics_visible: showDemographics,
           profile_public: profileVisibility,
