@@ -208,7 +208,14 @@ function RootLayoutNav() {
             // Navigate to map (where active navigation is)
             router.push("/(tabs)/(map)/");
             break;
-
+          case "batched_route_safety_alerts":
+            // For batched alerts, open the first (closest) location
+            if (data.reviews && data.reviews.length > 0) {
+              router.push(
+                `/(tabs)/(locations)/location-details?id=${data.reviews[0].locationId}`
+              );
+            }
+            break;
           default:
             logger.warn("Unknown notification type:", data.type);
         }
