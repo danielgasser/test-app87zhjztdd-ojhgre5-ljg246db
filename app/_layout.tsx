@@ -28,8 +28,8 @@ import { notificationService } from "@/services/notificationService";
 import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 import * as Sentry from "@sentry/react-native";
 import { logger } from "@/utils/logger";
+import * as Notifications from "expo-notifications";
 
-// Initialize Sentry
 // Initialize Sentry
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -179,6 +179,44 @@ function RootLayoutNav() {
       authListener.subscription.unsubscribe();
     };
   }, [dispatch]);
+
+  // Listen for notification taps
+  // Listen for notification taps
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data as Record<
+          string,
+          any
+        >;
+
+        if (!data || typeof data !== "object") return;
+
+        // Handle different notification types
+        switch (data.type) {
+          case "location_trigger":
+          case "location_safety_change":
+            // Navigate to location details
+            if (data.locationId) {
+              router.push(
+                `/(tabs)/(locations)/location-details?id=${data.locationId}`
+              );
+            }
+            break;
+
+          case "route_safety_alert":
+            // Navigate to map (where active navigation is)
+            router.push("/(tabs)/(map)/");
+            break;
+
+          default:
+            logger.warn("Unknown notification type:", data.type);
+        }
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
 
   // Deep link listener for OAuth callback
   useEffect(() => {
