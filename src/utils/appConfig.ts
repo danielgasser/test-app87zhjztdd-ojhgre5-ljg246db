@@ -71,25 +71,6 @@ export const APP_CONFIG = {
   },
 
   // Heat Map Settings
-  HEAT_MAP: {
-    BASE_RADIUS: 800,                          // Base radius for heat map circles
-    ZOOM_RADIUS_MULTIPLIER: 50,               // Multiply by zoom level
-    MIN_RADIUS: 200,                           // Minimum circle radius
-    MAX_RADIUS: 2000,                          // Maximum circle radius
-    COLORS: {
-      VERY_SAFE: "#4CAF5060",    // Green - 4.5+
-      SAFE: "#8BC34A60",         // Light green - 3.5+
-      NEUTRAL: "#FFC10760",      // Yellow - 2.5+
-      UNSAFE: "#FF572260",       // Orange - 1.5+
-      VERY_UNSAFE: "#F4433660",  // Red - <1.5
-    },
-    THRESHOLDS: {
-      VERY_SAFE: 4.5,
-      SAFE: 3.5,
-      NEUTRAL: 2.5,
-      UNSAFE: 1.5,
-    },
-  },
   DANGER_ZONES: {
     SEARCH_RADIUS_MILES: 50,              // Already in your config
     POLYGON_RADIUS_MILES: 2,              // Already in your config  
