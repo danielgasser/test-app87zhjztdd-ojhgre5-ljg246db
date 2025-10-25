@@ -65,6 +65,7 @@ export const APP_CONFIG = {
   // Business Rules
   BUSINESS_RULES: {
     ONE_REVIEW_PER_USER_LOCATION: true,       // Enforce single review per user/location
+    REVIEW_EDIT_TIMEFRAME: 24,                // Time window a user can edit their review in hours        
     REQUIRE_EMAIL_CONFIRMATION: true,         // Currently disabled for dev
     MIN_DEMOGRAPHIC_GROUPS_FOR_COMPARISON: 2,  // Min groups to compare for patterns
   },

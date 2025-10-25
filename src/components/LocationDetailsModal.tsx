@@ -106,6 +106,15 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     }
   };
 
+  const canEditReview = (createdAt: string | null): boolean => {
+    if (!createdAt) return false;
+    const hoursSinceCreation =
+      (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60);
+    return (
+      hoursSinceCreation <= APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME
+    );
+  };
+
   const handleUserProfilePress = (userId: string) => {
     setSelectedUserId(userId);
     setProfileModalVisible(true);
@@ -424,31 +433,32 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   ) : reviews.length > 0 ? (
                     reviews.map((review) => (
                       <View key={review.id} style={styles.reviewCard}>
-                        {review.user_id === currentUser?.id && (
-                          <TouchableOpacity
-                            style={styles.editButton}
-                            onPress={() => {
-                              onClose();
-                              router.push({
-                                pathname: "/edit-review",
-                                params: {
-                                  reviewId: review.id,
-                                  locationId: selectedLocation.id,
-                                  locationName: selectedLocation.name,
-                                },
-                              });
-                            }}
-                          >
-                            <Ionicons
-                              name="pencil"
-                              size={18}
-                              color={theme.colors.card}
-                            />
-                            <Text style={styles.editButtonText}>
-                              Edit Review
-                            </Text>
-                          </TouchableOpacity>
-                        )}
+                        {review.user_id === currentUser?.id &&
+                          canEditReview(review.created_at) && (
+                            <TouchableOpacity
+                              style={styles.editButton}
+                              onPress={() => {
+                                onClose();
+                                router.push({
+                                  pathname: "/edit-review",
+                                  params: {
+                                    reviewId: review.id,
+                                    locationId: selectedLocation.id,
+                                    locationName: selectedLocation.name,
+                                  },
+                                });
+                              }}
+                            >
+                              <Ionicons
+                                name="pencil"
+                                size={18}
+                                color={theme.colors.card}
+                              />
+                              <Text style={styles.editButtonText}>
+                                Edit Review
+                              </Text>
+                            </TouchableOpacity>
+                          )}
                         <View style={styles.reviewHeader}>
                           <View>
                             {review.user_profiles?.show_demographics &&

@@ -657,15 +657,38 @@ export const submitReview = createAsyncThunk(
 
 export const updateReview = createAsyncThunk(
   "locations/updateReview",
-  async ({ id, ...updateData }: { id: string } & Partial<CreateReviewForm>) => {
-    const { data, error } = await supabase.from("reviews").update(updateData).eq("id", id).select().single();
+  async ({ id, ...updateData }: { id: string } & Partial<CreateReviewForm>, { rejectWithValue }) => {
+    try {
+      // Fetch review to check created_at
+      const { data: review, error: fetchError } = await supabase
+        .from("reviews")
+        .select("created_at")
+        .eq("id", id)
+        .single();
 
-    if (error) {
-      logger.error("Error updating review:", error);
-      throw error;
+      if (fetchError || !review) throw new Error("Review not found");
+      if (!review.created_at) throw new Error("Invalid review timestamp");
+
+      // Check 24-hour window
+      const hoursSinceCreation = (Date.now() - new Date(review.created_at).getTime()) / (1000 * 60 * 60);
+
+      if (hoursSinceCreation > APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME) {
+        return rejectWithValue("Reviews can only be edited within 24 hours of creation.");
+      }
+
+      // Proceed with update
+      const { data, error } = await supabase
+        .from("reviews")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error?.message || "Failed to update review");
     }
-
-    return data;
   }
 );
 
