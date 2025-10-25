@@ -233,6 +233,15 @@ export interface PushNotification {
     body: string;
     data?: any;
     priority?: "default" | "normal" | "high";
+    android?: {
+        priority?: string;
+        timeoutAfter?: number;
+        channelId?: string;
+    };
+    ios?: {
+        sound?: string;
+        _displayInForeground?: boolean;
+    };
 }
 
 export interface UserProfile {

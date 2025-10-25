@@ -20,6 +20,7 @@ import {
   startNavigation,
   SafeRoute,
   RouteCoordinate,
+  fetchUserReviews,
 } from "@/store/locationsSlice";
 import { calculateRouteSafety } from "@/store/locationsSlice";
 import { formatDistanceToNow } from "date-fns";
@@ -29,6 +30,8 @@ import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 import * as Sentry from "@sentry/react-native";
 import { logger } from "@/utils/logger";
 import * as Notifications from "expo-notifications";
+import NetInfo from "@react-native-community/netinfo";
+import { offlineQueue } from "@/services/offlineQueue";
 
 // Initialize Sentry
 Sentry.init({
@@ -181,7 +184,6 @@ function RootLayoutNav() {
   }, [dispatch]);
 
   // Listen for notification taps
-  // Listen for notification taps
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
@@ -225,6 +227,27 @@ function RootLayoutNav() {
     return () => subscription.remove();
   }, []);
 
+  // Process offline queue when connection restored
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      if (state.isConnected) {
+        const count = await offlineQueue.processAll();
+        if (count > 0) {
+          notify.success(
+            `${count} queued review${count > 1 ? "s" : ""} synced!`
+          );
+
+          // Refresh user reviews to show synced reviews
+          const user = await supabase.auth.getUser();
+          if (user.data.user) {
+            dispatch(fetchUserReviews(user.data.user.id));
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [dispatch]);
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {

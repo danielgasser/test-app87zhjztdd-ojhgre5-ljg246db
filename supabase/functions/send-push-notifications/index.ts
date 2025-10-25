@@ -486,6 +486,14 @@ serve(async (req) => {
         to: route.user_profile.push_token,
         sound: "default",
         priority: highestSeverity.priority === 3 ? "high" : "default",
+        android: {
+          priority: severity.priority === 3 ? "max" : "default",
+          timeoutAfter: severity.priority === 3 ? 30000 : 10000,
+        },
+        ios: {
+          sound: severity.priority === 3 ? "default" : undefined,
+          _displayInForeground: true,
+        },
         title,
         body,
         data: notificationData,

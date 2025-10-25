@@ -194,7 +194,12 @@ export default function ReviewScreen() {
         service_rating: formData.service_rating || undefined,
       };
 
-      await dispatch(submitReview(reviewData)).unwrap();
+      const result = await dispatch(submitReview(reviewData)).unwrap();
+      if (result && "queued" in result) {
+        notify.success("Review saved - will sync when online");
+      } else {
+        notify.success("Review submitted successfully!");
+      }
       if (isCreatingNew && parsedLocationData && !navigationActive) {
         const newLocationWithScores: LocationWithScores = {
           id: finalLocationId,
