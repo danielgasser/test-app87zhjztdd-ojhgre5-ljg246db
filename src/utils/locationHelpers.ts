@@ -34,3 +34,80 @@ export const getUserCountry = async (
         return 'us';
     }
 };
+
+export const getAddressFromCoordinates = async (
+    latitude: number,
+    longitude: number
+): Promise<string | null> => {
+    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    if (!googleApiKey) {
+        logger.error('Google Maps API key not configured');
+        return null;
+    }
+
+    try {
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status !== 'OK' || !data.results || data.results.length === 0) {
+            logger.warn('No geocoding results found for coordinates:', { latitude, longitude });
+            return null;
+        }
+
+        // Try to find the best address format in order of preference:
+        // 1. Street address (most specific)
+        // 2. Route/street name
+        // 3. Locality (neighborhood)
+        // 4. City/town
+        // 5. Fallback to formatted_address
+
+        // Look for street address result
+        const streetAddress = data.results.find((result: any) =>
+            result.types.includes('street_address') || result.types.includes('premise')
+        );
+
+        if (streetAddress) {
+            // Extract street number + route from address_components
+            const streetNumber = streetAddress.address_components.find((c: any) =>
+                c.types.includes('street_number')
+            );
+            const route = streetAddress.address_components.find((c: any) =>
+                c.types.includes('route')
+            );
+
+            if (streetNumber && route) {
+                return `${streetNumber.long_name} ${route.long_name}`;
+            }
+            if (route) {
+                return route.long_name;
+            }
+        }
+
+        // Look for route/neighborhood/locality
+        const locality = data.results.find((result: any) =>
+            result.types.includes('route') ||
+            result.types.includes('neighborhood') ||
+            result.types.includes('locality')
+        );
+
+        if (locality) {
+            const name = locality.address_components.find((c: any) =>
+                c.types.includes('route') ||
+                c.types.includes('neighborhood') ||
+                c.types.includes('locality')
+            );
+            if (name) {
+                return name.long_name;
+            }
+        }
+
+        // Fallback: use the first formatted_address
+        return data.results[0].formatted_address;
+
+    } catch (error) {
+        logger.error('Error getting address from coordinates:', error);
+        return null;
+    }
+};
