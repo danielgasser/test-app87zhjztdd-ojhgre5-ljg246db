@@ -22,7 +22,7 @@ export const notificationStyles = StyleSheet.create({
         borderRadius: 8,
 
         // Shadow (works on both platforms)
-        shadowColor: "#000000",
+        shadowColor: theme.colors.shadowLight,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 8,
@@ -32,7 +32,7 @@ export const notificationStyles = StyleSheet.create({
 
         // Try border INSIDE a wrapper if needed
         borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.2)",
+        borderColor: theme.colors.borderLight,
     },
     snackbarTextContainer: {
         flex: 1,
@@ -124,13 +124,13 @@ export const notificationStyles = StyleSheet.create({
         fontWeight: "600",
     },
     confirmationButtonTextDefault: {
-        color: theme.colors.text,
+        color: theme.colors.background,
     },
     confirmationButtonTextDestructive: {
-        color: theme.colors.text,
+        color: theme.colors.background,
     },
     confirmationButtonTextCancel: {
-        color: theme.colors.text,
+        color: theme.colors.background,
     },
 });
 

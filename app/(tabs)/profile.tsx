@@ -310,7 +310,6 @@ export default function ProfileScreen() {
               <Text style={styles.name}>
                 {profile.full_name || "SafePath User"}
               </Text>
-              <Text style={styles.email}>{user.email}</Text>
 
               {/* Edit Profile Button */}
               <TouchableOpacity
