@@ -11,8 +11,3 @@ DROP FUNCTION IF EXISTS public.get_heatmap_data(
   user_age_range text
 );
 
--- Revoke any permissions that were granted
--- (This is safe to run even if already revoked)
-REVOKE ALL ON FUNCTION public.get_heatmap_data FROM anon;
-REVOKE ALL ON FUNCTION public.get_heatmap_data FROM authenticated;
-REVOKE ALL ON FUNCTION public.get_heatmap_data FROM service_role;

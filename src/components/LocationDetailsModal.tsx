@@ -136,14 +136,15 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           "name",
           "formatted_address",
           "geometry",
-          "opening_hours",
-          "formatted_phone_number",
-          "website",
-          "rating",
-          "user_ratings_total",
-          "photos",
-          "reviews",
           "types",
+          // expensive fields!
+          // "website",
+          // "rating",
+          // "user_ratings_total",
+          // "photos",
+          // "reviews",
+          // "formatted_phone_number",
+          // "opening_hours",
         ],
       });
 

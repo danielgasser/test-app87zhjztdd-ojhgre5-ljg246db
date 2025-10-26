@@ -89,41 +89,6 @@ export type Database = {
         }
         Relationships: []
       }
-      ml_training_data: {
-        Row: {
-          created_at: string | null
-          demographic_features: Json | null
-          id: string
-          location_id: string | null
-          safety_metrics: Json | null
-          temporal_features: Json | null
-        }
-        Insert: {
-          created_at?: string | null
-          demographic_features?: Json | null
-          id?: string
-          location_id?: string | null
-          safety_metrics?: Json | null
-          temporal_features?: Json | null
-        }
-        Update: {
-          created_at?: string | null
-          demographic_features?: Json | null
-          id?: string
-          location_id?: string | null
-          safety_metrics?: Json | null
-          temporal_features?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ml_training_data_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       notification_logs: {
         Row: {
           created_at: string
