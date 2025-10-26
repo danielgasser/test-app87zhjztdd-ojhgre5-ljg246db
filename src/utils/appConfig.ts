@@ -267,6 +267,13 @@ export const APP_CONFIG = {
     BYPASS_RATE_LIMITS: false,                       // Bypass rate limits in development
     SHOW_SEGMENT_BOUNDARIES: false,                  // Visualize route segments on map (debug)
   },
+  DEBUG: {
+    // List of emails that can access the debug screen
+    AUTHORIZED_EMAILS: [
+      'daniel@danielg.online',  // Replace with your email
+      '',  // Add your business partner's email
+    ] as string[],
+  },
 
 } as const;
 

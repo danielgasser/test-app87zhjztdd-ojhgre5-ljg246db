@@ -77,6 +77,13 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="debug"
+          options={{
+            href: null, // Hide from tab bar
+            title: "Debug",
+          }}
+        />
       </Tabs>
       <View style={styles.versionFooter}>
         <Text style={styles.versionText}>

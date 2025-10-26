@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Linking,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -25,6 +26,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetAll } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { APP_CONFIG } from "@/utils/appConfig";
+const appConfig = require("../../app.config.js");
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -46,6 +49,18 @@ export default function ProfileScreen() {
     router.push("/onboarding");
   };
 
+  const handleVersionLongPress = () => {
+    // Check if user is authorized
+    if (
+      user?.email &&
+      APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email)
+    ) {
+      router.push("/(tabs)/debug");
+    } else {
+      // Silent fail for unauthorized users
+      console.log("Debug access denied");
+    }
+  };
   // Calculate profile completion
   const profileCompletion = React.useMemo(() => {
     if (!profile) return { missingFields: [], completionPercentage: 0 };
@@ -371,6 +386,15 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </>
         )}
+        {user?.email &&
+          APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email) && (
+            <Pressable
+              style={styles.logoutButton}
+              onPress={handleVersionLongPress}
+            >
+              <Text style={styles.versionText}>Debug</Text>
+            </Pressable>
+          )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -389,6 +413,10 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: theme.spacing.lg,
+  },
+  versionText: {
+    fontSize: 18,
+    color: theme.colors.textSecondary,
   },
   notLoggedInText: {
     fontSize: 18,
