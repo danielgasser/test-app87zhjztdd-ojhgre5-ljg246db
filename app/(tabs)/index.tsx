@@ -615,6 +615,28 @@ export default function MapScreen() {
     }
   }, [userId, userLocation, dispatch]);
 
+  // Auto-fetch ML predictions for locations without reviews
+  useEffect(() => {
+    if (nearbyLocations.length > 0 && userProfile) {
+      nearbyLocations.forEach(
+        (location: {
+          demographic_safety_score: any;
+          avg_safety_score: any;
+          id: string;
+        }) => {
+          const hasReviews =
+            location.demographic_safety_score || location.avg_safety_score;
+          const hasPrediction = mlPredictions[location.id];
+          const isLoading = mlPredictionsLoading[location.id];
+
+          // Fetch prediction if no reviews, no existing prediction, and not already loading
+          if (!hasReviews && !hasPrediction && !isLoading) {
+            dispatch(fetchMLPredictions(location.id));
+          }
+        }
+      );
+    }
+  }, [nearbyLocations, userProfile, dispatch]); // Don't include mlPredictions to avoid infinite loop
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
