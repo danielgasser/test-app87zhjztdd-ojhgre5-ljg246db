@@ -201,13 +201,19 @@ export default function MapScreen() {
     const location = nearbyLocations.find(
       (loc: { id: string }) => loc.id === locationId
     );
+    console.log("🔍 DEBUG location found:", !!location);
+    console.log("🔍 DEBUG userProfile exists:", !!userProfile);
     if (location && userProfile) {
       const hasActualReviews =
         location.demographic_safety_score || location.avg_safety_score;
       const hasPrediction = mlPredictions[locationId];
       const isLoading = mlPredictionsLoading[locationId];
-
+      console.log("🔍 DEBUG hasActualReviews:", hasActualReviews);
+      console.log("🔍 DEBUG hasPrediction:", hasPrediction);
+      console.log("🔍 DEBUG isLoading:", isLoading);
       if (!hasActualReviews && !hasPrediction && !isLoading) {
+        console.log("✅ CALLING fetchMLPredictions");
+
         dispatch(fetchMLPredictions(locationId));
       }
     }
@@ -268,12 +274,16 @@ export default function MapScreen() {
 
   const handleMapPress = async (event: any) => {
     Keyboard.dismiss();
+
+    // Clear selected marker and modal
+    setSelectedLocationId(null);
+    setSelectedGooglePlaceId(null);
+    setModalVisible(false);
+
     if (!requireAuth(userId, "add marker")) return;
 
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
-    // Set as search marker (same UX as search results)
     const newMarker = {
       id: `longpress-${Date.now()}`,
       name: "New Location",
@@ -618,7 +628,8 @@ export default function MapScreen() {
   // Auto-fetch ML predictions for locations without reviews
   useEffect(() => {
     if (nearbyLocations.length > 0 && userProfile) {
-      nearbyLocations.forEach(
+      const locationsToPredict = nearbyLocations.slice(0, 10);
+      locationsToPredict.forEach(
         (location: {
           demographic_safety_score: any;
           avg_safety_score: any;

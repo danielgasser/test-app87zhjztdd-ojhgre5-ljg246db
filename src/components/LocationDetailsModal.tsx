@@ -388,6 +388,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 )}
               </View>
               {/* ML Prediction Badge for locations with no reviews */}
+
               {selectedLocation && selectedLocation.review_count === 0 && (
                 <PredictionBadge
                   prediction={mlPredictions[selectedLocation.id]}

@@ -48,13 +48,47 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
   const badgeColor = getBadgeColor(confidencePercent);
 
   return (
-    <View style={[styles.container, { backgroundColor: badgeColor }]}>
-      <Ionicons name="bulb" size={16} color={theme.colors.background} />
-      <Text style={styles.predictionText}>
-        AI Prediction: {prediction.predicted_safety_score.toFixed(1)}/5
+    <View
+      style={[
+        styles.container,
+        { borderLeftWidth: 4, borderLeftColor: badgeColor },
+      ]}
+    >
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
+      >
+        <Ionicons name="sparkles" size={20} color={theme.colors.primary} />
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: theme.colors.primary,
+            marginLeft: 6,
+          }}
+        >
+          AI Safety Prediction
+        </Text>
+      </View>
+
+      <Text
+        style={{ fontSize: 28, fontWeight: "bold", color: theme.colors.text }}
+      >
+        {prediction.predicted_safety_score.toFixed(1)}
+        <Text style={{ fontSize: 16, color: theme.colors.textSecondary }}>
+          /5
+        </Text>
       </Text>
-      <Text style={styles.confidenceText}>
-        ({confidencePercent}% confident)
+
+      <Text
+        style={{
+          fontSize: 12,
+          color: theme.colors.textSecondary,
+          marginTop: 4,
+        }}
+      >
+        {confidencePercent}% confidence
+        {prediction.based_on_locations > 0 &&
+          ` • ${prediction.based_on_locations} locations`}
       </Text>
     </View>
   );
@@ -62,12 +96,11 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 8,
+    backgroundColor: theme.colors.backgroundSecondary,
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 12,
+    marginHorizontal: 14,
     gap: 6,
   },
   predictionText: {
