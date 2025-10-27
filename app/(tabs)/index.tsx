@@ -216,6 +216,7 @@ export default function MapScreen() {
     );
     console.log("🔍 DEBUG location found:", !!location);
     console.log("🔍 DEBUG userProfile exists:", !!userProfile);
+
     if (location && userProfile) {
       const hasActualReviews =
         location.review_count && location.review_count > 0;
@@ -313,8 +314,13 @@ export default function MapScreen() {
     setSelectedGooglePlaceId(newMarker.id);
     setModalVisible(true);
 
+    console.log("🔵 handleMapPress - userProfile exists:", !!userProfile);
+    console.log("🔵 handleMapPress - userProfile value:", userProfile);
+
+    console.log("🔵 handleMapPress - newMarker.id:", newMarker.id);
     // Trigger ML prediction for this location
     if (userProfile) {
+      console.log("🔵 Dispatching fetchMLPredictions from handleMapPress"); // ← This line
       dispatch(fetchMLPredictions(newMarker.id));
     }
   };
@@ -931,27 +937,9 @@ export default function MapScreen() {
             }
             pinColor={theme.colors.primary}
             onPress={() => {
-              // For new locations (not in database)
-              if (searchMarker.source !== "database") {
-                setSelectedGooglePlaceId(searchMarker.id);
-                setModalVisible(true);
+              console.log("🔵 searchMarker onPress fired!", searchMarker.id);
 
-                // Trigger ML prediction with coordinates
-                if (
-                  userProfile &&
-                  searchMarker.latitude &&
-                  searchMarker.longitude
-                ) {
-                  console.log(
-                    "🔍 Triggering ML for new location:",
-                    searchMarker.id
-                  );
-                  dispatch(fetchMLPredictions(searchMarker.id));
-                }
-              } else {
-                // For database locations, use handleMarkerPress
-                handleMarkerPress(searchMarker.id);
-              }
+              handleMarkerPress(searchMarker.id);
             }}
           />
         )}

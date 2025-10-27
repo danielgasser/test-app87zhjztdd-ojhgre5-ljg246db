@@ -12,6 +12,7 @@ export const EDGE_CONFIG = {
             NEARBY_OVERALL: 0.2,               // 20% weight for nearby location averages  
             NEARBY_DEMOGRAPHIC: 0.4,           // 40% weight for nearby demographic matches
         },
+        NEARBY_LOCATION_RADIUS: 1000,
     },
     SAFETY_THRESHOLDS: {
         SAFE_MINIMUM: 4.0,

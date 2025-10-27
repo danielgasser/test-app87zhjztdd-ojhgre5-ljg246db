@@ -17,15 +17,33 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { location_id, user_demographics } = await req.json();
-    if (!location_id || !user_demographics) {
-      throw new Error('location_id and user_demographics are required');
+    const { location_id, latitude, longitude, user_demographics, place_type } = await req.json();
+
+    // Must have either location_id OR coordinates
+    if ((!location_id && (!latitude || !longitude)) || !user_demographics) {
+      throw new Error('Either location_id or (latitude + longitude) and user_demographics are required');
     }
     // Get location details
-    const { data: location, error: locError } = await supabase.from('locations').select('*').eq('id', location_id).single();
-    if (locError || !location) {
-      throw new Error('Location not found');
+    let location;
+
+    if (location_id) {
+      // Database location - fetch from locations table
+      const { data, error: locError } = await supabase.from('locations').select('*').eq('id', location_id).single();
+      if (locError || !data) {
+        throw new Error('Location not found');
+      }
+      location = data;
+    } else {
+      // Temporary location with coordinates - create a minimal location object
+      location = {
+        id: 'temp-location',
+        name: 'Temporary Location',
+        latitude: latitude,
+        longitude: longitude,
+        place_type: place_type || 'other'
+      };
     }
+
     // Check if we already have reviews for this location
     const { data: existingScores } = await supabase.from('safety_scores').select('*').eq('location_id', location_id);
     if (existingScores && existingScores.length > 0) {
@@ -64,9 +82,9 @@ serve(async (req) => {
       `).eq('place_type', location.place_type).neq('id', location_id);
     // Factor 2: Neighborhood scores (nearby locations)
     const { data: nearbyLocations } = await supabase.rpc('get_nearby_locations', {
-      lat: location.latitude || 0,
-      lng: location.longitude || 0,
-      radius_meters: 1000 // 1km radius
+      lat: location.latitude || latitude,
+      lng: location.longitude || longitude,
+      radius_meters: EDGE_CONFIG.ML_PARAMS.NEARBY_LOCATION_RADIUS
     });
     // Factor 3: Scores from similar demographics at similar places
     const demographicMatches = placeTypeScores?.filter((loc) => {
