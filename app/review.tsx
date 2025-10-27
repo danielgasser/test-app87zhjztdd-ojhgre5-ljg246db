@@ -494,6 +494,15 @@ export default function ReviewScreen() {
                       const newDateTime = new Date(visitDateTime);
                       newDateTime.setHours(selectedTime.getHours());
                       newDateTime.setMinutes(selectedTime.getMinutes());
+
+                      // Check if the combined date+time is in the future
+                      if (newDateTime > new Date()) {
+                        notify.error("Visit time cannot be in the future");
+                        const now = new Date();
+                        newDateTime.setHours(now.getHours());
+                        newDateTime.setMinutes(now.getMinutes());
+                      }
+
                       setVisitDateTime(newDateTime);
                     }
                   }}
@@ -522,10 +531,12 @@ export default function ReviewScreen() {
                 transparent={true}
                 animationType="slide"
               >
-                <TouchableOpacity
-                  style={styles.modalOverlay}
-                  onPress={() => setShowVisitTypePicker(false)}
-                >
+                <View style={styles.modalOverlay}>
+                  <TouchableOpacity
+                    style={{ flex: 1 }}
+                    activeOpacity={1}
+                    onPress={() => setShowVisitTypePicker(false)}
+                  />
                   <View style={styles.modalContent}>
                     <View style={styles.modalHeader}>
                       <Text style={styles.modalTitle}>Select Visit Type</Text>
@@ -539,7 +550,6 @@ export default function ReviewScreen() {
                       selectedValue={formData.visit_type}
                       onValueChange={(value) => {
                         setFormData({ ...formData, visit_type: value });
-                        setShowVisitTypePicker(false);
                       }}
                       style={{ height: 200 }}
                     >
@@ -550,7 +560,7 @@ export default function ReviewScreen() {
                       <Picker.Item label="Business" value="business" />
                     </Picker>
                   </View>
-                </TouchableOpacity>
+                </View>
               </Modal>
               {/* Demographic Context Note */}
               <View style={styles.noteContainer}>

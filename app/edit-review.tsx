@@ -442,7 +442,19 @@ export default function EditReviewScreen() {
                   onChange={(event, selectedTime) => {
                     setShowTimePicker(false);
                     if (selectedTime) {
-                      setVisitDateTime(selectedTime);
+                      const newDateTime = new Date(visitDateTime);
+                      newDateTime.setHours(selectedTime.getHours());
+                      newDateTime.setMinutes(selectedTime.getMinutes());
+
+                      // Check if the combined date+time is in the future
+                      if (newDateTime > new Date()) {
+                        notify.error("Visit time cannot be in the future");
+                        const now = new Date();
+                        newDateTime.setHours(now.getHours());
+                        newDateTime.setMinutes(now.getMinutes());
+                      }
+
+                      setVisitDateTime(newDateTime);
                     }
                   }}
                 />
