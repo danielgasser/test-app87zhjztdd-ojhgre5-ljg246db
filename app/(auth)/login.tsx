@@ -39,8 +39,21 @@ export default function LoginScreen() {
     }
 
     try {
-      await dispatch(signIn({ email, password })).unwrap();
-      router.replace("/(tabs)");
+      const result = await dispatch(signIn({ email, password })).unwrap();
+
+      // Check onboarding status
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("user_id", result.user.id)
+        .single();
+
+      // Route based on onboarding
+      if (!profile || !profile.onboarding_complete) {
+        router.replace("/onboarding");
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (err) {
       notify.error(error || "Invalid credentials", "Login Failed");
     }

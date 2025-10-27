@@ -708,7 +708,7 @@ export default function MapScreen() {
         }
       );
     }
-  }, [nearbyLocations, userProfile, dispatch]); // Don't include mlPredictions to avoid infinite loop
+  }, [nearbyLocations, userProfile, dispatch]);
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
@@ -1095,7 +1095,6 @@ export default function MapScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
       {selectedRoute && !navigationActive && (
         <View
           style={{
@@ -1140,7 +1139,6 @@ export default function MapScreen() {
           <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>
         </View>
       )}
-
       {/* Danger Zones Legend */}
       {dangerZonesVisible && dangerZones.length > 0 && (
         <View style={styles.dangerZoneLegend}>
@@ -1316,13 +1314,15 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
       )}
-      <LocationDetailsModal
-        visible={modalVisible}
-        locationId={selectedLocationId}
-        googlePlaceId={selectedGooglePlaceId}
-        searchMarker={searchMarker}
-        onClose={handleModalClose}
-      />
+      {modalVisible && (
+        <LocationDetailsModal
+          visible={modalVisible}
+          locationId={selectedLocationId}
+          googlePlaceId={selectedGooglePlaceId}
+          searchMarker={searchMarker}
+          onClose={handleModalClose}
+        />
+      )}
       {/* Navigation Mode */}
       {navigationActive && (
         <NavigationMode onExit={handleExitNavigation} mapRef={mapRef} />

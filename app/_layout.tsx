@@ -149,14 +149,55 @@ function RootLayoutNav() {
       notify.error("Failed to restore route. Please try again.");
     }
   };
+
   // Auth state listener
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
+        if (event === "INITIAL_SESSION") {
+          // App restart - check onboarding and route
+          if (session) {
+            dispatch(setSession(session));
+
+            // Check onboarding status
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("onboarding_complete")
+              .eq("user_id", session.user.id)
+              .single();
+
+            // Route based on onboarding
+            if (!profile || !profile.onboarding_complete) {
+              router.replace("/onboarding");
+            } else {
+              router.replace("/(tabs)");
+            }
+
+            // Register for push notifications
+            if (session.user?.id) {
+              notificationService
+                .registerForPushNotifications()
+                .then((pushToken) => {
+                  if (pushToken) {
+                    return notificationService.savePushToken(
+                      session.user.id,
+                      pushToken
+                    );
+                  }
+                })
+                .catch((error) => {
+                  logger.error("Failed to register push token:", error);
+                });
+            }
+          }
+
+          // Mark auth check as complete
+          setAuthCheckComplete(true);
+        } else if (event === "SIGNED_IN" && session) {
+          // New login - let login screen handle routing
           dispatch(setSession(session));
 
-          // Register for push notifications on login
+          // Register for push notifications
           if (session.user?.id) {
             notificationService
               .registerForPushNotifications()
@@ -170,10 +211,14 @@ function RootLayoutNav() {
               })
               .catch((error) => {
                 logger.error("Failed to register push token:", error);
-                notify.error("Something went wrong. Please try again");
               });
           }
-          // Don't route here - let deep link or callback screen handle it
+
+          // Mark auth check as complete
+          setAuthCheckComplete(true);
+        } else if (event === "SIGNED_OUT") {
+          // Mark auth check as complete
+          setAuthCheckComplete(true);
         }
       }
     );
