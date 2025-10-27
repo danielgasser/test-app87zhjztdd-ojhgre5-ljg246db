@@ -65,8 +65,8 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
   const getIconColor = () => getConfirmationIconColor(icon);
 
   const handleButtonPress = (button: ConfirmationButton) => {
-    button.onPress?.();
     onDismiss();
+    button.onPress?.();
   };
 
   const getButtonStyle = (style?: string) => {
@@ -99,6 +99,7 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
         ];
     }
   };
+  if (!visible) return null;
 
   return (
     <Modal

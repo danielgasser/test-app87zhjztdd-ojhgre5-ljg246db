@@ -1,36 +1,33 @@
-import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import { Stack } from "expo-router";
 
 export default function AuthLayout() {
   return (
-    <NotificationProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-          },
-          headerTintColor: theme.colors.background,
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.primary,
+        },
+        headerTintColor: theme.colors.background,
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
+      }}
+    >
+      <Stack.Screen
+        name="login"
+        options={{
+          title: "Sign In",
+          headerShown: false,
         }}
-      >
-        <Stack.Screen
-          name="login"
-          options={{
-            title: "Sign In",
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="register"
-          options={{
-            title: "Create Account",
-            headerShown: false,
-          }}
-        />
-      </Stack>
-    </NotificationProvider>
+      />
+      <Stack.Screen
+        name="register"
+        options={{
+          title: "Create Account",
+          headerShown: false,
+        }}
+      />
+    </Stack>
   );
 }

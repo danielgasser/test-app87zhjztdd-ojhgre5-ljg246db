@@ -27,6 +27,7 @@ import { notify } from "@/utils/notificationService";
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
+  console.log("LOGIN SCREEN RENDERING");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useAppDispatch();

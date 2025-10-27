@@ -46,7 +46,14 @@ export default function RegisterScreen() {
         notify.confirm(
           "Check Your Email",
           "We've sent you a confirmation email. Please check your inbox and click the link to verify your account.",
-          [{ text: "OK", onPress: () => router.replace("/login") }]
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                router.replace("/login");
+              },
+            },
+          ]
         );
       } else {
         // Auto-login (confirmation disabled or already confirmed)

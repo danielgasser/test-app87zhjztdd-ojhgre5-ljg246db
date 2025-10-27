@@ -156,6 +156,7 @@ function RootLayoutNav() {
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("AUTH EVENT:", event, "has session:", !!session);
         if (event === "INITIAL_SESSION") {
           // App restart - check onboarding and route
           if (session) {
