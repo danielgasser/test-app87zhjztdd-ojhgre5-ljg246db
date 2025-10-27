@@ -160,9 +160,10 @@ function RootLayoutNav() {
           // App restart - check onboarding and route
           if (session) {
             dispatch(setSession(session));
+            const emailConfirmed = session.user.email_confirmed_at;
 
             // Check onboarding status
-            if (!isHandlingCallback) {
+            if (!isHandlingCallback && emailConfirmed) {
               const { data: profile } = await supabase
                 .from("profiles")
                 .select("onboarding_complete")

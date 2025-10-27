@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchUserProfile } from "@/store/userSlice";
 import { RootState } from "@/store";
 import { View, Text, StyleSheet, Platform } from "react-native";
+import { supabase } from "@/services/supabase";
 const appConfig = require("../../app.config.js");
 
 export default function TabLayout() {
@@ -20,10 +21,24 @@ export default function TabLayout() {
   );
 
   useEffect(() => {
-    if (user?.id) {
-      dispatch(fetchUserProfile(user.id));
-    }
-  }, [user, dispatch]);
+    const checkAndFetchProfile = async () => {
+      if (!user?.id) return;
+
+      // Check if onboarding is complete before fetching user_profiles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      // Only fetch user_profiles if onboarding is complete
+      if (profile?.onboarding_complete) {
+        dispatch(fetchUserProfile(user.id));
+      }
+    };
+
+    checkAndFetchProfile();
+  }, [user?.id, dispatch]);
 
   return (
     <View style={{ flex: 1 }}>
