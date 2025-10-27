@@ -978,7 +978,14 @@ export const fetchSimilarUsers = createAsyncThunk(
 
 export const fetchMLPredictions = createAsyncThunk(
   "locations/fetchMLPredictions",
-  async (locationId: string, { getState }) => {
+  async (
+    payload: string | { locationId: string; latitude?: number; longitude?: number },
+    { getState }
+  ) => {
+    // Handle both old string format and new object format
+    const locationId = typeof payload === 'string' ? payload : payload.locationId;
+    const latitude = typeof payload === 'object' ? payload.latitude : undefined;
+    const longitude = typeof payload === 'object' ? payload.longitude : undefined;
     try {
       const state = getState() as any;
       const userId = state.auth.user?.id;
@@ -989,6 +996,26 @@ export const fetchMLPredictions = createAsyncThunk(
       }
       const token = await getAuthToken();
 
+      const requestBody: any = {
+        user_id: userId,
+        user_demographics: {
+          race_ethnicity: userProfile.race_ethnicity,
+          gender: userProfile.gender,
+          lgbtq_status: userProfile.lgbtq_status,
+          disability_status: userProfile.disability_status,
+          religion: userProfile.religion,
+          age_range: userProfile.age_range,
+        }
+      };
+
+      if (latitude !== undefined && longitude !== undefined) {
+        requestBody.latitude = latitude;
+        requestBody.longitude = longitude;
+        requestBody.place_type = 'temporary_location';
+      } else {
+        requestBody.location_id = locationId;
+      }
+
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
         {
@@ -997,18 +1024,7 @@ export const fetchMLPredictions = createAsyncThunk(
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            location_id: locationId,
-            user_id: userId,
-            user_demographics: {
-              race_ethnicity: userProfile.race_ethnicity,
-              gender: userProfile.gender,
-              lgbtq_status: userProfile.lgbtq_status,
-              disability_status: userProfile.disability_status,
-              religion: userProfile.religion,
-              age_range: userProfile.age_range,
-            }
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
@@ -1018,6 +1034,7 @@ export const fetchMLPredictions = createAsyncThunk(
       }
 
       const prediction = await response.json();
+      console.log("🟢 ML Prediction received:", prediction);
 
       return {
         locationId,
@@ -1976,7 +1993,9 @@ const locationsSlice = createSlice({
 
       // ML Predictions
       .addCase(fetchMLPredictions.pending, (state, action) => {
-        const locationId = action.meta.arg;
+        const locationId = typeof action.meta.arg === 'string'
+          ? action.meta.arg
+          : action.meta.arg.locationId;
         state.mlPredictionsLoading[locationId] = true;
       })
       .addCase(fetchMLPredictions.fulfilled, (state, action) => {
@@ -1987,7 +2006,9 @@ const locationsSlice = createSlice({
         }
       })
       .addCase(fetchMLPredictions.rejected, (state, action) => {
-        const locationId = action.meta.arg;
+        const locationId = typeof action.meta.arg === 'string'
+          ? action.meta.arg
+          : action.meta.arg.locationId;
         state.mlPredictionsLoading[locationId] = false;
       })
 

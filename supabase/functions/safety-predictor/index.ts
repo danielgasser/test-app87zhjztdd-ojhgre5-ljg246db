@@ -69,17 +69,23 @@ serve(async (req) => {
     }
     // No reviews exist - predict based on similar locations
     // Factor 1: Average scores for this place type
-    const { data: placeTypeScores } = await supabase.from('locations').select(`
-        id,
-        place_type,
-        safety_scores!inner (
-          avg_safety_score,
-          avg_comfort_score,
-          avg_overall_score,
-          demographic_type,
-          demographic_value
-        )
-      `).eq('place_type', location.place_type).neq('id', location_id);
+    let placeTypeQuery = supabase.from('locations').select(`
+    id,
+    place_type,
+    safety_scores!inner (
+      avg_safety_score,
+      avg_comfort_score,
+      avg_overall_score,
+      demographic_type,
+      demographic_value
+    )
+  `).eq('place_type', location.place_type);
+
+    // Only exclude the location if it's a real database location
+    if (location_id) {
+      placeTypeQuery = placeTypeQuery.neq('id', location_id);
+    }
+    const { data: placeTypeScores } = await placeTypeQuery;
     // Factor 2: Neighborhood scores (nearby locations)
     const { data: nearbyLocations } = await supabase.rpc('get_nearby_locations', {
       lat: location.latitude || latitude,

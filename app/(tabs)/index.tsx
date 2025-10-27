@@ -204,7 +204,13 @@ export default function MapScreen() {
         !mlPredictionsLoading[locationId]
       ) {
         console.log("✅ CALLING fetchMLPredictions for searchMarker");
-        dispatch(fetchMLPredictions(locationId));
+        dispatch(
+          fetchMLPredictions({
+            locationId: locationId,
+            latitude: searchMarker.latitude,
+            longitude: searchMarker.longitude,
+          })
+        );
       }
       return;
     }
@@ -321,7 +327,13 @@ export default function MapScreen() {
     // Trigger ML prediction for this location
     if (userProfile) {
       console.log("🔵 Dispatching fetchMLPredictions from handleMapPress"); // ← This line
-      dispatch(fetchMLPredictions(newMarker.id));
+      dispatch(
+        fetchMLPredictions({
+          locationId: newMarker.id,
+          latitude: newMarker.latitude,
+          longitude: newMarker.longitude,
+        })
+      );
     }
   };
 

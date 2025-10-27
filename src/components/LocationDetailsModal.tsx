@@ -389,10 +389,13 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               </View>
               {/* ML Prediction Badge for locations with no reviews */}
 
-              {selectedLocation && selectedLocation.review_count === 0 && (
+              {((selectedLocation && selectedLocation.review_count === 0) ||
+                (!selectedLocation && (locationId || googlePlaceId))) && (
                 <PredictionBadge
-                  prediction={mlPredictions[selectedLocation.id]}
-                  loading={mlPredictionsLoading[selectedLocation.id]}
+                  prediction={mlPredictions[locationId || googlePlaceId || ""]}
+                  loading={
+                    mlPredictionsLoading[locationId || googlePlaceId || ""]
+                  }
                 />
               )}
               {/* Write Review Button */}
