@@ -205,7 +205,8 @@ export default function MapScreen() {
     console.log("🔍 DEBUG userProfile exists:", !!userProfile);
     if (location && userProfile) {
       const hasActualReviews =
-        location.demographic_safety_score || location.avg_safety_score;
+        location.review_count && location.review_count > 0;
+
       const hasPrediction = mlPredictions[locationId];
       const isLoading = mlPredictionsLoading[locationId];
       console.log("🔍 DEBUG hasActualReviews:", hasActualReviews);
@@ -295,6 +296,14 @@ export default function MapScreen() {
     };
 
     setSearchMarker(newMarker);
+    // Immediately open modal with this new location
+    setSelectedGooglePlaceId(newMarker.id);
+    setModalVisible(true);
+
+    // Trigger ML prediction for this location
+    if (userProfile) {
+      dispatch(fetchMLPredictions(newMarker.id));
+    }
   };
 
   const handleToggleDangerZones = () => {
@@ -1080,7 +1089,7 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-      {/* Add Location Button */}
+      {/* Add Location Button 
       {searchMarker && (
         <View style={styles.addLocationContainer}>
           <TouchableOpacity
@@ -1114,6 +1123,7 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
       )}
+        */}
       <View style={styles.routeControls}>
         {routeMode === "none" ? (
           <TouchableOpacity
