@@ -194,7 +194,20 @@ export default function MapScreen() {
     console.log("marker pressed", locationId);
     setSelectedLocationId(locationId);
     setModalVisible(true);
-
+    // Check if this is a searchMarker (temporary new location)
+    if (searchMarker && searchMarker.id === locationId) {
+      console.log("🔍 This is a searchMarker");
+      // For searchMarkers, trigger ML with coordinates directly
+      if (
+        userProfile &&
+        !mlPredictions[locationId] &&
+        !mlPredictionsLoading[locationId]
+      ) {
+        console.log("✅ CALLING fetchMLPredictions for searchMarker");
+        dispatch(fetchMLPredictions(locationId));
+      }
+      return;
+    }
     await dispatch(fetchLocationDetails(locationId));
 
     // NEW: Fetch ML prediction on-demand if needed
@@ -917,7 +930,29 @@ export default function MapScreen() {
                 : "Tap + to add this location"
             }
             pinColor={theme.colors.primary}
-            //onPress={handleAddLocation}
+            onPress={() => {
+              // For new locations (not in database)
+              if (searchMarker.source !== "database") {
+                setSelectedGooglePlaceId(searchMarker.id);
+                setModalVisible(true);
+
+                // Trigger ML prediction with coordinates
+                if (
+                  userProfile &&
+                  searchMarker.latitude &&
+                  searchMarker.longitude
+                ) {
+                  console.log(
+                    "🔍 Triggering ML for new location:",
+                    searchMarker.id
+                  );
+                  dispatch(fetchMLPredictions(searchMarker.id));
+                }
+              } else {
+                // For database locations, use handleMarkerPress
+                handleMarkerPress(searchMarker.id);
+              }
+            }}
           />
         )}
         {routeOrigin && (
