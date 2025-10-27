@@ -161,7 +161,7 @@ export default function OnboardingScreen() {
 
   // Pre-populate form when profile data is available
   useEffect(() => {
-    if (profile) {
+    if (profile && profile.id === user?.id) {
       // Check if profile has any actual demographic data (not just empty defaults)
       const hasRealData =
         (profile.race_ethnicity && profile.race_ethnicity.length > 0) ||
@@ -1074,6 +1074,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: theme.colors.inputBackground,
     marginTop: 20,
+    width: "80%",
   },
   optionButton: {
     flexDirection: "row",

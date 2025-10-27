@@ -388,15 +388,27 @@ export default function EditReviewScreen() {
                 </TouchableOpacity>
               </View>
 
-              {showDatePicker && (
+              {showTimePicker && (
                 <DateTimePicker
                   value={visitDateTime}
-                  mode="date"
+                  mode="time"
                   display="default"
                   onChange={(event, selectedDate) => {
-                    setShowDatePicker(false);
+                    setShowTimePicker(false);
                     if (selectedDate) {
-                      setVisitDateTime(selectedDate);
+                      const newDateTime = new Date(visitDateTime);
+                      newDateTime.setHours(selectedDate.getHours());
+                      newDateTime.setMinutes(selectedDate.getMinutes());
+
+                      // Check if the combined date+time is in the future
+                      if (newDateTime > new Date()) {
+                        notify.error("Visit time cannot be in the future");
+                        const now = new Date();
+                        newDateTime.setHours(now.getHours());
+                        newDateTime.setMinutes(now.getMinutes());
+                      }
+
+                      setVisitDateTime(newDateTime);
                     }
                   }}
                 />

@@ -6,7 +6,15 @@ import { store } from "src/store";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSession } from "@/store/authSlice";
-import { Keyboard, Linking, TouchableWithoutFeedback } from "react-native";
+import {
+  Keyboard,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import {
   loadDismissals,
   loadDismissalsFromStorage,
@@ -32,6 +40,7 @@ import { logger } from "@/utils/logger";
 import * as Notifications from "expo-notifications";
 import NetInfo from "@react-native-community/netinfo";
 import { offlineQueue } from "@/services/offlineQueue";
+import { clearAllSessions } from "@/utils/debugUtils";
 
 // Initialize Sentry
 Sentry.init({
@@ -79,6 +88,9 @@ function RootLayout() {
 }
 
 function RootLayoutNav() {
+  // For DEBUG
+  const [showDebug, setShowDebug] = useState(__DEV__); // Only show in development
+
   const [isHandlingCallback, setIsHandlingCallback] = useState(false);
 
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
@@ -156,7 +168,6 @@ function RootLayoutNav() {
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("AUTH EVENT:", event, "has session:", !!session);
         if (event === "INITIAL_SESSION") {
           // App restart - check onboarding and route
           if (session) {
@@ -301,17 +312,10 @@ function RootLayoutNav() {
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
-      if (url.includes("safepath://callback")) {
-        // Navigate WITH the URL as a param
-        setIsHandlingCallback(true);
-        router.push({
-          pathname: "/(auth)/callback",
-          params: { deepLinkUrl: url },
-        });
-        setTimeout(() => setIsHandlingCallback(false), 3000);
-      }
+      console.log("🟡 _LAYOUT: Got URL:", url);
+
+      // Handle password reset
       if (url.includes("safepath://reset-password")) {
-        // Parse tokens from URL hash
         const hashPart = url.split("#")[1];
         if (hashPart) {
           const params = new URLSearchParams(hashPart);
@@ -320,21 +324,73 @@ function RootLayoutNav() {
           const type = params.get("type");
 
           if (type === "recovery" && accessToken && refreshToken) {
-            // Set session BEFORE navigating
             const { error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
 
             if (!error) {
-              // Now navigate - session is already set
-              router.push("/(auth)/reset-password");
-              return;
+              router.replace("/(auth)/reset-password");
             }
           }
         }
-        // If no tokens or error, still go to reset-password (will show error)
-        router.push("/(auth)/reset-password");
+        return;
+      }
+
+      // Handle email confirmation (type=signup) OR Google OAuth (callback)
+      if (url.includes("#access_token=")) {
+        console.log("🟡 _LAYOUT: Handling auth callback");
+        setIsHandlingCallback(true);
+
+        try {
+          const hashPart = url.split("#")[1];
+          const params = new URLSearchParams(hashPart);
+          const accessToken = params.get("access_token");
+          const refreshToken = params.get("refresh_token");
+
+          if (accessToken && refreshToken) {
+            console.log("🟡 _LAYOUT: Setting session");
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (error) {
+              console.error("🟡 _LAYOUT: Session error:", error);
+              router.replace("/login");
+              return;
+            }
+
+            if (data.session) {
+              console.log("🟡 _LAYOUT: Session set, updating Redux");
+              dispatch(setSession(data.session));
+
+              // Check onboarding status
+              console.log("🟡 _LAYOUT: Checking onboarding");
+              const { data: profile } = await supabase
+                .from("profiles")
+                .select("onboarding_complete")
+                .eq("user_id", data.session.user.id)
+                .single();
+
+              console.log("🟡 _LAYOUT: Profile =", profile);
+
+              // Route based on onboarding
+              if (!profile || !profile.onboarding_complete) {
+                console.log("🟡 _LAYOUT: Routing to onboarding");
+                router.replace("/onboarding");
+              } else {
+                console.log("🟡 _LAYOUT: Routing to tabs");
+                router.replace("/(tabs)");
+              }
+            }
+          }
+        } catch (error) {
+          console.error("🟡 _LAYOUT: Error:", error);
+          router.replace("/login");
+        } finally {
+          setTimeout(() => setIsHandlingCallback(false), 1000);
+        }
       }
     };
 
@@ -471,20 +527,52 @@ function RootLayoutNav() {
   useLocationTriggers();
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen
-          name="welcome"
-          options={{
-            headerShown: false,
-            gestureEnabled: false,
-          }}
-        />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="review" />
-        <Stack.Screen name="onboarding" />
-      </Stack>
+      <View style={{ flex: 1 }}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="welcome"
+            options={{
+              headerShown: false,
+              gestureEnabled: false,
+            }}
+          />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="review" />
+          <Stack.Screen name="onboarding" />
+        </Stack>
+        {showDebug && (
+          <TouchableOpacity
+            style={debugStyles.floatingButton}
+            onPress={clearAllSessions}
+          >
+            <Text style={debugStyles.buttonText}>🔥</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </TouchableWithoutFeedback>
   );
 }
 export default Sentry.wrap(RootLayout);
+// Add these styles at the bottom:
+const debugStyles = StyleSheet.create({
+  floatingButton: {
+    position: "absolute",
+    top: 80,
+    left: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#ff4444",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  buttonText: {
+    fontSize: 24,
+  },
+});

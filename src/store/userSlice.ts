@@ -4,6 +4,7 @@ import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
+import { signOut } from './authSlice';
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences'> & {
@@ -217,6 +218,14 @@ const userSlice = createSlice({
       .addCase(fetchPublicUserReviews.rejected, (state) => {
         state.publicReviewsLoading = false;
         state.publicReviews = [];
+      })
+      // Clear user data on logout
+      .addCase(signOut.fulfilled, (state) => {
+        state.profile = null;
+        state.publicReviews = [];
+        state.loading = false;
+        state.error = null;
+        state.onboardingComplete = false;
       });
   },
 });

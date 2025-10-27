@@ -443,13 +443,22 @@ export default function ReviewScreen() {
                   value={visitDateTime}
                   mode="date"
                   display="default"
+                  maximumDate={new Date()}
                   onChange={(event, selectedDate) => {
                     setShowDatePicker(Platform.OS === "ios");
                     if (selectedDate) {
                       const newDateTime = new Date(visitDateTime);
-                      newDateTime.setFullYear(selectedDate.getFullYear());
-                      newDateTime.setMonth(selectedDate.getMonth());
-                      newDateTime.setDate(selectedDate.getDate());
+                      newDateTime.setHours(selectedDate.getHours());
+                      newDateTime.setMinutes(selectedDate.getMinutes());
+
+                      // Check if the combined date+time is in the future
+                      if (newDateTime > new Date()) {
+                        notify.error("Visit time cannot be in the future");
+                        const now = new Date();
+                        newDateTime.setHours(now.getHours());
+                        newDateTime.setMinutes(now.getMinutes());
+                      }
+
                       setVisitDateTime(newDateTime);
                     }
                   }}
