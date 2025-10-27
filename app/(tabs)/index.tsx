@@ -17,7 +17,7 @@ import MapView, {
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   fetchNearbyLocations,
   fetchLocationDetails,
@@ -192,6 +192,12 @@ export default function MapScreen() {
   // ============= EVENT HANDLERS =============
   const handleMarkerPress = async (locationId: string) => {
     console.log("marker pressed", locationId);
+    console.log("🔵 searchMarker:", searchMarker);
+    console.log(
+      "🔵 is searchMarker match:",
+      searchMarker && searchMarker.id === locationId
+    );
+
     setSelectedLocationId(locationId);
     setModalVisible(true);
     // Check if this is a searchMarker (temporary new location)
@@ -214,14 +220,13 @@ export default function MapScreen() {
       }
       return;
     }
+    console.log("✅ CALLING fetchLocationDetails for:", locationId);
     await dispatch(fetchLocationDetails(locationId));
 
     // NEW: Fetch ML prediction on-demand if needed
     const location = nearbyLocations.find(
       (loc: { id: string }) => loc.id === locationId
     );
-    console.log("🔍 DEBUG location found:", !!location);
-    console.log("🔍 DEBUG userProfile exists:", !!userProfile);
 
     if (location && userProfile) {
       const hasActualReviews =
@@ -229,9 +234,7 @@ export default function MapScreen() {
 
       const hasPrediction = mlPredictions[locationId];
       const isLoading = mlPredictionsLoading[locationId];
-      console.log("🔍 DEBUG hasActualReviews:", hasActualReviews);
-      console.log("🔍 DEBUG hasPrediction:", hasPrediction);
-      console.log("🔍 DEBUG isLoading:", isLoading);
+
       if (!hasActualReviews && !hasPrediction && !isLoading) {
         console.log("✅ CALLING fetchMLPredictions");
 
@@ -244,6 +247,7 @@ export default function MapScreen() {
     setModalVisible(false);
     setSelectedLocationId(null);
     setSelectedGooglePlaceId(null);
+    setSearchMarker(null);
   };
 
   const handleLocationSelected = async (location: SearchResult) => {
@@ -300,6 +304,7 @@ export default function MapScreen() {
     setSelectedLocationId(null);
     setSelectedGooglePlaceId(null);
     setModalVisible(false);
+    dispatch({ type: "locations/clearSelectedLocation" });
 
     if (!requireAuth(userId, "add marker")) return;
 
@@ -616,6 +621,22 @@ export default function MapScreen() {
     requestLocationPermission();
   }, []);
 
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    if (params.openLocationId && params.refresh) {
+      // Open the location details modal with the real ID
+      const locationId = params.openLocationId as string;
+      console.log("🔄 Opening location from review:", locationId);
+
+      setSelectedLocationId(locationId);
+      setSearchMarker(null);
+      setModalVisible(true);
+
+      dispatch(fetchLocationDetails(locationId));
+    }
+  }, [params.openLocationId, params.refresh]);
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -702,7 +723,41 @@ export default function MapScreen() {
       }
     }, [dispatch, userLocation, mapReady])
   );
+  // Refresh modal when returning from review screen
+  useFocusEffect(
+    useCallback(() => {
+      if (modalVisible && selectedLocationId && searchMarker) {
+        // Check if this was a temp location that now exists in DB
+        const refreshModalData = async () => {
+          try {
+            // Search for location by coordinates
+            const { data, error } = await supabase.rpc("get_nearby_locations", {
+              lat: searchMarker.latitude,
+              lng: searchMarker.longitude,
+              radius_meters: 10, // Very small radius to find exact match
+            });
 
+            if (!error && data && data.length > 0) {
+              // Found a real location at these coordinates
+              const realLocation = data[0];
+              console.log("🔄 Found real location:", realLocation.id);
+
+              // Update to use real location ID
+              setSelectedLocationId(realLocation.id);
+              setSearchMarker(null); // Clear temp marker
+
+              // Fetch the real location details
+              await dispatch(fetchLocationDetails(realLocation.id));
+            }
+          } catch (err) {
+            console.error("Error refreshing modal:", err);
+          }
+        };
+
+        refreshModalData();
+      }
+    }, [modalVisible, selectedLocationId, searchMarker])
+  );
   // Handle navigation intents from other tabs - using useFocusEffect so it runs when tab is focused
   useFocusEffect(
     useCallback(() => {
@@ -801,7 +856,7 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         showsCompass={true}
-        onPress={handleMapPress}
+        onLongPress={handleMapPress}
         onMapReady={() => {
           setMapReady(true);
         }}
@@ -1265,6 +1320,7 @@ export default function MapScreen() {
         visible={modalVisible}
         locationId={selectedLocationId}
         googlePlaceId={selectedGooglePlaceId}
+        searchMarker={searchMarker}
         onClose={handleModalClose}
       />
       {/* Navigation Mode */}

@@ -20,10 +20,21 @@ import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { logger } from "@/utils/logger";
 import UserProfileModal from "./UserProfileModal";
+
+interface SearchResult {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  place_type?: string;
+  source?: "database" | "mapbox";
+}
 interface LocationDetailsModalProps {
   visible: boolean;
   locationId: string | null;
   googlePlaceId?: string | null;
+  searchMarker?: SearchResult | null;
   onClose: () => void;
 }
 
@@ -31,6 +42,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   visible,
   locationId,
   googlePlaceId,
+  searchMarker,
   onClose,
 }) => {
   const router = useRouter();
@@ -50,11 +62,21 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   );
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  console.log(
+    "🎨 Modal rendering - selectedLocation:",
+    !!selectedLocation,
+    "reviews:",
+    reviews.length,
+    "loading:",
+    loading,
+    "loadingReviews:",
+    loadingReviews
+  );
 
   useEffect(() => {
     if (locationId && visible) {
       dispatch(fetchLocationDetails(locationId));
-      fetchReviews();
+      fetchReviews(locationId);
     } else if (visible && !locationId) {
       // Clear reviews for new Google POIs (not in DB yet)
       setReviews([]);
@@ -67,19 +89,26 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     }
   }, [selectedLocation, googlePlaceId, visible]);
 
-  const fetchReviews = async () => {
-    if (!locationId) return;
+  const fetchReviews = async (locId?: string) => {
+    const idToUse = locId || locationId;
+    console.log("🔍 fetchReviews called with locationId:", idToUse);
+    if (!idToUse) {
+      console.log("⚠️ No locationId, skipping fetch");
+      return;
+    }
 
     setLoadingReviews(true);
     try {
+      console.log("📡 Fetching reviews for location:", locationId);
       const { data, error } = await supabase
         .from("reviews")
         .select("*")
-        .eq("location_id", locationId)
+        .eq("location_id", idToUse)
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(10);
-
+      console.log("📦 Reviews data:", data);
+      console.log("❌ Reviews error:", error);
       if (error) throw error;
 
       if (data && data.length > 0) {
@@ -166,6 +195,22 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         params: {
           locationId: locationId,
           locationName: selectedLocation?.name || "",
+        },
+      });
+    }
+    // If it's a temporary location from map tap/search
+    else if (searchMarker && googlePlaceId && !selectedLocation) {
+      router.push({
+        pathname: "/review",
+        params: {
+          isNewLocation: "true",
+          locationData: JSON.stringify({
+            name: searchMarker.name,
+            address: searchMarker.address,
+            latitude: searchMarker.latitude,
+            longitude: searchMarker.longitude,
+            place_type: searchMarker.place_type || "other",
+          }),
         },
       });
     }
@@ -398,7 +443,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   }
                 />
               )}
-              {/* Write Review Button */}
               {/* Write Review Button - ALWAYS show if user is logged in and hasn't reviewed */}
               {currentUser && !userHasReviewed && (
                 <TouchableOpacity
@@ -426,7 +470,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 </View>
               )}
               {/* Reviews Section */}
-              {selectedLocation && (
+              {(selectedLocation || reviews.length > 0) && (
                 <View style={styles.reviewsSection}>
                   <Text style={styles.sectionTitle}>Recent Reviews</Text>
 
@@ -448,8 +492,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                                   pathname: "/edit-review",
                                   params: {
                                     reviewId: review.id,
-                                    locationId: selectedLocation.id,
-                                    locationName: selectedLocation.name,
+                                    locationId:
+                                      locationId || selectedLocation?.id || "",
+                                    locationName: selectedLocation?.name || "",
                                   },
                                 });
                               }}

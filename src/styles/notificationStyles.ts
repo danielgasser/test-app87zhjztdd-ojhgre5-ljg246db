@@ -115,11 +115,12 @@ export const notificationStyles = StyleSheet.create({
         backgroundColor: theme.colors.error,
     },
     confirmationButtonCancel: {
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.primary,
         borderWidth: 1,
         borderColor: theme.colors.border,
     },
     confirmationButtonText: {
+        color: theme.colors.textOnPrimary,
         fontSize: 16,
         fontWeight: "600",
     },
@@ -130,7 +131,7 @@ export const notificationStyles = StyleSheet.create({
         color: theme.colors.background,
     },
     confirmationButtonTextCancel: {
-        color: theme.colors.background,
+        color: theme.colors.textOnPrimary,
     },
 });
 

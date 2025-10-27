@@ -294,7 +294,7 @@ export default function CommunityScreen() {
         </Text>
 
         <View style={styles.reviewFooter}>
-          {review.user_demographics.full_name?.length > 0 &&
+          {review.user_demographics?.full_name?.length > 0 &&
             review.user_demographics.show_demographics && (
               <TouchableOpacity
                 style={styles.userInfoName}

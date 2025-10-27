@@ -240,7 +240,24 @@ export default function ReviewScreen() {
         );*/
       }
       notify.confirm("Success", "Review submitted successfully!", [
-        { text: "OK", onPress: () => router.back() },
+        {
+          text: "OK",
+          onPress: () => {
+            if (isCreatingNew && finalLocationId) {
+              // Pass the real location ID back
+              router.replace({
+                pathname: "/(tabs)",
+                params: {
+                  tab: "map",
+                  openLocationId: finalLocationId,
+                  refresh: Date.now().toString(),
+                },
+              });
+            } else {
+              router.back();
+            }
+          },
+        },
       ]);
     } catch (error: any) {
       logger.error("🚨 Review submission error:", error);

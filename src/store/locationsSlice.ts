@@ -1674,6 +1674,9 @@ const locationsSlice = createSlice({
   name: "locations",
   initialState,
   reducers: {
+    clearSelectedLocation: (state) => {
+      state.selectedLocation = null;
+    },
     setSelectedRoute: (state, action: PayloadAction<SafeRoute | null>) => {
       state.selectedRoute = action.payload;
     },
@@ -2112,6 +2115,7 @@ const locationsSlice = createSlice({
 // ================================
 
 export const {
+  clearSelectedLocation,
   setSelectedLocation,
   setFilters,
   clearError,
