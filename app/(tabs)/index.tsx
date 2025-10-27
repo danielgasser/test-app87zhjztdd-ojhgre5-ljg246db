@@ -686,6 +686,8 @@ export default function MapScreen() {
     }
   }, [userId, userLocation, dispatch]);
 
+  const requestedPredictions = useRef<Set<string>>(new Set());
+
   // Auto-fetch ML predictions for locations without reviews
   useEffect(() => {
     if (nearbyLocations.length > 0 && userProfile) {
@@ -702,7 +704,13 @@ export default function MapScreen() {
           const isLoading = mlPredictionsLoading[location.id];
 
           // Fetch prediction if no reviews, no existing prediction, and not already loading
-          if (!hasReviews && !hasPrediction && !isLoading) {
+          if (
+            !hasReviews &&
+            !hasPrediction &&
+            !isLoading &&
+            !requestedPredictions.current.has(location.id)
+          ) {
+            requestedPredictions.current.add(location.id);
             dispatch(fetchMLPredictions(location.id));
           }
         }

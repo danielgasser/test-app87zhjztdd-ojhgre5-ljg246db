@@ -79,6 +79,8 @@ function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const [isHandlingCallback, setIsHandlingCallback] = useState(false);
+
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
   const router = useRouter();
@@ -160,19 +162,20 @@ function RootLayoutNav() {
             dispatch(setSession(session));
 
             // Check onboarding status
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("onboarding_complete")
-              .eq("user_id", session.user.id)
-              .single();
+            if (!isHandlingCallback) {
+              const { data: profile } = await supabase
+                .from("profiles")
+                .select("onboarding_complete")
+                .eq("user_id", session.user.id)
+                .single();
 
-            // Route based on onboarding
-            if (!profile || !profile.onboarding_complete) {
-              router.replace("/onboarding");
-            } else {
-              router.replace("/(tabs)");
+              // Route based on onboarding
+              if (!profile || !profile.onboarding_complete) {
+                router.replace("/onboarding");
+              } else {
+                router.replace("/(tabs)");
+              }
             }
-
             // Register for push notifications
             if (session.user?.id) {
               notificationService
@@ -298,10 +301,12 @@ function RootLayoutNav() {
     const handleUrl = async ({ url }: { url: string }) => {
       if (url.includes("safepath://callback")) {
         // Navigate WITH the URL as a param
+        setIsHandlingCallback(true);
         router.push({
           pathname: "/(auth)/callback",
           params: { deepLinkUrl: url },
         });
+        setTimeout(() => setIsHandlingCallback(false), 3000);
       }
       if (url.includes("safepath://reset-password")) {
         // Parse tokens from URL hash
