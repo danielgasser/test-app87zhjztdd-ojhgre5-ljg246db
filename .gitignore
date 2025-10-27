@@ -43,3 +43,6 @@ yarn-error.*
 gitpush.sh
 ios/
 android/
+
+# others
+*.xlsx
