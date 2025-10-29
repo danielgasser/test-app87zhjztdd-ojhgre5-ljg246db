@@ -46,3 +46,8 @@ android/
 
 # others
 *.xlsx
+
+# tests
+
+test-danger-zones.js
+test-address.js
