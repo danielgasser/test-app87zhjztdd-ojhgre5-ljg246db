@@ -3,6 +3,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { EDGE_CONFIG } from '../_shared/config.ts';
 
 // Types
 interface RouteCoordinate {
@@ -69,7 +70,7 @@ interface RouteSafetyResponse {
 // Configuration
 const CONFIG = {
   SEGMENT_LENGTH_MILES: 1.0,
-  SCORING_RADIUS_MILES: 0.5,
+  SCORING_RADIUS_MILES: 2.0,
   SAFE_THRESHOLD: 4.0,
   MIXED_THRESHOLD: 3.0,
   UNSAFE_THRESHOLD: 2.5,
@@ -112,7 +113,7 @@ function calculateDistance(coord1: RouteCoordinate, coord2: RouteCoordinate): nu
  */
 function segmentRoute(coordinates: RouteCoordinate[]): RouteSegment[] {
   const segments: RouteSegment[] = [];
-  const targetDistanceMeters = CONFIG.SEGMENT_LENGTH_MILES * 1609.34;
+  const targetDistanceMeters = EDGE_CONFIG.ROUTE_SAFETY_SCORES.SEGMENT_LENGTH_MILES * 1609.34;
 
   let currentDistance = 0;
   let segmentStart = coordinates[0];
@@ -189,53 +190,55 @@ async function analyzeSegmentSafety(
     let dangerPenalty = 0;
     let timePenalty = 0;
 
-    if (confidence > 0.5) {
-      const dangerResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/danger-zones`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
-        },
-        body: JSON.stringify({
-          latitude: segment.center.latitude,
-          longitude: segment.center.longitude,
-          radius_miles: CONFIG.SCORING_RADIUS_MILES,
-          user_demographics: userDemographics
-        })
-      });
+    const dangerResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/danger-zones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+      },
+      body: JSON.stringify({
+        latitude: segment.center.latitude,
+        longitude: segment.center.longitude,
+        radius_miles: EDGE_CONFIG.ROUTE_SAFETY_SCORES.SCORING_RADIUS_MILES,
+        user_demographics: userDemographics
+      })
+    });
 
 
-      if (dangerResponse.ok) {
-        const dangerData = await dangerResponse.json();
-        if (dangerData.zones && dangerData.zones.length > 0) {
-          dangerZoneCount = dangerData.zones.length;
-
-          for (const zone of dangerData.zones) {
-            const severity = zone.severity_level || 1;
-            if (severity >= 3) {
-              dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.HIGH;
-              riskFactors.push(`High danger zone: ${zone.reason || 'Unknown'}`);
-            } else if (severity >= 2) {
-              dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.MEDIUM;
-              riskFactors.push(`Moderate danger zone: ${zone.reason || 'Unknown'}`);
-            } else {
-              dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.LOW;
-              riskFactors.push(`Low danger zone: ${zone.reason || 'Unknown'}`);
-            }
+    if (dangerResponse.ok) {
+      const dangerData = await dangerResponse.json();
+      if (dangerData.danger_zones && dangerData.danger_zones.length > 0) {
+        dangerZoneCount = dangerData.danger_zones.length;
+        for (const zone of dangerData.danger_zones) {
+          const severity = zone.danger_level === 'high' ? 3 :
+            zone.danger_level === 'medium' ? 2 : 1;
+          if (severity >= 3) {
+            dangerPenalty += EDGE_CONFIG.ROUTE_SAFETY_SCORES.DANGER_ZONE_PENALTIES.HIGH;
+            riskFactors.push(`High danger zone: ${zone.reason || 'Unknown'}`);
+          } else if (severity >= 2) {
+            dangerPenalty += EDGE_CONFIG.ROUTE_SAFETY_SCORES.DANGER_ZONE_PENALTIES.MEDIUM;
+            riskFactors.push(`Moderate danger zone: ${zone.reason || 'Unknown'}`);
+          } else {
+            dangerPenalty += EDGE_CONFIG.ROUTE_SAFETY_SCORES.DANGER_ZONE_PENALTIES.LOW;
+            riskFactors.push(`Low danger zone: ${zone.reason || 'Unknown'}`);
           }
         }
       }
+    }
+
+    if (confidence > 0.5) {
+
 
 
       // Apply time-based penalties
       //let timePenalty = 0;
       const currentHour = new Date().getHours();
 
-      if (currentHour >= CONFIG.TIME_PENALTIES.EVENING_START && currentHour < CONFIG.TIME_PENALTIES.NIGHT_START) {
-        timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.EVENING_MULTIPLIER - 1);
+      if (currentHour >= EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.EVENING_START && currentHour < EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.NIGHT_START) {
+        timePenalty = baseSafety * (EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.EVENING_MULTIPLIER - 1);
         riskFactors.push('Evening travel time');
-      } else if (currentHour >= CONFIG.TIME_PENALTIES.NIGHT_START || currentHour < CONFIG.TIME_PENALTIES.MORNING_END) {
-        timePenalty = baseSafety * (CONFIG.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
+      } else if (currentHour >= EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.NIGHT_START || currentHour < EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.MORNING_END) {
+        timePenalty = baseSafety * (EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
         riskFactors.push('Night travel time');
       }
     } else {
@@ -292,9 +295,9 @@ function generateSafetySummary(segmentScores: RouteSegmentScore[]): {
   const notes: string[] = [];
 
   for (const segment of segmentScores) {
-    if (segment.safety_score >= CONFIG.SAFE_THRESHOLD) {
+    if (segment.safety_score >= EDGE_CONFIG.ROUTE_SAFETY_SCORES.SAFE_THRESHOLD) {
       safeSegments++;
-    } else if (segment.safety_score >= CONFIG.MIXED_THRESHOLD) {
+    } else if (segment.safety_score >= EDGE_CONFIG.ROUTE_SAFETY_SCORES.MIXED_THRESHOLD) {
       mixedSegments++;
     } else {
       unsafeSegments++;
@@ -391,7 +394,7 @@ async function analyzeRouteSafety(request: RouteSafetyRequest): Promise<RouteSaf
     ? Math.min(0.95, totalWeightedConfidence / totalConfidenceWeight)
     : 0.15; // Low baseline if no data
   const dangerZonesIntersected = segmentScores.reduce((sum, seg) => sum + seg.danger_zones, 0);
-  const highRiskSegments = segmentScores.filter(seg => seg.safety_score < CONFIG.UNSAFE_THRESHOLD).length;
+  const highRiskSegments = segmentScores.filter(seg => seg.safety_score < EDGE_CONFIG.ROUTE_SAFETY_SCORES.UNSAFE_THRESHOLD).length;
 
   // Generate summary
   const { summary, notes } = generateSafetySummary(segmentScores);

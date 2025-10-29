@@ -40,7 +40,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import RoutePlanningModal from "src/components/RoutePlanningModal";
 import { setMapCenter } from "src/store/locationsSlice";
-import { getUserCountry } from "src/utils/locationHelpers";
+import {
+  getCompleteAddressFromCoordinates,
+  getUserCountry,
+} from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/utils/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
@@ -291,6 +294,10 @@ export default function MapScreen() {
             latitude: searchMarker.latitude,
             longitude: searchMarker.longitude,
             place_type: searchMarker.place_type || "other",
+            city: (searchMarker as any).city,
+            state_province: (searchMarker as any).state_province,
+            country: (searchMarker as any).country,
+            postal_code: (searchMarker as any).postal_code,
           }),
         },
       });
@@ -310,14 +317,30 @@ export default function MapScreen() {
 
     const { latitude, longitude } = event.nativeEvent.coordinate;
 
+    // ✅ NEW: Get proper address data via reverse geocoding
+    const addressData = await getCompleteAddressFromCoordinates(
+      latitude,
+      longitude
+    );
+
+    if (!addressData) {
+      notify.error("Unable to get address for this location");
+      return;
+    }
+
     const newMarker = {
       id: `longpress-${Date.now()}`,
-      name: "New Location",
-      address: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+      name: addressData.address, // Use actual address as name
+      address: addressData.address,
       latitude: latitude,
       longitude: longitude,
       place_type: "other",
       source: "mapbox" as const,
+      // Store the full address data for later use
+      city: addressData.city,
+      state_province: addressData.state_province,
+      country: addressData.country,
+      postal_code: addressData.postal_code,
     };
 
     setSearchMarker(newMarker);

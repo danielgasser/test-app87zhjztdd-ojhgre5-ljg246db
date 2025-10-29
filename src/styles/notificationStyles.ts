@@ -139,11 +139,13 @@ export const notificationStyles = StyleSheet.create({
 // SNACKBAR BACKGROUND COLORS
 // ============================================
 export const getSnackbarBackgroundColor = (
-    type: "success" | "error" | "info"
+    type: "success" | "warning" | "error" | "info"
 ): string => {
     switch (type) {
         case "success":
             return theme.colors.secondary; // Green
+        case "warning":
+            return theme.colors.mixedYellow; // Yellow
         case "error":
             return theme.colors.error; // Red
         case "info":
@@ -155,11 +157,13 @@ export const getSnackbarBackgroundColor = (
 // SNACKBAR ICONS
 // ============================================
 export const getSnackbarIcon = (
-    type: "success" | "error" | "info"
-): "checkmark-circle" | "alert-circle" | "information-circle" => {
+    type: "success" | "warning" | "error" | "info"
+): "checkmark-circle" | "warning" | "alert-circle" | "information-circle" => {
     switch (type) {
         case "success":
             return "checkmark-circle";
+        case "warning":
+            return "warning";
         case "error":
             return "alert-circle";
         case "info":

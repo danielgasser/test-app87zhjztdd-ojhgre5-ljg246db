@@ -31,21 +31,35 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const { user_id, radius_miles = 50 } = await req.json()
+    const { user_id, user_demographics, radius_miles = EDGE_CONFIG.DANGER_ZONES.SEARCH_RADIUS_MILES, latitude, longitude } = await req.json()
 
-    if (!user_id) {
-      throw new Error('user_id is required')
-    }
+    let userProfile: any;
 
-    // Get user's demographics
-    const { data: userProfile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', user_id)
-      .single()
+    // Support both user_id and direct user_demographics
+    if (user_demographics) {
+      // Use demographics directly (for route scoring)
+      userProfile = {
+        race_ethnicity: user_demographics.race_ethnicity ? [user_demographics.race_ethnicity] : [],
+        gender: user_demographics.gender,
+        lgbtq_status: user_demographics.lgbtq_status === 'true' || user_demographics.lgbtq_status === true,
+        religion: user_demographics.religion,
+        disability_status: user_demographics.disability_status ? [user_demographics.disability_status] : [],
+        age_range: user_demographics.age_range,
+      };
+    } else if (user_id) {
+      // Fetch from database (for direct user queries)
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user_id)
+        .single()
 
-    if (profileError || !userProfile) {
-      throw new Error('User profile not found')
+      if (profileError || !profile) {
+        throw new Error('User profile not found')
+      }
+      userProfile = profile;
+    } else {
+      throw new Error('Either user_id or user_demographics is required')
     }
 
     // Build filter conditions for user's demographics
@@ -87,6 +101,31 @@ serve(async (req) => {
       query = query.or(demographicFilters.join(','));
     }
 
+    // Keep it simple - just query the locations table with PostGIS in a separate call
+    if (latitude && longitude) {
+      const radiusMeters = radius_miles * 1609.34;
+
+      // Get nearby location IDs first
+      const { data: nearbyLocs } = await supabase.rpc('get_nearby_locations', {
+        lat: latitude,
+        lng: longitude,
+        radius_meters: radiusMeters
+      });
+
+      if (!nearbyLocs || nearbyLocs.length === 0) {
+        // No locations nearby - return empty
+        return {
+          zones: [],
+          total_zones: 0,
+          search_radius_miles: radius_miles,
+          user_location: { latitude, longitude }
+        };
+      }
+
+      // Filter safety_scores to only these location IDs
+      const locationIds = nearbyLocs.map((loc: any) => loc.id);
+      query = query.in('location_id', locationIds);
+    }
     const { data: dangerousLocations, error: locError } = await query
 
     if (locError) {

@@ -750,20 +750,50 @@ export const createLocationFromSearch = createAsyncThunk(
       return searchLocation.id;
     }
 
-    const [city, stateProvince, country] = searchLocation.address.split(",").map(s => s.trim());
+    // ✅ FIXED: Use the complete address data from searchLocation
+    // If the marker was created from long-press, it will have city/state/country
+    // If from search, we need to reverse geocode
+    let city = (searchLocation as any).city;
+    let state_province = (searchLocation as any).state_province;
+    let country = (searchLocation as any).country;
+    let postal_code = (searchLocation as any).postal_code;
+
+    // If we don't have the address components, reverse geocode to get them
+    if (!city || !state_province || !country) {
+      const { getCompleteAddressFromCoordinates } = await import('@/utils/locationHelpers');
+      const addressData = await getCompleteAddressFromCoordinates(
+        searchLocation.latitude,
+        searchLocation.longitude
+      );
+
+      if (addressData) {
+        city = addressData.city;
+        state_province = addressData.state_province;
+        country = addressData.country;
+        postal_code = addressData.postal_code;
+      } else {
+        // Fallback if geocoding fails
+        city = 'Unknown';
+        state_province = 'Unknown';
+        country = 'US';
+        postal_code = null;
+      }
+    }
+
     const mappedPlaceType = mapMapboxPlaceType(searchLocation.place_type || "poi");
 
     const locationData = {
       name: searchLocation.name,
-      address: searchLocation.name,
-      city: city,
-      state_province: stateProvince,
-      country: country,
-      postal_code: null,
+      address: searchLocation.address,  // ✅ Use actual address
+      city: city,                       // ✅ Real city
+      state_province: state_province,   // ✅ Real state
+      country: country,                 // ✅ Real country
+      postal_code: postal_code,         // ✅ Real postal code
       coordinates: `POINT(${searchLocation.longitude} ${searchLocation.latitude})`,
       place_type: mappedPlaceType,
       tags: null,
-      google_place_id: searchLocation.id.startsWith("google_") ? searchLocation.id.replace("google_", "") : null, created_by: userId,
+      google_place_id: searchLocation.id.startsWith("google_") ? searchLocation.id.replace("google_", "") : null,
+      created_by: userId,
       verified: false,
       active: true,
     };
@@ -1891,7 +1921,6 @@ const locationsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed to create location";
       })
-
       .addCase(saveRouteToDatabase.fulfilled, (state, action) => {
         // Add the database ID to the selected route
         if (state.selectedRoute) {
@@ -1900,8 +1929,15 @@ const locationsSlice = createSlice({
         if (state.smartRouteComparison?.optimized_route) {
           state.smartRouteComparison.optimized_route.databaseId = action.payload.id;
         }
+        console.info("✅ Route saved to database:", action.payload.id);
       })
-
+      .addCase(saveRouteToDatabase.pending, (state) => {
+        console.info("⏳ Saving route to database...");
+      })
+      .addCase(saveRouteToDatabase.rejected, (state, action) => {
+        console.error("❌ Failed to save route to database:", action.payload);
+        notify.error("Failed to save route: " + action.payload);
+      })
       // Submit Review
       .addCase(submitReview.pending, (state) => {
         state.loading = true;

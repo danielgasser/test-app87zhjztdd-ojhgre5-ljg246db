@@ -366,13 +366,18 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     try {
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
-      console.log("Smart route result:", result);
 
       const originalSafety =
         result.original_safety || result.original_route?.safety_analysis;
       const dangerZones = originalSafety?.danger_zones_intersected || 0;
       const safetyScore = originalSafety?.overall_route_score || 3.0;
-
+      console.log("🔍 ROUTE GENERATION COMPLETE:", {
+        dangerZones,
+        safetyScore,
+        hasOptimizedRoute: !!result.optimized_route,
+        hasOriginalRoute: !!result.original_route,
+        resultSuccess: result.success,
+      });
       // ✅ CHECK: Warn if original route passes through danger zones
       if (dangerZones > 0 || safetyScore < 3.0) {
         const dangerMessage =
@@ -383,6 +388,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               )}/5.0).`;
 
         if (result.success && result.optimized_route) {
+          console.log("⚠️ DANGER DETECTED - About to save route");
+
           // Found safer alternative
           notify.confirm(
             "Safer Route Available",
@@ -425,6 +432,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                           .overall_route_score,
                     })
                   );
+                  console.log("✅ Route saved successfully (danger case)");
+
                   notify.warning(
                     "Using original route - stay alert for danger zones"
                   );
@@ -451,11 +460,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             })
           );
         }
-      } else if (
-        result.success &&
-        result.optimized_route &&
-        result.original_route
-      ) {
+        console.log("✅ Route saved successfully (safe case)");
+      } else if (result.optimized_route && result.original_route) {
+        console.log("✅ SAFE ROUTE - About to save");
+
         // Route is safe, save optimized version
         await dispatch(
           saveRouteToDatabase({
@@ -468,6 +476,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               result.optimized_route.safety_analysis.overall_route_score,
           })
         );
+      } else {
+        console.log("⚠️ NO ROUTE TO SAVE - Conditions not met:", {
+          resultSuccess: result.success,
+          hasOptimizedRoute: !!result.optimized_route,
+          hasOriginalRoute: !!result.original_route,
+        });
       }
     } catch (error) {
       logger.error("Route generation error:", error);

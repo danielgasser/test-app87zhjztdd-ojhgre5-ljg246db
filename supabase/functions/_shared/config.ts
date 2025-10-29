@@ -72,6 +72,27 @@ export const EDGE_CONFIG = {
     },
     REVIEWS: {
         RATE_LIMIT_WINDOW_HOURS: 24
+    },
+    ROUTE_SAFETY_SCORES: {
+        SEGMENT_LENGTH_MILES: 1.0,
+        SCORING_RADIUS_MILES: 2.0,
+        SAFE_THRESHOLD: 4.0,
+        MIXED_THRESHOLD: 3.0,
+        UNSAFE_THRESHOLD: 2.5,
+
+        TIME_PENALTIES: {
+            EVENING_MULTIPLIER: 1.2,
+            NIGHT_MULTIPLIER: 1.5,
+            EVENING_START: 18,
+            NIGHT_START: 22,
+            MORNING_END: 6,
+        },
+
+        DANGER_ZONE_PENALTIES: {
+            HIGH: 2.0,
+            MEDIUM: 1.0,
+            LOW: 0.5,
+        }
     }
 
 }
