@@ -614,13 +614,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           <View style={styles.headerSpacer} />
         </View>
         {/* Warning banner for low safety routes */}
-        {selectedRoute &&
-          selectedRoute.safety_analysis.overall_route_score < 3.0 && (
+        {selectedRoute?.safety_analysis?.overall_route_score &&
+          selectedRoute.safety_analysis.overall_route_score <
+            APP_CONFIG.NAVIGATION.OVERALL_ROUTE_SCORE && (
             <View style={styles.dangerWarningBanner}>
               <Ionicons name="warning" size={24} color={theme.colors.accent} />
               <View style={styles.dangerWarningContent}>
                 <Text style={styles.dangerWarningTitle}>
-                  ⚠️ Route passes through danger zones
+                  Route passes through danger zones
                 </Text>
                 <Text style={styles.dangerWarningText}>
                   No safer alternative route available. Consider delaying your
@@ -1086,7 +1087,7 @@ const styles = StyleSheet.create({
   },
   dangerWarningBanner: {
     flexDirection: "row",
-    backgroundColor: theme.colors.text,
+    backgroundColor: theme.colors.backgroundSecondary,
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
@@ -1101,12 +1102,12 @@ const styles = StyleSheet.create({
   dangerWarningTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#856404",
+    color: theme.colors.accent,
     marginBottom: 4,
   },
   dangerWarningText: {
     fontSize: 14,
-    color: "#856404",
+    color: theme.colors.accent,
     lineHeight: 20,
   },
   routesSection: {

@@ -473,6 +473,7 @@ export default function MapScreen() {
       return APP_CONFIG.ROUTE_DISPLAY.COLORS.SELECTED_ROUTE;
 
     const score = route.safety_analysis.overall_route_score;
+
     if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
       return APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE;
     } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
@@ -584,6 +585,10 @@ export default function MapScreen() {
               APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
             : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+        console.log(`🎨 Segment ${index} color:`, {
+          score: segment.safety_score || segment.overall_score,
+          color: segmentColor,
+        });
 
         // Try wrapping in Fragment with timestamp key to force re-render
         return (

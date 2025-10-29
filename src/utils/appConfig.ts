@@ -198,7 +198,7 @@ export const APP_CONFIG = {
       SAFE_ROUTE: '#4CAF50',                         // Green for safe routes
       MIXED_ROUTE: '#FFC107',                        // Yellow for mixed safety routes  
       UNSAFE_ROUTE: '#F44336',                       // Red for unsafe routes
-      SELECTED_ROUTE: 'theme.colors.primary',                     // Purple for selected route
+      SELECTED_ROUTE: '#2A5C99',                     // Purple for selected route
       ALTERNATIVE_ROUTE: '#757575',                  // Gray for alternative routes
     },
 

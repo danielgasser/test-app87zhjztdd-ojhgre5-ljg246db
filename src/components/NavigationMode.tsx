@@ -85,7 +85,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       // Check if ANY dangerous review is within 500m of our route
       const dangerOnRoute = dangerousReviews.filter((review) => {
         // Check distance to any point on our route
-        const isNearRoute = selectedRoute.coordinates.some((routePoint) => {
+        const isNearRoute = (
+          selectedRoute.route_points || selectedRoute.coordinates
+        )?.some((routePoint) => {
           const distance = calculateDistance(
             routePoint.latitude,
             routePoint.longitude,
@@ -388,7 +390,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Safety</Text>
             <Text style={styles.statValue}>
-              {selectedRoute.safety_analysis.overall_route_score.toFixed(1)}
+              {selectedRoute.safety_analysis?.overall_route_score.toFixed(1)}
             </Text>
           </View>
         </View>
