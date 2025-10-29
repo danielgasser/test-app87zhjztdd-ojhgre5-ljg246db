@@ -366,8 +366,15 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     try {
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
-
-      if (result.optimized_route && result.original_route) {
+      console.log("Smart route result:", {
+        success: result.success,
+        hasOptimized: !!result.optimized_route,
+        hasOriginal: !!result.original_route,
+        originalSafety:
+          result.original_route?.safety_analysis?.overall_route_score,
+      });
+      // Only save if we actually got a successful smart route
+      if (result.success && result.optimized_route && result.original_route) {
         await dispatch(
           saveRouteToDatabase({
             route_coordinates: result.optimized_route.coordinates,
@@ -378,6 +385,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             safety_score:
               result.optimized_route.safety_analysis.overall_route_score,
           })
+        );
+      } else if (!result.success) {
+        // Smart route found no better alternative - inform user
+        notify.info(
+          "No safer route alternative available for this route. Showing fastest route.",
+          "Route Generated"
         );
       }
     } catch (error) {
@@ -510,7 +523,22 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           <Text style={styles.title}>Plan Safe Route</Text>
           <View style={styles.headerSpacer} />
         </View>
-
+        {/* Warning banner for low safety routes */}
+        {selectedRoute &&
+          selectedRoute.safety_analysis.overall_route_score < 3.0 && (
+            <View style={styles.dangerWarningBanner}>
+              <Ionicons name="warning" size={24} color={theme.colors.accent} />
+              <View style={styles.dangerWarningContent}>
+                <Text style={styles.dangerWarningTitle}>
+                  ⚠️ Route passes through danger zones
+                </Text>
+                <Text style={styles.dangerWarningText}>
+                  No safer alternative route available. Consider delaying your
+                  trip or choosing a different destination.
+                </Text>
+              </View>
+            </View>
+          )}
         {/* Search Mode */}
         {activeInput ? (
           <View style={styles.searchMode}>
@@ -965,6 +993,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
     flex: 1,
+  },
+  dangerWarningBanner: {
+    flexDirection: "row",
+    backgroundColor: theme.colors.text,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    zIndex: 100000,
+  },
+  dangerWarningContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  dangerWarningTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#856404",
+    marginBottom: 4,
+  },
+  dangerWarningText: {
+    fontSize: 14,
+    color: "#856404",
+    lineHeight: 20,
   },
   routesSection: {
     marginTop: 24,

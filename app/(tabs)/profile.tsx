@@ -241,11 +241,8 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
+    <View style={styles.container}>
+      <ScrollView>
         {!isLoggedIn ? (
           // NOT LOGGED IN - Only show Sign In button
           <View style={styles.notLoggedInContainer}>
@@ -398,7 +395,7 @@ export default function ProfileScreen() {
             </Pressable>
           )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

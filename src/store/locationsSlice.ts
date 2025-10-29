@@ -1034,7 +1034,7 @@ export const fetchMLPredictions = createAsyncThunk(
       }
 
       const prediction = await response.json();
-      console.log("🟢 ML Prediction received:", prediction);
+      console.log("🟢 ML Prediction received");
 
       return {
         locationId,
@@ -1591,20 +1591,38 @@ export const checkForReroute = createAsyncThunk(
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
 
         if (result.success && result.optimized_route) {
-          // Use the safer route
-          dispatch(setSelectedRoute(result.optimized_route));
+          // Check if there's actual improvement
+          const hasImprovement =
+            result.improvement_summary.safety_improvement > 0 ||
+            result.improvement_summary.danger_zones_avoided > 0;
 
-          notify.info(
-            "New safer route calculated from your current position",
-            "Route Updated",
-          );
+          if (hasImprovement) {
+            // Use the safer route
+            dispatch(setSelectedRoute(result.optimized_route));
+
+            notify.info(
+              `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
+              "Route Updated"
+            );
+          } else {
+            // No actual improvement - treat as no alternative available
+            throw new Error("No safer alternative available");
+          }
         } else {
-          // Fall back to basic safe route
-          throw new Error("Smart route not better");
+          // Smart route generation failed
+          throw new Error("Smart route generation failed");
         }
       } catch (smartRouteError) {
 
         // Fallback to basic route generation
+        const errorMessage = smartRouteError instanceof Error ? smartRouteError.message : String(smartRouteError);
+
+        if (errorMessage.includes("No safer alternative available")) {
+          // Don't try fallback - inform user directly
+          throw new Error("NO_ALTERNATIVE_ROUTE");
+        }
+
+        // For other errors, try fallback to basic route generation
         const basicResult = await dispatch(generateSafeRoute(newRouteRequest)).unwrap();
 
         if (basicResult.route) {
@@ -1612,27 +1630,53 @@ export const checkForReroute = createAsyncThunk(
 
           notify.info(
             "New route calculated from your current position",
-            "Route Updated",
+            "Route Updated"
           );
         }
       }
 
     } catch (error) {
-      logger.error("❌ Rerouting failed:", error);
-      notify.confirm(
-        "Rerouting Failed",
-        "Could not calculate new route. Please try planning again.",
-        [
-          {
-            text: "Stop Navigation",
-            style: "destructive",
-            onPress: () => dispatch(endNavigation()),
-          },
-          {
-            text: "Continue", style: "cancel", onPress: () => { },
-          },
-        ]
-      );
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage === "NO_ALTERNATIVE_ROUTE") {
+        // No safer route exists - give user clear options
+        notify.confirm(
+          "No Safer Route Available",
+          "There are no safer alternative routes in this area. You can continue with your current route or cancel navigation.",
+          [
+            {
+              text: "Continue Current Route",
+              style: "cancel",
+              onPress: () => { }
+            },
+            {
+              text: "Stop Navigation",
+              style: "destructive",
+              onPress: () => dispatch(endNavigation())
+            }
+          ],
+          "warning"
+        );
+      } else {
+        // Other routing errors
+        logger.error("❌ Rerouting failed:", error);
+        notify.confirm(
+          "Rerouting Failed",
+          "Could not calculate new route. Please try planning again.",
+          [
+            {
+              text: "Stop Navigation",
+              style: "destructive",
+              onPress: () => dispatch(endNavigation()),
+            },
+            {
+              text: "Continue",
+              style: "cancel",
+              onPress: () => { }
+            },
+          ]
+        );
+      }
     }
   }
 );
@@ -2098,9 +2142,15 @@ const locationsSlice = createSlice({
           state.showSmartRouteComparison = true;
 
         } else {
-          // If smart routing didn"t improve anything, just store basic route
+          // Smart routing didn't improve or failed
           state.smartRouteComparison = null;
           state.showSmartRouteComparison = false;
+
+          // If we have an original route, use it as the selected route
+          if (result && result.original_route) {
+            state.selectedRoute = result.original_route;
+            state.routes = [result.original_route];
+          }
         }
       })
       .addCase(generateSmartRoute.rejected, (state, action) => {

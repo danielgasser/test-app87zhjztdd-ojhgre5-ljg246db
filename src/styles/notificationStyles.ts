@@ -28,7 +28,7 @@ export const notificationStyles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 10,
 
-        zIndex: 9999,
+        zIndex: 19999,
 
         // Try border INSIDE a wrapper if needed
         borderWidth: 1,
