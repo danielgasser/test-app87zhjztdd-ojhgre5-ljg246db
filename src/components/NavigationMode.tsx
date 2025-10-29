@@ -75,17 +75,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     if (!selectedRoute || !currentPosition || !communityReviews) return;
 
     const checkReviewsAlongRoute = () => {
-      // Get reviews from last 10 minutes with low safety ratings
-      const recentDangerousReviews = communityReviews.filter((review) => {
-        const reviewTime = new Date(review.created_at).getTime();
-        const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-        return reviewTime > tenMinutesAgo && review.safety_rating < 3.0;
+      // Get ALL dangerous reviews (not just recent ones)
+      const dangerousReviews = communityReviews.filter((review) => {
+        return review.safety_rating < 3.0;
       });
 
-      if (recentDangerousReviews.length === 0) return;
+      if (dangerousReviews.length === 0) return;
 
       // Check if ANY dangerous review is within 500m of our route
-      const dangerOnRoute = recentDangerousReviews.filter((review) => {
+      const dangerOnRoute = dangerousReviews.filter((review) => {
         // Check distance to any point on our route
         const isNearRoute = selectedRoute.coordinates.some((routePoint) => {
           const distance = calculateDistance(
@@ -106,7 +104,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
         notify.confirm(
           "⚠️ SAFETY ALERT ON YOUR ROUTE",
-          `Safety concern just reported at: ${locationNames}\n\nWould you like to find a safer route?`,
+          `Your route passes through areas with safety concerns: ${locationNames}\n\nWould you like to find a safer route?`,
           [
             {
               text: "Find Safer Route",

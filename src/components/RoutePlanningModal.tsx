@@ -366,15 +366,97 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     try {
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
-      console.log("Smart route result:", {
-        success: result.success,
-        hasOptimized: !!result.optimized_route,
-        hasOriginal: !!result.original_route,
-        originalSafety:
-          result.original_route?.safety_analysis?.overall_route_score,
-      });
-      // Only save if we actually got a successful smart route
-      if (result.success && result.optimized_route && result.original_route) {
+      console.log("Smart route result:", result);
+
+      const originalSafety =
+        result.original_safety || result.original_route?.safety_analysis;
+      const dangerZones = originalSafety?.danger_zones_intersected || 0;
+      const safetyScore = originalSafety?.overall_route_score || 3.0;
+
+      // ✅ CHECK: Warn if original route passes through danger zones
+      if (dangerZones > 0 || safetyScore < 3.0) {
+        const dangerMessage =
+          dangerZones > 0
+            ? `⚠️ This route passes through ${dangerZones} danger zone(s) for your demographics.`
+            : `⚠️ This route has a low safety score (${safetyScore.toFixed(
+                1
+              )}/5.0).`;
+
+        if (result.success && result.optimized_route) {
+          // Found safer alternative
+          notify.confirm(
+            "Safer Route Available",
+            `${dangerMessage}\n\nWe found a safer alternative route. Would you like to use it?`,
+            [
+              {
+                text: "Use Safer Route",
+                onPress: async () => {
+                  await dispatch(
+                    saveRouteToDatabase({
+                      route_coordinates: result.optimized_route.coordinates,
+                      origin_name: fromLocation.name,
+                      destination_name: toLocation.name,
+                      distance_km: result.optimized_route.distance_kilometers,
+                      duration_minutes:
+                        result.optimized_route.estimated_duration_minutes,
+                      safety_score:
+                        result.optimized_route.safety_analysis
+                          .overall_route_score,
+                    })
+                  );
+                  notify.success("Using safer route");
+                },
+              },
+              {
+                text: "Use Original Anyway",
+                style: "cancel",
+                onPress: async () => {
+                  // Save original route even though it has danger zones
+                  await dispatch(
+                    saveRouteToDatabase({
+                      route_coordinates: result.original_route.coordinates,
+                      origin_name: fromLocation.name,
+                      destination_name: toLocation.name,
+                      distance_km: result.original_route.distance_kilometers,
+                      duration_minutes:
+                        result.original_route.estimated_duration_minutes,
+                      safety_score:
+                        result.original_route.safety_analysis
+                          .overall_route_score,
+                    })
+                  );
+                  notify.warning(
+                    "Using original route - stay alert for danger zones"
+                  );
+                },
+              },
+            ]
+          );
+        } else {
+          // No safer alternative found - still warn but auto-save original
+          notify.warning(
+            dangerMessage + "\n\nNo safer alternative route available.",
+            "Safety Warning"
+          );
+          await dispatch(
+            saveRouteToDatabase({
+              route_coordinates: result.original_route.coordinates,
+              origin_name: fromLocation.name,
+              destination_name: toLocation.name,
+              distance_km: result.original_route.distance_kilometers,
+              duration_minutes:
+                result.original_route.estimated_duration_minutes,
+              safety_score:
+                result.original_route.safety_analysis.overall_route_score,
+            })
+          );
+        }
+      } else if (
+        result.success &&
+        result.optimized_route &&
+        result.original_route
+      ) {
+        // Route is safe, save optimized version
         await dispatch(
           saveRouteToDatabase({
             route_coordinates: result.optimized_route.coordinates,
@@ -385,12 +467,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             safety_score:
               result.optimized_route.safety_analysis.overall_route_score,
           })
-        );
-      } else if (!result.success) {
-        // Smart route found no better alternative - inform user
-        notify.info(
-          "No safer route alternative available for this route. Showing fastest route.",
-          "Route Generated"
         );
       }
     } catch (error) {

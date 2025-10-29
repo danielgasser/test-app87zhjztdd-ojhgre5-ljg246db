@@ -70,6 +70,11 @@ class NotificationService {
     }
 
     // Show error snackbar
+    warning(message: string, title: string = 'Warning', duration?: number) {
+        this.show(message, 'warning', duration);
+    }
+
+    // Show error snackbar
     error(message: string, title: string = 'Error', duration?: number) {
         this.show(message, 'error', duration);
     }

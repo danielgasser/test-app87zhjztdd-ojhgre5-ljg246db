@@ -114,6 +114,12 @@ serve(async (req) => {
       for (const [locationId, data] of Object.entries(locationGroups)) {
         const { location, scores } = data
 
+        // ✅ CHECK: Only create danger zone if enough incidents
+        if (scores.length < EDGE_CONFIG.DANGER_ZONES.MIN_INCIDENTS_FOR_ZONE) {
+          console.log(`⏭️  Skipping ${location.name}: only ${scores.length} incidents (need ${EDGE_CONFIG.DANGER_ZONES.MIN_INCIDENTS_FOR_ZONE})`)
+          continue
+        }
+
         // Get location coordinates using PostGIS functions
         const { data: locationWithCoords, error: coordError } = await supabase
           .rpc('get_location_with_coords', { location_id: locationId })

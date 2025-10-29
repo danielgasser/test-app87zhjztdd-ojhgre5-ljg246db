@@ -70,14 +70,6 @@ export const APP_CONFIG = {
     MIN_DEMOGRAPHIC_GROUPS_FOR_COMPARISON: 2,  // Min groups to compare for patterns
   },
 
-  // Heat Map Settings
-  DANGER_ZONES: {
-    SEARCH_RADIUS_MILES: 50,              // Already in your config
-    POLYGON_RADIUS_MILES: 2,              // Already in your config  
-    POLYGON_SIDES: 8,                     // Already in your config
-    MIN_INCIDENTS_FOR_ZONE: 3,            // Minimum incidents to create danger zone
-  },
-
   RECOMMENDATIONS: {
     MIN_RECOMMENDATION_SCORE: 3.5,        // Minimum score to recommend
     MAX_RECOMMENDATIONS: 10,               // Maximum recommendations to return
@@ -236,6 +228,7 @@ export const APP_CONFIG = {
     LOCATION_UPDATE_INTERVAL_MS: 1000,               // GPS location update frequency
     ROUTE_RECALCULATION_THRESHOLD_METERS: 100,      // Distance off-route before recalculating
     AHEAD_WARNING_DISTANCE_METERS: 2000,            // Distance to warn about upcoming dangers (2km)
+    OVERALL_ROUTE_SCORE: 3.0,
 
     // Safety Alerts
     SAFETY_ALERTS: {
