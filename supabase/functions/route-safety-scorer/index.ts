@@ -200,6 +200,7 @@ async function analyzeSegmentSafety(
     ];
 
     for (const point of pointsToCheck) {
+      console.log(`🔍 Checking point: ${point.latitude}, ${point.longitude} for danger zones`);
       const dangerResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/danger-zones`, {
         method: 'POST',
         headers: {

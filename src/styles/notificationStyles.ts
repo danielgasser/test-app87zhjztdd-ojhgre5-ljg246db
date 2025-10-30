@@ -7,9 +7,7 @@ import { theme } from "@/styles/theme";
 // ============================================
 
 export const notificationStyles = StyleSheet.create({
-    // ============================================
-    // SNACKBAR STYLES
-    // ============================================
+
     snackbarContainer: {
         position: "absolute",
         top: 60,
@@ -20,17 +18,12 @@ export const notificationStyles = StyleSheet.create({
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderRadius: 8,
-
-        // Shadow (works on both platforms)
         shadowColor: theme.colors.shadowLight,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 8,
-        elevation: 10,
-
-        zIndex: 19999,
-
-        // Try border INSIDE a wrapper if needed
+        elevation: 999,
+        zIndex: 999999,
         borderWidth: 1,
         borderColor: theme.colors.borderLight,
     },

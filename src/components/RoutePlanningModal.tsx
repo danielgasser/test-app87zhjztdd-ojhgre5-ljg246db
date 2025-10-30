@@ -369,8 +369,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
       const originalSafety =
         result.original_safety || result.original_route?.safety_analysis;
-      const dangerZones = originalSafety?.danger_zones_intersected || 0;
-      const safetyScore = originalSafety?.overall_route_score || 3.0;
+      const dangerZones =
+        originalSafety?.danger_zones_intersected ??
+        result.improvement_summary?.danger_zones_avoided ?? // Use improvement_summary!
+        0;
+      const safetyScore =
+        originalSafety?.overall_route_score ??
+        result.improvement_summary?.original_safety_score ?? // Use improvement_summary!
+        3.0;
       console.log("🔍 ROUTE GENERATION COMPLETE:", {
         dangerZones,
         safetyScore,

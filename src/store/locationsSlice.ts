@@ -327,7 +327,7 @@ const initialState: LocationsState = {
   routePreferences: {
     safetyPriority: "balanced",
     avoidEveningDanger: true,
-    maxDetourMinutes: 15,
+    maxDetourMinutes: 3600,
   },
   smartRouteComparison: null,
   showSmartRouteComparison: false,
@@ -1480,6 +1480,7 @@ export const generateSmartRoute = createAsyncThunk(
           route_preferences: routeRequest.route_preferences
         }
       });
+      console.log("🔥 RAW RESPONSE FROM SMART-ROUTE-GENERATOR:", JSON.stringify(data, null, 2));
 
       if (error) {
         logger.error("❌ Smart route generation failed:", error);
@@ -1549,11 +1550,13 @@ export const generateSmartRoute = createAsyncThunk(
         name: "Fastest Route",
         route_type: "fastest",
         coordinates: originalCoords,
+        route_points: originalCoords,
         estimated_duration_minutes: Math.round(data.original_route.duration / 60),
         distance_kilometers: Math.round(data.original_route.distance / 1000 * 10) / 10,
-        safety_analysis: {
+        safety_analysis: data.original_safety || {
           overall_route_score: data.improvement_summary.original_safety_score,
           confidence: 0.85,
+          segment_scores: data.original_safety?.segment_scores,
           safety_notes: ["Standard fastest route - may pass through danger zones"],
           safety_summary: {
             safe_segments: 0,
