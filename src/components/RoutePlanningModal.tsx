@@ -123,6 +123,17 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     title?: string;
   } | null>(null);
 
+  const [routeOrigin, setRouteOrigin] = useState<{
+    name: string;
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [routeDestination, setRouteDestination] = useState<{
+    name: string;
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   // Initialize from location with current location
   useEffect(() => {
     if (visible && userLocation && !fromLocation) {
@@ -318,8 +329,23 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   };
 
   // Handle selecting original route
-  const handleSelectOriginalRoute = () => {
-    if (smartRouteComparison?.original_route) {
+  const handleSelectOriginalRoute = async () => {
+    if (
+      smartRouteComparison?.original_route &&
+      routeOrigin &&
+      routeDestination
+    ) {
+      await dispatch(
+        saveRouteToDatabase({
+          route_coordinates: result.original_route.coordinates,
+          origin_name: fromLocation.name,
+          destination_name: toLocation.name,
+          distance_km: result.original_route.distance_kilometers,
+          duration_minutes: result.original_route.estimated_duration_minutes,
+          safety_score:
+            result.original_route.safety_analysis.overall_route_score,
+        })
+      );
       dispatch(setSelectedRoute(smartRouteComparison.original_route));
       dispatch(setSmartRouteComparison(null));
       onClose();
@@ -327,8 +353,19 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   };
 
   // Handle selecting optimized route
-  const handleSelectOptimizedRoute = () => {
+  const handleSelectOptimizedRoute = async () => {
     if (smartRouteComparison?.optimized_route) {
+      await dispatch(
+        saveRouteToDatabase({
+          route_coordinates: result.original_route.coordinates,
+          origin_name: fromLocation.name,
+          destination_name: toLocation.name,
+          distance_km: result.original_route.distance_kilometers,
+          duration_minutes: result.original_route.estimated_duration_minutes,
+          safety_score:
+            result.original_route.safety_analysis.overall_route_score,
+        })
+      );
       dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
       dispatch(setSmartRouteComparison(null));
       setPendingNotification({
@@ -384,7 +421,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     try {
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
-
+      setRouteOrigin({
+        name: fromLocation.name,
+        latitude: fromLocation.latitude,
+        longitude: fromLocation.longitude,
+      });
+      setRouteDestination({
+        name: toLocation.name,
+        latitude: toLocation.latitude,
+        longitude: toLocation.longitude,
+      });
       const originalSafety =
         result.original_safety || result.original_route?.safety_analysis;
       const dangerZones =
@@ -414,6 +460,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         if (result.success && result.optimized_route) {
           console.log("⚠️ ABOUT TO CALL notify.confirm");
           // Found safer alternative
+
           notify.confirm(
             "Safer Route Available",
             `${dangerMessage}\n\nWe found a safer alternative route. Would you like to use it?`,
@@ -421,19 +468,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               {
                 text: "Use Safer Route",
                 onPress: async () => {
-                  await dispatch(
-                    saveRouteToDatabase({
-                      route_coordinates: result.optimized_route.coordinates,
-                      origin_name: fromLocation.name,
-                      destination_name: toLocation.name,
-                      distance_km: result.optimized_route.distance_kilometers,
-                      duration_minutes:
-                        result.optimized_route.estimated_duration_minutes,
-                      safety_score:
-                        result.optimized_route.safety_analysis
-                          .overall_route_score,
-                    })
-                  );
                   setPendingNotification({
                     type: "success",
                     message: "Using safer route with danger zone avoidance",
@@ -446,19 +480,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 style: "cancel",
                 onPress: async () => {
                   // Save original route even though it has danger zones
-                  await dispatch(
-                    saveRouteToDatabase({
-                      route_coordinates: result.original_route.coordinates,
-                      origin_name: fromLocation.name,
-                      destination_name: toLocation.name,
-                      distance_km: result.original_route.distance_kilometers,
-                      duration_minutes:
-                        result.original_route.estimated_duration_minutes,
-                      safety_score:
-                        result.original_route.safety_analysis
-                          .overall_route_score,
-                    })
-                  );
+
                   console.log("✅ Route saved successfully (danger case)");
 
                   setPendingNotification({
@@ -483,18 +505,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               dangerMessage + "\n\nNo safer alternative route available.",
             title: "Safety Warning",
           });
-          await dispatch(
-            saveRouteToDatabase({
-              route_coordinates: result.original_route.coordinates,
-              origin_name: fromLocation.name,
-              destination_name: toLocation.name,
-              distance_km: result.original_route.distance_kilometers,
-              duration_minutes:
-                result.original_route.estimated_duration_minutes,
-              safety_score:
-                result.original_route.safety_analysis.overall_route_score,
-            })
-          );
         }
         console.log("✅ Route saved successfully (safe case)");
       } else if (result.optimized_route && result.original_route) {
