@@ -123,17 +123,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     title?: string;
   } | null>(null);
 
-  const [routeOrigin, setRouteOrigin] = useState<{
-    name: string;
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [routeDestination, setRouteDestination] = useState<{
-    name: string;
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-
   // Initialize from location with current location
   useEffect(() => {
     if (visible && userLocation && !fromLocation) {
@@ -243,17 +232,44 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
-    if (!smartRouteComparison?.optimized_route) {
+    if (
+      !smartRouteComparison?.optimized_route ||
+      !selectedRoute ||
+      !fromLocation ||
+      !toLocation
+    ) {
       notify.error("No route selected for navigation");
       return;
     }
+    await dispatch(
+      saveRouteToDatabase({
+        route_coordinates: selectedRoute.coordinates,
+        origin_name: fromLocation.name,
+        destination_name: toLocation.name,
+        distance_km: selectedRoute.distance_kilometers,
+        duration_minutes: selectedRoute.estimated_duration_minutes,
+        safety_score: selectedRoute.safety_analysis.overall_route_score,
+      })
+    );
     const optimizedRoute = smartRouteComparison.optimized_route;
     dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
 
     if (optimizedRoute.databaseId) {
       await dispatch(startNavigationSession(optimizedRoute.databaseId));
     }
-
+    if (selectedRoute.route_type === "safest") {
+      setPendingNotification({
+        type: "success",
+        message: "Using safer route with danger zone avoidance",
+        title: "Route Selected",
+      });
+    } else {
+      setPendingNotification({
+        type: "warning",
+        message: "Using original route - stay alert for danger zones",
+        title: "Route Warning",
+      });
+    }
     // Dispatch start navigation action
     dispatch(startNavigation());
     onClose();
@@ -329,51 +345,20 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   };
 
   // Handle selecting original route
-  const handleSelectOriginalRoute = async () => {
-    if (
-      smartRouteComparison?.original_route &&
-      routeOrigin &&
-      routeDestination
-    ) {
-      await dispatch(
-        saveRouteToDatabase({
-          route_coordinates: result.original_route.coordinates,
-          origin_name: fromLocation.name,
-          destination_name: toLocation.name,
-          distance_km: result.original_route.distance_kilometers,
-          duration_minutes: result.original_route.estimated_duration_minutes,
-          safety_score:
-            result.original_route.safety_analysis.overall_route_score,
-        })
-      );
+  const handleSelectOriginalRoute = () => {
+    console.log("🔵 ORIGINAL ROUTE SELECTED");
+
+    if (smartRouteComparison?.original_route) {
       dispatch(setSelectedRoute(smartRouteComparison.original_route));
-      dispatch(setSmartRouteComparison(null));
-      onClose();
     }
   };
 
   // Handle selecting optimized route
   const handleSelectOptimizedRoute = async () => {
+    console.log("🟢 OPTIMIZED ROUTE SELECTED");
+
     if (smartRouteComparison?.optimized_route) {
-      await dispatch(
-        saveRouteToDatabase({
-          route_coordinates: result.original_route.coordinates,
-          origin_name: fromLocation.name,
-          destination_name: toLocation.name,
-          distance_km: result.original_route.distance_kilometers,
-          duration_minutes: result.original_route.estimated_duration_minutes,
-          safety_score:
-            result.original_route.safety_analysis.overall_route_score,
-        })
-      );
       dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
-      dispatch(setSmartRouteComparison(null));
-      setPendingNotification({
-        type: "info",
-        message: "Using safer route with danger zone avoidance.",
-        title: "Route Selected",
-      });
-      onClose();
     }
   };
 
@@ -421,16 +406,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     try {
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
-      setRouteOrigin({
-        name: fromLocation.name,
-        latitude: fromLocation.latitude,
-        longitude: fromLocation.longitude,
-      });
-      setRouteDestination({
-        name: toLocation.name,
-        latitude: toLocation.latitude,
-        longitude: toLocation.longitude,
-      });
+
       const originalSafety =
         result.original_safety || result.original_route?.safety_analysis;
       const dangerZones =

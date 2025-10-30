@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SmartRouteComparison } from "../store/locationsSlice";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { useAppSelector } from "@/store/hooks";
 
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
@@ -31,7 +32,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     if (score >= 3.0) return theme.colors.mixedYellow; // Yellow
     return theme.colors.error; // Red
   };
-
+  const selectedRoute = useAppSelector(
+    (state) => state.locations.selectedRoute
+  );
+  const isOriginalSelected = selectedRoute?.id === original_route.id;
+  const isOptimizedSelected = selectedRoute?.id === optimized_route.id;
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -56,7 +61,18 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
       {/* Route Comparison Cards */}
       <View style={styles.routesContainer}>
         {/* Original Route */}
-        <View style={styles.routeCard}>
+        <TouchableOpacity
+          style={[
+            styles.routeCard,
+            isOriginalSelected && styles.recommendedCard, // Add style if selected
+          ]}
+          onPress={onSelectOriginal}
+        >
+          {isOriginalSelected && ( // Show badge if selected
+            <View style={styles.recommendedBadge}>
+              <Text style={styles.recommendedText}>Selected</Text>
+            </View>
+          )}
           <View style={styles.routeCardHeader}>
             <Text style={styles.routeLabel}>Original Route</Text>
             <View
@@ -92,18 +108,25 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               </Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.selectButton}
-            onPress={onSelectOriginal}
-          >
-            <Text style={styles.selectButtonText}>Use Fastest</Text>
-          </TouchableOpacity>
-        </View>
+
+          <Text style={styles.selectButtonText}>Use Fastest</Text>
+        </TouchableOpacity>
 
         {/* Optimized Route */}
-        <View style={[styles.routeCard, styles.recommendedCard]}>
-          <View style={styles.recommendedBadge}>
-            <Text style={styles.recommendedText}>RECOMMENDED</Text>
+        <TouchableOpacity
+          style={[
+            styles.routeCard,
+            isOptimizedSelected && styles.recommendedCard,
+          ]}
+          onPress={onSelectOptimized}
+        >
+          {isOptimizedSelected && ( // Show badge if selected
+            <View style={styles.recommendedBadge}>
+              <Text style={styles.recommendedText}>Selected</Text>
+            </View>
+          )}
+          <View style={styles.recommendedBadgeRed}>
+            <Text style={styles.recommendedTextRed}>RECOMMENDED</Text>
           </View>
           <View style={styles.routeCardHeader}>
             <Text style={styles.routeLabel}>Safer Route</Text>
@@ -145,13 +168,8 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               <Text style={styles.metricText}>Avoids danger zones</Text>
             </View>
           </View>
-          <TouchableOpacity
-            style={[styles.selectButton, styles.primaryButton]}
-            onPress={onSelectOptimized}
-          >
-            <Text style={styles.primaryButtonText}>Use Safer Route</Text>
-          </TouchableOpacity>
-        </View>
+          <Text style={styles.selectButtonText}>Use Safer Route</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Waypoints Info */}
@@ -195,7 +213,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             </Text>
             <Text style={styles.warningText}>
               Help improve safety. Be the first to review locations along the
-              way after your trip.
+              way during your trip.
             </Text>
           </View>
         </View>
@@ -287,6 +305,22 @@ const styles = StyleSheet.create({
   },
   recommendedText: {
     color: theme.colors.background,
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  recommendedBadgeRed: {
+    position: "absolute",
+    top: -8,
+    right: 8,
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderColor: theme.colors.accent,
+    borderWidth: 1,
+  },
+  recommendedTextRed: {
+    color: theme.colors.accent,
     fontSize: 10,
     fontWeight: "700",
   },
