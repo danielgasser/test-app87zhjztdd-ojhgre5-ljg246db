@@ -117,11 +117,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
 
-  const [pendingNotification, setPendingNotification] = useState<{
-    type: "success" | "warning" | "info" | "error";
-    message: string;
-    title?: string;
-  } | null>(null);
+  const [dangerMessage, setDangerMessage] = useState<string>("");
 
   // Initialize from location with current location
   useEffect(() => {
@@ -163,17 +159,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       setMapboxResults([]);
     }
   }, [visible]);
-
-  useEffect(() => {
-    // When modal closes (visible changes from true to false)
-    if (!visible && pendingNotification) {
-      notify[pendingNotification.type](
-        pendingNotification.message,
-        pendingNotification.title
-      );
-      setPendingNotification(null);
-    }
-  }, [visible, pendingNotification]);
 
   // Mapbox search function
   // Google Places Autocomplete search
@@ -257,19 +242,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (optimizedRoute.databaseId) {
       await dispatch(startNavigationSession(optimizedRoute.databaseId));
     }
-    if (selectedRoute.route_type === "safest") {
-      setPendingNotification({
-        type: "success",
-        message: "Using safer route with danger zone avoidance",
-        title: "Route Selected",
-      });
-    } else {
-      setPendingNotification({
-        type: "warning",
-        message: "Using original route - stay alert for danger zones",
-        title: "Route Warning",
-      });
-    }
+
     // Dispatch start navigation action
     dispatch(startNavigation());
     onClose();
@@ -398,7 +371,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         age_range: userProfile.age_range || "",
       },
       route_preferences: {
-        prioritize_safety: routePreferences.safetyPriority === "safety_focused",
+        prioritize_safety: true,
         avoid_evening_danger: routePreferences.avoidEveningDanger,
         max_detour_minutes: routePreferences.maxDetourMinutes || 30,
       },
@@ -426,84 +399,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       });
       // ✅ CHECK: Warn if original route passes through danger zones
       if (dangerZones > 0 || safetyScore < 3.0) {
-        const dangerMessage =
+        setDangerMessage(
           dangerZones > 0
             ? `⚠️ This route passes through ${dangerZones} danger zone(s) for your demographics.`
             : `⚠️ This route has a low safety score (${safetyScore.toFixed(
                 1
-              )}/5.0).`;
-
-        if (result.success && result.optimized_route) {
-          console.log("⚠️ ABOUT TO CALL notify.confirm");
-          // Found safer alternative
-
-          notify.confirm(
-            "Safer Route Available",
-            `${dangerMessage}\n\nWe found a safer alternative route. Would you like to use it?`,
-            [
-              {
-                text: "Use Safer Route",
-                onPress: async () => {
-                  setPendingNotification({
-                    type: "success",
-                    message: "Using safer route with danger zone avoidance",
-                    title: "Route Selected",
-                  });
-                },
-              },
-              {
-                text: "Use Original Anyway",
-                style: "cancel",
-                onPress: async () => {
-                  // Save original route even though it has danger zones
-
-                  console.log("✅ Route saved successfully (danger case)");
-
-                  setPendingNotification({
-                    type: "warning",
-                    message:
-                      "Using original route - stay alert for danger zones",
-                    title: "Route Warning",
-                  });
-                },
-              },
-            ],
-            "warning",
-            18000
-          );
-          console.log("✅ notify.confirm CALLED");
-        } else {
-          console.log("🚫 ENTERING ELSE BLOCK - NO OPTIMIZED ROUTE"); // ← Add this
-          // No safer alternative found - still warn but auto-save original
-          setPendingNotification({
-            type: "warning",
-            message:
-              dangerMessage + "\n\nNo safer alternative route available.",
-            title: "Safety Warning",
-          });
-        }
-        console.log("✅ Route saved successfully (safe case)");
-      } else if (result.optimized_route && result.original_route) {
-        console.log("✅ SAFE ROUTE - About to save");
-
-        // Route is safe, save optimized version
-        await dispatch(
-          saveRouteToDatabase({
-            route_coordinates: result.optimized_route.coordinates,
-            origin_name: fromLocation.name,
-            destination_name: toLocation.name,
-            distance_km: result.optimized_route.distance_kilometers,
-            duration_minutes: result.optimized_route.estimated_duration_minutes,
-            safety_score:
-              result.optimized_route.safety_analysis.overall_route_score,
-          })
+              )}/5.0).`
         );
-      } else {
-        console.log("⚠️ NO ROUTE TO SAVE - Conditions not met:", {
-          resultSuccess: result.success,
-          hasOptimizedRoute: !!result.optimized_route,
-          hasOriginalRoute: !!result.original_route,
-        });
+        console.log("✅ Route saved successfully (safe case)");
       }
     } catch (error) {
       logger.error("Route generation error:", error);
@@ -518,16 +421,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       } catch (fallbackError) {
         notify.error("Unable to generate route. Please try again.");
       }
-    }
-  };
-
-  // Handle safety priority change
-  const handleSafetyPriorityChange = (
-    priority: "speed_focused" | "balanced" | "safety_focused"
-  ) => {
-    dispatch(updateRoutePreferences({ safetyPriority: priority }));
-    if (smartRouteComparison || selectedRoute) {
-      handleGenerateRoute();
     }
   };
 
@@ -645,9 +538,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 <Text style={styles.dangerWarningTitle}>
                   Route passes through danger zones
                 </Text>
-                <Text style={styles.dangerWarningText}>
-                  Consider choosing another route.
-                </Text>
+                <Text style={styles.dangerWarningText}>{dangerMessage}</Text>
               </View>
             </View>
           )}
@@ -716,6 +607,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 {/* Safety Preferences */}
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Safety Preferences</Text>
+                  {/*
                   <View style={styles.priorityButtons}>
                     {(
                       ["speed_focused", "balanced", "safety_focused"] as const
@@ -741,6 +633,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                       </TouchableOpacity>
                     ))}
                   </View>
+*/}
 
                   <View style={styles.toggleRow}>
                     <Text style={styles.toggleLabel}>
@@ -771,7 +664,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     </TouchableOpacity>
                   </View>
                 </View>
-
                 {/* Generate Route Button */}
                 <TouchableOpacity
                   style={[
@@ -1023,31 +915,6 @@ const styles = StyleSheet.create({
   locationPlaceholder: {
     fontSize: 16,
     color: theme.colors.textSecondary,
-  },
-  priorityButtons: {
-    flexDirection: "row",
-    backgroundColor: theme.colors.background,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 16,
-  },
-  priorityButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  activePriorityButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  priorityButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: theme.colors.textSecondary,
-  },
-  activePriorityButtonText: {
-    color: theme.colors.background,
   },
   toggleRow: {
     flexDirection: "row",
