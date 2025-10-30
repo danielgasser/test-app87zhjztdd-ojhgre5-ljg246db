@@ -30,6 +30,7 @@ interface ConfirmationSheetProps {
   buttons: ConfirmationButton[];
   onDismiss: () => void;
   icon?: "warning" | "info" | "question";
+  duration?: number;
 }
 const styles = notificationStyles;
 
@@ -40,6 +41,7 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
   buttons,
   onDismiss,
   icon,
+  duration = 0,
 }) => {
   const slideAnim = useRef(new Animated.Value(height)).current;
 
@@ -51,6 +53,12 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
         tension: 65,
         friction: 10,
       }).start();
+      if (duration > 0) {
+        const timer = setTimeout(() => {
+          onDismiss();
+        }, duration);
+        return () => clearTimeout(timer);
+      }
     } else {
       Animated.timing(slideAnim, {
         toValue: height,
@@ -58,7 +66,7 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [visible]);
+  }, [visible, duration]);
 
   const getIconName = () => getConfirmationIcon(icon);
 

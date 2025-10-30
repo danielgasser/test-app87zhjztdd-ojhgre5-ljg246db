@@ -25,6 +25,7 @@ interface ConfirmationState {
   message: string;
   buttons: ConfirmationButton[];
   icon?: "warning" | "info" | "question";
+  duration?: number;
 }
 
 const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -81,6 +82,7 @@ const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         message={confirmation.message}
         buttons={confirmation.buttons}
         icon={confirmation.icon}
+        duration={confirmation.duration}
         onDismiss={() => setConfirmation({ ...confirmation, visible: false })}
       />
     </>

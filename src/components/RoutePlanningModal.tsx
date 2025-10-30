@@ -117,6 +117,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
 
+  const [pendingNotification, setPendingNotification] = useState<{
+    type: "success" | "warning" | "info" | "error";
+    message: string;
+    title?: string;
+  } | null>(null);
+
   // Initialize from location with current location
   useEffect(() => {
     if (visible && userLocation && !fromLocation) {
@@ -157,6 +163,17 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       setMapboxResults([]);
     }
   }, [visible]);
+
+  useEffect(() => {
+    // When modal closes (visible changes from true to false)
+    if (!visible && pendingNotification) {
+      notify[pendingNotification.type](
+        pendingNotification.message,
+        pendingNotification.title
+      );
+      setPendingNotification(null);
+    }
+  }, [visible, pendingNotification]);
 
   // Mapbox search function
   // Google Places Autocomplete search
@@ -314,10 +331,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (smartRouteComparison?.optimized_route) {
       dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
       dispatch(setSmartRouteComparison(null));
-      notify.info(
-        "Using safer route with danger zone avoidance.",
-        "Route Selected"
-      );
+      setPendingNotification({
+        type: "info",
+        message: "Using safer route with danger zone avoidance.",
+        title: "Route Selected",
+      });
       onClose();
     }
   };
@@ -417,7 +435,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                           .overall_route_score,
                     })
                   );
-                  notify.success("Using safer route");
+                  setPendingNotification({
+                    type: "success",
+                    message: "Using safer route with danger zone avoidance",
+                    title: "Route Selected",
+                  });
                 },
               },
               {
@@ -440,19 +462,26 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   );
                   console.log("✅ Route saved successfully (danger case)");
 
-                  notify.warning(
-                    "Using original route - stay alert for danger zones"
-                  );
+                  setPendingNotification({
+                    type: "warning",
+                    message:
+                      "Using original route - stay alert for danger zones",
+                    title: "Route Warning",
+                  });
                 },
               },
-            ]
+            ],
+            "warning",
+            18000
           );
         } else {
           // No safer alternative found - still warn but auto-save original
-          notify.warning(
-            dangerMessage + "\n\nNo safer alternative route available.",
-            "Safety Warning"
-          );
+          setPendingNotification({
+            type: "warning",
+            message:
+              dangerMessage + "\n\nNo safer alternative route available.",
+            title: "Safety Warning",
+          });
           await dispatch(
             saveRouteToDatabase({
               route_coordinates: result.original_route.coordinates,
@@ -630,8 +659,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   Route passes through danger zones
                 </Text>
                 <Text style={styles.dangerWarningText}>
-                  No safer alternative route available. Consider delaying your
-                  trip or choosing a different destination.
+                  Consider choosing another route.
                 </Text>
               </View>
             </View>

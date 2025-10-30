@@ -26,6 +26,7 @@ interface ConfirmationState {
     message: string;
     buttons: ConfirmationButton[];
     icon?: 'warning' | 'info' | 'question';
+    duration?: number;
 }
 
 class NotificationService {
@@ -107,7 +108,8 @@ class NotificationService {
         title: string,
         message: string,
         buttons: ConfirmationButton[],
-        icon?: 'warning' | 'info' | 'question'
+        icon?: 'warning' | 'info' | 'question',
+        duration?: number,
     ) {
         const confirmation: ConfirmationState = {
             visible: true,
@@ -115,6 +117,7 @@ class NotificationService {
             message,
             buttons,
             icon,
+            duration,
         };
         this.confirmationListeners.forEach((listener) => listener(confirmation));
     }
