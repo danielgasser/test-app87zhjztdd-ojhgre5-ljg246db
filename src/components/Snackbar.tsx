@@ -97,9 +97,7 @@ const Snackbar: React.FC<SnackbarProps> = ({
       <View style={styles.snackbarTextContainer}>
         {/* WRAP TEXT */}
         {title && <Text style={styles.snackbarTitle}>{title}</Text>}
-        <Text style={styles.snackbarMessage} numberOfLines={2}>
-          {message}
-        </Text>
+        <Text style={styles.snackbarMessage}>{message}</Text>
       </View>
       {actionText && onActionPress && (
         <TouchableOpacity

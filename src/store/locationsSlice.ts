@@ -1578,7 +1578,8 @@ export const generateSmartRoute = createAsyncThunk(
         optimized_route: optimizedSafeRoute,
         original_route: originalSafeRoute,
         improvement_summary: data.improvement_summary,
-        smart_route_data: data
+        smart_route_data: data,
+        success: data.success,
       };
 
     } catch (error) {

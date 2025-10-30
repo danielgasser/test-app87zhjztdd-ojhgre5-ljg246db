@@ -92,6 +92,7 @@ export const notificationStyles = StyleSheet.create({
         marginBottom: 24,
         textAlign: "center",
         lineHeight: 24,
+        flexShrink: 2,
     },
     confirmationButtonsContainer: {
         gap: 12,

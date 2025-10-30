@@ -412,8 +412,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               )}/5.0).`;
 
         if (result.success && result.optimized_route) {
-          console.log("⚠️ DANGER DETECTED - About to save route");
-
+          console.log("success true");
           // Found safer alternative
           notify.confirm(
             "Safer Route Available",
@@ -475,6 +474,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             18000
           );
         } else {
+          console.log("🚫 ENTERING ELSE BLOCK - NO OPTIMIZED ROUTE"); // ← Add this
           // No safer alternative found - still warn but auto-save original
           setPendingNotification({
             type: "warning",
