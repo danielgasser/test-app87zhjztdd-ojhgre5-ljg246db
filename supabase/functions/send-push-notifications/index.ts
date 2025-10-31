@@ -132,8 +132,8 @@ async function findRecentBatchableReviews(
     .lt("safety_rating", 3.0) // Only dangerous reviews
     .gte("created_at", batchCutoff.toISOString())
     .lte("created_at", currentReviewTime)
-    .not("navigation_started_at", "is", null)
-    .is("navigation_ended_at", null)
+    // .not("navigation_started_at", "is", null)
+    //.is("navigation_ended_at", null)
     .order("created_at", { ascending: false })
     .limit(10); // Max 10 reviews in a batch
 
@@ -319,7 +319,8 @@ serve(async (req) => {
           religion
         )
       `)
-      .eq("status", "active")
+      .not("navigation_started_at", "is", null)
+      .is("navigation_ended_at", null)
       .not("user_profile.push_token", "is", null);
 
     if (routeError) {
@@ -365,15 +366,15 @@ serve(async (req) => {
       }
 
       // Calculate distance to the CURRENT review
-      const routeCoords = route.route_coordinates?.coordinates || [];
+      const routeCoords = route.route_coordinates || [];
       let minDistance = Infinity;
 
       for (const coord of routeCoords) {
         const distance = calculateDistance(
           reviewLocation.latitude,
           reviewLocation.longitude,
-          coord[1],
-          coord[0]
+          coord.latitude,
+          coord.longitude
         );
         minDistance = Math.min(minDistance, distance);
       }

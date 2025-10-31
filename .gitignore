@@ -46,6 +46,7 @@ android/
 
 # others
 *.xlsx
+*.csv
 
 # tests
 

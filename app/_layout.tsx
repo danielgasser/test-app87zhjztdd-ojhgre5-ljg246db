@@ -558,7 +558,7 @@ export default Sentry.wrap(RootLayout);
 const debugStyles = StyleSheet.create({
   floatingButton: {
     position: "absolute",
-    top: 80,
+    top: 120,
     left: 20,
     width: 50,
     height: 50,

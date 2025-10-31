@@ -62,16 +62,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   );
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  console.log(
-    "🎨 Modal rendering - selectedLocation:",
-    !!selectedLocation,
-    "reviews:",
-    reviews.length,
-    "loading:",
-    loading,
-    "loadingReviews:",
-    loadingReviews
-  );
 
   useEffect(() => {
     if (locationId && visible) {
@@ -91,15 +81,12 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
   const fetchReviews = async (locId?: string) => {
     const idToUse = locId || locationId;
-    console.log("🔍 fetchReviews called with locationId:", idToUse);
     if (!idToUse) {
-      console.log("⚠️ No locationId, skipping fetch");
       return;
     }
 
     setLoadingReviews(true);
     try {
-      console.log("📡 Fetching reviews for location:", locationId);
       const { data, error } = await supabase
         .from("reviews")
         .select("*")
@@ -107,10 +94,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(10);
-      console.log("📦 Reviews data:", data);
-      console.log("❌ Reviews error:", error);
-      if (error) throw error;
 
+      if (error) {
+        logger.error("❌ Reviews error:", error);
+        throw error;
+      }
       if (data && data.length > 0) {
         const userIds = [...new Set(data.map((r) => r.user_id))];
         const { data: profiles } = await supabase

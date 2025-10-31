@@ -229,7 +229,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       notify.error("No route selected for navigation");
       return;
     }
-    await dispatch(
+    const savedRoute = await dispatch(
       saveRouteToDatabase({
         route_coordinates: selectedRoute.coordinates,
         origin_name: fromLocation.name,
@@ -238,41 +238,21 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         duration_minutes: selectedRoute.estimated_duration_minutes,
         safety_score: selectedRoute.safety_analysis.overall_route_score,
       })
-    );
-    const optimizedRoute = smartRouteComparison.optimized_route;
-    dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
+    ).unwrap();
+    const optimizedRoute = {
+      ...smartRouteComparison.optimized_route,
+      databaseId: savedRoute.id,
+    };
+    dispatch(setSelectedRoute(optimizedRoute));
 
     if (optimizedRoute.databaseId) {
-      await dispatch(startNavigationSession(optimizedRoute.databaseId));
+      await dispatch(startNavigationSession(savedRoute.id));
     }
 
     // Dispatch start navigation action
     dispatch(startNavigation());
     onClose();
   };
-
-  useEffect(() => {
-    if (smartRouteComparison) {
-      console.log("Comparison data:", {
-        original: {
-          score:
-            smartRouteComparison.original_route?.safety_analysis
-              ?.overall_route_score,
-          dangerZones:
-            smartRouteComparison.original_route?.safety_analysis
-              ?.danger_zones_intersected,
-        },
-        optimized: {
-          score:
-            smartRouteComparison.optimized_route?.safety_analysis
-              ?.overall_route_score,
-          dangerZones:
-            smartRouteComparison.optimized_route?.safety_analysis
-              ?.danger_zones_intersected,
-        },
-      });
-    }
-  }, [smartRouteComparison]);
 
   useEffect(() => {
     const searchTimeout = setTimeout(() => {

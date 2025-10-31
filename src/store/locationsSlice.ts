@@ -1478,7 +1478,6 @@ export const generateSmartRoute = createAsyncThunk(
           route_preferences: routeRequest.route_preferences
         }
       });
-      console.log("🔥 RAW RESPONSE FROM SMART-ROUTE-GENERATOR:", JSON.stringify(data, null, 2));
 
       if (error) {
         logger.error("❌ Smart route generation failed:", error);
