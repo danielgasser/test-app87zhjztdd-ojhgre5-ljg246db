@@ -34,7 +34,6 @@ interface RouteSafetyRequest {
   user_id?: string;
   route_preferences?: {
     avoid_evening_danger?: boolean;
-    safety_priority?: 'speed_focused' | 'balanced' | 'safety_focused';
   };
 }
 
@@ -47,6 +46,7 @@ interface RouteSegmentScore {
   safety_score: number;
   confidence: number;
   danger_zones: number;
+  danger_zone_ids?: string[];
   risk_factors: string[];
   distance_meters: number;
   duration_seconds: number;
@@ -192,6 +192,7 @@ async function analyzeSegmentSafety(
     // Check for danger zones - check start, center, and end points
     let dangerPenalty = 0;
     let timePenalty = 0;
+    const uniqueZoneIds = new Set<string>();
 
     const pointsToCheck = [
       segment.start,
@@ -222,6 +223,28 @@ async function analyzeSegmentSafety(
           dangerZoneCount = Math.max(dangerZoneCount, dangerData.danger_zones.length);
 
           for (const zone of dangerData.danger_zones) {
+            if (!zone.polygon_points || zone.polygon_points.length === 0) {
+              console.warn(`Zone ${zone.id} has no polygon points, skipping`);
+              continue;
+            }
+
+            // Check if this segment actually intersects the danger zone polygon
+            const intersects = doesSegmentIntersectPolygon(
+              segment.start,
+              segment.end,
+              zone.polygon_points
+            );
+
+            if (!intersects) {
+              console.log(`✓ Segment ${segmentIndex} near but NOT intersecting zone ${zone.id}`);
+              continue; // Skip this zone - no actual intersection
+            }
+
+            console.log(`⚠️  Segment ${segmentIndex} INTERSECTS danger zone ${zone.id}`);
+
+            uniqueZoneIds.add(zone.id);
+            dangerZoneCount = Math.max(dangerZoneCount, 1); // At least 1 zone intersected
+
             const severity = zone.danger_level === 'high' ? 3 : zone.danger_level === 'medium' ? 2 : 1;
             if (severity >= 3) {
               dangerPenalty += CONFIG.DANGER_ZONE_PENALTIES.HIGH;
@@ -267,6 +290,7 @@ async function analyzeSegmentSafety(
       safety_score: finalScore,
       confidence,
       danger_zones: dangerZoneCount,
+      danger_zone_ids: Array.from(uniqueZoneIds),
       risk_factors: riskFactors,
       distance_meters: segment.distance_meters,
       duration_seconds: segment.duration_seconds
@@ -284,6 +308,7 @@ async function analyzeSegmentSafety(
       safety_score: 3.0,
       confidence: 0.1,
       danger_zones: 0,
+      danger_zone_ids: [],
       risk_factors: ['Analysis unavailable'],
       distance_meters: segment.distance_meters,
       duration_seconds: segment.duration_seconds
@@ -291,6 +316,50 @@ async function analyzeSegmentSafety(
   }
 }
 
+/**
+ * Check if a point is inside a polygon using ray-casting algorithm
+ */
+function isPointInPolygon(point: RouteCoordinate, polygon: Array<{ lat: number, lng: number }>): boolean {
+  let inside = false;
+  const x = point.longitude;
+  const y = point.latitude;
+
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].lng;
+    const yi = polygon[i].lat;
+    const xj = polygon[j].lng;
+    const yj = polygon[j].lat;
+
+    const intersect = ((yi > y) !== (yj > y)) &&
+      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+    if (intersect) inside = !inside;
+  }
+
+  return inside;
+}
+
+/**
+ * Check if a line segment intersects with a polygon
+ */
+function doesSegmentIntersectPolygon(
+  start: RouteCoordinate,
+  end: RouteCoordinate,
+  polygon: Array<{ lat: number, lng: number }>
+): boolean {
+  // Check if start or end point is inside polygon
+  if (isPointInPolygon(start, polygon) || isPointInPolygon(end, polygon)) {
+    return true;
+  }
+
+  // Check if center point is inside (simple approximation)
+  const center: RouteCoordinate = {
+    latitude: (start.latitude + end.latitude) / 2,
+    longitude: (start.longitude + end.longitude) / 2
+  };
+
+  return isPointInPolygon(center, polygon);
+}
 /**
  * Generate safety summary and notes
  */
@@ -402,8 +471,13 @@ async function analyzeRouteSafety(request: RouteSafetyRequest): Promise<RouteSaf
   const overallConfidence = totalConfidenceWeight > 0
     ? Math.min(0.95, totalWeightedConfidence / totalConfidenceWeight)
     : 0.15; // Low baseline if no data
-  const dangerZonesIntersected = segmentScores.reduce((sum, seg) => sum + seg.danger_zones, 0);
-  const highRiskSegments = segmentScores.filter(seg => seg.safety_score < EDGE_CONFIG.ROUTE_SAFETY_SCORES.UNSAFE_THRESHOLD).length;
+  const allZoneIds = new Set<string>();
+  segmentScores.forEach(seg => {
+    if (seg.danger_zone_ids) {
+      seg.danger_zone_ids.forEach(id => allZoneIds.add(id));
+    }
+  });
+  const dangerZonesIntersected = allZoneIds.size; const highRiskSegments = segmentScores.filter(seg => seg.safety_score < EDGE_CONFIG.ROUTE_SAFETY_SCORES.UNSAFE_THRESHOLD).length;
 
   // Generate summary
   const { summary, notes } = generateSafetySummary(segmentScores);

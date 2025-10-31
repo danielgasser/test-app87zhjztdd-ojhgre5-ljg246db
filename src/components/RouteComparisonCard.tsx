@@ -74,7 +74,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             </View>
           )}
           <View style={styles.routeCardHeader}>
-            <Text style={styles.routeLabel}>Original Route</Text>
+            <Text style={styles.routeLabel}>Fastest Route</Text>
             <View
               style={[
                 styles.safetyBadge,
@@ -104,7 +104,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             <View style={styles.metric}>
               <Ionicons name="warning" size={16} color={theme.colors.error} />
               <Text style={styles.metricText}>
-                {improvement_summary.danger_zones_avoided} danger zones
+                {original_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
+                danger zone
+                {original_route.safety_analysis?.danger_zones_intersected === 1
+                  ? ""
+                  : "s"}
               </Text>
             </View>
           </View>

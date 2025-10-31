@@ -233,7 +233,6 @@ interface LocationsState {
   showRouteSegments: boolean;
   selectedSegment: RouteSegment | null;
   routePreferences: {
-    safetyPriority: "speed_focused" | "balanced" | "safety_focused";
     avoidEveningDanger: boolean;
     maxDetourMinutes: number;
   };
@@ -325,7 +324,6 @@ const initialState: LocationsState = {
   showRouteSegments: false,
   selectedSegment: null,
   routePreferences: {
-    safetyPriority: "balanced",
     avoidEveningDanger: true,
     maxDetourMinutes: 3600,
   },
@@ -1557,6 +1555,8 @@ export const generateSmartRoute = createAsyncThunk(
           overall_route_score: data.improvement_summary.original_safety_score,
           confidence: 0.85,
           segment_scores: data.original_safety?.segment_scores,
+          danger_zones_intersected: data.original_safety?.danger_zones_intersected ?? 0,
+          high_risk_segments: data.original_safety?.high_risk_segments ?? 0,
           safety_notes: ["Standard fastest route - may pass through danger zones"],
           safety_summary: {
             safe_segments: 0,

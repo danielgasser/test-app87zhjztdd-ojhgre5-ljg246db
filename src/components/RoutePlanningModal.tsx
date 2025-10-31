@@ -249,6 +249,29 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   };
 
   useEffect(() => {
+    if (smartRouteComparison) {
+      console.log("Comparison data:", {
+        original: {
+          score:
+            smartRouteComparison.original_route?.safety_analysis
+              ?.overall_route_score,
+          dangerZones:
+            smartRouteComparison.original_route?.safety_analysis
+              ?.danger_zones_intersected,
+        },
+        optimized: {
+          score:
+            smartRouteComparison.optimized_route?.safety_analysis
+              ?.overall_route_score,
+          dangerZones:
+            smartRouteComparison.optimized_route?.safety_analysis
+              ?.danger_zones_intersected,
+        },
+      });
+    }
+  }, [smartRouteComparison]);
+
+  useEffect(() => {
     const searchTimeout = setTimeout(() => {
       if (activeInput && searchQuery) {
         performSearch(searchQuery);
@@ -257,6 +280,36 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
     return () => clearTimeout(searchTimeout);
   }, [searchQuery, activeInput, performSearch]);
+
+  // Update danger message when selected route changes
+  useEffect(() => {
+    if (selectedRoute?.safety_analysis) {
+      const dangerZones =
+        originalSafety?.danger_zones_intersected ??
+        result.original_route?.safety_analysis?.danger_zones_intersected ?? // ← Correct fallback
+        0;
+      const safetyScore = selectedRoute.safety_analysis.overall_route_score;
+      const safetyNotes = [
+        selectedRoute?.safety_analysis.safety_notes?.[0],
+        selectedRoute?.safety_analysis.safety_notes?.[2],
+        selectedRoute?.safety_analysis.safety_notes?.[3],
+      ]
+        .filter(Boolean)
+        .map((note) => `⚠️ ${note}`)
+        .join(".\n\n");
+      if (dangerZones > 0 || safetyScore < 3.0) {
+        setDangerMessage(
+          dangerZones > 0
+            ? `${safetyNotes}.`
+            : `⚠️ This route has a low safety score (${safetyScore.toFixed(
+                1
+              )}/5.0).`
+        );
+      } else {
+        setDangerMessage(""); // Clear message for safe routes
+      }
+    }
+  }, [selectedRoute]);
 
   // Handle input focus
   const handleInputFocus = (inputType: "from" | "to") => {
@@ -319,8 +372,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle selecting original route
   const handleSelectOriginalRoute = () => {
-    console.log("🔵 ORIGINAL ROUTE SELECTED");
-
     if (smartRouteComparison?.original_route) {
       dispatch(setSelectedRoute(smartRouteComparison.original_route));
     }
@@ -328,8 +379,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle selecting optimized route
   const handleSelectOptimizedRoute = async () => {
-    console.log("🟢 OPTIMIZED ROUTE SELECTED");
-
     if (smartRouteComparison?.optimized_route) {
       dispatch(setSelectedRoute(smartRouteComparison.optimized_route));
     }
@@ -384,24 +433,26 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         result.original_safety || result.original_route?.safety_analysis;
       const dangerZones =
         originalSafety?.danger_zones_intersected ??
-        result.improvement_summary?.danger_zones_avoided ?? // Use improvement_summary!
+        result.original_route?.safety_analysis?.danger_zones_intersected ?? // ← Correct fallback
         0;
       const safetyScore =
         originalSafety?.overall_route_score ??
-        result.improvement_summary?.original_safety_score ?? // Use improvement_summary!
+        result.improvement_summary?.original_safety_score ??
         3.0;
-      console.log("🔍 ROUTE GENERATION COMPLETE:", {
-        dangerZones,
-        safetyScore,
-        hasOptimizedRoute: !!result.optimized_route,
-        hasOriginalRoute: !!result.original_route,
-        resultSuccess: result.success,
-      });
+
+      const safetyNotes = [
+        selectedRoute?.safety_analysis.safety_notes?.[0],
+        selectedRoute?.safety_analysis.safety_notes?.[2],
+        selectedRoute?.safety_analysis.safety_notes?.[3],
+      ]
+        .filter(Boolean)
+        .map((note) => `⚠️ ${note}`)
+        .join(".\n\n");
       // ✅ CHECK: Warn if original route passes through danger zones
       if (dangerZones > 0 || safetyScore < 3.0) {
         setDangerMessage(
           dangerZones > 0
-            ? `⚠️ This route passes through ${dangerZones} danger zone(s) for your demographics.`
+            ? `⚠️ This route passes through ${dangerZones} danger zone(s) for your demographics. ${safetyNotes}`
             : `⚠️ This route has a low safety score (${safetyScore.toFixed(
                 1
               )}/5.0).`
@@ -607,33 +658,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 {/* Safety Preferences */}
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Safety Preferences</Text>
-                  {/*
-                  <View style={styles.priorityButtons}>
-                    {(
-                      ["speed_focused", "balanced", "safety_focused"] as const
-                    ).map((priority) => (
-                      <TouchableOpacity
-                        key={priority}
-                        style={[
-                          styles.priorityButton,
-                          routePreferences.safetyPriority === priority &&
-                            styles.activePriorityButton,
-                        ]}
-                        onPress={() => handleSafetyPriorityChange(priority)}
-                      >
-                        <Text
-                          style={[
-                            styles.priorityButtonText,
-                            routePreferences.safetyPriority === priority &&
-                              styles.activePriorityButtonText,
-                          ]}
-                        >
-                          {priority.replace("_", " ").toUpperCase()}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-*/}
 
                   <View style={styles.toggleRow}>
                     <Text style={styles.toggleLabel}>
@@ -980,7 +1004,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.accent,
     zIndex: 100000,
   },
   dangerWarningContent: {
@@ -988,13 +1012,13 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   dangerWarningTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     color: theme.colors.accent,
     marginBottom: 4,
   },
   dangerWarningText: {
-    fontSize: 14,
+    fontSize: 16,
     color: theme.colors.accent,
     lineHeight: 20,
   },

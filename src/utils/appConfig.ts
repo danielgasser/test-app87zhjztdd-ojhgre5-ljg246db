@@ -150,13 +150,6 @@ export const APP_CONFIG = {
     MAX_ALTERNATIVE_ROUTES: 5,                      // Maximum alternative routes to generate
     MAX_DETOUR_MULTIPLIER: 1.5,                     // Max detour: 1.5x fastest route time
 
-    // Safety Priority Weights (for user preferences)
-    SAFETY_PRIORITY_WEIGHTS: {
-      SPEED_FOCUSED: 0.2,                           // 20% safety, 80% speed
-      BALANCED: 0.5,                                // 50% safety, 50% speed  
-      SAFETY_FOCUSED: 0.8,                          // 80% safety, 20% speed
-    },
-
     // Route Safety Thresholds
     SAFE_ROUTE_THRESHOLD: 4.0,                      // Overall route score >= 4.0 considered safe
     MIXED_ROUTE_THRESHOLD: 3.0,                     // Overall route score >= 3.0 considered mixed
