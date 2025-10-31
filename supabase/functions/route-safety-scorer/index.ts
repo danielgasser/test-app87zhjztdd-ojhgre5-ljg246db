@@ -155,7 +155,8 @@ async function analyzeSegmentSafety(
   userDemographics: UserDemographics,
   segmentIndex: number,
   supabase: any,
-  userId?: string
+  userId?: string,
+  avoidEveningDanger: boolean = false
 ): Promise<RouteSegmentScore> {
   const riskFactors: string[] = [];
   let baseSafety = 3.0; // Default neutral score
@@ -263,15 +264,15 @@ async function analyzeSegmentSafety(
     }
 
     // Apply time-based penalties
-    if (confidence > 0.5) {
+    if (avoidEveningDanger && confidence > 0.5) {
       const currentHour = new Date().getHours();
 
       if (currentHour >= EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.EVENING_START && currentHour < EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.NIGHT_START) {
         timePenalty = baseSafety * (EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.EVENING_MULTIPLIER - 1);
-        riskFactors.push('Evening travel time');
+        riskFactors.push('Evening travel time - extra caution advised');
       } else if (currentHour >= EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.NIGHT_START || currentHour < EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.MORNING_END) {
         timePenalty = baseSafety * (EDGE_CONFIG.ROUTE_SAFETY_SCORES.TIME_PENALTIES.NIGHT_MULTIPLIER - 1);
-        riskFactors.push('Night travel time');
+        riskFactors.push('Night travel time - extra caution advised');
       }
     } else {
       // Low confidence - insufficient data
@@ -402,11 +403,18 @@ function generateSafetySummary(segmentScores: RouteSegmentScore[]): {
     notes.push(`${unsafeSegments} segment(s) require extra caution`);
   }
 
-  const totalDangerZones = segmentScores.reduce((sum, seg) => sum + seg.danger_zones, 0);
-  if (totalDangerZones > 0) {
-    notes.push(`Route intersects ${totalDangerZones} danger zone(s)`);
-  }
+  // Get unique danger zone count
+  const uniqueZoneIds = new Set<string>();
+  segmentScores.forEach(seg => {
+    if (seg.danger_zone_ids) {
+      seg.danger_zone_ids.forEach(id => uniqueZoneIds.add(id));
+    }
+  });
+  const totalDangerZones = uniqueZoneIds.size;  // ← Use unique count
 
+  if (totalDangerZones > 0) {
+    notes.push(`${totalDangerZones} danger zone(s) on this route`);
+  }
   // Check for specific risk patterns
   const commonRisks = segmentScores
     .flatMap(seg => seg.risk_factors)
@@ -451,7 +459,7 @@ async function analyzeRouteSafety(request: RouteSafetyRequest): Promise<RouteSaf
 
   // Analyze each segment
   const segmentPromises = segments.map((segment, index) =>
-    analyzeSegmentSafety(segment, request.user_demographics, index, supabase, request.user_id)
+    analyzeSegmentSafety(segment, request.user_demographics, index, supabase, request.user_id, request.route_preferences?.avoid_evening_danger ?? false)
   );
 
   const segmentScores = await Promise.all(segmentPromises);
@@ -477,7 +485,9 @@ async function analyzeRouteSafety(request: RouteSafetyRequest): Promise<RouteSaf
       seg.danger_zone_ids.forEach(id => allZoneIds.add(id));
     }
   });
-  const dangerZonesIntersected = allZoneIds.size; const highRiskSegments = segmentScores.filter(seg => seg.safety_score < EDGE_CONFIG.ROUTE_SAFETY_SCORES.UNSAFE_THRESHOLD).length;
+  const dangerZonesIntersected = allZoneIds.size;
+
+  const highRiskSegments = segmentScores.filter(seg => seg.safety_score < EDGE_CONFIG.ROUTE_SAFETY_SCORES.UNSAFE_THRESHOLD).length;
 
   // Generate summary
   const { summary, notes } = generateSafetySummary(segmentScores);

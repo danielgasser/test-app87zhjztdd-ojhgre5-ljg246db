@@ -118,6 +118,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const [mapboxResults, setMapboxResults] = useState<LocationResult[]>([]);
 
   const [dangerMessage, setDangerMessage] = useState<string>("");
+  const [routeLoadingMessage, setRouteLoadingMessage] = useState(
+    "Finding Safe Route..."
+  );
 
   // Initialize from location with current location
   useEffect(() => {
@@ -285,9 +288,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   useEffect(() => {
     if (selectedRoute?.safety_analysis) {
       const dangerZones =
-        originalSafety?.danger_zones_intersected ??
-        result.original_route?.safety_analysis?.danger_zones_intersected ?? // ← Correct fallback
-        0;
+        selectedRoute.safety_analysis.danger_zones_intersected ?? 0;
       const safetyScore = selectedRoute.safety_analysis.overall_route_score;
       const safetyNotes = [
         selectedRoute?.safety_analysis.safety_notes?.[0],
@@ -427,6 +428,21 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     };
 
     try {
+      const messages = [
+        "Analyzing route segments...",
+        "Checking danger zones...",
+        "Finding safer alternatives...",
+        "Calculating safety scores...",
+        "Optimizing your route...",
+      ];
+
+      let messageIndex = 0;
+      const messageInterval = setInterval(() => {
+        if (messageIndex < messages.length) {
+          setRouteLoadingMessage(messages[messageIndex]);
+          messageIndex++;
+        }
+      }, 2000);
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
 
       const originalSafety =
@@ -711,9 +727,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     />
                   )}
                   <Text style={styles.generateButtonText}>
-                    {routeLoading
-                      ? "Finding safe route..."
-                      : "Generate Safe Route"}
+                    {routeLoading ? routeLoadingMessage : "Generate Safe Route"}
                   </Text>
                 </TouchableOpacity>
 

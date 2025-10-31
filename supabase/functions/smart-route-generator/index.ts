@@ -180,7 +180,8 @@ function decodePolyline(encoded: string): [number, number][] {
  */
 async function scoreRoute(
   routeCoordinates: RouteCoordinate[],
-  userDemographics: UserDemographics
+  userDemographics: UserDemographics,
+  routePreferences?: { avoid_evening_danger?: boolean; max_detour_minutes?: number; prioritize_safety?: boolean }
 ): Promise<any> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -193,7 +194,10 @@ async function scoreRoute(
     },
     body: JSON.stringify({
       route_coordinates: routeCoordinates,
-      user_demographics: userDemographics
+      user_demographics: userDemographics,
+      route_preferences: {
+        avoid_evening_danger: routePreferences?.avoid_evening_danger ?? false
+      }
     })
   });
 
@@ -323,8 +327,7 @@ async function generateOptimizedRoute(
 
   // Step 2: Score the original route
   console.log('🔍 Step 2: Scoring original route...');
-  const originalSafety = await scoreRoute(originalCoords, request.user_demographics);
-
+  const originalSafety = await scoreRoute(originalCoords, request.user_demographics, request.route_preferences);
   console.log(`📊 Original route safety: ${originalSafety.overall_route_score.toFixed(2)}/5.0`);
   console.log(`⚠️ Danger zones intersected: ${originalSafety.danger_zones_intersected || 0}`);
   console.log(`🚨 High risk segments: ${originalSafety.high_risk_segments || 0}`);
@@ -429,7 +432,7 @@ async function generateOptimizedRoute(
 
   // Step 7: Score the optimized route
   console.log('🔍 Step 6: Scoring optimized route...');
-  const optimizedSafety = await scoreRoute(optimizedCoords, request.user_demographics);
+  const optimizedSafety = await scoreRoute(optimizedCoords, request.user_demographics, request.route_preferences);
 
   // Step 8: Calculate improvements
   const originalTime = originalRoute.duration / 60; // convert to minutes

@@ -169,7 +169,13 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
                 size={16}
                 color={theme.colors.secondary}
               />
-              <Text style={styles.metricText}>Avoids danger zones</Text>
+              <Text style={styles.metricText}>
+                {optimized_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
+                danger zone
+                {optimized_route.safety_analysis?.danger_zones_intersected === 1
+                  ? ""
+                  : "s"}
+              </Text>
             </View>
           </View>
           <Text style={styles.selectButtonText}>Use Safer Route</Text>
