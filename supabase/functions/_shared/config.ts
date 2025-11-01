@@ -61,8 +61,8 @@ export const EDGE_CONFIG = {
     },
     NAVIGATION: {
         NOTIFICATIONS: {
-            RATE_LIMIT_WINDOW_MINUTES: 10,
-            BATCH_WINDOW_SECONDS: 30
+            RATE_LIMIT_WINDOW_MINUTES: 1,
+            BATCH_WINDOW_SECONDS: 1
         },
         SEVERITY_LEVELS: {
             CRITICAL: { min: 1.0, max: 1.9, emoji: "🚨", label: "CRITICAL", priority: 3 },

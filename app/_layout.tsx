@@ -29,6 +29,7 @@ import {
   SafeRoute,
   RouteCoordinate,
   fetchUserReviews,
+  setNavigationIntent,
 } from "@/store/locationsSlice";
 import { calculateRouteSafety } from "@/store/locationsSlice";
 import { formatDistanceToNow } from "date-fns";
@@ -261,27 +262,41 @@ function RootLayoutNav() {
           case "location_safety_change":
             // Navigate to location details
             if (data.locationId) {
-              router.push(
-                `/(tabs)/(locations)/location-details?id=${data.locationId}`
+              dispatch(
+                setNavigationIntent({
+                  targetTab: "map",
+                  locationId: data.locationId,
+                  action: "view_location",
+                })
               );
+              router.push("/(tabs)/index");
             }
             break;
 
           case "route_safety_alert":
             // Navigate to map (where active navigation is)
             if (data.locationId) {
-              router.push(`/(tabs)/index?locationId=${data.locationId}`);
-            } else {
-              // Fallback to map if no location ID
+              dispatch(
+                setNavigationIntent({
+                  targetTab: "map",
+                  locationId: data.locationId,
+                  action: "view_location",
+                })
+              );
               router.push("/(tabs)/index");
             }
             break;
           case "batched_route_safety_alerts":
             // For batched alerts, open the first (closest) location
             if (data.reviews && data.reviews.length > 0) {
-              router.push(
-                `/(tabs)/(locations)/location-details?id=${data.reviews[0].locationId}`
+              dispatch(
+                setNavigationIntent({
+                  targetTab: "map",
+                  locationId: data.reviews[0].locationId,
+                  action: "view_location",
+                })
               );
+              router.push("/(tabs)/index");
             }
             break;
           default:
