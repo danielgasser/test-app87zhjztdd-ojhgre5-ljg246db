@@ -194,25 +194,16 @@ export default function MapScreen() {
 
   // ============= EVENT HANDLERS =============
   const handleMarkerPress = async (locationId: string) => {
-    console.log("marker pressed", locationId);
-    console.log("🔵 searchMarker:", searchMarker);
-    console.log(
-      "🔵 is searchMarker match:",
-      searchMarker && searchMarker.id === locationId
-    );
-
     setSelectedLocationId(locationId);
     setModalVisible(true);
     // Check if this is a searchMarker (temporary new location)
     if (searchMarker && searchMarker.id === locationId) {
-      console.log("🔍 This is a searchMarker");
       // For searchMarkers, trigger ML with coordinates directly
       if (
         userProfile &&
         !mlPredictions[locationId] &&
         !mlPredictionsLoading[locationId]
       ) {
-        console.log("✅ CALLING fetchMLPredictions for searchMarker");
         dispatch(
           fetchMLPredictions({
             locationId: locationId,
@@ -223,7 +214,6 @@ export default function MapScreen() {
       }
       return;
     }
-    console.log("✅ CALLING fetchLocationDetails for:", locationId);
     await dispatch(fetchLocationDetails(locationId));
 
     // NEW: Fetch ML prediction on-demand if needed
@@ -239,8 +229,6 @@ export default function MapScreen() {
       const isLoading = mlPredictionsLoading[locationId];
 
       if (!hasActualReviews && !hasPrediction && !isLoading) {
-        console.log("✅ CALLING fetchMLPredictions");
-
         dispatch(fetchMLPredictions(locationId));
       }
     }
@@ -272,35 +260,6 @@ export default function MapScreen() {
 
     if (location.source === "database" && location.id) {
       await handleMarkerPress(location.id);
-    }
-  };
-
-  const handleAddLocation = async () => {
-    console.log("🔵 userId:", userId);
-    if (!requireAuth(userId, "add location")) return;
-
-    if (!searchMarker) return;
-
-    if ((searchMarker.source || "database") === "database" && searchMarker.id) {
-      await handleMarkerPress(searchMarker.id);
-    } else {
-      router.push({
-        pathname: "/review",
-        params: {
-          isNewLocation: "true",
-          locationData: JSON.stringify({
-            name: searchMarker.name,
-            address: searchMarker.address,
-            latitude: searchMarker.latitude,
-            longitude: searchMarker.longitude,
-            place_type: searchMarker.place_type || "other",
-            city: (searchMarker as any).city,
-            state_province: (searchMarker as any).state_province,
-            country: (searchMarker as any).country,
-            postal_code: (searchMarker as any).postal_code,
-          }),
-        },
-      });
     }
   };
 
@@ -348,13 +307,8 @@ export default function MapScreen() {
     setSelectedGooglePlaceId(newMarker.id);
     setModalVisible(true);
 
-    console.log("🔵 handleMapPress - userProfile exists:", !!userProfile);
-    console.log("🔵 handleMapPress - userProfile value:", userProfile);
-
-    console.log("🔵 handleMapPress - newMarker.id:", newMarker.id);
     // Trigger ML prediction for this location
     if (userProfile) {
-      console.log("🔵 Dispatching fetchMLPredictions from handleMapPress"); // ← This line
       dispatch(
         fetchMLPredictions({
           locationId: newMarker.id,
@@ -399,8 +353,6 @@ export default function MapScreen() {
         permissionPromise,
         timeoutPromise,
       ])) as any;
-      console.log("🟢 Permission status:", status);
-      //setLocationPermission(status === "granted");
 
       if (status === "granted" || status === undefined) {
         setLocationPermission(true);
@@ -427,7 +379,8 @@ export default function MapScreen() {
         }
       }
     } catch (error) {
-      console.log("❌ Permission error - trying fallback:", error);
+      logger.error("❌ Permission error - trying fallback:", error);
+
       // Android emulator workaround - try to get last known location
       try {
         const lastKnown = await Location.getLastKnownPositionAsync();
@@ -651,7 +604,6 @@ export default function MapScreen() {
     if (params.openLocationId && params.refresh) {
       // Open the location details modal with the real ID
       const locationId = params.openLocationId as string;
-      console.log("🔄 Opening location from review:", locationId);
 
       setSelectedLocationId(locationId);
       setSearchMarker(null);
@@ -772,7 +724,6 @@ export default function MapScreen() {
             if (!error && data && data.length > 0) {
               // Found a real location at these coordinates
               const realLocation = data[0];
-              console.log("🔄 Found real location:", realLocation.id);
 
               // Update to use real location ID
               setSelectedLocationId(realLocation.id);
@@ -782,7 +733,7 @@ export default function MapScreen() {
               await dispatch(fetchLocationDetails(realLocation.id));
             }
           } catch (err) {
-            console.error("Error refreshing modal:", err);
+            logger.error("Error refreshing modal:", err);
           }
         };
 
@@ -1036,8 +987,6 @@ export default function MapScreen() {
             }
             pinColor={theme.colors.primary}
             onPress={() => {
-              console.log("🔵 searchMarker onPress fired!", searchMarker.id);
-
               handleMarkerPress(searchMarker.id);
             }}
           />
@@ -1209,41 +1158,6 @@ export default function MapScreen() {
           </View>
         </View>
       )}
-      {/* Add Location Button 
-      {searchMarker && (
-        <View style={styles.addLocationContainer}>
-          <TouchableOpacity
-            style={styles.addLocationButton}
-            onPress={handleAddLocation}
-          >
-            <Ionicons
-              name={
-                (searchMarker.source || "database") === "database"
-                  ? "eye"
-                  : "add-circle"
-              }
-              size={24}
-              color={theme.colors.background}
-            />
-            <Text style={styles.addLocationText}>
-              {(searchMarker.source || "database") === "database"
-                ? "View Location"
-                : "Add & Review Location"}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.closeSearchButton}
-            onPress={() => setSearchMarker(null)}
-          >
-            <Ionicons
-              name="close-circle"
-              size={28}
-              color={theme.colors.error}
-            />
-          </TouchableOpacity>
-        </View>
-      )}
-        */}
       <View style={styles.routeControls}>
         {routeMode === "none" ? (
           <TouchableOpacity

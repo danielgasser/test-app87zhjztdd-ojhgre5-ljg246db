@@ -453,7 +453,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 1
               )}/5.0).`
         );
-        console.log("✅ Route saved successfully (safe case)");
       }
     } catch (error) {
       logger.error("Route generation error:", error);

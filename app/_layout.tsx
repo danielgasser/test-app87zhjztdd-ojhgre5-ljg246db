@@ -269,7 +269,12 @@ function RootLayoutNav() {
 
           case "route_safety_alert":
             // Navigate to map (where active navigation is)
-            router.push("/(tabs)/(map)/");
+            if (data.locationId) {
+              router.push(`/(tabs)/index?locationId=${data.locationId}`);
+            } else {
+              // Fallback to map if no location ID
+              router.push("/(tabs)/index");
+            }
             break;
           case "batched_route_safety_alerts":
             // For batched alerts, open the first (closest) location
@@ -312,8 +317,6 @@ function RootLayoutNav() {
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
-      console.log("🟡 _LAYOUT: Got URL:", url);
-
       // Handle password reset
       if (url.includes("safepath://reset-password")) {
         const hashPart = url.split("#")[1];
@@ -339,7 +342,6 @@ function RootLayoutNav() {
 
       // Handle email confirmation (type=signup) OR Google OAuth (callback)
       if (url.includes("#access_token=")) {
-        console.log("🟡 _LAYOUT: Handling auth callback");
         setIsHandlingCallback(true);
 
         try {
@@ -349,44 +351,37 @@ function RootLayoutNav() {
           const refreshToken = params.get("refresh_token");
 
           if (accessToken && refreshToken) {
-            console.log("🟡 _LAYOUT: Setting session");
             const { data, error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
 
             if (error) {
-              console.error("🟡 _LAYOUT: Session error:", error);
+              logger.error("🟡 _LAYOUT: Session error:", error);
               router.replace("/login");
               return;
             }
 
             if (data.session) {
-              console.log("🟡 _LAYOUT: Session set, updating Redux");
               dispatch(setSession(data.session));
 
               // Check onboarding status
-              console.log("🟡 _LAYOUT: Checking onboarding");
               const { data: profile } = await supabase
                 .from("profiles")
                 .select("onboarding_complete")
                 .eq("user_id", data.session.user.id)
                 .single();
 
-              console.log("🟡 _LAYOUT: Profile =", profile);
-
               // Route based on onboarding
               if (!profile || !profile.onboarding_complete) {
-                console.log("🟡 _LAYOUT: Routing to onboarding");
                 router.replace("/onboarding");
               } else {
-                console.log("🟡 _LAYOUT: Routing to tabs");
                 router.replace("/(tabs)");
               }
             }
           }
         } catch (error) {
-          console.error("🟡 _LAYOUT: Error:", error);
+          logger.error("🟡 _LAYOUT: Error:", error);
           router.replace("/login");
         } finally {
           setTimeout(() => setIsHandlingCallback(false), 1000);

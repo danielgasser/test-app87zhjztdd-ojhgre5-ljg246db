@@ -56,9 +56,6 @@ export default function ProfileScreen() {
       APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email)
     ) {
       router.push("/(tabs)/debug");
-    } else {
-      // Silent fail for unauthorized users
-      console.log("Debug access denied");
     }
   };
   // Calculate profile completion

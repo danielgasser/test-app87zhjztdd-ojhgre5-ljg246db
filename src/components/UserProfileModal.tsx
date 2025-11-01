@@ -40,8 +40,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   useEffect(() => {
     if (visible && userId) {
-      console.log("🔍 Fetching profile and reviews for userId:", userId);
-
       dispatch(fetchPublicUserProfile(userId));
       dispatch(fetchPublicUserReviews(userId));
     }

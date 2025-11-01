@@ -15,13 +15,11 @@ import * as Linking from "expo-linking";
 import { useLocalSearchParams } from "expo-router";
 
 export default function AuthCallback() {
-  console.log("🔴 CALLBACK SCREEN MOUNTED");
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [status, setStatus] = useState("Processing...");
   const [statusHistory, setStatusHistory] = useState<string[]>([]);
   const { deepLinkUrl } = useLocalSearchParams<{ deepLinkUrl?: string }>();
-  console.log("🔴 deepLinkUrl from params:", deepLinkUrl);
 
   const addStatus = (message: string) => {
     setStatusHistory((prev) => [
@@ -63,26 +61,21 @@ export default function AuthCallback() {
           }
 
           if (data.session) {
-            console.log("🔵 CALLBACK: Got session, checking onboarding...");
             // Update Redux with session
             dispatch(setSession(data.session));
 
-            console.log("🔵 CALLBACK: Redux updated, fetching profile...");
             // Check onboarding status
             const { data: profile } = await supabase
               .from("profiles")
               .select("onboarding_complete")
               .eq("user_id", data.session.user.id)
               .single();
-            console.log("🔵 CALLBACK: Profile =", profile);
 
             // Route based on onboarding
             if (!profile || !profile.onboarding_complete) {
-              console.log("🔵 CALLBACK: Routing to ONBOARDING");
               addStatus("Signing you in...");
               router.replace("/onboarding");
             } else {
-              console.log("🔵 CALLBACK: Routing to TABS");
               addStatus("Getting started...");
               router.replace("/(tabs)");
             }

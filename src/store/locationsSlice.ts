@@ -1062,7 +1062,6 @@ export const fetchMLPredictions = createAsyncThunk(
       }
 
       const prediction = await response.json();
-      console.log("🟢 ML Prediction received");
 
       return {
         locationId,
