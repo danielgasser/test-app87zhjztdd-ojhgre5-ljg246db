@@ -924,14 +924,19 @@ export const fetchDangerZones = createAsyncThunk(
   "locations/fetchDangerZones",
   async ({
     userId,
+    latitude,
+    longitude,
     radius = 10000,
     userDemographics
   }: {
     userId: string;
+    latitude?: number;
+    longitude?: number;
     radius?: number;
     userDemographics?: any;
   }) => {
     try {
+      console.log('=== DANGER ZONES Start ===');
       const token = await getAuthToken();
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
@@ -942,6 +947,8 @@ export const fetchDangerZones = createAsyncThunk(
         },
         body: JSON.stringify({
           user_id: userId,
+          latitude: latitude,
+          longitude: longitude,
           radius_miles: radius / 1609.34,
           user_demographics: userDemographics
         })
@@ -949,13 +956,20 @@ export const fetchDangerZones = createAsyncThunk(
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.log('=== DANGER ZONES FAILED ===');
+        console.log('Data:', errorText);
+
         logger.error("🛡️ Danger zones API error:", errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
+      console.log('=== DANGER ZONES SUCCESS ===');
+      console.log('Data:', JSON.stringify(data, null, 2));
       return data.danger_zones || [];
     } catch (error) {
+      console.log('=== DANGER ZONES ERROR ===');
+      console.log('Error:', error);
       logger.error("Error fetching danger zones:", error);
       return [];
     }

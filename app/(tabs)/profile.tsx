@@ -348,13 +348,7 @@ export default function ProfileScreen() {
                   <Text style={styles.statNumber}>
                     {profile?.total_reviews || 0}
                   </Text>
-                  <Text style={styles.statLabel}>Reviews</Text>
-                </View>
-                <View style={styles.statBox}>
-                  <Text style={styles.statNumber}>
-                    {profile?.helpful_votes || 0}
-                  </Text>
-                  <Text style={styles.statLabel}>Helpful Votes</Text>
+                  <Text style={styles.statLabel}>Reviews Posted</Text>
                 </View>
               </View>
             </CollapsibleSection>

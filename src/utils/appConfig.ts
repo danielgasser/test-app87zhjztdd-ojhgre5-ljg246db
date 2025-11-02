@@ -8,6 +8,7 @@ export const APP_CONFIG = {
     DANGER_ZONE_SEARCH_RADIUS_MILES: 50,       // Default radius for danger zone search
     DANGER_ZONE_POLYGON_RADIUS_MILES: 2,       // Radius for individual danger zone polygons
     DANGER_ZONE_POLYGON_SIDES: 8,              // Number of sides for danger zone polygon (octagon)
+    DANGER_ZONES_MAX_RADIUS_METERS: 100000,
   },
 
   // Safety Score Thresholds
