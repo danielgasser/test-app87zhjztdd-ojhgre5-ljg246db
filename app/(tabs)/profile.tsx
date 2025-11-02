@@ -238,161 +238,154 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView>
-        {!isLoggedIn ? (
-          // NOT LOGGED IN - Only show Sign In button
-          <View style={styles.notLoggedInContainer}>
-            <Text style={styles.notLoggedInText}>
-              Please sign in to view your profile
-            </Text>
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.contentContainer}
+    >
+      {!isLoggedIn ? (
+        // NOT LOGGED IN - Only show Sign In button
+        <View style={styles.notLoggedInContainer}>
+          <Text style={styles.notLoggedInText}>
+            Please sign in to view your profile
+          </Text>
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={() => router.push("/(auth)/login")}
+          >
+            <Text style={styles.signInButtonText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      ) : !hasCompletedOnboarding ? (
+        // LOGGED IN but NO PROFILE - Show Set Up Profile
+        <View style={styles.setupContainer}>
+          <Text style={styles.setupTitle}>Complete Your Profile</Text>
+          <Text style={styles.setupDescription}>
+            Set up your profile to get personalized safety recommendations
+          </Text>
+          <TouchableOpacity
+            style={styles.setupButton}
+            onPress={() => router.push("/onboarding")}
+          >
+            <Text style={styles.setupButtonText}>Set Up Profile</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        // LOGGED IN and HAS PROFILE - Show full profile UI
+        <>
+          <View style={styles.header}>
+            {/* Avatar section */}
             <TouchableOpacity
-              style={styles.signInButton}
-              onPress={() => router.push("/(auth)/login")}
+              onPress={pickImage}
+              onLongPress={handleRemoveProfilePicture}
+              disabled={uploading}
+              style={styles.avatarContainer}
             >
-              <Text style={styles.signInButtonText}>Sign In</Text>
+              {uploading ? (
+                <View style={styles.avatarPlaceholder}>
+                  <ActivityIndicator
+                    size="large"
+                    color={theme.colors.primary}
+                  />
+                </View>
+              ) : profile?.avatar_url ? (
+                <>
+                  <Image
+                    key={profile.avatar_url}
+                    source={{ uri: profile.avatar_url }}
+                    style={styles.avatar}
+                  />
+                </>
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Ionicons name="person" size={50} color="#999" />
+                </View>
+              )}
+              <View style={styles.cameraIcon}>
+                <Ionicons name="camera" size={20} color="#fff" />
+              </View>
             </TouchableOpacity>
-          </View>
-        ) : !hasCompletedOnboarding ? (
-          // LOGGED IN but NO PROFILE - Show Set Up Profile
-          <View style={styles.setupContainer}>
-            <Text style={styles.setupTitle}>Complete Your Profile</Text>
-            <Text style={styles.setupDescription}>
-              Set up your profile to get personalized safety recommendations
+
+            {/* User info */}
+            <Text style={styles.name}>
+              {profile.full_name || "SafePath User"}
             </Text>
+
+            {/* Edit Profile Button */}
             <TouchableOpacity
               style={styles.setupButton}
-              onPress={() => router.push("/onboarding")}
+              onPress={handleEditProfile}
             >
-              <Text style={styles.setupButtonText}>Set Up Profile</Text>
+              <Text style={styles.setupButtonText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
-        ) : (
-          // LOGGED IN and HAS PROFILE - Show full profile UI
-          <>
-            <View style={styles.header}>
-              {/* Avatar section */}
-              <TouchableOpacity
-                onPress={pickImage}
-                onLongPress={handleRemoveProfilePicture}
-                disabled={uploading}
-                style={styles.avatarContainer}
-              >
-                {uploading ? (
-                  <View style={styles.avatarPlaceholder}>
-                    <ActivityIndicator
-                      size="large"
-                      color={theme.colors.primary}
-                    />
-                  </View>
-                ) : profile?.avatar_url ? (
-                  <>
-                    <Image
-                      key={profile.avatar_url}
-                      source={{ uri: profile.avatar_url }}
-                      style={styles.avatar}
-                    />
-                  </>
-                ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <Ionicons name="person" size={50} color="#999" />
-                  </View>
-                )}
-                <View style={styles.cameraIcon}>
-                  <Ionicons name="camera" size={20} color="#fff" />
-                </View>
-              </TouchableOpacity>
-
-              {/* User info */}
-              <Text style={styles.name}>
-                {profile.full_name || "SafePath User"}
-              </Text>
-
-              {/* Edit Profile Button */}
-              <TouchableOpacity
-                style={styles.setupButton}
-                onPress={handleEditProfile}
-              >
-                <Text style={styles.setupButtonText}>Edit Profile</Text>
-              </TouchableOpacity>
-            </View>
-            {/* Reset Banners Button (for testing)
+          {/* Reset Banners Button (for testing)
                     // ToDo: remove in production (before Realease)
        */}
-            <TouchableOpacity
-              style={[
-                styles.menuItem,
-                { backgroundColor: theme.colors.warning },
-              ]}
-              onPress={async () => {
-                await AsyncStorage.removeItem("profile_banner_dismissals");
-                // Import resetAll from the slice
-                dispatch(resetAll());
-                notify.success("All banner dismissals cleared!");
-              }}
-            >
-              <Ionicons
-                name="refresh"
-                size={24}
-                color={theme.colors.background}
-              />
-              <Text
-                style={[styles.menuText, { color: theme.colors.background }]}
+          <TouchableOpacity
+            style={[styles.menuItem, { backgroundColor: theme.colors.warning }]}
+            onPress={async () => {
+              await AsyncStorage.removeItem("profile_banner_dismissals");
+              // Import resetAll from the slice
+              dispatch(resetAll());
+              notify.success("All banner dismissals cleared!");
+            }}
+          >
+            <Ionicons
+              name="refresh"
+              size={24}
+              color={theme.colors.background}
+            />
+            <Text style={[styles.menuText, { color: theme.colors.background }]}>
+              Reset Banners (Testing)
+            </Text>
+          </TouchableOpacity>
+          {/* Demographics Card */}
+          <View style={styles.demographicsCard}>{renderDemographics()}</View>
+          <View style={{ paddingHorizontal: 20 }}>
+            <ProfileCompletionWidget
+              missingFields={profileCompletion.missingFields}
+              completionPercentage={profileCompletion.completionPercentage}
+            />
+          </View>
+          {/* Settings Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderSettings}>
+              <Text style={styles.sectionTitle}>Settings</Text>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => router.push("/notification-settings")}
               >
-                Reset Banners (Testing)
-              </Text>
-            </TouchableOpacity>
-            {/* Demographics Card */}
-            <View style={styles.demographicsCard}>{renderDemographics()}</View>
-            <View style={{ paddingHorizontal: 20 }}>
-              <ProfileCompletionWidget
-                missingFields={profileCompletion.missingFields}
-                completionPercentage={profileCompletion.completionPercentage}
-              />
+                <MaterialIcons name="notifications" size={24} color="#333" />
+                <Text style={styles.menuText}>Notifications</Text>
+                <MaterialIcons name="chevron-right" size={24} color="#999" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => router.push("/privacy-settings")}
+              >
+                <MaterialIcons name="privacy-tip" size={24} color="#333" />
+                <Text style={styles.menuText}>Privacy</Text>
+                <MaterialIcons name="chevron-right" size={24} color="#999" />
+              </TouchableOpacity>
             </View>
-            {/* Settings Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeaderSettings}>
-                <Text style={styles.sectionTitle}>Settings</Text>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => router.push("/notification-settings")}
-                >
-                  <MaterialIcons name="notifications" size={24} color="#333" />
-                  <Text style={styles.menuText}>Notifications</Text>
-                  <MaterialIcons name="chevron-right" size={24} color="#999" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => router.push("/privacy-settings")}
-                >
-                  <MaterialIcons name="privacy-tip" size={24} color="#333" />
-                  <Text style={styles.menuText}>Privacy</Text>
-                  <MaterialIcons name="chevron-right" size={24} color="#999" />
-                </TouchableOpacity>
-              </View>
-            </View>
+          </View>
 
-            {/* Sign Out Button */}
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <Text style={styles.logoutText}>Sign Out</Text>
-            </TouchableOpacity>
-          </>
+          {/* Sign Out Button */}
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </>
+      )}
+      {user?.email &&
+        APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email) && (
+          <Pressable
+            style={styles.logoutButton}
+            onPress={handleVersionLongPress}
+          >
+            <Text style={styles.versionText}>Debug</Text>
+          </Pressable>
         )}
-        {user?.email &&
-          APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email) && (
-            <Pressable
-              style={styles.logoutButton}
-              onPress={handleVersionLongPress}
-            >
-              <Text style={styles.versionText}>Debug</Text>
-            </Pressable>
-          )}
-      </ScrollView>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -448,9 +441,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: theme.spacing.xl,
   },
-  container: {
-    flex: 1,
+  scrollView: {
+    height: "20%",
+    width: "100%",
     backgroundColor: theme.colors.backgroundSecondary,
+    padding: 10,
+  },
+  contentContainer: {
+    paddingBottom: 50,
   },
   header: {
     alignItems: "center",

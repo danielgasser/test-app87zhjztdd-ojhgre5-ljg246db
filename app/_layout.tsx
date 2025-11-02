@@ -246,9 +246,15 @@ function RootLayoutNav() {
   }, [dispatch]);
 
   // Listen for notification taps
+  // Listen for notification taps
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
+        console.error("🔔 NOTIFICATION TAPPED", response);
+        console.error(
+          "🔔 NOTIFICATION DATA",
+          response.notification.request.content.data
+        ); // ADD THIS
         const data = response.notification.request.content.data as Record<
           string,
           any
@@ -256,58 +262,43 @@ function RootLayoutNav() {
 
         if (!data || typeof data !== "object") return;
 
-        // Handle different notification types
+        // ALL notifications go to map with navigationIntent
+        // The map screen will automatically open the location modal
+        let locationId = null;
+
         switch (data.type) {
           case "location_trigger":
           case "location_safety_change":
-            // Navigate to location details
-            if (data.locationId) {
-              dispatch(
-                setNavigationIntent({
-                  targetTab: "map",
-                  locationId: data.locationId,
-                  action: "view_location",
-                })
-              );
-              router.push("/(tabs)/index");
-            }
+          case "route_safety_alert":
+            locationId = data.locationId;
             break;
 
-          case "route_safety_alert":
-            // Navigate to map (where active navigation is)
-            if (data.locationId) {
-              dispatch(
-                setNavigationIntent({
-                  targetTab: "map",
-                  locationId: data.locationId,
-                  action: "view_location",
-                })
-              );
-              router.push("/(tabs)/index");
-            }
-            break;
           case "batched_route_safety_alerts":
-            // For batched alerts, open the first (closest) location
-            if (data.reviews && data.reviews.length > 0) {
-              dispatch(
-                setNavigationIntent({
-                  targetTab: "map",
-                  locationId: data.reviews[0].locationId,
-                  action: "view_location",
-                })
-              );
-              router.push("/(tabs)/index");
-            }
+            // For batched alerts, use the first (closest) location
+            locationId = data.reviews?.[0]?.locationId;
             break;
+
           default:
             logger.warn("Unknown notification type:", data.type);
+            return;
+        }
+
+        // If we have a location ID, set the intent and navigate to map
+        if (locationId) {
+          dispatch(
+            setNavigationIntent({
+              targetTab: "map",
+              locationId: locationId,
+              action: "view_location",
+            })
+          );
+          router.push("/(tabs)/index");
         }
       }
     );
 
     return () => subscription.remove();
-  }, []);
-
+  }, [dispatch]);
   // Process offline queue when connection restored
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {

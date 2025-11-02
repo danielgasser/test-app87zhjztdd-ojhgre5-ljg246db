@@ -18,9 +18,6 @@ const corsHeaders = {
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
-// NOTIFICATION RATE LIMITING CONFIG
-const RATE_LIMIT_WINDOW_MINUTES = EDGE_CONFIG.NAVIGATION.NOTIFICATIONS.RATE_LIMIT_WINDOW_MINUTES; // Don't send duplicate alerts within 15 minutes
-const BATCH_WINDOW_SECONDS = EDGE_CONFIG.NAVIGATION.NOTIFICATIONS.BATCH_WINDOW_SECONDS; // Wait 30 seconds to batch multiple reviews
 
 // SEVERITY LEVELS FOR ALERTS
 const SEVERITY_LEVELS = {
@@ -83,7 +80,7 @@ async function wasRecentlyNotified(
   routeId: string
 ): Promise<boolean> {
   const cutoffTime = new Date();
-  cutoffTime.setMinutes(cutoffTime.getMinutes() - RATE_LIMIT_WINDOW_MINUTES);
+  cutoffTime.setMinutes(cutoffTime.getMinutes() - EDGE_CONFIG.NOTIFICATIONS.RATE_LIMIT_WINDOW_MINUTES);
 
   const { data, error } = await supabase
     .from("notification_logs")
@@ -112,7 +109,7 @@ async function findRecentBatchableReviews(
   currentReviewTime: string
 ): Promise<any[]> {
   const batchCutoff = new Date(currentReviewTime);
-  batchCutoff.setSeconds(batchCutoff.getSeconds() - BATCH_WINDOW_SECONDS);
+  batchCutoff.setSeconds(batchCutoff.getSeconds() - EDGE_CONFIG.NOTIFICATIONS.BATCH_WINDOW_SECONDS);
 
   const { data, error } = await supabase
     .from("reviews")
@@ -290,7 +287,7 @@ serve(async (req) => {
     console.log("👤 Reviewer demographics:", reviewerProfile ? "has profile" : "no profile");
 
     // 🆕 BATCH WINDOW: Check for other recent dangerous reviews
-    console.log(`🔍 Checking for other reviews in last ${BATCH_WINDOW_SECONDS} seconds to batch...`);
+    console.log(`🔍 Checking for other reviews in last ${EDGE_CONFIG.NOTIFICATIONS.BATCH_WINDOW_SECONDS} seconds to batch...`);
     const batchableReviews = await findRecentBatchableReviews(
       supabaseClient,
       review.id,
@@ -361,7 +358,7 @@ serve(async (req) => {
       );
 
       if (wasNotified) {
-        console.log(`⏭️ Skipping user ${route.user_id}: Recently notified (within ${RATE_LIMIT_WINDOW_MINUTES}min)`);
+        console.log(`⏭️ Skipping user ${route.user_id}: Recently notified (within ${EDGE_CONFIG.NOTIFICATIONS.RATE_LIMIT_WINDOW_MINUTES}min)`);
         continue;
       }
 

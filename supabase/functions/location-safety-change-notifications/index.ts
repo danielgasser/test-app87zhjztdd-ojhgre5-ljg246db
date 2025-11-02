@@ -157,11 +157,11 @@ serve(async (req) => {
         reviewer.user_id,
         review.location_id,
         "location_safety_change",
-        EDGE_CONFIG.REVIEWS.RATE_LIMIT_WINDOW_HOURS
+        EDGE_CONFIG.NOTIFICATIONS.RATE_LIMIT_WINDOW_MINUTES
       );
 
       if (wasNotifiedRecently) {
-        console.log(`⏭️ Skipping user ${reviewer.user_id}: Recently notified about this location (within ${EDGE_CONFIG.REVIEWS.RATE_LIMIT_WINDOW_HOURS}h)`);
+        console.log(`⏭️ Skipping user ${reviewer.user_id}: Recently notified about this location (within ${EDGE_CONFIG.NOTIFICATIONS.RATE_LIMIT_WINDOW_MINUTES}h)`);
         continue;
       }
 
