@@ -323,9 +323,6 @@ export default function MapScreen() {
   };
 
   const handleToggleDangerZones = () => {
-    console.log("=== TOGGLE DANGER ZONES ===");
-    console.log("userId:", userId);
-    console.log("userProfile:", JSON.stringify(userProfile, null, 2));
     if (!requireAuth(userId, "view danger zones")) return;
 
     const hasValidDemographics =
@@ -333,11 +330,6 @@ export default function MapScreen() {
       (userProfile.race_ethnicity?.length > 0 ||
         userProfile.gender ||
         userProfile.lgbtq_status);
-    console.log("=== AUTO-LOAD USEEFFECT ===");
-    console.log("userId:", userId);
-    console.log("userLocation:", userLocation);
-    console.log("hasValidDemographics:", hasValidDemographics);
-    console.log("dangerZones.length:", dangerZones.length);
     if (!hasValidDemographics) {
       notify.confirm(
         "Complete your profile to view Danger Zones",
@@ -673,11 +665,6 @@ export default function MapScreen() {
       (userProfile.race_ethnicity?.length > 0 ||
         userProfile.gender ||
         userProfile.lgbtq_status);
-    console.log("=== AUTO-LOAD USEEFFECT ===");
-    console.log("userId:", userId);
-    console.log("userLocation:", userLocation);
-    console.log("hasValidDemographics:", hasValidDemographics);
-    console.log("dangerZones.length:", dangerZones.length);
     if (
       userId &&
       userLocation &&

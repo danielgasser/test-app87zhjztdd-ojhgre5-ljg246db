@@ -221,8 +221,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
-    console.log("🚀 handleStartNavigation CALLED");
-
     if (
       !smartRouteComparison?.optimized_route ||
       !selectedRoute ||
@@ -258,9 +256,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       },
     };
 
-    console.log("📝 Saving routeRequest to Redux:", routeRequestData);
     dispatch(setRouteRequest(routeRequestData));
-    console.log("✅ routeRequest saved to Redux");
 
     const savedRoute = await dispatch(
       saveRouteToDatabase({

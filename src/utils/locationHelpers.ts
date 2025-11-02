@@ -11,7 +11,6 @@ export const getUserCountry = async (
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!googleApiKey || !userLocation) {
-        console.log('🌍 No API key or location, defaulting to us');  // ← ADD
         return 'us';
     }
 

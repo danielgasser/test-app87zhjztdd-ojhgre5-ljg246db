@@ -38,12 +38,7 @@ export default function DangerZoneOverlay({
   dangerZones,
   visible,
 }: DangerZoneOverlayProps) {
-  console.log("=== DANGER ZONE DEBUG ===");
-  console.log("Visible:", visible);
-  console.log("Zones count:", dangerZones.length);
-  console.log("Zone data:", JSON.stringify(dangerZones, null, 2));
   if (!visible || dangerZones.length === 0) {
-    console.log("Early return - visible or no zones");
     return null;
   }
   return (

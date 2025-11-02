@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Linking,
   Pressable,
+  GestureResponderEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -34,6 +35,19 @@ export default function ProfileScreen() {
   const { user } = useAppSelector((state) => state.auth);
   const { profile, loading } = useAppSelector((state) => state.user);
   const [uploading, setUploading] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    activity: true,
+    demographics: false,
+    settings: false,
+    account: false,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
   const isLoggedIn = !!user;
   const hasCompletedOnboarding = !!profile;
   const handleLogout = async () => {
@@ -237,13 +251,13 @@ export default function ProfileScreen() {
     );
   };
 
+  function handleDeleteAccount(event: GestureResponderEvent): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
-    <ScrollView
-      style={styles.scrollView}
-      contentContainerStyle={styles.contentContainer}
-    >
+    <SafeAreaView style={styles.container}>
       {!isLoggedIn ? (
-        // NOT LOGGED IN - Only show Sign In button
         <View style={styles.notLoggedInContainer}>
           <Text style={styles.notLoggedInText}>
             Please sign in to view your profile
@@ -256,364 +270,438 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       ) : !hasCompletedOnboarding ? (
-        // LOGGED IN but NO PROFILE - Show Set Up Profile
-        <View style={styles.setupContainer}>
-          <Text style={styles.setupTitle}>Complete Your Profile</Text>
-          <Text style={styles.setupDescription}>
-            Set up your profile to get personalized safety recommendations
+        <View style={styles.onboardingContainer}>
+          <Ionicons
+            name="information-circle"
+            size={64}
+            color={theme.colors.primary}
+          />
+          <Text style={styles.onboardingTitle}>Complete Your Profile</Text>
+          <Text style={styles.onboardingText}>
+            Add your demographic information to get personalized safety
+            recommendations
           </Text>
           <TouchableOpacity
-            style={styles.setupButton}
+            style={styles.completeProfileButton}
             onPress={() => router.push("/onboarding")}
           >
-            <Text style={styles.setupButtonText}>Set Up Profile</Text>
+            <Text style={styles.completeProfileButtonText}>
+              Complete Profile
+            </Text>
           </TouchableOpacity>
         </View>
       ) : (
-        // LOGGED IN and HAS PROFILE - Show full profile UI
-        <>
+        <View style={styles.profileContainer}>
+          {/* Fixed Header */}
           <View style={styles.header}>
-            {/* Avatar section */}
             <TouchableOpacity
               onPress={pickImage}
-              onLongPress={handleRemoveProfilePicture}
-              disabled={uploading}
               style={styles.avatarContainer}
             >
               {uploading ? (
-                <View style={styles.avatarPlaceholder}>
-                  <ActivityIndicator
-                    size="large"
-                    color={theme.colors.primary}
-                  />
-                </View>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
               ) : profile?.avatar_url ? (
-                <>
-                  <Image
-                    key={profile.avatar_url}
-                    source={{ uri: profile.avatar_url }}
-                    style={styles.avatar}
-                  />
-                </>
+                <Image
+                  source={{ uri: profile.avatar_url }}
+                  style={styles.avatar}
+                />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="person" size={50} color="#999" />
+                  <Ionicons
+                    name="person"
+                    size={40}
+                    color={theme.colors.textSecondary}
+                  />
                 </View>
               )}
-              <View style={styles.cameraIcon}>
-                <Ionicons name="camera" size={20} color="#fff" />
+              <View style={styles.avatarBadge}>
+                <Ionicons
+                  name="camera"
+                  size={16}
+                  color={theme.colors.textOnPrimary}
+                />
               </View>
             </TouchableOpacity>
-
-            {/* User info */}
-            <Text style={styles.name}>
-              {profile.full_name || "SafePath User"}
+            <Text style={styles.userName}>
+              {profile?.full_name || "SafePath User"}
             </Text>
-
-            {/* Edit Profile Button */}
-            <TouchableOpacity
-              style={styles.setupButton}
-              onPress={handleEditProfile}
-            >
-              <Text style={styles.setupButtonText}>Edit Profile</Text>
-            </TouchableOpacity>
+            <Text style={styles.memberSince}>
+              Member since{" "}
+              {new Date(profile?.created_at || Date.now()).toLocaleDateString()}
+            </Text>
           </View>
-          {/* Reset Banners Button (for testing)
-                    // ToDo: remove in production (before Realease)
-       */}
-          <TouchableOpacity
-            style={[styles.menuItem, { backgroundColor: theme.colors.warning }]}
-            onPress={async () => {
-              await AsyncStorage.removeItem("profile_banner_dismissals");
-              // Import resetAll from the slice
-              dispatch(resetAll());
-              notify.success("All banner dismissals cleared!");
-            }}
+
+          {/* Collapsible Sections */}
+          <ScrollView
+            style={styles.sectionsContainer}
+            showsVerticalScrollIndicator={false}
           >
-            <Ionicons
-              name="refresh"
-              size={24}
-              color={theme.colors.background}
-            />
-            <Text style={[styles.menuText, { color: theme.colors.background }]}>
-              Reset Banners (Testing)
-            </Text>
-          </TouchableOpacity>
-          {/* Demographics Card */}
-          <View style={styles.demographicsCard}>{renderDemographics()}</View>
-          <View style={{ paddingHorizontal: 20 }}>
-            <ProfileCompletionWidget
-              missingFields={profileCompletion.missingFields}
-              completionPercentage={profileCompletion.completionPercentage}
-            />
-          </View>
-          {/* Settings Section */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeaderSettings}>
-              <Text style={styles.sectionTitle}>Settings</Text>
+            {/* Activity Section */}
+            <CollapsibleSection
+              title="My Activity"
+              icon="stats-chart"
+              isExpanded={expandedSections.activity}
+              onToggle={() => toggleSection("activity")}
+            >
+              <View style={styles.statsGrid}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statNumber}>
+                    {profile?.total_reviews || 0}
+                  </Text>
+                  <Text style={styles.statLabel}>Reviews</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statNumber}>
+                    {profile?.helpful_votes || 0}
+                  </Text>
+                  <Text style={styles.statLabel}>Helpful Votes</Text>
+                </View>
+              </View>
+            </CollapsibleSection>
+            {/* Demographics Section */}
+            <CollapsibleSection
+              title="Demographics"
+              icon="people"
+              isExpanded={expandedSections.demographics}
+              onToggle={() => toggleSection("demographics")}
+            >
+              {renderDemographics()}
+            </CollapsibleSection>
+            {/* Settings Section */}
+            {/* Settings Section */}
+            <CollapsibleSection
+              title="Settings"
+              icon="settings"
+              isExpanded={expandedSections.settings}
+              onToggle={() => toggleSection("settings")}
+            >
               <TouchableOpacity
-                style={styles.menuItem}
-                onPress={() => router.push("/notification-settings")}
-              >
-                <MaterialIcons name="notifications" size={24} color="#333" />
-                <Text style={styles.menuText}>Notifications</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#999" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.menuItem}
+                style={styles.settingItem}
                 onPress={() => router.push("/privacy-settings")}
               >
-                <MaterialIcons name="privacy-tip" size={24} color="#333" />
-                <Text style={styles.menuText}>Privacy</Text>
-                <MaterialIcons name="chevron-right" size={24} color="#999" />
+                <Ionicons
+                  name="shield-checkmark"
+                  size={24}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.settingText}>Privacy Settings</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
               </TouchableOpacity>
-            </View>
-          </View>
 
-          {/* Sign Out Button */}
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Sign Out</Text>
-          </TouchableOpacity>
-        </>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => router.push("/notification-settings")}
+              >
+                <Ionicons
+                  name="notifications"
+                  size={24}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.settingText}>Notifications</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
+              </TouchableOpacity>
+            </CollapsibleSection>
+            {/* Account Section */}
+            <CollapsibleSection
+              title="Account"
+              icon="person-circle"
+              isExpanded={expandedSections.account}
+              onToggle={() => toggleSection("account")}
+            >
+              <TouchableOpacity
+                style={styles.accountItem}
+                onPress={() => router.push("/onboarding")}
+              >
+                <Ionicons
+                  name="create"
+                  size={24}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.accountText}>Edit Profile</Text>
+              </TouchableOpacity>
+
+              {profile?.avatar_url && (
+                <TouchableOpacity
+                  style={styles.accountItem}
+                  onPress={handleRemoveProfilePicture}
+                >
+                  <Ionicons name="image" size={24} color={theme.colors.error} />
+                  <Text
+                    style={[styles.accountText, { color: theme.colors.error }]}
+                  >
+                    Remove Profile Picture
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={styles.accountItem}
+                onPress={handleLogout}
+              >
+                <Ionicons
+                  name="log-out"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.accountText}>Sign Out</Text>
+              </TouchableOpacity>
+            </CollapsibleSection>
+          </ScrollView>
+        </View>
       )}
-      {user?.email &&
-        APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email) && (
-          <Pressable
-            style={styles.logoutButton}
-            onPress={handleVersionLongPress}
-          >
-            <Text style={styles.versionText}>Debug</Text>
-          </Pressable>
-        )}
-    </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+// Collapsible Section Component
+function CollapsibleSection({
+  title,
+  icon,
+  isExpanded,
+  onToggle,
+  children,
+}: {
+  title: string;
+  icon: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.section}>
+      <TouchableOpacity style={styles.sectionHeader} onPress={onToggle}>
+        <View style={styles.sectionHeaderLeft}>
+          <Ionicons name={icon as any} size={24} color={theme.colors.primary} />
+          <Text style={styles.sectionTitle}>{title}</Text>
+        </View>
+        <Ionicons
+          name={isExpanded ? "chevron-up" : "chevron-down"}
+          size={24}
+          color={theme.colors.textSecondary}
+        />
+      </TouchableOpacity>
+      {isExpanded && <View style={styles.sectionContent}>{children}</View>}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   notLoggedInContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: theme.spacing.xl,
-    marginTop: 100,
-  },
-  name: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    textAlign: "center",
-    marginBottom: theme.spacing.lg,
-  },
-  versionText: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
   },
   notLoggedInText: {
-    fontSize: 18,
+    fontSize: 16,
     color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: theme.spacing.lg,
   },
   signInButton: {
     backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.xl,
-    borderRadius: 8,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
   signInButtonText: {
     color: theme.colors.textOnPrimary,
     fontSize: 16,
     fontWeight: "600",
   },
-  setupContainer: {
-    padding: theme.spacing.xl,
+  onboardingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 100,
+    padding: theme.spacing.xl,
   },
-  setupTitle: {
+  onboardingTitle: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: theme.colors.text,
+    marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.sm,
   },
-  setupDescription: {
+  onboardingText: {
     fontSize: 16,
     color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: theme.spacing.xl,
   },
-  scrollView: {
-    //height: "20%",
-    flex: 1,
-    width: "100%",
-    backgroundColor: theme.colors.backgroundSecondary,
-    padding: 10,
+  completeProfileButton: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
-  contentContainer: {
-    //paddingBottom: 50,
-    flexGrow: 1,
-    padding: theme.spacing.md,
+  completeProfileButtonText: {
+    color: theme.colors.textOnPrimary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  profileContainer: {
+    flex: 1,
   },
   header: {
     alignItems: "center",
-    padding: 30,
-    backgroundColor: theme.colors.card,
+    paddingVertical: theme.spacing.xl,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.separator,
   },
   avatarContainer: {
     position: "relative",
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderWidth: 3,
     borderColor: theme.colors.primary,
   },
   avatarPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: theme.colors.inputBackground,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: theme.colors.background,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: theme.colors.inputBorder,
+    borderColor: theme.colors.primary,
   },
-  cameraIcon: {
+  avatarBadge: {
     position: "absolute",
     bottom: 0,
     right: 0,
     backgroundColor: theme.colors.primary,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 3,
-    borderColor: theme.colors.border,
+    borderWidth: 2,
+    borderColor: theme.colors.backgroundSecondary,
   },
-  removePhotoText: {
-    color: theme.colors.error,
-    fontSize: 14,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  email: {
-    fontSize: 18,
+  userName: {
+    fontSize: 24,
+    fontWeight: "700",
     color: theme.colors.text,
-    marginTop: 10,
+    marginBottom: theme.spacing.xs,
   },
-  fullName: {
-    fontSize: 18,
+  memberSince: {
+    fontSize: 14,
     color: theme.colors.textSecondary,
-    marginTop: 4,
+  },
+  sectionsContainer: {
+    flex: 1,
   },
   section: {
-    marginTop: 20,
-    backgroundColor: theme.colors.background,
-    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.separator,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: theme.spacing.md,
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.background,
   },
-  sectionHeaderSettings: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingHorizontal: 20,
-    paddingBottom: theme.spacing.md,
-    marginBottom: theme.spacing.md,
+  sectionHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.md,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: theme.colors.text,
   },
-  editProfile: {
-    fontSize: 18,
-    color: theme.colors.primary,
-    fontWeight: "600",
+  sectionContent: {
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.backgroundSecondary,
   },
-  editText: {
-    fontSize: 18,
-    color: theme.colors.primary,
-    fontWeight: "600",
+  statsGrid: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
   },
-  demographicsCard: {
-    marginHorizontal: 20,
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.inputBackground,
-    borderRadius: 8,
+  statBox: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    alignItems: "center",
+  },
+  statNumber: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.xs,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
   },
   demographicsChipContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    paddingVertical: 8,
+    gap: theme.spacing.sm,
   },
   demographicChip: {
-    backgroundColor: theme.colors.backgroundSecondary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: theme.colors.primary + "20",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.full,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
   },
   demographicChipText: {
+    color: theme.colors.primary,
     fontSize: 14,
-    color: theme.colors.text,
+    fontWeight: "500",
   },
   noDemographicsText: {
     fontSize: 14,
     color: theme.colors.textSecondary,
     fontStyle: "italic",
-    textAlign: "center",
-    paddingVertical: 12,
   },
-  demographicText: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-  setupButton: {
-    marginHorizontal: 20,
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.primary,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  setupButtonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  menuItem: {
+  settingItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  menuText: {
-    flex: 1,
-    fontSize: 20,
-    color: theme.colors.text,
-    marginLeft: 15,
-  },
-  logoutButton: {
-    margin: 20,
     padding: theme.spacing.md,
-    backgroundColor: theme.colors.error,
-    borderRadius: 8,
-    alignItems: "center",
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.md,
+    gap: theme.spacing.md,
   },
-  logoutText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 18,
-    fontWeight: "600",
+  settingText: {
+    flex: 1,
+    fontSize: 16,
+    color: theme.colors.text,
+  },
+  accountItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+    gap: theme.spacing.md,
+  },
+  accountText: {
+    flex: 1,
+    fontSize: 16,
+    color: theme.colors.text,
   },
 });
