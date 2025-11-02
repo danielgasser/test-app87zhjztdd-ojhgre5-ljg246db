@@ -75,6 +75,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   }, []);
 
   useEffect(() => {
+    console.log("🔔 Safety check useEffect running", {
+      hasRoute: !!selectedRoute,
+      hasPosition: !!currentPosition,
+      reviewCount: communityReviews?.length,
+      isRerouting,
+      timestamp: new Date().toISOString(),
+    });
     // SMART CHECK: Only alert if dangerous review is ON our route
     if (
       !selectedRoute ||
@@ -124,6 +131,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       });
 
       if (newDangerOnRoute.length > 0) {
+        console.log("🚨 SHOWING SAFETY ALERT", {
+          dangerCount: newDangerOnRoute.length,
+          locations: newDangerOnRoute.map((r) => r.location_name),
+        });
         const locationNames = newDangerOnRoute
           .map((r) => r.location_name)
           .join(", ");

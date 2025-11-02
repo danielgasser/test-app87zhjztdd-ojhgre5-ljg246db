@@ -1945,6 +1945,7 @@ const locationsSlice = createSlice({
       state.navigationActive = true;
       state.currentNavigationStep = 0;
       state.navigationStartTime = new Date().toISOString();
+      state.isRerouting = false;
     },
 
     endNavigation: (state) => {
