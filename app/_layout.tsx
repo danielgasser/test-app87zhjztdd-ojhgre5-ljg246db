@@ -250,8 +250,8 @@ function RootLayoutNav() {
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        console.error("🔔 NOTIFICATION TAPPED", response);
-        console.error(
+        console.log("🔔 NOTIFICATION TAPPED", response);
+        console.log(
           "🔔 NOTIFICATION DATA",
           response.notification.request.content.data
         ); // ADD THIS
@@ -292,7 +292,7 @@ function RootLayoutNav() {
               action: "view_location",
             })
           );
-          router.push("/(tabs)/index");
+          router.push("/");
         }
       }
     );

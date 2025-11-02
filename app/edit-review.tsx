@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   dateButton: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.background,
     borderWidth: 1,
     borderColor: theme.colors.inputBorder,
     borderRadius: 8,
@@ -698,6 +698,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    color: theme.colors.card,
   },
   cancelButton: {
     backgroundColor: theme.colors.inputBackground,
@@ -706,6 +707,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: theme.colors.primary,
+    color: theme.colors.card,
   },
   buttonDisabled: {
     backgroundColor: theme.colors.border,
@@ -714,6 +716,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: "600",
+    color: theme.colors.card,
   },
   cancelButtonText: {
     fontSize: 16,

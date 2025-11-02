@@ -345,6 +345,12 @@ serve(async (req) => {
     for (const route of activeRoutes) {
       // Check notification preferences
       const prefs = route.user_profile.notification_preferences || {};
+      /*
+            if (route.user_id === review.user_id) {
+              console.log(`⏭️ Skipping reviewer's own route`);
+              continue;
+            }
+      */
       if (prefs.safety_alerts === false) {
         console.log(`⏭️ Skipping user ${route.user_id}: Has disabled safety_alerts preference`);
         continue;

@@ -72,7 +72,7 @@ export const EDGE_CONFIG = {
         BATCH_WINDOW_SECONDS: 1
     },
     REVIEWS: {
-        RATE_LIMIT_WINDOW_HOURS: 24
+        RATE_LIMIT_WINDOW_HOURS: 0
     },
     ROUTE_SAFETY_SCORES: {
         SEGMENT_LENGTH_MILES: 1.0,
