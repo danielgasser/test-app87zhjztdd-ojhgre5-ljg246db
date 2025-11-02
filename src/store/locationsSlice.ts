@@ -255,12 +255,6 @@ interface LocationsState {
   navigationActive: boolean;
   currentNavigationStep: number | null;
   navigationStartTime: string | null;
-  dismissedSafetyAlerts: {
-    [reviewId: string]: {
-      dismissedAt: string;
-      routeId: string | undefined;
-    };
-  };
   isRerouting: boolean;
 }
 export interface RouteImprovementSummary {
@@ -340,7 +334,6 @@ const initialState: LocationsState = {
   navigationActive: false,
   currentNavigationStep: null,
   navigationStartTime: null,
-  dismissedSafetyAlerts: {},
   isRerouting: false,
 };
 
@@ -1625,7 +1618,7 @@ export const checkForReroute = createAsyncThunk(
 
     // Show alert
     notify.info(
-      "You've gone off course. Finding a new route...",
+      "Finding a new & safer route...",
       "Recalculating Route"
     );
 
@@ -1673,6 +1666,15 @@ export const checkForReroute = createAsyncThunk(
             // Use the safer route
             dispatch(setSelectedRoute(routeWithDbId));
 
+            // @ts-ignore
+            dispatch(setRouteRequest({
+              ...routeRequest,
+              origin: {
+                latitude: currentPosition.latitude,
+                longitude: currentPosition.longitude,
+              }
+            }));
+
             // 🆕 End old navigation session if exists
             if (selectedRoute.databaseId) {
               await dispatch(endNavigationSession(selectedRoute.databaseId));
@@ -1682,12 +1684,15 @@ export const checkForReroute = createAsyncThunk(
             await dispatch(startNavigationSession(savedRoute.id));
 
             // 🆕 Clear dismissed alerts - fresh start with new safer route
-            dispatch(clearDismissedSafetyAlerts());
 
             notify.info(
               `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
               "Route Updated"
             );
+            setTimeout(() => {
+              // @ts-ignore
+              dispatch(setRerouting(false));
+            }, 10000);
           } else {
             // No actual improvement - treat as no alternative available
             throw new Error("No safer alternative available");
@@ -1735,6 +1740,15 @@ export const checkForReroute = createAsyncThunk(
 
           dispatch(setSelectedRoute(routeWithDbId));
 
+          // @ts-ignore
+          dispatch(setRouteRequest({
+            ...routeRequest,
+            origin: {
+              latitude: currentPosition.latitude,
+              longitude: currentPosition.longitude,
+            }
+          }));
+
           // 🆕 End old navigation session
           if (selectedRoute.databaseId) {
             await dispatch(endNavigationSession(selectedRoute.databaseId));
@@ -1743,10 +1757,7 @@ export const checkForReroute = createAsyncThunk(
           // 🆕 Start new navigation session
           await dispatch(startNavigationSession(savedRoute.id));
 
-          // 🆕 Clear dismissed alerts
-          if (oldRouteId) {
-            dispatch(clearDismissedAlertsForRoute(oldRouteId));
-          }
+
           notify.success(
             "New route calculated from your current position",
             "Route Updated"
@@ -1958,30 +1969,7 @@ const locationsSlice = createSlice({
       state.currentNavigationStep = action.payload;
     },
     // Safety alert dismissal tracking
-    dismissSafetyAlert: (
-      state,
-      action: PayloadAction<{ reviewId: string; routeId: string | undefined }>
-    ) => {
-      const { reviewId, routeId } = action.payload;
-      state.dismissedSafetyAlerts[reviewId] = {
-        dismissedAt: new Date().toISOString(),
-        routeId,
-      };
-    },
 
-    clearDismissedSafetyAlerts: (state) => {
-      state.dismissedSafetyAlerts = {};
-    },
-
-    clearDismissedAlertsForRoute: (state, action: PayloadAction<string>) => {
-      const routeId = action.payload;
-      // Remove alerts that were dismissed for a specific route
-      Object.keys(state.dismissedSafetyAlerts).forEach((reviewId) => {
-        if (state.dismissedSafetyAlerts[reviewId].routeId === routeId) {
-          delete state.dismissedSafetyAlerts[reviewId];
-        }
-      });
-    },
     setRerouting: (state, action: PayloadAction<boolean>) => {
       state.isRerouting = action.payload;
     },
@@ -2350,9 +2338,6 @@ export const {
   startNavigation,
   endNavigation,
   updateNavigationProgress,
-  dismissSafetyAlert,
-  clearDismissedSafetyAlerts,
-  clearDismissedAlertsForRoute,
   setRerouting,
 } = locationsSlice.actions;
 

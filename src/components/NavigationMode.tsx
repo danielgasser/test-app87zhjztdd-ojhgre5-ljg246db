@@ -16,7 +16,6 @@ import {
   checkForReroute,
   startNavigationSession,
   endNavigationSession,
-  dismissSafetyAlert,
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
@@ -42,7 +41,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     currentNavigationStep,
     userLocation,
     navigationActive,
-    dismissedSafetyAlerts,
     isRerouting,
   } = useAppSelector((state) => state.locations);
 
@@ -54,7 +52,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const [distanceToNextTurn, setDistanceToNextTurn] = useState<number>(0);
   const [locationSubscription, setLocationSubscription] = useState<any>(null);
+
   const [mapKey, setMapKey] = useState(0);
+
+  const alertShownRef = useRef(false);
 
   // Start GPS tracking
   useEffect(() => {
@@ -117,24 +118,20 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       });
 
       // 🆕 Filter out already-dismissed alerts for this route
-      const newDangerOnRoute = dangerOnRoute.filter((review) => {
-        const dismissal = dismissedSafetyAlerts[review.id];
-
-        // If not dismissed, include it
-        if (!dismissal) return true;
-
-        // If dismissed for a different route, include it (route changed)
-        if (dismissal.routeId !== selectedRoute.databaseId) return true;
-
-        // Otherwise it's already dismissed for this route, exclude it
-        return false;
-      });
+      const newDangerOnRoute = dangerOnRoute;
 
       if (newDangerOnRoute.length > 0) {
         console.log("🚨 SHOWING SAFETY ALERT", {
           dangerCount: newDangerOnRoute.length,
           locations: newDangerOnRoute.map((r) => r.location_name),
         });
+
+        if (alertShownRef.current) {
+          console.log("⏭️ Alert already shown, skipping duplicate");
+          return;
+        }
+        alertShownRef.current = true;
+
         const locationNames = newDangerOnRoute
           .map((r) => r.location_name)
           .join(", ");
@@ -149,8 +146,16 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Find Safer Route",
               onPress: () => {
+                alertShownRef.current = false;
                 if (currentPosition) {
                   dispatch(checkForReroute(currentPosition));
+                  // Show cautionary message after reroute attempt
+                  setTimeout(() => {
+                    notify.info(
+                      "We've calculated the safest available route. Some areas may still require extra caution. Please stay alert.",
+                      "Route Updated"
+                    );
+                  }, 3000);
                 }
               },
             },
@@ -158,31 +163,18 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               text: "Continue Anyway",
               style: "cancel",
               onPress: () => {
-                // 🆕 Track dismissal for each review on this route
-                reviewIds.forEach((reviewId) => {
-                  dispatch(
-                    dismissSafetyAlert({
-                      reviewId,
-                      routeId: selectedRoute.databaseId,
-                    })
-                  );
-                });
+                alertShownRef.current = false;
               },
             },
           ]
         );
+      } else {
+        alertShownRef.current = false;
       }
     };
 
     checkReviewsAlongRoute();
-  }, [
-    communityReviews,
-    selectedRoute,
-    currentPosition,
-    dispatch,
-    dismissedSafetyAlerts,
-    isRerouting,
-  ]);
+  }, [communityReviews, selectedRoute, currentPosition, dispatch, isRerouting]);
 
   useEffect(() => {
     // Force map refresh every 30 seconds if position hasn't changed
