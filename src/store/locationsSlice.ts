@@ -261,6 +261,7 @@ interface LocationsState {
       routeId: string | undefined;
     };
   };
+  isRerouting: boolean;
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -340,6 +341,7 @@ const initialState: LocationsState = {
   currentNavigationStep: null,
   navigationStartTime: null,
   dismissedSafetyAlerts: {},
+  isRerouting: false,
 };
 
 
@@ -1602,10 +1604,23 @@ export const checkForReroute = createAsyncThunk(
   ) => {
     const state = getState() as RootState;
     const { selectedRoute, routeRequest } = state.locations;
+
+    console.log('🔍 checkForReroute called');
+    console.log('🔍 currentPosition:', currentPosition);
+    console.log('🔍 selectedRoute exists:', !!selectedRoute);
+    console.log('🔍 selectedRoute.databaseId:', selectedRoute?.databaseId);
+    console.log('🔍 routeRequest exists:', !!routeRequest);
+    console.log('🔍 routeRequest details:', JSON.stringify(routeRequest, null, 2));
+
     if (!selectedRoute || !routeRequest) {
-      console.log('❌ BLOCKED - selectedRoute:', selectedRoute?.databaseId);
-      console.log('❌ BLOCKED - routeRequest:', routeRequest); return;
+      console.log('❌ BLOCKED - Missing data for reroute');
+      console.log('❌ selectedRoute:', selectedRoute?.databaseId);
+      console.log('❌ routeRequest:', routeRequest);
+      return;
     }
+    // @ts-ignore
+    dispatch(setRerouting(true));
+
     console.log('✅ STARTING reroute from:', currentPosition);
 
     // Show alert
@@ -1732,13 +1747,19 @@ export const checkForReroute = createAsyncThunk(
           if (oldRouteId) {
             dispatch(clearDismissedAlertsForRoute(oldRouteId));
           }
-          notify.info(
+          notify.success(
             "New route calculated from your current position",
             "Route Updated"
           );
+          setTimeout(() => {
+            // @ts-ignore
+            dispatch(setRerouting(false));
+          }, 10000);
         }
       }
     } catch (error) {
+      // @ts-ignore
+      dispatch(setRerouting(false));
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
@@ -1959,6 +1980,9 @@ const locationsSlice = createSlice({
           delete state.dismissedSafetyAlerts[reviewId];
         }
       });
+    },
+    setRerouting: (state, action: PayloadAction<boolean>) => {
+      state.isRerouting = action.payload;
     },
   },
 
@@ -2328,6 +2352,7 @@ export const {
   dismissSafetyAlert,
   clearDismissedSafetyAlerts,
   clearDismissedAlertsForRoute,
+  setRerouting,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

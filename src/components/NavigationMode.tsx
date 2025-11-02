@@ -43,6 +43,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     userLocation,
     navigationActive,
     dismissedSafetyAlerts,
+    isRerouting,
   } = useAppSelector((state) => state.locations);
 
   const [currentPosition, setCurrentPosition] = useState<{
@@ -75,8 +76,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   useEffect(() => {
     // SMART CHECK: Only alert if dangerous review is ON our route
-    if (!selectedRoute || !currentPosition || !communityReviews) return;
-
+    if (
+      !selectedRoute ||
+      !currentPosition ||
+      !communityReviews ||
+      isRerouting
+    ) {
+      return;
+    }
     const checkReviewsAlongRoute = () => {
       // Get ALL dangerous reviews (not just recent ones)
       const dangerousReviews = communityReviews.filter((review) => {
@@ -163,6 +170,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     currentPosition,
     dispatch,
     dismissedSafetyAlerts,
+    isRerouting,
   ]);
 
   useEffect(() => {

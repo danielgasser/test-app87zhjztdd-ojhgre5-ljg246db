@@ -233,31 +233,34 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       return;
     }
 
-    dispatch(
-      setRouteRequest({
-        origin: {
-          latitude: fromLocation.latitude,
-          longitude: fromLocation.longitude,
-        },
-        destination: {
-          latitude: toLocation.latitude,
-          longitude: toLocation.longitude,
-        },
-        user_demographics: {
-          race_ethnicity: userProfile?.race_ethnicity?.[0] || "",
-          gender: userProfile?.gender || "",
-          lgbtq_status: String(userProfile?.lgbtq_status ?? ""),
-          religion: userProfile?.religion || "",
-          disability_status: userProfile?.disability_status?.[0] || "",
-          age_range: userProfile?.age_range || "",
-        },
-        route_preferences: {
-          prioritize_safety: true,
-          avoid_evening_danger: routePreferences.avoidEveningDanger,
-          max_detour_minutes: routePreferences.maxDetourMinutes || 30,
-        },
-      })
-    );
+    // Create the route request data object
+    const routeRequestData = {
+      origin: {
+        latitude: fromLocation.latitude,
+        longitude: fromLocation.longitude,
+      },
+      destination: {
+        latitude: toLocation.latitude,
+        longitude: toLocation.longitude,
+      },
+      user_demographics: {
+        race_ethnicity: userProfile?.race_ethnicity?.[0] || "",
+        gender: userProfile?.gender || "",
+        lgbtq_status: String(userProfile?.lgbtq_status ?? ""),
+        religion: userProfile?.religion || "",
+        disability_status: userProfile?.disability_status?.[0] || "",
+        age_range: userProfile?.age_range || "",
+      },
+      route_preferences: {
+        prioritize_safety: true,
+        avoid_evening_danger: routePreferences.avoidEveningDanger,
+        max_detour_minutes: routePreferences.maxDetourMinutes || 30,
+      },
+    };
+
+    console.log("📝 Saving routeRequest to Redux:", routeRequestData);
+    dispatch(setRouteRequest(routeRequestData));
+    console.log("✅ routeRequest saved to Redux");
 
     const savedRoute = await dispatch(
       saveRouteToDatabase({
