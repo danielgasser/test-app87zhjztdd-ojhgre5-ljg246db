@@ -17,7 +17,9 @@ export default function TabLayout() {
     "APP version:",
     appConfig.expo?.version,
     "Platform:",
-    Platform.OS
+    Platform.OS,
+    "iOS Version:",
+    Platform.Version
   );
 
   useEffect(() => {

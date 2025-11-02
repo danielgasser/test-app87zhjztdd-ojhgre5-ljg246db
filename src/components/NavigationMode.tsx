@@ -16,6 +16,7 @@ import {
   checkForReroute,
   startNavigationSession,
   endNavigationSession,
+  dismissSafetyAlert,
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
@@ -40,6 +41,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     currentNavigationStep,
     userLocation,
     navigationActive,
+    dismissedSafetyAlerts,
   } = useAppSelector((state) => state.locations);
 
   const [currentPosition, setCurrentPosition] = useState<{
@@ -99,10 +101,27 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         return isNearRoute;
       });
 
-      if (dangerOnRoute.length > 0) {
-        const locationNames = dangerOnRoute
+      // 🆕 Filter out already-dismissed alerts for this route
+      const newDangerOnRoute = dangerOnRoute.filter((review) => {
+        const dismissal = dismissedSafetyAlerts[review.id];
+
+        // If not dismissed, include it
+        if (!dismissal) return true;
+
+        // If dismissed for a different route, include it (route changed)
+        if (dismissal.routeId !== selectedRoute.databaseId) return true;
+
+        // Otherwise it's already dismissed for this route, exclude it
+        return false;
+      });
+
+      if (newDangerOnRoute.length > 0) {
+        const locationNames = newDangerOnRoute
           .map((r) => r.location_name)
           .join(", ");
+
+        // Store review IDs for dismissal tracking
+        const reviewIds = newDangerOnRoute.map((r) => r.id);
 
         notify.confirm(
           "⚠️ SAFETY ALERT ON YOUR ROUTE",
@@ -119,7 +138,17 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Continue Anyway",
               style: "cancel",
-              onPress: () => {},
+              onPress: () => {
+                // 🆕 Track dismissal for each review on this route
+                reviewIds.forEach((reviewId) => {
+                  dispatch(
+                    dismissSafetyAlert({
+                      reviewId,
+                      routeId: selectedRoute.databaseId,
+                    })
+                  );
+                });
+              },
             },
           ]
         );
@@ -127,7 +156,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     };
 
     checkReviewsAlongRoute();
-  }, [communityReviews, selectedRoute, currentPosition, dispatch]);
+  }, [
+    communityReviews,
+    selectedRoute,
+    currentPosition,
+    dispatch,
+    dismissedSafetyAlerts,
+  ]);
 
   useEffect(() => {
     // Force map refresh every 30 seconds if position hasn't changed

@@ -255,6 +255,12 @@ interface LocationsState {
   navigationActive: boolean;
   currentNavigationStep: number | null;
   navigationStartTime: string | null;
+  dismissedSafetyAlerts: {
+    [reviewId: string]: {
+      dismissedAt: string;
+      routeId: string | undefined;
+    };
+  };
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -333,6 +339,7 @@ const initialState: LocationsState = {
   navigationActive: false,
   currentNavigationStep: null,
   navigationStartTime: null,
+  dismissedSafetyAlerts: {},
 };
 
 
@@ -1600,11 +1607,10 @@ export const checkForReroute = createAsyncThunk(
       return;
     }
 
-
     // Show alert
     notify.info(
       "You've gone off course. Finding a new route...",
-      "Recalculating Route",
+      "Recalculating Route"
     );
 
     try {
@@ -1629,8 +1635,37 @@ export const checkForReroute = createAsyncThunk(
             result.improvement_summary.danger_zones_avoided > 0;
 
           if (hasImprovement) {
+            // 🆕 Save the new route to database
+            const savedRoute = await dispatch(
+              saveRouteToDatabase({
+                route_coordinates: result.optimized_route.coordinates,
+                origin_name: "Current Location",
+                destination_name: routeRequest.destination.latitude + "," + routeRequest.destination.longitude,
+                distance_km: result.optimized_route.distance_kilometers,
+                duration_minutes: result.optimized_route.estimated_duration_minutes,
+                safety_score: result.optimized_route.safety_analysis.overall_route_score,
+              })
+            ).unwrap();
+
+            // 🆕 Attach database ID to the route
+            const routeWithDbId = {
+              ...result.optimized_route,
+              databaseId: savedRoute.id,
+            };
+
             // Use the safer route
-            dispatch(setSelectedRoute(result.optimized_route));
+            dispatch(setSelectedRoute(routeWithDbId));
+
+            // 🆕 End old navigation session if exists
+            if (selectedRoute.databaseId) {
+              await dispatch(endNavigationSession(selectedRoute.databaseId));
+            }
+
+            // 🆕 Start new navigation session with new route
+            await dispatch(startNavigationSession(savedRoute.id));
+
+            // 🆕 Clear dismissed alerts - fresh start with new safer route
+            dispatch(clearDismissedSafetyAlerts());
 
             notify.info(
               `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
@@ -1645,9 +1680,11 @@ export const checkForReroute = createAsyncThunk(
           throw new Error("Smart route generation failed");
         }
       } catch (smartRouteError) {
-
         // Fallback to basic route generation
-        const errorMessage = smartRouteError instanceof Error ? smartRouteError.message : String(smartRouteError);
+        const errorMessage =
+          smartRouteError instanceof Error
+            ? smartRouteError.message
+            : String(smartRouteError);
 
         if (errorMessage.includes("No safer alternative available")) {
           // Don't try fallback - inform user directly
@@ -1655,10 +1692,41 @@ export const checkForReroute = createAsyncThunk(
         }
 
         // For other errors, try fallback to basic route generation
-        const basicResult = await dispatch(generateSafeRoute(newRouteRequest)).unwrap();
+        const basicResult = await dispatch(
+          generateSafeRoute(newRouteRequest)
+        ).unwrap();
 
         if (basicResult.route) {
-          dispatch(setSelectedRoute(basicResult.route));
+          // 🆕 Save the fallback route to database
+          const savedRoute = await dispatch(
+            saveRouteToDatabase({
+              route_coordinates: basicResult.route.coordinates,
+              origin_name: "Current Location",
+              destination_name: routeRequest.destination.latitude + "," + routeRequest.destination.longitude,
+              distance_km: basicResult.route.distance_kilometers,
+              duration_minutes: basicResult.route.estimated_duration_minutes,
+              safety_score: basicResult.route.safety_analysis.overall_route_score,
+            })
+          ).unwrap();
+
+          // 🆕 Attach database ID
+          const routeWithDbId = {
+            ...basicResult.route,
+            databaseId: savedRoute.id,
+          };
+
+          dispatch(setSelectedRoute(routeWithDbId));
+
+          // 🆕 End old navigation session
+          if (selectedRoute.databaseId) {
+            await dispatch(endNavigationSession(selectedRoute.databaseId));
+          }
+
+          // 🆕 Start new navigation session
+          await dispatch(startNavigationSession(savedRoute.id));
+
+          // 🆕 Clear dismissed alerts
+          dispatch(clearDismissedSafetyAlerts());
 
           notify.info(
             "New route calculated from your current position",
@@ -1666,9 +1734,9 @@ export const checkForReroute = createAsyncThunk(
           );
         }
       }
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       if (errorMessage === "NO_ALTERNATIVE_ROUTE") {
         // No safer route exists - give user clear options
@@ -1679,13 +1747,13 @@ export const checkForReroute = createAsyncThunk(
             {
               text: "Continue Current Route",
               style: "cancel",
-              onPress: () => { }
+              onPress: () => { },
             },
             {
               text: "Stop Navigation",
               style: "destructive",
-              onPress: () => dispatch(endNavigation())
-            }
+              onPress: () => dispatch(endNavigation()),
+            },
           ],
           "warning"
         );
@@ -1704,7 +1772,7 @@ export const checkForReroute = createAsyncThunk(
             {
               text: "Continue",
               style: "cancel",
-              onPress: () => { }
+              onPress: () => { },
             },
           ]
         );
@@ -1712,7 +1780,6 @@ export const checkForReroute = createAsyncThunk(
     }
   }
 );
-
 // ================================
 // HELPER FUNCTIONS
 // ================================
@@ -1864,6 +1931,31 @@ const locationsSlice = createSlice({
 
     updateNavigationProgress: (state, action: PayloadAction<number>) => {
       state.currentNavigationStep = action.payload;
+    },
+    // Safety alert dismissal tracking
+    dismissSafetyAlert: (
+      state,
+      action: PayloadAction<{ reviewId: string; routeId: string | undefined }>
+    ) => {
+      const { reviewId, routeId } = action.payload;
+      state.dismissedSafetyAlerts[reviewId] = {
+        dismissedAt: new Date().toISOString(),
+        routeId,
+      };
+    },
+
+    clearDismissedSafetyAlerts: (state) => {
+      state.dismissedSafetyAlerts = {};
+    },
+
+    clearDismissedAlertsForRoute: (state, action: PayloadAction<string>) => {
+      const routeId = action.payload;
+      // Remove alerts that were dismissed for a specific route
+      Object.keys(state.dismissedSafetyAlerts).forEach((reviewId) => {
+        if (state.dismissedSafetyAlerts[reviewId].routeId === routeId) {
+          delete state.dismissedSafetyAlerts[reviewId];
+        }
+      });
     },
   },
 
@@ -2230,6 +2322,9 @@ export const {
   startNavigation,
   endNavigation,
   updateNavigationProgress,
+  dismissSafetyAlert,
+  clearDismissedSafetyAlerts,
+  clearDismissedAlertsForRoute,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
