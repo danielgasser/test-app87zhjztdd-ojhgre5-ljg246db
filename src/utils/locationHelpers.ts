@@ -9,7 +9,6 @@ export const getUserCountry = async (
     userLocation: { latitude: number; longitude: number } | null
 ): Promise<string> => {
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-    console.log('🌍 getUserCountry called with:', userLocation);  // ← ADD
 
     if (!googleApiKey || !userLocation) {
         console.log('🌍 No API key or location, defaulting to us');  // ← ADD

@@ -1602,10 +1602,11 @@ export const checkForReroute = createAsyncThunk(
   ) => {
     const state = getState() as RootState;
     const { selectedRoute, routeRequest } = state.locations;
-
     if (!selectedRoute || !routeRequest) {
-      return;
+      console.log('❌ BLOCKED - selectedRoute:', selectedRoute?.databaseId);
+      console.log('❌ BLOCKED - routeRequest:', routeRequest); return;
     }
+    console.log('✅ STARTING reroute from:', currentPosition);
 
     // Show alert
     notify.info(
@@ -1627,6 +1628,7 @@ export const checkForReroute = createAsyncThunk(
       // Try smart route first (safer route)
       try {
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
+        console.log('✅ REROUTE RESULT:', result ? 'success' : 'failed');
 
         if (result.success && result.optimized_route) {
           // Check if there's actual improvement
@@ -1853,7 +1855,6 @@ const locationsSlice = createSlice({
       state.routeAlternatives = [];
       state.routeSafetyAnalysis = null;
       state.routeError = null;
-      state.routeRequest = null;
       state.smartRouteComparison = null;
       state.showSmartRouteComparison = false;
     },

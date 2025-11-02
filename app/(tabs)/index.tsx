@@ -84,9 +84,6 @@ interface SearchResult {
 export default function MapScreen() {
   useEffect(() => {
     const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-    console.log("🔑 API Key present:", !!apiKey);
-    console.log("🔑 API Key length:", apiKey?.length);
-    console.log("🔑 First 10 chars:", apiKey?.substring(0, 10));
   }, []);
   // ============= STATE VARIABLES =============
   const mapRef = useRef<MapView>(null);

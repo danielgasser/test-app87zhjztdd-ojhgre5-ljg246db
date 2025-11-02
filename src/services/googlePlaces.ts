@@ -177,7 +177,6 @@ export async function getPlaceAutocomplete(
     options: AutocompleteOptions
 ): Promise<PlaceAutocompleteResult[]> {
     const { query, latitude, longitude, radius, types, components } = options;
-    console.log('🔍 Search called with:', query);  // ← ADD THIS LINE
 
     if (query.length < 2) {
         return [];
@@ -208,11 +207,9 @@ export async function getPlaceAutocomplete(
     if (components) {
         url += `&components=${components}`;
     }
-    console.log('🔍 Calling URL:', url.replace(apiKey, 'API_KEY_HIDDEN'));  // ← ADD THIS
 
     try {
         const data = await fetchGoogleApi(url);
-        console.log('🔍 API returned:', data.predictions?.length || 0, 'results');  // ← ADD
 
         return data.predictions || [];
     } catch (error) {

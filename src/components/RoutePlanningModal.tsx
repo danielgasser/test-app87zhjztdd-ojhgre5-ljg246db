@@ -221,6 +221,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
+    console.log("🚀 handleStartNavigation CALLED");
+
     if (
       !smartRouteComparison?.optimized_route ||
       !selectedRoute ||
