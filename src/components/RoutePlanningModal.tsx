@@ -25,6 +25,7 @@ import {
   startNavigation,
   saveRouteToDatabase,
   startNavigationSession,
+  setRouteRequest,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -229,6 +230,33 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       notify.error("No route selected for navigation");
       return;
     }
+
+    dispatch(
+      setRouteRequest({
+        origin: {
+          latitude: fromLocation.latitude,
+          longitude: fromLocation.longitude,
+        },
+        destination: {
+          latitude: toLocation.latitude,
+          longitude: toLocation.longitude,
+        },
+        user_demographics: {
+          race_ethnicity: userProfile?.race_ethnicity?.[0] || "",
+          gender: userProfile?.gender || "",
+          lgbtq_status: String(userProfile?.lgbtq_status ?? ""),
+          religion: userProfile?.religion || "",
+          disability_status: userProfile?.disability_status?.[0] || "",
+          age_range: userProfile?.age_range || "",
+        },
+        route_preferences: {
+          prioritize_safety: true,
+          avoid_evening_danger: routePreferences.avoidEveningDanger,
+          max_detour_minutes: routePreferences.maxDetourMinutes || 30,
+        },
+      })
+    );
+
     const savedRoute = await dispatch(
       saveRouteToDatabase({
         route_coordinates: selectedRoute.coordinates,

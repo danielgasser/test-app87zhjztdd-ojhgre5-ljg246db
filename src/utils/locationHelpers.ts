@@ -18,25 +18,19 @@ export const getUserCountry = async (
 
     try {
         const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLocation.latitude},${userLocation.longitude}&key=${googleApiKey}`;
-        console.log('🌍 Calling geocoding API...');  // ← ADD
         const response = await fetch(url);
         const data = await response.json();
-        console.log('🌍 Geocoding API response status:', data.status);  // ← ADD
-        console.log('🌍 Geocoding API response:', JSON.stringify(data, null, 2));  // ← ADD
 
         if (data.status === 'OK' && data.results[0]) {
             const countryComponent = data.results[0].address_components.find(
                 (c: any) => c.types.includes('country')
             );
             const countryCode = countryComponent?.short_name?.toLowerCase() || 'us';
-            console.log('🌍 Found country code:', countryCode);  // ← ADD
             return countryCode;
         }
-        console.log('🌍 API status not OK or no results, defaulting to us');  // ← ADD
 
         return 'us';
     } catch (error) {
-        console.log('🌍 getUserCountry ERROR:', error);  // ← ADD
         logger.error('no user country found', error)
         notify.error('❌ We couldn\'t get your country:');
         return 'us';

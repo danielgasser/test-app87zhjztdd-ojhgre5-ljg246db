@@ -22,6 +22,7 @@ import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { store } from "@/store";
 
 const { width, height } = Dimensions.get("window");
 
@@ -75,12 +76,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useEffect(() => {
     // SMART CHECK: Only alert if dangerous review is ON our route
     if (!selectedRoute || !currentPosition || !communityReviews) return;
+    console.log("🔍 Safety check triggered"); // ← ADD
+    console.log("🔍 dismissedSafetyAlerts:", dismissedSafetyAlerts); // ← ADD
 
     const checkReviewsAlongRoute = () => {
       // Get ALL dangerous reviews (not just recent ones)
       const dangerousReviews = communityReviews.filter((review) => {
         return review.safety_rating < 3.0;
       });
+      console.log("🔍 dangerousReviews count:", dangerousReviews.length); // ← ADD
 
       if (dangerousReviews.length === 0) return;
 
@@ -100,11 +104,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         });
         return isNearRoute;
       });
+      console.log("🔍 dangerOnRoute count:", dangerOnRoute.length); // ← ADD
 
       // 🆕 Filter out already-dismissed alerts for this route
       const newDangerOnRoute = dangerOnRoute.filter((review) => {
         const dismissal = dismissedSafetyAlerts[review.id];
 
+        console.log(`🔍 Review ${review.id} dismissal:`, dismissal); // ← ADD
+        console.log(`🔍 Current routeId:`, selectedRoute.databaseId); // ← ADD
         // If not dismissed, include it
         if (!dismissal) return true;
 
@@ -114,6 +121,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         // Otherwise it's already dismissed for this route, exclude it
         return false;
       });
+      console.log("🔍 newDangerOnRoute count:", newDangerOnRoute.length); // ← ADD
 
       if (newDangerOnRoute.length > 0) {
         const locationNames = newDangerOnRoute
@@ -130,6 +138,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Find Safer Route",
               onPress: () => {
+                console.log("🔍 Find Safer Route clicked"); // ← ADD
                 if (currentPosition) {
                   dispatch(checkForReroute(currentPosition));
                 }
@@ -139,6 +148,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               text: "Continue Anyway",
               style: "cancel",
               onPress: () => {
+                console.log(
+                  "🔍 Continue Anyway clicked, dismissing:",
+                  reviewIds
+                ); // ← ADD
+                console.log(
+                  "🔍 Current dismissedSafetyAlerts before:",
+                  dismissedSafetyAlerts
+                ); // ← ADD
                 // 🆕 Track dismissal for each review on this route
                 reviewIds.forEach((reviewId) => {
                   dispatch(
@@ -148,6 +165,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                     })
                   );
                 });
+                setTimeout(() => {
+                  const state = store.getState(); // Need to import store
+                  console.log(
+                    "🔍 dismissedSafetyAlerts after:",
+                    state.locations.dismissedSafetyAlerts
+                  );
+                }, 100);
               },
             },
           ]
