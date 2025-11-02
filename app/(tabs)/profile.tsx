@@ -442,13 +442,16 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
   },
   scrollView: {
-    height: "20%",
+    //height: "20%",
+    flex: 1,
     width: "100%",
     backgroundColor: theme.colors.backgroundSecondary,
     padding: 10,
   },
   contentContainer: {
-    paddingBottom: 50,
+    //paddingBottom: 50,
+    flexGrow: 1,
+    padding: theme.spacing.md,
   },
   header: {
     alignItems: "center",

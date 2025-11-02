@@ -32,6 +32,7 @@ import {
   clearNavigationIntent,
   endNavigation,
   startNavigation,
+  setDangerZonesVisible,
 } from "../../src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -324,7 +325,7 @@ export default function MapScreen() {
 
   const handleToggleDangerZones = () => {
     if (!requireAuth(userId, "view danger zones")) return;
-    // Check if user has valid demographics
+
     const hasValidDemographics =
       userProfile &&
       (userProfile.race_ethnicity?.length > 0 ||
@@ -332,9 +333,22 @@ export default function MapScreen() {
         userProfile.lgbtq_status);
 
     if (!hasValidDemographics) {
+      notify.confirm(
+        "Complete your profile to view Danger Zones",
+        "Profile Required",
+        [
+          { text: "Cancel", onPress: () => {} },
+          {
+            text: "Complete Profile",
+            onPress: () => router.push("/onboarding"),
+          },
+        ]
+      );
       return;
     }
+
     dispatch(toggleDangerZones());
+
     if (!dangerZonesVisible && dangerZones.length === 0 && userId) {
       dispatch(
         fetchDangerZones({
@@ -654,7 +668,12 @@ export default function MapScreen() {
         userProfile.gender ||
         userProfile.lgbtq_status);
 
-    if (userId && userLocation && hasValidDemographics) {
+    if (
+      userId &&
+      userLocation &&
+      hasValidDemographics &&
+      dangerZones.length === 0
+    ) {
       dispatch(
         fetchDangerZones({
           userId: userId,
@@ -662,8 +681,9 @@ export default function MapScreen() {
           userDemographics: userProfile,
         })
       );
+      dispatch(setDangerZonesVisible(true));
     }
-  }, [userId, userLocation, dispatch]);
+  }, [userId, userLocation, userProfile, dangerZones.length, dispatch]);
 
   const requestedPredictions = useRef<Set<string>>(new Set());
 
@@ -1124,7 +1144,7 @@ export default function MapScreen() {
         </View>
       )}
       {/* Danger Zones Legend */}
-      {dangerZonesVisible && dangerZones.length > 0 ? (
+      {dangerZonesVisible && dangerZones.length > 0 && (
         <View style={styles.dangerZoneLegend}>
           <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
           <Text style={styles.legendSubtitle}>
@@ -1159,13 +1179,6 @@ export default function MapScreen() {
               <Text style={styles.legendText}>Low Risk</Text>
             </View>
           </View>
-        </View>
-      ) : (
-        <View style={styles.dangerZoneLegend}>
-          <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
-          <Text style={styles.legendSubtitle}>
-            No danger zones in your area
-          </Text>
         </View>
       )}
       <View style={styles.routeControls}>
