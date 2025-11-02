@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
+import { logger } from "@sentry/react-native";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -155,7 +156,6 @@ serve(async (req) => {
 
         // ✅ CHECK: Only create danger zone if enough incidents
         if (scores.length < EDGE_CONFIG.DANGER_ZONES.MIN_INCIDENTS_FOR_ZONE) {
-          console.log(`⏭️  Skipping ${location.name}: only ${scores.length} incidents (need ${EDGE_CONFIG.DANGER_ZONES.MIN_INCIDENTS_FOR_ZONE})`)
           continue
         }
 

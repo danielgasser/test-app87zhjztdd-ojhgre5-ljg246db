@@ -250,11 +250,6 @@ function RootLayoutNav() {
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        console.log("🔔 NOTIFICATION TAPPED", response);
-        console.log(
-          "🔔 NOTIFICATION DATA",
-          response.notification.request.content.data
-        ); // ADD THIS
         const data = response.notification.request.content.data as Record<
           string,
           any
