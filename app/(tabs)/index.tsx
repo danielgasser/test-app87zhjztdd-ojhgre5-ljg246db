@@ -1124,7 +1124,7 @@ export default function MapScreen() {
         </View>
       )}
       {/* Danger Zones Legend */}
-      {dangerZonesVisible && dangerZones.length > 0 && (
+      {dangerZonesVisible && dangerZones.length > 0 ? (
         <View style={styles.dangerZoneLegend}>
           <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
           <Text style={styles.legendSubtitle}>
@@ -1159,6 +1159,13 @@ export default function MapScreen() {
               <Text style={styles.legendText}>Low Risk</Text>
             </View>
           </View>
+        </View>
+      ) : (
+        <View style={styles.dangerZoneLegend}>
+          <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
+          <Text style={styles.legendSubtitle}>
+            No danger zones in your area
+          </Text>
         </View>
       )}
       <View style={styles.routeControls}>

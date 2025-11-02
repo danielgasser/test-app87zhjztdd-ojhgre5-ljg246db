@@ -1716,6 +1716,7 @@ export const checkForReroute = createAsyncThunk(
             ...basicResult.route,
             databaseId: savedRoute.id,
           };
+          const oldRouteId = selectedRoute.databaseId;
 
           dispatch(setSelectedRoute(routeWithDbId));
 
@@ -1728,8 +1729,9 @@ export const checkForReroute = createAsyncThunk(
           await dispatch(startNavigationSession(savedRoute.id));
 
           // 🆕 Clear dismissed alerts
-          dispatch(clearDismissedSafetyAlerts());
-
+          if (oldRouteId) {
+            dispatch(clearDismissedAlertsForRoute(oldRouteId));
+          }
           notify.info(
             "New route calculated from your current position",
             "Route Updated"
