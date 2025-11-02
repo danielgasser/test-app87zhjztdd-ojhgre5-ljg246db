@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
-import { logger } from "@sentry/react-native";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -171,9 +170,23 @@ serve(async (req) => {
 
         // Check if this location is particularly dangerous for user's demographics
         const userDemoScores = scores.filter((s: any) => {
-          return (userProfile.race_ethnicity?.includes(s.demographic_value) ||
-            s.demographic_value === userProfile.gender ||
-            (s.demographic_type === 'lgbtq_status' && userProfile.lgbtq_status && s.demographic_value === 'LGBTQ+'))
+          // Match user's exact demographics
+          if (userProfile.race_ethnicity?.includes(s.demographic_value)) return true;
+          if (s.demographic_value === userProfile.gender) return true;
+          if (s.demographic_type === 'lgbtq_status' && userProfile.lgbtq_status && s.demographic_value === 'LGBTQ+') return true;
+
+          // Show general minority/safety issues regardless of specific demographic
+          // If ANY minority group is affected, show to all minorities
+          const minorityRaces = ['Black/African American', 'Hispanic/Latino', 'Asian', 'Native American', 'Middle Eastern', 'Pacific Islander', 'Multiracial'];
+          const isMinorityRace = userProfile.race_ethnicity?.some(race => minorityRaces.includes(race));
+          const scoreIsMinority = minorityRaces.includes(s.demographic_value);
+
+          if (isMinorityRace && scoreIsMinority) return true;
+
+          // LGBTQ+ individuals should see zones dangerous for any gender minority
+          if (userProfile.lgbtq_status && scoreIsMinority) return true;
+
+          return false;
         })
 
         if (userDemoScores.length === 0) continue
@@ -183,8 +196,8 @@ serve(async (req) => {
           sum + Number(s.avg_overall_score), 0) / userDemoScores.length
 
         let dangerLevel: 'high' | 'medium' | 'low'
-        if (avgScore < 2) dangerLevel = 'high'
-        else if (avgScore < 2.5) dangerLevel = 'medium'
+        if (avgScore < EDGE_CONFIG.DANGER_ZONES.DANGER_THRESHOLD_HIGH) dangerLevel = 'high'
+        else if (avgScore < EDGE_CONFIG.DANGER_ZONES.DANGER_THRESHOLD_MEDIUM) dangerLevel = 'medium'
         else dangerLevel = 'low'
 
         // Create 2-mile radius polygon (octagon for simplicity)

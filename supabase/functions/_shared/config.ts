@@ -45,11 +45,14 @@ export const EDGE_CONFIG = {
         POLYGON_RADIUS_MILES: 2,              // Already in your config  
         POLYGON_SIDES: 8,                     // Already in your config
         MIN_INCIDENTS_FOR_ZONE: 1,       // Minimum incidents to create danger zone
+        DANGER_THRESHOLD_HIGH: 2.0,  // ← Tune these
+        DANGER_THRESHOLD_MEDIUM: 2.5,
+        INCLUDE_SIMILAR_DEMOGRAPHICS: true,
         SEVERITY_MULTIPLIERS: {
             HIGH: 2.0,                          // High severity incident weight
             MEDIUM: 1.5,                        // Medium severity incident weight
             LOW: 1.0,                           // Low severity incident weight
-        }
+        },
     },
     RECOMMENDATIONS: {
         SCORING_WEIGHTS: {

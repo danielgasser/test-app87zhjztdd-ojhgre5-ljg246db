@@ -38,7 +38,12 @@ export default function DangerZoneOverlay({
   dangerZones,
   visible,
 }: DangerZoneOverlayProps) {
+  console.log("=== DANGER ZONE DEBUG ===");
+  console.log("Visible:", visible);
+  console.log("Zones count:", dangerZones.length);
+  console.log("Zone data:", JSON.stringify(dangerZones, null, 2));
   if (!visible || dangerZones.length === 0) {
+    console.log("Early return - visible or no zones");
     return null;
   }
   return (
@@ -56,8 +61,10 @@ export default function DangerZoneOverlay({
         }
         return (
           <React.Fragment key={zone.id}>
-            {/* Danger zone polygon */}
             <Polygon
+              key={`polygon-${zone.id}`}
+              zIndex={1000}
+              tappable={false}
               coordinates={zone.polygon_points.map((point) => {
                 return {
                   latitude: point.lat,
@@ -69,8 +76,9 @@ export default function DangerZoneOverlay({
               strokeWidth={2}
             />
 
-            {/* Center marker with warning icon */}
             <Marker
+              key={`marker-${zone.id}`}
+              zIndex={1001}
               coordinate={{
                 latitude: zone.center_lat,
                 longitude: zone.center_lng,

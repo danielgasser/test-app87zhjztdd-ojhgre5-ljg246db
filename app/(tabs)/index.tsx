@@ -195,7 +195,6 @@ export default function MapScreen() {
       };
     }
   };
-
   // ============= EVENT HANDLERS =============
   const handleMarkerPress = async (locationId: string) => {
     setSelectedLocationId(locationId);
@@ -324,6 +323,9 @@ export default function MapScreen() {
   };
 
   const handleToggleDangerZones = () => {
+    console.log("=== TOGGLE DANGER ZONES ===");
+    console.log("userId:", userId);
+    console.log("userProfile:", JSON.stringify(userProfile, null, 2));
     if (!requireAuth(userId, "view danger zones")) return;
 
     const hasValidDemographics =
@@ -331,7 +333,11 @@ export default function MapScreen() {
       (userProfile.race_ethnicity?.length > 0 ||
         userProfile.gender ||
         userProfile.lgbtq_status);
-
+    console.log("=== AUTO-LOAD USEEFFECT ===");
+    console.log("userId:", userId);
+    console.log("userLocation:", userLocation);
+    console.log("hasValidDemographics:", hasValidDemographics);
+    console.log("dangerZones.length:", dangerZones.length);
     if (!hasValidDemographics) {
       notify.confirm(
         "Complete your profile to view Danger Zones",
@@ -667,7 +673,11 @@ export default function MapScreen() {
       (userProfile.race_ethnicity?.length > 0 ||
         userProfile.gender ||
         userProfile.lgbtq_status);
-
+    console.log("=== AUTO-LOAD USEEFFECT ===");
+    console.log("userId:", userId);
+    console.log("userLocation:", userLocation);
+    console.log("hasValidDemographics:", hasValidDemographics);
+    console.log("dangerZones.length:", dangerZones.length);
     if (
       userId &&
       userLocation &&
@@ -856,6 +866,8 @@ export default function MapScreen() {
         key={mapKey}
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
+        mapType="standard"
+        zoomEnabled={true}
         showsPointsOfInterest={true}
         style={styles.map}
         initialRegion={region}
@@ -1144,41 +1156,52 @@ export default function MapScreen() {
         </View>
       )}
       {/* Danger Zones Legend */}
-      {dangerZonesVisible && dangerZones.length > 0 && (
+      {dangerZonesVisible && (
         <View style={styles.dangerZoneLegend}>
-          <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
-          <Text style={styles.legendSubtitle}>
-            Areas with reported discrimination
-          </Text>
-          <View style={styles.legendItems}>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: theme.colors.error },
-                ]}
-              />
-              <Text style={styles.legendText}>High Risk</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: theme.colors.accent },
-                ]}
-              />
-              <Text style={styles.legendText}>Medium Risk</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: theme.colors.mixedYellow },
-                ]}
-              />
-              <Text style={styles.legendText}>Low Risk</Text>
-            </View>
-          </View>
+          {dangerZones.length > 0 ? (
+            <>
+              <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
+              <Text style={styles.legendSubtitle}>
+                Areas with reported discrimination
+              </Text>
+              <View style={styles.legendItems}>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[
+                      styles.legendColor,
+                      { backgroundColor: theme.colors.error },
+                    ]}
+                  />
+                  <Text style={styles.legendText}>High Risk</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[
+                      styles.legendColor,
+                      { backgroundColor: theme.colors.accent },
+                    ]}
+                  />
+                  <Text style={styles.legendText}>Medium Risk</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[
+                      styles.legendColor,
+                      { backgroundColor: theme.colors.mixedYellow },
+                    ]}
+                  />
+                  <Text style={styles.legendText}>Low Risk</Text>
+                </View>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.legendTitle}>✓ No Danger Zones</Text>
+              <Text style={styles.legendSubtitle}>
+                No reported danger in this area
+              </Text>
+            </>
+          )}
         </View>
       )}
       <View style={styles.routeControls}>

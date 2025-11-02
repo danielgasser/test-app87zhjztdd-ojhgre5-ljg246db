@@ -931,6 +931,10 @@ export const fetchDangerZones = createAsyncThunk(
     radius?: number;
     userDemographics?: any;
   }) => {
+    console.log('=== FETCH DANGER ZONES CALLED ===');
+    console.log('userId:', userId);
+    console.log('radius:', radius);
+    console.log('userDemographics:', JSON.stringify(userDemographics, null, 2))
     try {
       const token = await getAuthToken();
 
@@ -949,11 +953,16 @@ export const fetchDangerZones = createAsyncThunk(
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.log('=== DANGER ZONES ERROR ===');
+        console.log('Status:', response.status);
+        console.log('Error:', errorText);
         logger.error("🛡️ Danger zones API error:", errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
+      console.log('=== DANGER ZONES SUCCESS ===');
+      console.log('Data:', JSON.stringify(data, null, 2));
       return data.danger_zones || [];
     } catch (error) {
       logger.error("Error fetching danger zones:", error);
