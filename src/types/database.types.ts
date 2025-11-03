@@ -438,6 +438,7 @@ export type Database = {
           id: string
           lgbtq_status: boolean | null
           notification_preferences: Json | null
+          preferences: Json | null
           privacy_level: string | null
           push_token: string | null
           race_ethnicity: string[] | null
@@ -459,6 +460,7 @@ export type Database = {
           id: string
           lgbtq_status?: boolean | null
           notification_preferences?: Json | null
+          preferences?: Json | null
           privacy_level?: string | null
           push_token?: string | null
           race_ethnicity?: string[] | null
@@ -480,6 +482,7 @@ export type Database = {
           id?: string
           lgbtq_status?: boolean | null
           notification_preferences?: Json | null
+          preferences?: Json | null
           privacy_level?: string | null
           push_token?: string | null
           race_ethnicity?: string[] | null
