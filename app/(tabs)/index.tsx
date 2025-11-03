@@ -335,10 +335,6 @@ export default function MapScreen() {
       // ALWAYS fetch when turning on, even if we have zones
       // This ensures we get zones for the current map view
       const visibleRadiusMeters = (region.latitudeDelta * 111000) / 2;
-      console.log("=== REGION DEBUG ===");
-      console.log("region:", region);
-      console.log("latitude:", region.latitude);
-      console.log("longitude:", region.longitude);
       // Don't send lat/lng - let edge function use user location from profile
       dispatch(
         fetchDangerZones({

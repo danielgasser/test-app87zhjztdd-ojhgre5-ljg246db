@@ -65,6 +65,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     }
 
     try {
+      if (!selectedRoute?.databaseId || !selectedRoute?.navigationSessionId) {
+        return false;
+      }
       // Query all routes in this navigation session
       const { data: sessionRoutes, error } = await supabase
         .from("routes")
@@ -205,13 +208,16 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       // 🆕 Filter out already-dismissed alerts for this route
       const unhandledDangers = [];
 
-      for (const review of dangerOnRoute) {
-        const alreadyHandled = await checkIfAlertAlreadyHandled(review.id);
-        if (!alreadyHandled) {
-          unhandledDangers.push(review);
+      try {
+        for (const review of dangerOnRoute) {
+          const alreadyHandled = await checkIfAlertAlreadyHandled(review.id);
+          if (!alreadyHandled) {
+            unhandledDangers.push(review);
+          }
         }
+      } catch (error) {
+        console.error("❌ Error checking alerts:", error);
       }
-
       unhandledDangersRef.current = unhandledDangers;
 
       if (unhandledDangers.length > 0) {

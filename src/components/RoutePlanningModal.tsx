@@ -37,7 +37,7 @@ import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { v4 as uuidv4 } from "uuid";
+import * as Crypto from "expo-crypto";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -122,7 +122,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const [dangerMessage, setDangerMessage] = useState<string>("");
   const [routeLoadingMessage, setRouteLoadingMessage] = useState(
-    "Finding Safe Route..."
+    "Finding safe route..."
   );
 
   // Initialize from location with current location
@@ -223,8 +223,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
-    const navigationSessionId = uuidv4();
+    const navigationSessionId = Crypto.randomUUID();
     dispatch(setNavigationSessionId(navigationSessionId));
+
     if (
       !smartRouteComparison?.optimized_route ||
       !selectedRoute ||
@@ -276,6 +277,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     const optimizedRoute = {
       ...smartRouteComparison.optimized_route,
       databaseId: savedRoute.id,
+      navigationSessionId: navigationSessionId,
     };
     dispatch(setSelectedRoute(optimizedRoute));
 
@@ -336,6 +338,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Handle location selection
   // Handle location selection
   const handleLocationSelect = async (location: LocationResult) => {
+    console.log("handleLocationSelect");
     // If location already has coordinates (database result), use it directly
     if (location.latitude !== 0 && location.longitude !== 0) {
       if (activeInput === "from") {
@@ -343,6 +346,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       } else if (activeInput === "to") {
         setToLocation(location);
       }
+      Keyboard.dismiss();
+
       setActiveInput(null);
       setSearchQuery("");
       setMapboxResults([]);

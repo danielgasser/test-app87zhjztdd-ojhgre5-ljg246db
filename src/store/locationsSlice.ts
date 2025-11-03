@@ -955,10 +955,7 @@ export const fetchDangerZones = createAsyncThunk(
     userDemographics?: any;
   }) => {
     try {
-      console.log('=== DANGER ZONES Start ===');
-      console.log('Getting auth token...');
       const token = await getAuthToken();
-      console.log('Token obtained:', token ? 'YES' : 'NO');
 
       const fetchBody = {
         user_id: userId,
@@ -968,11 +965,8 @@ export const fetchDangerZones = createAsyncThunk(
         user_demographics: userDemographics
       };
 
-      console.log('Fetching with body:', JSON.stringify(fetchBody, null, 2));
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
-        console.log('=== DANGER ZONES TIMEOUT ===');
         controller.abort()
       }, 10000); // 10s timeout
 
@@ -986,25 +980,17 @@ export const fetchDangerZones = createAsyncThunk(
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      console.log('Response received:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('=== DANGER ZONES FAILED ===');
-        console.log('Data:', errorText);
-
         logger.error("🛡️ Danger zones API error:", errorText);
         return [];
       }
 
       const data: DangerZonesResponse = await response.json();
-      console.log('=== DANGER ZONES SUCCESS ===');
-      console.log('Data:', JSON.stringify(data, null, 2));
       return data.danger_zones || [];
     } catch (fetchError: any) {
-      console.log('=== DANGER ZONES ERROR ===');
       if (fetchError.name === 'AbortError') {
-        console.log('=== DANGER ZONES TIMEOUT - returning empty ===');
         return [];
       }
       throw fetchError;
@@ -1699,6 +1685,7 @@ export const checkForReroute = createAsyncThunk(
             const routeWithDbId = {
               ...result.optimized_route,
               databaseId: savedRoute.id,
+              navigationSessionId: selectedRoute.navigationSessionId,
             };
 
             // Use the safer route
@@ -1774,6 +1761,7 @@ export const checkForReroute = createAsyncThunk(
           const routeWithDbId = {
             ...basicResult.route,
             databaseId: savedRoute.id,
+            navigationSessionId: selectedRoute.navigationSessionId,
           };
           const oldRouteId = selectedRoute.databaseId;
 
