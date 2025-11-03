@@ -28,6 +28,7 @@ import { resetAll } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { APP_CONFIG } from "@/utils/appConfig";
+import SearchRadiusSelector from "@/components/SearchRadiusSelector";
 const appConfig = require("../../app.config.js");
 
 export default function ProfileScreen() {
@@ -38,6 +39,7 @@ export default function ProfileScreen() {
   const [expandedSections, setExpandedSections] = useState({
     activity: true,
     demographics: false,
+    mapSettings: false,
     settings: false,
     account: false,
   });
@@ -361,7 +363,15 @@ export default function ProfileScreen() {
             >
               {renderDemographics()}
             </CollapsibleSection>
-            {/* Settings Section */}
+            {/* Map Settings Section */}
+            <CollapsibleSection
+              title="Map Settings"
+              icon="map"
+              isExpanded={expandedSections.mapSettings}
+              onToggle={() => toggleSection("mapSettings")}
+            >
+              <SearchRadiusSelector />
+            </CollapsibleSection>
             {/* Settings Section */}
             <CollapsibleSection
               title="Settings"

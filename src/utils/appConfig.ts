@@ -9,6 +9,17 @@ export const APP_CONFIG = {
     DANGER_ZONE_POLYGON_RADIUS_MILES: 2,       // Radius for individual danger zone polygons
     DANGER_ZONE_POLYGON_SIDES: 8,              // Number of sides for danger zone polygon (octagon)
     DANGER_ZONES_MAX_RADIUS_METERS: 100000,
+    // Search radius options (in kilometers)
+    SEARCH_RADIUS_OPTIONS: [
+      { label: '5 km', value: 5, description: 'City walking' },
+      { label: '10 km', value: 10, description: 'Urban exploring' },
+      { label: '25 km', value: 25, description: 'Suburban travel' },
+      { label: '50 km', value: 50, description: 'Road tripping' },
+    ],
+
+    MIN_SEARCH_RADIUS_KM: 1,
+    MAX_SEARCH_RADIUS_KM: 100,
+
   },
 
   // Safety Score Thresholds
@@ -30,29 +41,6 @@ export const APP_CONFIG = {
     COLOR_NO_REVIEWS: '#2196F3',               // Blue for no reviews
     THRESHOLD_SAFE: 4.0,
     THRESHOLD_MIXED: 3.0,
-  },
-
-  // ML/Algorithm Parameters
-  ML_PARAMS: {
-    SIMILARITY_MIN_CONFIDENCE: 0.5,            // Minimum confidence for similar users
-    LOCATION_CONFIDENCE_MAX: 0.8,              // Max confidence for location predictions
-    CONFIDENCE_DATA_POINTS_DIVISOR: 10,        // Divide data points by this for confidence
-    MIN_REVIEWS_FOR_PATTERNS: 2,               // Minimum reviews to detect patterns
-
-
-    // NEW: Confidence Calculation
-    CONFIDENCE_SETTINGS: {
-      NEUTRAL_BASELINE: 0.15,            // 15% confidence for no-data predictions
-      DATA_POINTS_DIVISOR: 15,           // Divide data sources by this for confidence
-      MAX_CONFIDENCE: 0.8,               // Maximum confidence cap (80%)
-      MIN_CONFIDENCE: 0.05,     // Minimum confidence floor (5%)
-    },
-
-    // NEW: Nearby Location Search
-    NEARBY_SEARCH: {
-      RADIUS_METERS: 1000,               // 1km radius for nearby locations
-      MAX_NEARBY_LOCATIONS: 20,          // Maximum nearby locations to consider
-    }
   },
 
   // Time-Based Categories
@@ -91,8 +79,6 @@ export const APP_CONFIG = {
     }
   },
 
-
-
   PROFILE_COMPLETION: {
     // Mandatory fields for onboarding (3 required)
     MANDATORY_FIELDS: ['race_ethnicity', 'gender', 'lgbtq_status'],
@@ -128,7 +114,6 @@ export const APP_CONFIG = {
     },
   },
 
-
   API_SETTINGS: {
     DEFAULT_PAGE_SIZE: 20,                // Default pagination size
     MAX_PAGE_SIZE: 100,                   // Maximum items per page
@@ -141,6 +126,7 @@ export const APP_CONFIG = {
     REVIEW_SOFT_DELETE: true,             // Use soft delete for reviews
     LOCATION_CACHE_TTL_MINUTES: 30,       // Location data cache time-to-live
   },
+
   ROUTE_PLANNING: {
     // Route Segmentation
     SEGMENT_LENGTH_METERS: 1000,                    // Divide routes into 1km segments for safety scoring

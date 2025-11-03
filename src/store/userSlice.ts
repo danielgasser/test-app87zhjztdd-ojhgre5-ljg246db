@@ -5,6 +5,7 @@ import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
 import { signOut } from './authSlice';
+import { logger } from '@/utils/logger';
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences'> & {
@@ -33,6 +34,7 @@ interface UserState {
   publicProfileError: string | null;
   publicReviews: PublicUserReview[];
   publicReviewsLoading: boolean;
+  searchRadiusKm: number;
 }
 
 const initialState: UserState = {
@@ -45,6 +47,7 @@ const initialState: UserState = {
   publicProfileError: null,
   publicReviews: [],
   publicReviewsLoading: false,
+  searchRadiusKm: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000,
 };
 
 // Fetch user profile
@@ -111,6 +114,59 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
   }
 );
 
+// Update search radius preference
+export const updateSearchRadius = createAsyncThunk<
+  UserProfile,
+  { userId: string; radiusKm: number }
+>(
+  'user/updateSearchRadius',
+  async ({ userId, radiusKm }: { userId: string; radiusKm: number }): Promise<UserProfile> => {
+    try {
+      // Clamp the value to min/max
+      const clampedRadius = Math.max(
+        APP_CONFIG.DISTANCE.MIN_SEARCH_RADIUS_KM,
+        Math.min(APP_CONFIG.DISTANCE.MAX_SEARCH_RADIUS_KM, radiusKm)
+      );
+
+      // Get current preferences
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from('user_profiles')
+        .select('preferences')
+        .eq('id', userId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Merge with existing preferences
+      const currentPreferences = currentProfile?.preferences || {};
+      const updatedPreferences = {
+        ...currentPreferences,
+        search: {
+          ...(currentPreferences.search || {}),
+          radius_km: clampedRadius,
+        },
+      };
+
+      // Update in database
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .update({ preferences: updatedPreferences })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Failed to update preferences');
+
+      logger.info(`✅ Search radius updated to ${clampedRadius}km`);
+      return data as UserProfile;
+    } catch (error) {
+      logger.error('❌ Failed to update search radius:', error);
+      throw error;
+    }
+  }
+);
+
 // Fetch public user profile (for viewing other users' profiles)
 export const fetchPublicUserProfile = createAsyncThunk<PublicUserProfile, string>(
   'user/fetchPublicProfile',
@@ -162,6 +218,9 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setSearchRadius: (state, action: PayloadAction<number>) => {
+      state.searchRadiusKm = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -174,6 +233,12 @@ const userSlice = createSlice({
         state.loading = false;
         state.profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
+        const preferences = action.payload.preferences as any;
+        if (preferences?.search?.radius_km) {
+          state.searchRadiusKm = preferences.search.radius_km;
+        } else {
+          state.searchRadiusKm = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000;
+        }
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
@@ -226,9 +291,28 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = null;
         state.onboardingComplete = false;
+      })
+      // Update search radius
+      .addCase(updateSearchRadius.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateSearchRadius.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+
+        // Update cached radius
+        const preferences = action.payload.preferences as any;
+        if (preferences?.search?.radius_km) {
+          state.searchRadiusKm = preferences.search.radius_km;
+        }
+      })
+      .addCase(updateSearchRadius.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update search radius';
       });
   },
 });
 
-export const { setProfile, setOnboardingComplete, clearError } = userSlice.actions;
+export const { setProfile, setOnboardingComplete, clearError, setSearchRadius } = userSlice.actions;
 export default userSlice.reducer;

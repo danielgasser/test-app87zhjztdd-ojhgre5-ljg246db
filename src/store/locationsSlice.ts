@@ -357,8 +357,11 @@ const initialState: LocationsState = {
 
 export const fetchNearbyLocations = createAsyncThunk(
   "locations/fetchNearby",
-  async ({ latitude, longitude, radius = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS }: Coordinates & { radius?: number }, { getState }) => {
-    // Get user profile from Redux state
+  async ({ latitude, longitude, radius }: Coordinates & { radius?: number }, { getState }) => {
+    // Get user's preferred radius if not explicitly provided
+    const state = getState() as any;
+    const userRadiusKm = state.user.searchRadiusKm || (APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000);
+    const radiusMeters = radius !== undefined ? radius : (userRadiusKm * 1000);    // Get user profile from Redux state
     const state = getState() as any;
     const userProfile = state.user.profile;
 
@@ -371,7 +374,7 @@ export const fetchNearbyLocations = createAsyncThunk(
         user_race_ethnicity: userProfile.race_ethnicity,
         user_gender: userProfile.gender,
         user_lgbtq_status: userProfile.lgbtq_status,
-        radius_meters: radius,
+        radius_meters: radiusMeters,
       });
 
       if (error) throw error;
