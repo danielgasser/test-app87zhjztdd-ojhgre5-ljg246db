@@ -11,6 +11,11 @@ import { notify } from '@/utils/notificationService';
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences' | 'preferences'> & {
   notification_preferences?: Record<string, any> | null;
+  preferences?: {
+    search?: {
+      radius_km?: number;
+    };
+  } | null;
 };
 const isProfileComplete = (profile: UserProfile | null): boolean => {
   if (!profile) return false;

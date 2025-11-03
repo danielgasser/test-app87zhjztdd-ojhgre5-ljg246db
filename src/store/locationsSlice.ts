@@ -362,7 +362,6 @@ export const fetchNearbyLocations = createAsyncThunk(
     const state = getState() as any;
     const userRadiusKm = state.user.searchRadiusKm || (APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000);
     const radiusMeters = radius !== undefined ? radius : (userRadiusKm * 1000);    // Get user profile from Redux state
-    const state = getState() as any;
     const userProfile = state.user.profile;
 
     // Use demographic-aware function if user has profile, otherwise fallback
