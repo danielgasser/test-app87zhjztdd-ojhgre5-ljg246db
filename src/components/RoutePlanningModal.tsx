@@ -26,6 +26,7 @@ import {
   saveRouteToDatabase,
   startNavigationSession,
   setRouteRequest,
+  setNavigationSessionId,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -36,6 +37,7 @@ import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { v4 as uuidv4 } from "uuid";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -221,6 +223,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
+    const navigationSessionId = uuidv4();
+    dispatch(setNavigationSessionId(navigationSessionId));
     if (
       !smartRouteComparison?.optimized_route ||
       !selectedRoute ||
@@ -266,6 +270,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         distance_km: selectedRoute.distance_kilometers,
         duration_minutes: selectedRoute.estimated_duration_minutes,
         safety_score: selectedRoute.safety_analysis.overall_route_score,
+        navigation_session_id: navigationSessionId,
       })
     ).unwrap();
     const optimizedRoute = {

@@ -304,9 +304,11 @@ export type Database = {
           duration_minutes: number
           id: string
           navigation_ended_at: string | null
+          navigation_session_id: string | null
           navigation_started_at: string | null
           origin_name: string
           route_coordinates: Json
+          safety_alerts_handled: Json | null
           safety_score: number | null
           updated_at: string
           user_id: string
@@ -318,9 +320,11 @@ export type Database = {
           duration_minutes: number
           id?: string
           navigation_ended_at?: string | null
+          navigation_session_id?: string | null
           navigation_started_at?: string | null
           origin_name: string
           route_coordinates: Json
+          safety_alerts_handled?: Json | null
           safety_score?: number | null
           updated_at?: string
           user_id: string
@@ -332,9 +336,11 @@ export type Database = {
           duration_minutes?: number
           id?: string
           navigation_ended_at?: string | null
+          navigation_session_id?: string | null
           navigation_started_at?: string | null
           origin_name?: string
           route_coordinates?: Json
+          safety_alerts_handled?: Json | null
           safety_score?: number | null
           updated_at?: string
           user_id?: string

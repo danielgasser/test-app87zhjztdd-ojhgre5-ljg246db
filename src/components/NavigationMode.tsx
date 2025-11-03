@@ -16,12 +16,13 @@ import {
   checkForReroute,
   startNavigationSession,
   endNavigationSession,
+  SafetyAlertHandled,
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { store } from "@/store";
+import { supabase } from "@/services/supabase";
 
 const { width, height } = Dimensions.get("window");
 
@@ -53,9 +54,100 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const [distanceToNextTurn, setDistanceToNextTurn] = useState<number>(0);
   const [locationSubscription, setLocationSubscription] = useState<any>(null);
 
-  const [mapKey, setMapKey] = useState(0);
-
   const alertShownRef = useRef(false);
+  const unhandledDangersRef = useRef<any[]>([]);
+  // Check if this review has already been handled in this navigation session
+  const checkIfAlertAlreadyHandled = async (
+    reviewId: string
+  ): Promise<boolean> => {
+    if (!selectedRoute?.databaseId || !selectedRoute?.navigationSessionId) {
+      return false;
+    }
+
+    try {
+      // Query all routes in this navigation session
+      const { data: sessionRoutes, error } = await supabase
+        .from("routes")
+        .select("safety_alerts_handled")
+        .eq("navigation_session_id", selectedRoute.navigationSessionId);
+
+      if (error) {
+        logger.error("Error checking handled alerts:", error);
+        return false;
+      }
+
+      // Check if any route in this session has handled this review
+      for (const route of sessionRoutes || []) {
+        const alerts = route.safety_alerts_handled as
+          | SafetyAlertHandled[]
+          | null;
+        const handled = alerts?.some(
+          (alert: SafetyAlertHandled) => alert.review_id === reviewId
+        );
+        if (handled) {
+          logger.info(`✅ Review ${reviewId} already handled in this session`);
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      logger.error("Error in checkIfAlertAlreadyHandled:", error);
+      return false;
+    }
+  };
+
+  // Record that a safety alert was handled by the user
+  const recordSafetyAlertHandled = async (
+    routeId: string,
+    review: any,
+    action: "reroute_attempted" | "user_continued"
+  ) => {
+    try {
+      // Get current alerts for this route
+      const { data: route, error: fetchError } = await supabase
+        .from("routes")
+        .select("safety_alerts_handled")
+        .eq("id", routeId)
+        .single();
+
+      if (fetchError) {
+        logger.error("Error fetching route alerts:", fetchError);
+        return;
+      }
+
+      const existingAlerts =
+        (route?.safety_alerts_handled as unknown as SafetyAlertHandled[]) || [];
+
+      // Add new alert record
+      const { error: updateError } = await supabase
+        .from("routes")
+        .update({
+          safety_alerts_handled: [
+            ...existingAlerts,
+            {
+              review_id: review.id,
+              handled_at: new Date().toISOString(),
+              action,
+              review_location: {
+                lat: review.location_latitude,
+                lng: review.location_longitude,
+              },
+              review_safety_rating: review.safety_rating,
+            },
+          ],
+        })
+        .eq("id", routeId);
+
+      if (updateError) {
+        logger.error("Error updating route alerts:", updateError);
+      } else {
+        logger.info(`✅ Recorded ${action} for review ${review.id}`);
+      }
+    } catch (error) {
+      logger.error("Error in recordSafetyAlertHandled:", error);
+    }
+  };
 
   // Start GPS tracking
   useEffect(() => {
@@ -85,7 +177,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     ) {
       return;
     }
-    const checkReviewsAlongRoute = () => {
+    const checkReviewsAlongRoute = async () => {
       // Get ALL dangerous reviews (not just recent ones)
       const dangerousReviews = communityReviews.filter((review) => {
         return review.safety_rating < 3.0;
@@ -111,20 +203,29 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       });
 
       // 🆕 Filter out already-dismissed alerts for this route
-      const newDangerOnRoute = dangerOnRoute;
+      const unhandledDangers = [];
 
-      if (newDangerOnRoute.length > 0) {
+      for (const review of dangerOnRoute) {
+        const alreadyHandled = await checkIfAlertAlreadyHandled(review.id);
+        if (!alreadyHandled) {
+          unhandledDangers.push(review);
+        }
+      }
+
+      unhandledDangersRef.current = unhandledDangers;
+
+      if (unhandledDangers.length > 0) {
         if (alertShownRef.current) {
           return;
         }
         alertShownRef.current = true;
 
-        const locationNames = newDangerOnRoute
+        const locationNames = unhandledDangers
           .map((r) => r.location_name)
           .join(", ");
 
         // Store review IDs for dismissal tracking
-        const reviewIds = newDangerOnRoute.map((r) => r.id);
+        const reviewIds = unhandledDangers.map((r) => r.id);
 
         notify.confirm(
           "⚠️ SAFETY ALERT ON YOUR ROUTE",
@@ -132,8 +233,21 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           [
             {
               text: "Find Safer Route",
-              onPress: () => {
+              onPress: async () => {
                 alertShownRef.current = false;
+
+                // Record the action for all dangerous reviews
+                if (selectedRoute?.databaseId) {
+                  for (const review of unhandledDangersRef.current) {
+                    await recordSafetyAlertHandled(
+                      selectedRoute.databaseId,
+                      review,
+                      "reroute_attempted"
+                    );
+                  }
+                }
+
+                // Then trigger reroute
                 if (currentPosition) {
                   dispatch(checkForReroute(currentPosition));
                   // Show cautionary message after reroute attempt
@@ -149,8 +263,19 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Continue Anyway",
               style: "cancel",
-              onPress: () => {
+              onPress: async () => {
                 alertShownRef.current = false;
+
+                // Record that user chose to continue
+                if (selectedRoute?.databaseId) {
+                  for (const review of unhandledDangersRef.current) {
+                    await recordSafetyAlertHandled(
+                      selectedRoute.databaseId,
+                      review,
+                      "user_continued"
+                    );
+                  }
+                }
               },
             },
           ]

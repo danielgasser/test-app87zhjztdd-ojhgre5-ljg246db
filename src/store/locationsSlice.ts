@@ -159,6 +159,19 @@ export interface NavigationStep {
   end_location: RouteCoordinate;
   maneuver?: string; // e.g., "turn-left", "turn-right"
 }
+
+// Safety alert tracking for routes
+export interface SafetyAlertHandled {
+  review_id: string;
+  handled_at: string;
+  action: 'reroute_attempted' | 'user_continued';
+  review_location: {
+    lat: number;
+    lng: number;
+  };
+  review_safety_rating: number;
+}
+
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 export interface SafeRoute {
   id: string;
@@ -166,12 +179,14 @@ export interface SafeRoute {
   route_type: "fastest" | "safest" | "balanced";
   coordinates: RouteCoordinate[];
   route_points?: RouteCoordinate[];
-  steps?: NavigationStep[]; //
+  steps?: NavigationStep[];
   estimated_duration_minutes: number;
   distance_kilometers: number;
   safety_analysis: RouteSafetyAnalysis;
   created_at: string;
   databaseId?: string;
+  navigationSessionId?: string;
+  safetyAlertsHandled?: SafetyAlertHandled[];
   mapbox_data?: {
     duration: number;
     distance: number;
@@ -255,6 +270,7 @@ interface LocationsState {
   navigationActive: boolean;
   currentNavigationStep: number | null;
   navigationStartTime: string | null;
+  navigationSessionId: string | null;
   isRerouting: boolean;
 }
 export interface RouteImprovementSummary {
@@ -334,6 +350,7 @@ const initialState: LocationsState = {
   navigationActive: false,
   currentNavigationStep: null,
   navigationStartTime: null,
+  navigationSessionId: null,
   isRerouting: false,
 };
 
@@ -457,6 +474,7 @@ export const saveRouteToDatabase = createAsyncThunk(
     distance_km: number;
     duration_minutes: number;
     safety_score: number;
+    navigation_session_id?: string;
   }, { rejectWithValue }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -475,6 +493,7 @@ export const saveRouteToDatabase = createAsyncThunk(
           distance_km: route.distance_km,
           duration_minutes: route.duration_minutes,
           safety_score: route.safety_score,
+          navigation_session_id: route.navigation_session_id,
         })
         .select()
         .single();
@@ -1672,6 +1691,7 @@ export const checkForReroute = createAsyncThunk(
                 distance_km: result.optimized_route.distance_kilometers,
                 duration_minutes: result.optimized_route.estimated_duration_minutes,
                 safety_score: result.optimized_route.safety_analysis.overall_route_score,
+                navigation_session_id: selectedRoute.navigationSessionId,
               })
             ).unwrap();
 
@@ -1746,6 +1766,7 @@ export const checkForReroute = createAsyncThunk(
               distance_km: basicResult.route.distance_kilometers,
               duration_minutes: basicResult.route.estimated_duration_minutes,
               safety_score: basicResult.route.safety_analysis.overall_route_score,
+              navigation_session_id: selectedRoute.navigationSessionId,
             })
           ).unwrap();
 
@@ -1990,9 +2011,11 @@ const locationsSlice = createSlice({
       state.currentNavigationStep = action.payload;
     },
     // Safety alert dismissal tracking
-
     setRerouting: (state, action: PayloadAction<boolean>) => {
       state.isRerouting = action.payload;
+    },
+    setNavigationSessionId: (state, action: PayloadAction<string | null>) => {
+      state.navigationSessionId = action.payload;
     },
   },
 
@@ -2360,6 +2383,7 @@ export const {
   endNavigation,
   updateNavigationProgress,
   setRerouting,
+  setNavigationSessionId,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;
