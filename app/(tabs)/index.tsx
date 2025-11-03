@@ -334,14 +334,16 @@ export default function MapScreen() {
     if (!dangerZonesVisible && userId) {
       // ALWAYS fetch when turning on, even if we have zones
       // This ensures we get zones for the current map view
-      const visibleRadiusMeters = (region.latitudeDelta * 111000) / 2;
-      // Don't send lat/lng - let edge function use user location from profile
+      const userSearchRadiusKm = useAppSelector(
+        (state) => state.user.searchRadiusKm
+      );
+      const userRadiusMeters = userSearchRadiusKm * 1000; // Don't send lat/lng - let edge function use user location from profile
       dispatch(
         fetchDangerZones({
           userId: userId,
           latitude: region.latitude,
           longitude: region.longitude,
-          radius: Math.min(visibleRadiusMeters, 100000),
+          radius: Math.min(userRadiusMeters, 100000),
           userDemographics: userProfile,
         })
       );

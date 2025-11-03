@@ -6,9 +6,10 @@ import { isFieldComplete } from '@/utils/profileValidation';
 import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
 import { signOut } from './authSlice';
 import { logger } from '@/utils/logger';
+import { notify } from '@/utils/notificationService';
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
-export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences'> & {
+export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences' | 'preferences'> & {
   notification_preferences?: Record<string, any> | null;
 };
 const isProfileComplete = (profile: UserProfile | null): boolean => {
@@ -138,7 +139,8 @@ export const updateSearchRadius = createAsyncThunk<
       if (fetchError) throw fetchError;
 
       // Merge with existing preferences
-      const currentPreferences = currentProfile?.preferences || {};
+      const currentPreferences = (currentProfile?.preferences as any) || {};
+      const currentSearch = (currentPreferences?.search as any) || {};
       const updatedPreferences = {
         ...currentPreferences,
         search: {
@@ -158,7 +160,7 @@ export const updateSearchRadius = createAsyncThunk<
       if (error) throw error;
       if (!data) throw new Error('Failed to update preferences');
 
-      logger.info(`✅ Search radius updated to ${clampedRadius}km`);
+      notify.info(`Search radius updated to ${clampedRadius}km`);
       return data as UserProfile;
     } catch (error) {
       logger.error('❌ Failed to update search radius:', error);
