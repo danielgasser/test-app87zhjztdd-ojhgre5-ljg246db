@@ -104,6 +104,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 
   const handleSelectLocation = async (location: SearchResult) => {
+    Keyboard.dismiss();
     setSearchText(location.name);
     setShowResults(false);
 

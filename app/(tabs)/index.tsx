@@ -348,6 +348,19 @@ export default function MapScreen() {
     }
   };
 
+  const handleRecenterToUserLocation = () => {
+    console.log("handleRecenterToUserLocation");
+    if (userLocation && mapRef.current) {
+      const newRegion = {
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+      mapRef.current.animateToRegion(newRegion, 1000);
+    }
+  };
+
   const requestLocationPermission = async () => {
     try {
       const permissionPromise = Location.requestForegroundPermissionsAsync();
@@ -823,8 +836,8 @@ export default function MapScreen() {
         showsPointsOfInterest={true}
         style={styles.map}
         initialRegion={region}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
+        //showsUserLocation={false}
+        showsMyLocationButton={false}
         showsCompass={true}
         onLongPress={handleMapPress}
         onMapReady={() => {
@@ -1033,6 +1046,15 @@ export default function MapScreen() {
           )}
       </MapView>
       {/* Map Controls */}
+      {/* Recenter to My Location Button */}
+      <View style={styles.recenterButtonContainer}>
+        <TouchableOpacity
+          style={styles.recenterButton}
+          onPress={handleRecenterToUserLocation}
+        >
+          <Ionicons name="locate" size={30} color={theme.colors.primary} />
+        </TouchableOpacity>
+      </View>
       {/* Danger Zones Control */}
       <View style={styles.dangerZoneContainer}>
         <TouchableOpacity
@@ -1364,62 +1386,34 @@ const styles = StyleSheet.create({
   },
   mapControls: {
     position: "absolute",
-    bottom: 120,
+    bottom: 0,
     right: 20,
     zIndex: 1000,
   },
-  fabContainer: {
+  recenterButtonContainer: {
     position: "absolute",
-    bottom: 120,
-    right: 20,
+    bottom: 10, // Above the danger zones button
+    right: 10,
     zIndex: 1000,
   },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.colors.primary,
+  recenterButton: {
+    width: 55,
+    height: 55,
+    borderRadius: 100,
+    backgroundColor: theme.colors.card,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: theme.colors.text,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  fabOpen: {
-    backgroundColor: theme.colors.card,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-  },
-  fabMenu: {
-    position: "absolute",
-    bottom: 70, // Above the FAB
-    right: 0,
-    gap: 12,
-  },
-  fabMenuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.card,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 25,
     shadowColor: theme.colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 8,
-    gap: 8,
-  },
-  fabMenuText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.text,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
   },
   dangerZoneContainer: {
     position: "absolute",
-    bottom: 20,
+    bottom: -20,
     right: 0,
     zIndex: 1000,
   },

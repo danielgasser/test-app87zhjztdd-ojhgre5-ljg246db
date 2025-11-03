@@ -346,7 +346,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       } else if (activeInput === "to") {
         setToLocation(location);
       }
-      Keyboard.dismiss();
 
       setActiveInput(null);
       setSearchQuery("");
@@ -655,6 +654,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               data={allResults}
               renderItem={renderSearchResult}
               keyExtractor={(item) => item.id}
+              keyboardShouldPersistTaps="handled"
               ListEmptyComponent={
                 searchQuery.length > 0 && !searchLoading ? (
                   <View style={styles.noResults}>
