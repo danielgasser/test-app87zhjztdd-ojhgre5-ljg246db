@@ -328,24 +328,24 @@ export default function MapScreen() {
   const handleToggleDangerZones = () => {
     if (!requireAuth(userId, "view danger zones")) return;
 
-    const hasValidDemographics = // ... (keep existing logic)
+    const hasValidDemographics = // ... keep existing
       dispatch(toggleDangerZones());
 
     if (!dangerZonesVisible && userId) {
-      // Calculate radius from map viewport (latitudeDelta gives us the visible range)
-      // Convert degrees to meters (roughly 111km per degree)
+      // ALWAYS fetch when turning on, even if we have zones
+      // This ensures we get zones for the current map view
       const visibleRadiusMeters = (region.latitudeDelta * 111000) / 2;
-      console.log("visibleRadiusMeters: ", visibleRadiusMeters);
-
+      console.log("=== REGION DEBUG ===");
+      console.log("region:", region);
+      console.log("latitude:", region.latitude);
+      console.log("longitude:", region.longitude);
+      // Don't send lat/lng - let edge function use user location from profile
       dispatch(
         fetchDangerZones({
           userId: userId,
-          latitude: region.latitude, // Use map center, not user location
+          latitude: region.latitude,
           longitude: region.longitude,
-          radius: Math.min(
-            visibleRadiusMeters,
-            APP_CONFIG.DISTANCE.DANGER_ZONES_MAX_RADIUS_METERS
-          ), // Cap at 1000km max
+          radius: Math.min(visibleRadiusMeters, 100000),
           userDemographics: userProfile,
         })
       );
@@ -650,31 +650,6 @@ export default function MapScreen() {
       );
     })();
   }, [dispatch]);
-
-  // Fetch danger zones when user location is available
-  useEffect(() => {
-    // Only fetch danger zones if user has completed profile with demographics
-    const hasValidDemographics =
-      userProfile &&
-      (userProfile.race_ethnicity?.length > 0 ||
-        userProfile.gender ||
-        userProfile.lgbtq_status);
-    if (
-      userId &&
-      userLocation &&
-      hasValidDemographics &&
-      dangerZones.length === 0
-    ) {
-      dispatch(
-        fetchDangerZones({
-          userId: userId,
-          radius: 10000,
-          userDemographics: userProfile,
-        })
-      );
-      dispatch(setDangerZonesVisible(true));
-    }
-  }, [userId, userLocation, userProfile, dangerZones.length, dispatch]);
 
   const requestedPredictions = useRef<Set<string>>(new Set());
 

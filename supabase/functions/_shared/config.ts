@@ -48,6 +48,7 @@ export const EDGE_CONFIG = {
         DANGER_THRESHOLD_HIGH: 2.0,  // ← Tune these
         DANGER_THRESHOLD_MEDIUM: 2.5,
         INCLUDE_SIMILAR_DEMOGRAPHICS: true,
+        NEARBY_LOCATIONS_TIME_OUT: 5000,
         SEVERITY_MULTIPLIERS: {
             HIGH: 2.0,                          // High severity incident weight
             MEDIUM: 1.5,                        // Medium severity incident weight

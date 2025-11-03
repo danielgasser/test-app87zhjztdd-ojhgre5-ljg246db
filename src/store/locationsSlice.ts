@@ -937,7 +937,25 @@ export const fetchDangerZones = createAsyncThunk(
   }) => {
     try {
       console.log('=== DANGER ZONES Start ===');
+      console.log('Getting auth token...');
       const token = await getAuthToken();
+      console.log('Token obtained:', token ? 'YES' : 'NO');
+
+      const fetchBody = {
+        user_id: userId,
+        latitude: latitude,
+        longitude: longitude,
+        radius_miles: radius / 1609.34,
+        user_demographics: userDemographics
+      };
+
+      console.log('Fetching with body:', JSON.stringify(fetchBody, null, 2));
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.log('=== DANGER ZONES TIMEOUT ===');
+        controller.abort()
+      }, 10000); // 10s timeout
 
       const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/danger-zones`, {
         method: "POST",
@@ -945,14 +963,11 @@ export const fetchDangerZones = createAsyncThunk(
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({
-          user_id: userId,
-          latitude: latitude,
-          longitude: longitude,
-          radius_miles: radius / 1609.34,
-          user_demographics: userDemographics
-        })
+        body: JSON.stringify(fetchBody),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
+      console.log('Response received:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -967,11 +982,13 @@ export const fetchDangerZones = createAsyncThunk(
       console.log('=== DANGER ZONES SUCCESS ===');
       console.log('Data:', JSON.stringify(data, null, 2));
       return data.danger_zones || [];
-    } catch (error) {
+    } catch (fetchError: any) {
       console.log('=== DANGER ZONES ERROR ===');
-      console.log('Error:', error);
-      logger.error("Error fetching danger zones:", error);
-      return [];
+      if (fetchError.name === 'AbortError') {
+        console.log('=== DANGER ZONES TIMEOUT - returning empty ===');
+        return [];
+      }
+      throw fetchError;
     }
   }
 );
@@ -1940,8 +1957,11 @@ const locationsSlice = createSlice({
 
     toggleDangerZones: (state) => {
       state.dangerZonesVisible = !state.dangerZonesVisible;
+      // Clear zones when toggling OFF so next toggle ON refetches
+      if (!state.dangerZonesVisible) {
+        state.dangerZones = [];
+      }
     },
-
     setDangerZonesVisible: (state, action: PayloadAction<boolean>) => {
       state.dangerZonesVisible = action.payload;
     },

@@ -39,10 +39,11 @@ serve(async (req) => {
     if (user_demographics) {
       // Use demographics directly (for route scoring)
       userProfile = {
-        race_ethnicity: user_demographics.race_ethnicity ? [user_demographics.race_ethnicity] : [],
+        race_ethnicity: Array.isArray(user_demographics.race_ethnicity)
+          ? user_demographics.race_ethnicity
+          : (user_demographics.race_ethnicity ? [user_demographics.race_ethnicity] : []),
         gender: user_demographics.gender,
-        lgbtq_status: user_demographics.lgbtq_status === 'true' || user_demographics.lgbtq_status === true,
-        religion: user_demographics.religion,
+        lgbtq_status: user_demographics.lgbtq_status === 'true' || user_demographics.lgbtq_status === true || user_demographics.lgbtq_status === 1, religion: user_demographics.religion,
         disability_status: user_demographics.disability_status ? [user_demographics.disability_status] : [],
         age_range: user_demographics.age_range,
       };
@@ -103,28 +104,64 @@ serve(async (req) => {
 
     // Keep it simple - just query the locations table with PostGIS in a separate call
     if (latitude && longitude) {
-      const radiusMeters = radius_miles * 1609.34;
+      const radiusMeters = Math.round(radius_miles * 1609.34);
 
-      // Get nearby location IDs first
-      const { data: nearbyLocs } = await supabase.rpc('get_nearby_locations', {
-        lat: latitude,
-        lng: longitude,
-        radius_meters: radiusMeters
-      });
+      console.log(`Calling get_nearby_locations with lat=${latitude}, lng=${longitude}, radius=${radiusMeters}`);
 
-      if (!nearbyLocs || nearbyLocs.length === 0) {
-        // No locations nearby - return empty
-        return {
-          zones: [],
-          total_zones: 0,
-          search_radius_miles: radius_miles,
-          user_location: { latitude, longitude }
-        };
+      // Get nearby location IDs first - with timeout handling
+      try {
+        const { data: nearbyLocs, error: nearbyError } = await supabase.rpc('get_nearby_locations', {
+          lat: latitude,
+          lng: longitude,
+          radius_meters: radiusMeters
+        });
+        console.log('RPC returned:', { nearbyLocs, nearbyError });
+
+        if (nearbyError) {
+          console.error('get_nearby_locations error:', nearbyError);
+          return new Response(
+            JSON.stringify({
+              user_id,
+              danger_zones: [],
+              total_zones: 0,
+              search_radius_miles: radius_miles,
+              user_location: { latitude, longitude }
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+          );
+        }
+
+        if (!nearbyLocs || nearbyLocs.length === 0) {
+          console.log('No nearby locations found');
+          return new Response(
+            JSON.stringify({
+              user_id,
+              danger_zones: [],
+              total_zones: 0,
+              search_radius_miles: radius_miles,
+              user_location: { latitude, longitude }
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+          );
+        }
+
+        console.log(`Found ${nearbyLocs.length} nearby locations`);
+
+        // Filter safety_scores to only these location IDs
+        const locationIds = nearbyLocs.map((loc: any) => loc.id);
+        query = query.in('location_id', locationIds);
+      } catch (error) {
+        console.error('Exception in get_nearby_locations:', error);
+        return new Response(
+          JSON.stringify({
+            user_id,
+            danger_zones: [],
+            total_zones: 0,
+            error: 'Location search failed'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        );
       }
-
-      // Filter safety_scores to only these location IDs
-      const locationIds = nearbyLocs.map((loc: any) => loc.id);
-      query = query.in('location_id', locationIds);
     }
     const { data: dangerousLocations, error: locError } = await query
 
