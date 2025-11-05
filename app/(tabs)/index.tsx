@@ -809,7 +809,14 @@ export default function MapScreen() {
       </View>
     );
   }
-
+  if (!userLocation) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Getting your location...</Text>
+      </View>
+    );
+  }
   // ============= MAIN RENDER =============
   return (
     <View style={styles.container}>
