@@ -149,8 +149,10 @@ export default function SearchRadiusSelector() {
           color={theme.colors.textSecondary}
         />
         <Text style={styles.infoText}>
-          Currently showing locations within {selectedRadius} km of map center
-        </Text>
+          {selectedRadius >= 999999
+            ? "Searching globally - all countries"
+            : `Currently showing locations within ${selectedRadius} km of map center`}
+        </Text>{" "}
       </View>
     </View>
   );

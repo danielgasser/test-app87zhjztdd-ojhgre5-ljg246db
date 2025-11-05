@@ -11,14 +11,13 @@ export const APP_CONFIG = {
     DANGER_ZONES_MAX_RADIUS_METERS: 100000,
     // Search radius options (in kilometers)
     SEARCH_RADIUS_OPTIONS: [
-      { label: '5 km', value: 5, description: 'City walking' },
-      { label: '10 km', value: 10, description: 'Urban exploring' },
-      { label: '25 km', value: 25, description: 'Suburban travel' },
-      { label: '50 km', value: 50, description: 'Road tripping' },
+      { label: '100 km', value: 100, description: 'Regional' },
+      { label: '1000 km', value: 1000, description: 'Country-wide' },
+      { label: '∞', value: 999999, description: 'Global' },
     ],
 
     MIN_SEARCH_RADIUS_KM: 1,
-    MAX_SEARCH_RADIUS_KM: 100,
+    MAX_SEARCH_RADIUS_KM: 999999,
 
   },
 

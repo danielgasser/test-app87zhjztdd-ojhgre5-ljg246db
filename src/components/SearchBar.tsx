@@ -50,18 +50,25 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [searchText, setSearchText] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [mapboxResults, setMapboxResults] = useState<SearchResult[]>([]);
+  const searchRadiusKm = useAppSelector((state) => state.user.searchRadiusKm);
 
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
       const country = userCountry || "us";
 
-      const results = await googlePlacesService.autocomplete({
+      const autocompleteParams: any = {
         query,
         latitude: userLocation?.latitude,
         longitude: userLocation?.longitude,
-        radius: 50000, // 50km radius for location bias
         components: `country:${country}`,
-      });
+      };
+
+      if (searchRadiusKm < 999999) {
+        autocompleteParams.radius = searchRadiusKm * 1000; // Convert km to meters
+      }
+      const results = await googlePlacesService.autocomplete(
+        autocompleteParams
+      );
 
       return results.slice(0, 5).map((result) => ({
         id: `google_${result.place_id}`,

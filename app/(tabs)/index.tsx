@@ -94,6 +94,7 @@ export default function MapScreen() {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+
   const [locationPermission, setLocationPermission] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);

@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "SafePath",
     slug: "safepath",
-    version: "0.9.10",
+    version: "0.9.11",
     // increase build number!!!
     scheme: "safepath",
     orientation: "portrait",
