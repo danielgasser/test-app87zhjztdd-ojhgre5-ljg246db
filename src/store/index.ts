@@ -12,6 +12,7 @@ export const store = configureStore({
     profileBanner: profileBannerReducer,
   },
 });
+console.log('🏪 Redux store created');
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

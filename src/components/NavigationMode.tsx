@@ -23,6 +23,7 @@ import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { supabase } from "@/services/supabase";
+import { store } from "@/store";
 
 const { width, height } = Dimensions.get("window");
 
@@ -262,29 +263,40 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Find Safer Route",
               onPress: async () => {
+                console.log("🔴 BUTTON CLICKED");
+                const fullState = store.getState();
+                console.log("🔴 Full locations state:", {
+                  hasSelectedRoute: !!fullState.locations.selectedRoute,
+                  hasRouteRequest: !!fullState.locations.routeRequest,
+                  navigationSessionId: fullState.locations.navigationSessionId,
+                });
                 alertShownRef.current = false;
-
+                const currentRouteId = selectedRoute?.databaseId;
+                console.log("🔴 currentRouteId:", currentRouteId);
+                console.log(
+                  "🔴 unhandledDangersRef.current.length:",
+                  unhandledDangersRef.current.length
+                );
                 // Record the action for all dangerous reviews
-                if (selectedRoute?.databaseId) {
+                if (currentRouteId) {
+                  console.log("🔴 Starting to record alerts...");
                   for (const review of unhandledDangersRef.current) {
+                    console.log("🔴 Recording for review:", review.id);
                     await recordSafetyAlertHandled(
-                      selectedRoute.databaseId,
+                      currentRouteId,
                       review,
                       "reroute_attempted"
                     );
                   }
+                  console.log("🔴 Finished recording alerts");
+                } else {
+                  console.log("🔴 No currentRouteId - skipping recording");
                 }
 
                 // Then trigger reroute
                 if (currentPosition) {
+                  console.log("🔴 Calling checkForReroute");
                   dispatch(checkForReroute(currentPosition));
-                  // Show cautionary message after reroute attempt
-                  setTimeout(() => {
-                    notify.info(
-                      "We've calculated the safest available route. Some areas may still require extra caution. Please stay alert.",
-                      "Route Updated"
-                    );
-                  }, 3000);
                 }
               },
             },

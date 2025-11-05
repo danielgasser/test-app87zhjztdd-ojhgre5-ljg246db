@@ -30,6 +30,8 @@ import {
   RouteCoordinate,
   fetchUserReviews,
   setNavigationIntent,
+  setRouteRequest,
+  setNavigationSessionId,
 } from "@/store/locationsSlice";
 import { calculateRouteSafety } from "@/store/locationsSlice";
 import { formatDistanceToNow } from "date-fns";
@@ -155,7 +157,38 @@ function RootLayoutNav() {
         created_at: activeRoute.created_at,
         databaseId: activeRoute.id,
       };
-
+      const origin = routeCoords[0];
+      const destination = routeCoords[routeCoords.length - 1];
+      // Restore the route request for rerouting
+      dispatch(
+        setRouteRequest({
+          origin: {
+            latitude: origin.latitude,
+            longitude: origin.longitude,
+          },
+          destination: {
+            latitude: destination.latitude,
+            longitude: destination.longitude,
+          },
+          user_demographics: {
+            race_ethnicity: userProfile.race_ethnicity?.[0] || "",
+            gender: userProfile.gender || "",
+            lgbtq_status: String(userProfile.lgbtq_status ?? ""),
+            religion: userProfile.religion || "",
+            disability_status: userProfile.disability_status?.[0] || "",
+            age_range: userProfile.age_range || "",
+          },
+          route_preferences: {
+            prioritize_safety: true,
+            avoid_evening_danger: false,
+            max_detour_minutes: 15,
+          },
+        })
+      );
+      // Restore navigation session ID
+      if (activeRoute.navigation_session_id) {
+        dispatch(setNavigationSessionId(activeRoute.navigation_session_id));
+      }
       dispatch(setSelectedRoute(safeRoute));
       await dispatch(startNavigationSession(activeRoute.id));
       dispatch(startNavigation());

@@ -1727,7 +1727,11 @@ export const checkForReroute = createAsyncThunk(
 
           } else {
             // No actual improvement - treat as no alternative available
-            throw new Error("No safer alternative available");
+            notify.info(
+              "No safer alternative route is available. Continuing with current route.",
+              "Route Status"
+            );
+            return;
           }
         } else {
           // Smart route generation failed
@@ -1742,7 +1746,24 @@ export const checkForReroute = createAsyncThunk(
 
         if (errorMessage.includes("No safer alternative available")) {
           // Don't try fallback - inform user directly
-          throw new Error("NO_ALTERNATIVE_ROUTE");
+          notify.confirm(
+            "No Safer Route Available",
+            "There's no way to avoid this danger zone. You can continue with caution or stop navigation.",
+            [
+              {
+                text: "Continue Current Route",
+                style: "cancel",
+                onPress: () => { },
+              },
+              {
+                text: "Stop Navigation",
+                style: "destructive",
+                onPress: () => dispatch(endNavigation()),
+              },
+            ],
+            "warning"
+          );
+          return;
         }
 
         // For other errors, try fallback to basic route generation
@@ -1897,12 +1918,20 @@ const locationsSlice = createSlice({
       state.selectedLocation = null;
     },
     setSelectedRoute: (state, action: PayloadAction<SafeRoute | null>) => {
+      console.log('🟣 setSelectedRoute called');
+      console.log('  Has navigationSessionId?', action.payload?.navigationSessionId ? 'YES' : 'NO');
+      console.log('  Route ID:', action.payload?.databaseId);
+      if (!action.payload?.navigationSessionId) {
+        console.trace('🟣 MISSING navigationSessionId - call stack:');
+      }
       state.selectedRoute = action.payload;
     },
 
     setRouteRequest: (state, action: PayloadAction<RouteRequest | null>) => {
       console.log('📝 setRouteRequest called with:', action.payload ? 'DATA' : 'NULL');
-      console.trace();
+      if (action.payload === null) {
+        console.trace('📝 Setting to NULL - call stack:');
+      }
       state.routeRequest = action.payload;
     },
 
@@ -2018,6 +2047,10 @@ const locationsSlice = createSlice({
       state.isRerouting = action.payload;
     },
     setNavigationSessionId: (state, action: PayloadAction<string | null>) => {
+      console.log('🔵 setNavigationSessionId called with:', action.payload);
+      if (action.payload === null) {
+        console.trace('🔵 Setting to NULL - call stack:');
+      }
       state.navigationSessionId = action.payload;
     },
   },
