@@ -326,28 +326,35 @@ export default function MapScreen() {
     }
   };
 
-  const handleToggleDangerZones = () => {
+  const handleToggleDangerZones = async () => {
     if (!requireAuth(userId, "view danger zones")) return;
 
-    const hasValidDemographics = // ... keep existing
+    try {
       dispatch(toggleDangerZones());
 
-    if (!dangerZonesVisible && userId) {
-      // ALWAYS fetch when turning on, even if we have zones
-      // This ensures we get zones for the current map view
-      const userSearchRadiusKm = useAppSelector(
-        (state) => state.user.searchRadiusKm
-      );
-      const userRadiusMeters = userSearchRadiusKm * 1000; // Don't send lat/lng - let edge function use user location from profile
-      dispatch(
-        fetchDangerZones({
-          userId: userId,
-          latitude: region.latitude,
-          longitude: region.longitude,
-          radius: Math.min(userRadiusMeters, 100000),
-          userDemographics: userProfile,
-        })
-      );
+      if (!dangerZonesVisible && userId && userProfile) {
+        // ALWAYS fetch when turning on, even if we have zones
+        // This ensures we get zones for the current map view
+        const userSearchRadiusKm = useAppSelector(
+          (state) => state.user.searchRadiusKm
+        );
+        const userRadiusMeters = userSearchRadiusKm * 1000;
+
+        await dispatch(
+          fetchDangerZones({
+            userId: userId,
+            latitude: region.latitude,
+            longitude: region.longitude,
+            radius: Math.min(userRadiusMeters, 100000),
+            userDemographics: userProfile,
+          })
+        ).unwrap();
+      }
+    } catch (error) {
+      logger.error("Danger zones error:", error);
+      notify.error("Could not load danger zones");
+      // Revert the toggle if fetch failed
+      dispatch(setDangerZonesVisible(false));
     }
   };
 

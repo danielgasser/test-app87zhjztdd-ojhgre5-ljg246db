@@ -517,7 +517,11 @@ function RootLayoutNav() {
         // User has unfinished route but not currently navigating - ask them
         const routeTime = new Date(activeRoute.navigation_started_at);
         const timeAgo = formatDistanceToNow(routeTime, { addSuffix: true });
-
+        const hoursAgo = (Date.now() - routeTime.getTime()) / (1000 * 60 * 60);
+        if (hoursAgo > 24) {
+          await dispatch(endNavigationSession(activeRoute.id));
+          return;
+        }
         notify.confirm(
           "Unfinished Route",
           `You have a route from ${timeAgo}. Would you like to continue?`,

@@ -56,7 +56,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
       const country = userCountry || "us";
-
+      logger.info("🔍 Search Debug", {
+        userCountry: userCountry,
+        fallbackCountry: country,
+        hasUserLocation: !!userLocation,
+        userLat: userLocation?.latitude,
+        userLng: userLocation?.longitude,
+        searchQuery: query,
+      });
       const autocompleteParams: any = {
         query,
         latitude: userLocation?.latitude,
