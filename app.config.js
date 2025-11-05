@@ -3,6 +3,7 @@ module.exports = {
     name: "SafePath",
     slug: "safepath",
     version: "0.9.10",
+    // increase build number!!!
     scheme: "safepath",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
@@ -13,7 +14,7 @@ module.exports = {
       backgroundColor: "#ffffff",
     },
     ios: {
-      buildNumber: "60",
+      buildNumber: "62",
       supportsTablet: false,
       bundleIdentifier: "com.keradaniel.safepath.app",
       associatedDomains: ["applinks:safepath.app"],
@@ -25,7 +26,7 @@ module.exports = {
       },
     },
     android: {
-      minSdkVersion: 31, // Android 12
+      minSdkVersion: 24, // Android 7.0
       targetSdkVersion: 34, // Android 14
       permissions: ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       config: {
@@ -37,7 +38,7 @@ module.exports = {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#FFFFFF",
       },
-      package: "com.safepath.app",
+      package: "com.keradaniel.safepath.app",
     },
     plugins: ["expo-router", "expo-secure-store"],
     extra: {

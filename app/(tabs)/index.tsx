@@ -838,7 +838,7 @@ export default function MapScreen() {
         showsPointsOfInterest={true}
         style={styles.map}
         initialRegion={region}
-        //showsUserLocation={false}
+        showsUserLocation={true}
         showsMyLocationButton={false}
         showsCompass={true}
         onLongPress={handleMapPress}
