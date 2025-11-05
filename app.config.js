@@ -9,7 +9,7 @@ module.exports = {
     icon: "./assets/images/icon.png",
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/images/splash-icon.png",
+      image: "./assets/images/logo.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
@@ -35,7 +35,7 @@ module.exports = {
         },
       },
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
+        foregroundImage: "./assets/images/logo.png",
         backgroundColor: "#FFFFFF",
       },
       package: "com.keradaniel.safepath.app",
