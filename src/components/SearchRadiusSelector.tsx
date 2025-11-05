@@ -112,16 +112,14 @@ export default function SearchRadiusSelector() {
                 selectedRadius === option.value && styles.segmentTextActive,
               ]}
             >
-              {option.value}
+              {option.label}
             </Text>
             <Text
               style={[
                 styles.segmentUnit,
                 selectedRadius === option.value && styles.segmentUnitActive,
               ]}
-            >
-              km
-            </Text>
+            ></Text>
           </TouchableOpacity>
         ))}
       </View>

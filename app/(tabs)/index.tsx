@@ -514,8 +514,8 @@ export default function MapScreen() {
         const targetDistance =
           segmentScores[currentSegmentIndex].distance_meters;
 
-        // If we've traveled the target distance (with 10% tolerance), start new chunk
-        if (cumulativeDistance >= targetDistance * 0.9) {
+        // If we've traveled the target distance (with 5% tolerance), start new chunk
+        if (cumulativeDistance >= targetDistance * 0.95) {
           chunks.push([...currentChunk]);
           currentChunk = [routePoints[i]]; // Start next chunk with current point
           cumulativeDistance = 0;

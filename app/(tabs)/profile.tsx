@@ -37,7 +37,7 @@ export default function ProfileScreen() {
   const { profile, loading } = useAppSelector((state) => state.user);
   const [uploading, setUploading] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
-    activity: true,
+    activity: false,
     demographics: false,
     mapSettings: false,
     settings: false,
