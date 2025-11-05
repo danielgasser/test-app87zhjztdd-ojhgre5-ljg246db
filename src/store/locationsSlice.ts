@@ -1633,13 +1633,18 @@ export const checkForReroute = createAsyncThunk(
     currentPosition: { latitude: number; longitude: number },
     { getState, dispatch }
   ) => {
+    console.log('🔄 checkForReroute STARTED');
+
     const state = getState() as RootState;
-    const { selectedRoute, routeRequest } = state.locations;
+    const { selectedRoute, routeRequest, navigationSessionId } = state.locations;
 
     if (!selectedRoute || !routeRequest) {
+      console.log('🔄 checkForReroute ABORTED:');
+      console.log('  selectedRoute:', selectedRoute ? 'EXISTS' : 'NULL');
+      console.log('  routeRequest:', routeRequest ? 'EXISTS' : 'NULL');
       return;
     }
-    // @ts-ignore
+    console.log('🔄 Setting isRerouting = true');
     dispatch(setRerouting(true));
 
     // Show alert
@@ -1650,6 +1655,7 @@ export const checkForReroute = createAsyncThunk(
 
     try {
       // Create new route request from current position to original destination
+      console.log('🔄 Creating new route request...');
       const newRouteRequest: RouteRequest = {
         ...routeRequest,
         origin: {
@@ -1661,7 +1667,9 @@ export const checkForReroute = createAsyncThunk(
 
       // Try smart route first (safer route)
       try {
+        console.log('🔄 Calling generateSmartRoute...');
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
+        console.log('🔄 Smart route result:', result.success);
 
         if (result.success && result.optimized_route) {
           // Check if there's actual improvement
@@ -1687,7 +1695,7 @@ export const checkForReroute = createAsyncThunk(
             const routeWithDbId = {
               ...result.optimized_route,
               databaseId: savedRoute.id,
-              navigationSessionId: selectedRoute.navigationSessionId,
+              navigationSessionId: navigationSessionId ?? undefined,
             };
 
             // Use the safer route
@@ -1760,7 +1768,7 @@ export const checkForReroute = createAsyncThunk(
           const routeWithDbId = {
             ...basicResult.route,
             databaseId: savedRoute.id,
-            navigationSessionId: selectedRoute.navigationSessionId,
+            navigationSessionId: navigationSessionId ?? undefined,
           };
           const oldRouteId = selectedRoute.databaseId;
 
@@ -1803,6 +1811,8 @@ export const checkForReroute = createAsyncThunk(
       dispatch(setRerouting(false));
       const errorMessage =
         error instanceof Error ? error.message : String(error);
+      console.log(`❌ checkForReroute ERROR: ${errorMessage}`);
+      console.log(`❌ Error type: ${error instanceof Error ? error.constructor.name : typeof error}`);
 
       if (errorMessage === "NO_ALTERNATIVE_ROUTE") {
         // No safer route exists - give user clear options
@@ -1891,6 +1901,8 @@ const locationsSlice = createSlice({
     },
 
     setRouteRequest: (state, action: PayloadAction<RouteRequest | null>) => {
+      console.log('📝 setRouteRequest called with:', action.payload ? 'DATA' : 'NULL');
+      console.trace();
       state.routeRequest = action.payload;
     },
 

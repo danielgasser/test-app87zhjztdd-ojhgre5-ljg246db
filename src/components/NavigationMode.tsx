@@ -44,7 +44,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     navigationActive,
     isRerouting,
   } = useAppSelector((state) => state.locations);
-
+  const routeRequest = useAppSelector((state) => state.locations.routeRequest);
+  console.log(
+    "🔍 Current routeRequest in Redux:",
+    routeRequest ? "EXISTS" : "NULL"
+  );
+  if (routeRequest) {
+    console.log("  Origin:", routeRequest.origin);
+    console.log("  Destination:", routeRequest.destination);
+  }
   const [currentPosition, setCurrentPosition] = useState<{
     latitude: number;
     longitude: number;
@@ -217,6 +225,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
       try {
         for (const review of dangerOnRoute) {
+          console.log(`🔎 About to check review ${review.id}`);
+          console.log(
+            `🔎 selectedRoute.databaseId: ${selectedRoute?.databaseId}`
+          );
+          console.log(
+            `🔎 selectedRoute.navigationSessionId: ${selectedRoute?.navigationSessionId}`
+          );
           const alreadyHandled = await checkIfAlertAlreadyHandled(review.id);
           if (!alreadyHandled) {
             unhandledDangers.push(review);

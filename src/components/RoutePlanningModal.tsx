@@ -233,6 +233,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const handleStartNavigation = async () => {
     const navigationSessionId = Crypto.randomUUID();
     dispatch(setNavigationSessionId(navigationSessionId));
+    console.log("🚀 handleStartNavigation - creating routeRequest");
 
     if (
       !smartRouteComparison?.optimized_route ||
@@ -268,8 +269,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         max_detour_minutes: routePreferences.maxDetourMinutes || 30,
       },
     };
+    console.log("🚀 About to dispatch setRouteRequest");
 
     dispatch(setRouteRequest(routeRequestData));
+    console.log("🚀 Dispatched setRouteRequest");
 
     const savedRoute = await dispatch(
       saveRouteToDatabase({
