@@ -6,7 +6,7 @@ module.exports = {
     // increase build number!!!
     scheme: "safepath",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/logo.png",
     userInterfaceStyle: "light",
     splash: {
       image: "./assets/images/logo.png",
