@@ -17,6 +17,7 @@ import { searchLocations } from "src/store/locationsSlice";
 import { googlePlacesService } from "@/services/googlePlaces";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { APP_CONFIG } from "@/utils/appConfig";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -65,7 +66,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       if (searchRadiusKm < 999999) {
         autocompleteParams.radius = searchRadiusKm * 1000; // Convert km to meters
+      } else if (!searchRadiusKm) {
+        autocompleteParams.radius =
+          APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS; // fallback
       }
+
       const results = await googlePlacesService.autocomplete(
         autocompleteParams
       );
