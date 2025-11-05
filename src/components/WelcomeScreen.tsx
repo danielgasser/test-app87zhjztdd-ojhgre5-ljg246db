@@ -13,7 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import logoImage from "assets/images/logo.png";
+import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
 import { theme } from "@/styles/theme";
 
 const { width, height } = Dimensions.get("window");

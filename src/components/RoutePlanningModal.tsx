@@ -1044,6 +1044,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.accent,
     zIndex: 100000,
+    elevation: 20,
   },
   dangerWarningContent: {
     flex: 1,

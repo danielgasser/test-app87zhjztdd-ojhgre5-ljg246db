@@ -285,7 +285,6 @@ export default function MapScreen() {
 
     const { latitude, longitude } = event.nativeEvent.coordinate;
 
-    // ✅ NEW: Get proper address data via reverse geocoding
     const addressData = await getCompleteAddressFromCoordinates(
       latitude,
       longitude
@@ -359,6 +358,11 @@ export default function MapScreen() {
   };
 
   const handleRecenterToUserLocation = () => {
+    console.log("🎯 Recenter clicked", {
+      hasUserLocation: !!userLocation,
+      hasMapRef: !!mapRef.current,
+      userLocation,
+    });
     if (userLocation && mapRef.current) {
       const newRegion = {
         latitude: userLocation.latitude,
@@ -366,7 +370,14 @@ export default function MapScreen() {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       };
+      console.log("🎯 Animating to:", newRegion);
+
       mapRef.current.animateToRegion(newRegion, 1000);
+    } else {
+      console.log("🎯 Cannot recenter:", {
+        noUserLocation: !userLocation,
+        noMapRef: !mapRef.current,
+      });
     }
   };
 
@@ -1068,7 +1079,12 @@ export default function MapScreen() {
       </MapView>
       {/* Map Controls */}
       {/* Recenter to My Location Button */}
-      <View style={styles.recenterButtonContainer}>
+      <View
+        style={[
+          styles.recenterButtonContainer,
+          { bottom: navigationActive ? 180 : 10 },
+        ]}
+      >
         <TouchableOpacity
           style={styles.recenterButton}
           onPress={handleRecenterToUserLocation}
@@ -1077,7 +1093,12 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
       {/* Danger Zones Control */}
-      <View style={styles.dangerZoneContainer}>
+      <View
+        style={[
+          styles.dangerZoneContainer,
+          { bottom: navigationActive ? 20 : -20 }, // ✅ Dynamic
+        ]}
+      >
         <TouchableOpacity
           style={[
             styles.controlButton,
@@ -1325,6 +1346,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10000,
+    elevation: 20,
   },
   container: {
     flex: 1,
@@ -1358,11 +1380,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
+    elevation: 10,
   },
   closeSearchButton: {
     marginLeft: 12,
     padding: 12,
     zIndex: 1000,
+    elevation: 10,
     backgroundColor: theme.colors.background,
     borderRadius: 12,
   },
@@ -1410,12 +1434,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 20,
     zIndex: 1000,
+    elevation: 10,
   },
   recenterButtonContainer: {
     position: "absolute",
-    bottom: 10, // Above the danger zones button
     right: 10,
     zIndex: 1000,
+    elevation: 10,
   },
   recenterButton: {
     width: 55,
@@ -1434,9 +1459,9 @@ const styles = StyleSheet.create({
   },
   dangerZoneContainer: {
     position: "absolute",
-    bottom: -20,
     right: 0,
     zIndex: 1000,
+    elevation: 10,
   },
   collapseIndicator: {
     position: "absolute",
@@ -1585,6 +1610,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     zIndex: 1000,
+    elevation: 10,
   },
   routeButton: {
     flexDirection: "row",
@@ -1631,8 +1657,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
     zIndex: 1000,
+    elevation: 10,
   },
   routeInfoHeader: {
     flexDirection: "row",

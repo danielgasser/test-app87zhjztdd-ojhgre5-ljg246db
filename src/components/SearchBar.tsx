@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     zIndex: 1000,
+    elevation: 10,
   },
   searchContainer: {
     backgroundColor: theme.colors.background,

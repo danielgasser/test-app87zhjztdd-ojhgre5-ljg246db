@@ -22,7 +22,7 @@ export const notificationStyles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 8,
-        elevation: 999,
+        elevation: 24,
         zIndex: 999999,
         borderWidth: 1,
         borderColor: theme.colors.borderLight,

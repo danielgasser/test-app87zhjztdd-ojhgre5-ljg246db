@@ -6,10 +6,10 @@ module.exports = {
     // increase build number!!!
     scheme: "safepath",
     orientation: "portrait",
-    icon: "./assets/images/logo.png",
+    icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/images/logo.png",
+      image: "./assets/images/SafePathLogoTransparent1024x1024.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
@@ -35,7 +35,7 @@ module.exports = {
         },
       },
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo.png",
+        foregroundImage: "./assets/images/SafePathLogoTransparent1024x1024.png",
         backgroundColor: "#FFFFFF",
       },
       package: "com.keradaniel.safepath.app",
