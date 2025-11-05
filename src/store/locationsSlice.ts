@@ -1272,7 +1272,15 @@ export const getGoogleRoute = createAsyncThunk(
     // Transform Google routes to match our expected format
     const transformedRoutes = data.routes.map((route: any) => {
       // Decode polyline to get coordinates
-      const coordinates = decodePolyline(route.overview_polyline.points);
+      const detailedCoordinates: [number, number][] = [];
+      route.legs.forEach((leg: any) => {
+        leg.steps.forEach((step: any) => {
+          // Each step has its own detailed polyline
+          const stepCoords = decodePolyline(step.polyline.points);
+          detailedCoordinates.push(...stepCoords);
+        });
+      });
+      console.log('🔍 DETAILED COORDS:', detailedCoordinates.length, 'points extracted from steps');
 
       // Extract turn-by-turn steps from all legs
       const steps: NavigationStep[] = [];
@@ -1299,7 +1307,7 @@ export const getGoogleRoute = createAsyncThunk(
         duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
         distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
         geometry: {
-          coordinates: coordinates,
+          coordinates: detailedCoordinates,
           type: "LineString"
         },
         steps: steps,
@@ -1390,6 +1398,7 @@ export const generateSafeRoute = createAsyncThunk(
         name: routeName,
         route_type: routeType,
         coordinates: routeCoordinates,
+        route_points: routeCoordinates,
         estimated_duration_minutes: Math.round(primaryRoute.duration / 60),
         distance_kilometers: Math.round(primaryRoute.distance / 1000 * 10) / 10,
         safety_analysis: safetyAnalysis,

@@ -493,45 +493,64 @@ export default function MapScreen() {
       return [];
     }
 
-    const chunks: Array<Array<{ latitude: number; longitude: number }>> = [];
-    let currentChunk: Array<{ latitude: number; longitude: number }> = [
-      routePoints[0],
-    ];
-    let cumulativeDistance = 0;
-    let currentSegmentIndex = 0;
-
+    // Build cumulative distances for each route point
+    const pointDistances: number[] = [0];
     for (let i = 1; i < routePoints.length; i++) {
-      const segmentDistance = calculateDistance(
-        routePoints[i - 1],
-        routePoints[i]
-      );
-      cumulativeDistance += segmentDistance;
-      currentChunk.push(routePoints[i]);
-
-      // Check if we've reached the end of the current segment
-      if (currentSegmentIndex < segmentScores.length) {
-        const targetDistance =
-          segmentScores[currentSegmentIndex].distance_meters;
-
-        // If we've traveled the target distance (with 5% tolerance), start new chunk
-        if (cumulativeDistance >= targetDistance * 0.95) {
-          chunks.push([...currentChunk]);
-          currentChunk = [routePoints[i]]; // Start next chunk with current point
-          cumulativeDistance = 0;
-          currentSegmentIndex++;
-        }
-      }
+      const dist = calculateDistance(routePoints[i - 1], routePoints[i]);
+      pointDistances.push(pointDistances[i - 1] + dist);
     }
 
-    // Add remaining points as last chunk
-    if (currentChunk.length > 1) {
-      chunks.push(currentChunk);
+    const totalDistance = pointDistances[pointDistances.length - 1];
+
+    // Build segment boundaries based on segment distances
+    const segmentBoundaries: number[] = [0];
+    let cumDist = 0;
+    for (const segment of segmentScores) {
+      cumDist += segment.distance_meters;
+      segmentBoundaries.push(Math.min(cumDist, totalDistance));
+    }
+
+    // Split route points into chunks based on boundaries
+    const chunks: Array<Array<{ latitude: number; longitude: number }>> = [];
+
+    for (let segIdx = 0; segIdx < segmentScores.length; segIdx++) {
+      const segmentStart = segmentBoundaries[segIdx];
+      const segmentEnd = segmentBoundaries[segIdx + 1] || totalDistance;
+
+      const chunk: Array<{ latitude: number; longitude: number }> = [];
+
+      for (let i = 0; i < routePoints.length; i++) {
+        const pointDist = pointDistances[i];
+
+        if (pointDist >= segmentStart && pointDist <= segmentEnd) {
+          chunk.push(routePoints[i]);
+        }
+
+        if (pointDist > segmentEnd) break;
+      }
+
+      if (chunk.length >= 2) {
+        chunks.push(chunk);
+      }
     }
 
     return chunks;
   };
 
   const renderRouteSegments = (route: any, forceShow: boolean = false) => {
+    console.log("🔍 ROUTE DATA CHECK:");
+    console.log("  Has route_points?", !!route.route_points);
+    console.log("  Has coordinates?", !!route.coordinates);
+    console.log("  route_points length:", route.route_points?.length || 0);
+    console.log("  coordinates length:", route.coordinates?.length || 0);
+    console.log(
+      "  Has segment_scores?",
+      !!route.safety_analysis?.segment_scores
+    );
+    console.log(
+      "  segment_scores length:",
+      route.safety_analysis?.segment_scores?.length || 0
+    );
     if (
       (!showRouteSegments && !forceShow) ||
       !route.safety_analysis?.segment_scores ||
@@ -543,7 +562,18 @@ export default function MapScreen() {
       route.route_points,
       route.safety_analysis.segment_scores
     );
-
+    console.log("🔍 SEGMENT DEBUG:");
+    console.log("  Total route points:", route.route_points?.length);
+    console.log(
+      "  Number of segments:",
+      route.safety_analysis.segment_scores?.length
+    );
+    console.log("  Number of chunks:", segmentChunks.length);
+    console.log(
+      "  Chunk sizes:",
+      segmentChunks.map((c) => c.length)
+    );
+    console.log("  First chunk sample:", segmentChunks[0]?.slice(0, 3));
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         if (!segmentChunks[index] || segmentChunks[index].length < 2) {
