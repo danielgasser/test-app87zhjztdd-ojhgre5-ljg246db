@@ -1280,7 +1280,6 @@ export const getGoogleRoute = createAsyncThunk(
           detailedCoordinates.push(...stepCoords);
         });
       });
-      console.log('🔍 DETAILED COORDS:', detailedCoordinates.length, 'points extracted from steps');
 
       // Extract turn-by-turn steps from all legs
       const steps: NavigationStep[] = [];

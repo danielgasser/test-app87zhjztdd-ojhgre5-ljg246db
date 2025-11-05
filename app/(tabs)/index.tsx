@@ -538,19 +538,6 @@ export default function MapScreen() {
   };
 
   const renderRouteSegments = (route: any, forceShow: boolean = false) => {
-    console.log("🔍 ROUTE DATA CHECK:");
-    console.log("  Has route_points?", !!route.route_points);
-    console.log("  Has coordinates?", !!route.coordinates);
-    console.log("  route_points length:", route.route_points?.length || 0);
-    console.log("  coordinates length:", route.coordinates?.length || 0);
-    console.log(
-      "  Has segment_scores?",
-      !!route.safety_analysis?.segment_scores
-    );
-    console.log(
-      "  segment_scores length:",
-      route.safety_analysis?.segment_scores?.length || 0
-    );
     if (
       (!showRouteSegments && !forceShow) ||
       !route.safety_analysis?.segment_scores ||
@@ -562,18 +549,6 @@ export default function MapScreen() {
       route.route_points,
       route.safety_analysis.segment_scores
     );
-    console.log("🔍 SEGMENT DEBUG:");
-    console.log("  Total route points:", route.route_points?.length);
-    console.log(
-      "  Number of segments:",
-      route.safety_analysis.segment_scores?.length
-    );
-    console.log("  Number of chunks:", segmentChunks.length);
-    console.log(
-      "  Chunk sizes:",
-      segmentChunks.map((c) => c.length)
-    );
-    console.log("  First chunk sample:", segmentChunks[0]?.slice(0, 3));
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         if (!segmentChunks[index] || segmentChunks[index].length < 2) {

@@ -130,7 +130,17 @@ async function getGoogleRoute(
     duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
     distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
     geometry: {
-      coordinates: decodePolyline(route.overview_polyline.points),
+      coordinates: (() => {
+        const detailedCoords: [number, number][] = [];
+        route.legs.forEach((leg: any) => {
+          leg.steps.forEach((step: any) => {
+            if (step.polyline?.points) {
+              detailedCoords.push(...decodePolyline(step.polyline.points));
+            }
+          });
+        });
+        return detailedCoords.length > 0 ? detailedCoords : decodePolyline(route.overview_polyline.points);
+      })(),
       type: 'LineString'
     }
   };
