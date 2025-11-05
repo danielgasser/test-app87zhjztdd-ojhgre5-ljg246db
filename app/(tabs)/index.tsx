@@ -352,7 +352,6 @@ export default function MapScreen() {
   };
 
   const handleRecenterToUserLocation = () => {
-    console.log("handleRecenterToUserLocation");
     if (userLocation && mapRef.current) {
       const newRegion = {
         latitude: userLocation.latitude,

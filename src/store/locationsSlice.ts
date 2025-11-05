@@ -1633,18 +1633,13 @@ export const checkForReroute = createAsyncThunk(
     currentPosition: { latitude: number; longitude: number },
     { getState, dispatch }
   ) => {
-    console.log('🔄 checkForReroute STARTED');
 
     const state = getState() as RootState;
     const { selectedRoute, routeRequest, navigationSessionId } = state.locations;
 
     if (!selectedRoute || !routeRequest) {
-      console.log('🔄 checkForReroute ABORTED:');
-      console.log('  selectedRoute:', selectedRoute ? 'EXISTS' : 'NULL');
-      console.log('  routeRequest:', routeRequest ? 'EXISTS' : 'NULL');
       return;
     }
-    console.log('🔄 Setting isRerouting = true');
     dispatch(setRerouting(true));
 
     // Show alert
@@ -1655,7 +1650,6 @@ export const checkForReroute = createAsyncThunk(
 
     try {
       // Create new route request from current position to original destination
-      console.log('🔄 Creating new route request...');
       const newRouteRequest: RouteRequest = {
         ...routeRequest,
         origin: {
@@ -1667,9 +1661,7 @@ export const checkForReroute = createAsyncThunk(
 
       // Try smart route first (safer route)
       try {
-        console.log('🔄 Calling generateSmartRoute...');
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
-        console.log('🔄 Smart route result:', result.success);
 
         if (result.success && result.optimized_route) {
           // Check if there's actual improvement
@@ -1690,12 +1682,11 @@ export const checkForReroute = createAsyncThunk(
                 navigation_session_id: selectedRoute.navigationSessionId,
               })
             ).unwrap();
-
             // 🆕 Attach database ID to the route
             const routeWithDbId = {
               ...result.optimized_route,
               databaseId: savedRoute.id,
-              navigationSessionId: navigationSessionId ?? undefined,
+              navigationSessionId: navigationSessionId,
             };
 
             // Use the safer route
@@ -1784,14 +1775,12 @@ export const checkForReroute = createAsyncThunk(
               navigation_session_id: selectedRoute.navigationSessionId,
             })
           ).unwrap();
-
           // 🆕 Attach database ID
           const routeWithDbId = {
             ...basicResult.route,
             databaseId: savedRoute.id,
-            navigationSessionId: navigationSessionId ?? undefined,
+            navigationSessionId: selectedRoute.navigationSessionId ?? undefined,
           };
-          const oldRouteId = selectedRoute.databaseId;
 
           dispatch(setSelectedRoute(routeWithDbId));
 
@@ -1832,8 +1821,6 @@ export const checkForReroute = createAsyncThunk(
       dispatch(setRerouting(false));
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.log(`❌ checkForReroute ERROR: ${errorMessage}`);
-      console.log(`❌ Error type: ${error instanceof Error ? error.constructor.name : typeof error}`);
 
       if (errorMessage === "NO_ALTERNATIVE_ROUTE") {
         // No safer route exists - give user clear options
@@ -1918,9 +1905,6 @@ const locationsSlice = createSlice({
       state.selectedLocation = null;
     },
     setSelectedRoute: (state, action: PayloadAction<SafeRoute | null>) => {
-      console.log('🟣 setSelectedRoute called');
-      console.log('  Has navigationSessionId?', action.payload?.navigationSessionId ? 'YES' : 'NO');
-      console.log('  Route ID:', action.payload?.databaseId);
       if (!action.payload?.navigationSessionId) {
         console.trace('🟣 MISSING navigationSessionId - call stack:');
       }
@@ -1928,7 +1912,6 @@ const locationsSlice = createSlice({
     },
 
     setRouteRequest: (state, action: PayloadAction<RouteRequest | null>) => {
-      console.log('📝 setRouteRequest called with:', action.payload ? 'DATA' : 'NULL');
       if (action.payload === null) {
         console.trace('📝 Setting to NULL - call stack:');
       }
@@ -2047,7 +2030,6 @@ const locationsSlice = createSlice({
       state.isRerouting = action.payload;
     },
     setNavigationSessionId: (state, action: PayloadAction<string | null>) => {
-      console.log('🔵 setNavigationSessionId called with:', action.payload);
       if (action.payload === null) {
         console.trace('🔵 Setting to NULL - call stack:');
       }

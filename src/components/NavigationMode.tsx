@@ -46,14 +46,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     isRerouting,
   } = useAppSelector((state) => state.locations);
   const routeRequest = useAppSelector((state) => state.locations.routeRequest);
-  console.log(
-    "🔍 Current routeRequest in Redux:",
-    routeRequest ? "EXISTS" : "NULL"
-  );
-  if (routeRequest) {
-    console.log("  Origin:", routeRequest.origin);
-    console.log("  Destination:", routeRequest.destination);
-  }
+
   const [currentPosition, setCurrentPosition] = useState<{
     latitude: number;
     longitude: number;
@@ -70,16 +63,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     reviewId: string
   ): Promise<boolean> => {
     if (!selectedRoute?.databaseId || !selectedRoute?.navigationSessionId) {
-      console.log(
-        `❌ No databaseId or sessionId - databaseId: ${selectedRoute?.databaseId}, sessionId: ${selectedRoute?.navigationSessionId}`
-      );
       return false;
     }
 
     try {
-      console.log(
-        `🔍 Checking if review ${reviewId} already handled in session ${selectedRoute.navigationSessionId}`
-      );
       // Query all routes in this navigation session
       const { data: sessionRoutes, error } = await supabase
         .from("routes")
@@ -96,18 +83,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         const alerts = route.safety_alerts_handled as
           | SafetyAlertHandled[]
           | null;
-        console.log(`  Route has ${alerts?.length || 0} alerts:`, alerts);
         const handled = alerts?.some(
           (alert: SafetyAlertHandled) => alert.review_id === reviewId
         );
         if (handled) {
-          console.log(`✅ Review ${reviewId} already handled!`);
           logger.info(`✅ Review ${reviewId} already handled in this session`);
           return true;
         }
-        console.log(`📋 Found ${sessionRoutes?.length || 0} routes in session`);
       }
-      console.log(`❌ Review ${reviewId} NOT found in any route`);
 
       return false;
     } catch (error) {
@@ -198,8 +181,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     }
     const checkReviewsAlongRoute = async () => {
       // Get ALL dangerous reviews (not just recent ones)
+      const navigationStartTime = selectedRoute.created_at; // When route was created
+
+      // Get dangerous reviews posted AFTER navigation started
       const dangerousReviews = communityReviews.filter((review) => {
-        return review.safety_rating < 3.0;
+        // Only alert on reviews posted AFTER navigation started
+        const reviewTime = new Date(review.created_at).getTime();
+        const navStartTime = new Date(navigationStartTime).getTime();
+
+        return review.safety_rating < 3.0 && reviewTime > navStartTime;
       });
 
       if (dangerousReviews.length === 0) return;
@@ -226,13 +216,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
       try {
         for (const review of dangerOnRoute) {
-          console.log(`🔎 About to check review ${review.id}`);
-          console.log(
-            `🔎 selectedRoute.databaseId: ${selectedRoute?.databaseId}`
-          );
-          console.log(
-            `🔎 selectedRoute.navigationSessionId: ${selectedRoute?.navigationSessionId}`
-          );
           const alreadyHandled = await checkIfAlertAlreadyHandled(review.id);
           if (!alreadyHandled) {
             unhandledDangers.push(review);
@@ -263,39 +246,23 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Find Safer Route",
               onPress: async () => {
-                console.log("🔴 BUTTON CLICKED");
                 const fullState = store.getState();
-                console.log("🔴 Full locations state:", {
-                  hasSelectedRoute: !!fullState.locations.selectedRoute,
-                  hasRouteRequest: !!fullState.locations.routeRequest,
-                  navigationSessionId: fullState.locations.navigationSessionId,
-                });
+
                 alertShownRef.current = false;
                 const currentRouteId = selectedRoute?.databaseId;
-                console.log("🔴 currentRouteId:", currentRouteId);
-                console.log(
-                  "🔴 unhandledDangersRef.current.length:",
-                  unhandledDangersRef.current.length
-                );
                 // Record the action for all dangerous reviews
                 if (currentRouteId) {
-                  console.log("🔴 Starting to record alerts...");
                   for (const review of unhandledDangersRef.current) {
-                    console.log("🔴 Recording for review:", review.id);
                     await recordSafetyAlertHandled(
                       currentRouteId,
                       review,
                       "reroute_attempted"
                     );
                   }
-                  console.log("🔴 Finished recording alerts");
-                } else {
-                  console.log("🔴 No currentRouteId - skipping recording");
                 }
 
                 // Then trigger reroute
                 if (currentPosition) {
-                  console.log("🔴 Calling checkForReroute");
                   dispatch(checkForReroute(currentPosition));
                 }
               },

@@ -231,11 +231,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
-    console.log("🚀🚀🚀 handleStartNavigation CALLED");
     const navigationSessionId = Crypto.randomUUID();
-    console.log("🚀 Generated session ID:", navigationSessionId);
     dispatch(setNavigationSessionId(navigationSessionId));
-    console.log("🚀 Set session ID to Redux");
 
     if (
       !smartRouteComparison?.optimized_route ||
@@ -243,11 +240,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       !fromLocation ||
       !toLocation
     ) {
-      console.log("🚀 EARLY RETURN - missing data");
       notify.error("No route selected for navigation");
       return;
     }
-    console.log("🚀 Validation passed");
 
     // Create the route request data object
     const routeRequestData = {
@@ -273,10 +268,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         max_detour_minutes: routePreferences.maxDetourMinutes || 30,
       },
     };
-    console.log("🚀 Created routeRequestData");
 
     dispatch(setRouteRequest(routeRequestData));
-    console.log("🚀 Dispatched setRouteRequest");
 
     const savedRoute = await dispatch(
       saveRouteToDatabase({
@@ -351,9 +344,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   };
 
   // Handle location selection
-  // Handle location selection
   const handleLocationSelect = async (location: LocationResult) => {
-    console.log("handleLocationSelect");
     // If location already has coordinates (database result), use it directly
     if (location.latitude !== 0 && location.longitude !== 0) {
       if (activeInput === "from") {

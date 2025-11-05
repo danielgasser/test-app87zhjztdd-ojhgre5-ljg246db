@@ -54,7 +54,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const searchRadiusKm = useAppSelector((state) => state.user.searchRadiusKm);
 
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
-    console.log("🔍 searchRadiusKm:", searchRadiusKm);
     try {
       const country = userCountry || "us";
 
@@ -71,7 +70,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         autocompleteParams.radius =
           APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS; // fallback
       }
-      console.log("🔍 Final radius:", autocompleteParams.radius);
 
       const results = await googlePlacesService.autocomplete(
         autocompleteParams
