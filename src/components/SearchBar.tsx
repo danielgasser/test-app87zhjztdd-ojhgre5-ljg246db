@@ -18,6 +18,7 @@ import { googlePlacesService } from "@/services/googlePlaces";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { APP_CONFIG } from "@/utils/appConfig";
+import * as Sentry from "@sentry/react-native";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -56,13 +57,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
       const country = userCountry || "us";
-      logger.info("🔍 Search Debug", {
-        userCountry: userCountry,
-        fallbackCountry: country,
-        hasUserLocation: !!userLocation,
-        userLat: userLocation?.latitude,
-        userLng: userLocation?.longitude,
-        searchQuery: query,
+      Sentry.captureMessage("🔍 Search Debug", {
+        level: "info",
+        extra: {
+          userCountry: userCountry,
+          fallbackCountry: country,
+          hasUserLocation: !!userLocation,
+          userLat: userLocation?.latitude,
+          userLng: userLocation?.longitude,
+          searchQuery: query,
+        },
       });
       const autocompleteParams: any = {
         query,
