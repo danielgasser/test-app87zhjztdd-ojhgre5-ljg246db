@@ -57,6 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
       const country = userCountry || "us";
+      /*
       Sentry.captureMessage("🔍 Search Debug", {
         level: "info",
         extra: {
@@ -68,6 +69,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           searchQuery: query,
         },
       });
+      */
       const autocompleteParams: any = {
         query,
         latitude: userLocation?.latitude,

@@ -110,7 +110,9 @@ export default function MapScreen() {
   >("none");
   const [showRoutePlanningModal, setShowRoutePlanningModal] = useState(false);
   const [mapKey, setMapKey] = useState(0);
-
+  const userSearchRadiusKm = useAppSelector(
+    (state) => state.user.searchRadiusKm
+  );
   const [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState<
     string | null
   >(null);
@@ -335,9 +337,7 @@ export default function MapScreen() {
       if (!dangerZonesVisible && userId && userProfile) {
         // ALWAYS fetch when turning on, even if we have zones
         // This ensures we get zones for the current map view
-        const userSearchRadiusKm = useAppSelector(
-          (state) => state.user.searchRadiusKm
-        );
+
         const userRadiusMeters = userSearchRadiusKm * 1000;
 
         await dispatch(
