@@ -150,7 +150,7 @@ export default function SearchRadiusSelector() {
           {selectedRadius >= 999999
             ? "Searching globally - all countries"
             : `Currently showing locations within ${selectedRadius} km of map center`}
-        </Text>{" "}
+        </Text>
       </View>
     </View>
   );

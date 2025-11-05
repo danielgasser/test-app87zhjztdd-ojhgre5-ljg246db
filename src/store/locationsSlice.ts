@@ -1716,10 +1716,7 @@ export const checkForReroute = createAsyncThunk(
               `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
               "Route Updated"
             );
-            setTimeout(() => {
-              // @ts-ignore
-              dispatch(setRerouting(false));
-            }, 10000);
+
           } else {
             // No actual improvement - treat as no alternative available
             throw new Error("No safer alternative available");
@@ -1796,6 +1793,10 @@ export const checkForReroute = createAsyncThunk(
             dispatch(setRerouting(false));
           }, 10000);
         }
+      } finally {
+        setTimeout(() => {
+          dispatch(setRerouting(false));
+        }, 3000);
       }
     } catch (error) {
       // @ts-ignore

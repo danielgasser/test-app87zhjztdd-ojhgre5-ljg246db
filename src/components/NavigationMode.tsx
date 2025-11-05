@@ -61,13 +61,16 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     reviewId: string
   ): Promise<boolean> => {
     if (!selectedRoute?.databaseId || !selectedRoute?.navigationSessionId) {
+      console.log(
+        `❌ No databaseId or sessionId - databaseId: ${selectedRoute?.databaseId}, sessionId: ${selectedRoute?.navigationSessionId}`
+      );
       return false;
     }
 
     try {
-      if (!selectedRoute?.databaseId || !selectedRoute?.navigationSessionId) {
-        return false;
-      }
+      console.log(
+        `🔍 Checking if review ${reviewId} already handled in session ${selectedRoute.navigationSessionId}`
+      );
       // Query all routes in this navigation session
       const { data: sessionRoutes, error } = await supabase
         .from("routes")
@@ -84,14 +87,18 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         const alerts = route.safety_alerts_handled as
           | SafetyAlertHandled[]
           | null;
+        console.log(`  Route has ${alerts?.length || 0} alerts:`, alerts);
         const handled = alerts?.some(
           (alert: SafetyAlertHandled) => alert.review_id === reviewId
         );
         if (handled) {
+          console.log(`✅ Review ${reviewId} already handled!`);
           logger.info(`✅ Review ${reviewId} already handled in this session`);
           return true;
         }
+        console.log(`📋 Found ${sessionRoutes?.length || 0} routes in session`);
       }
+      console.log(`❌ Review ${reviewId} NOT found in any route`);
 
       return false;
     } catch (error) {
