@@ -32,6 +32,7 @@ import {
   setNavigationIntent,
   setRouteRequest,
   setNavigationSessionId,
+  endNavigation,
 } from "@/store/locationsSlice";
 import { calculateRouteSafety } from "@/store/locationsSlice";
 import { formatDistanceToNow } from "date-fns";
@@ -520,6 +521,8 @@ function RootLayoutNav() {
         const hoursAgo = (Date.now() - routeTime.getTime()) / (1000 * 60 * 60);
         if (hoursAgo > 24) {
           await dispatch(endNavigationSession(activeRoute.id));
+          dispatch(endNavigation());
+
           return;
         }
         notify.confirm(

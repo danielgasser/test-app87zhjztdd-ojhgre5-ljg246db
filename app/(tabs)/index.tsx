@@ -1111,11 +1111,7 @@ export default function MapScreen() {
           <Ionicons
             name={dangerZonesVisible ? "shield" : "shield-outline"}
             size={24}
-            color={
-              dangerZonesVisible
-                ? theme.colors.textOnPrimary
-                : theme.colors.overlay
-            }
+            color={theme.colors.textOnPrimary}
           />
           <Text
             style={[
@@ -1130,8 +1126,8 @@ export default function MapScreen() {
       {selectedRoute && !navigationActive && (
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
+            //flexDirection: "row",
+            // alignItems: "center",
             paddingLeft: 16,
             paddingTop: 16,
             backgroundColor: theme.colors.card,
@@ -1173,7 +1169,12 @@ export default function MapScreen() {
       )}
       {/* Danger Zones Legend */}
       {dangerZonesVisible && !dangerZonesLoading && (
-        <View style={styles.dangerZoneLegend}>
+        <View
+          style={[
+            styles.dangerZoneLegend,
+            { bottom: navigationActive ? 120 : 20 },
+          ]}
+        >
           {dangerZones.length > 0 ? (
             <>
               <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
@@ -1515,7 +1516,6 @@ const styles = StyleSheet.create({
   },
   dangerZoneLegend: {
     position: "absolute",
-    bottom: 20,
     left: 20,
     backgroundColor: theme.colors.card,
     padding: 12,
@@ -1524,7 +1524,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
+    zIndex: 1000,
+    elevation: 8,
     borderWidth: 1,
     borderColor: theme.colors.error,
   },
