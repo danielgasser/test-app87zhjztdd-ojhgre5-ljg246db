@@ -22,7 +22,7 @@ module.exports = {
       backgroundColor: "#ffffff",
     },
     ios: {
-      buildNumber: "72",
+      buildNumber: "73",
       supportsTablet: false,
       bundleIdentifier: "com.keradaniel.safepath.app",
       associatedDomains: ["applinks:safepath.app"],
