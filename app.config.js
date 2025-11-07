@@ -1,11 +1,16 @@
-const IS_DEV =
-  process.env.APP_VARIANT === "development" || !process.env.APP_VARIANT;
+const buildVariant = process.env.APP_VARIANT || "development";
+const IS_PREVIEW = buildVariant === "preview";
+const IS_PRODUCTION = buildVariant === "production";
 
 module.exports = {
   expo: {
-    name: IS_DEV ? "SafePath DEV" : "SafePath",
+    name: IS_PRODUCTION
+      ? "SafePath"
+      : IS_PREVIEW
+      ? "SafePath TEST"
+      : "SafePath DEV",
     slug: "safepath",
-    version: "0.9.19",
+    version: "0.9.20",
     // increase build number!!!
     scheme: "safepath",
     orientation: "portrait",
@@ -17,7 +22,7 @@ module.exports = {
       backgroundColor: "#ffffff",
     },
     ios: {
-      buildNumber: "71",
+      buildNumber: "72",
       supportsTablet: false,
       bundleIdentifier: "com.keradaniel.safepath.app",
       associatedDomains: ["applinks:safepath.app"],
