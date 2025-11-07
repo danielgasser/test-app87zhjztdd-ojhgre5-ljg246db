@@ -9,6 +9,7 @@ import { View, Text, StyleSheet, Platform } from "react-native";
 import { supabase } from "@/services/supabase";
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
+import Constants from "expo-constants";
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
@@ -110,7 +111,7 @@ export default function TabLayout() {
       </Tabs>
       <View style={styles.versionFooter}>
         <Text style={styles.versionText}>
-          {`${appConfig.expo?.name} version: ${appConfig.expo?.version} (${appConfig.expo?.ios.buildNumber}) Platform: ${Platform.OS} v: ${Platform.Version}`}
+          {`${Constants.expo?.name} version: ${Constants.expo?.version} (${Constants.expo?.ios.buildNumber}) Platform: ${Platform.OS} v: ${Platform.Version}`}
         </Text>
       </View>
     </View>
