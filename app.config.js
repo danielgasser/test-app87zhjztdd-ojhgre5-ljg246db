@@ -11,7 +11,7 @@ module.exports = () => {
         ? "SafePath TEST"
         : "SafePath DEV",
       slug: "safepath",
-      version: "0.9.20",
+      version: "0.9.21",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -23,7 +23,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "74",
+        buildNumber: "77",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],

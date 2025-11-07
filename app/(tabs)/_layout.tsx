@@ -110,7 +110,7 @@ export default function TabLayout() {
       </Tabs>
       <View style={styles.versionFooter}>
         <Text style={styles.versionText}>
-          v{`${appConfig.expo?.version || "-"} | ${appConfig.expo?.name}`}
+          {`${appConfig.expo?.name} version: ${appConfig.expo?.version} (${appConfig.expo?.ios.buildNumber}) Platform: ${Platform.OS} v: ${Platform.Version}`}
         </Text>
       </View>
     </View>
