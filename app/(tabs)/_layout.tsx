@@ -15,7 +15,7 @@ export default function TabLayout() {
 
   console.log(
     "APP version:",
-    appConfig.expo?.version,
+    appConfig.expo?.version + " | " + appConfig.expo?.name,
     "Platform:",
     Platform.OS,
     "iOS Version:",
@@ -104,7 +104,7 @@ export default function TabLayout() {
       </Tabs>
       <View style={styles.versionFooter}>
         <Text style={styles.versionText}>
-          v{appConfig.expo?.version || "1.3.2"}
+          v{`${appConfig.expo?.version || "-"} | ${appConfig.expo?.name}`}
         </Text>
       </View>
     </View>

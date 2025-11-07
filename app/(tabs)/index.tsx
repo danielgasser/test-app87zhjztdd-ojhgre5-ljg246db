@@ -358,11 +358,6 @@ export default function MapScreen() {
   };
 
   const handleRecenterToUserLocation = () => {
-    console.log("🎯 Recenter clicked", {
-      hasUserLocation: !!userLocation,
-      hasMapRef: !!mapRef.current,
-      userLocation,
-    });
     if (userLocation && mapRef.current) {
       const newRegion = {
         latitude: userLocation.latitude,
@@ -370,14 +365,8 @@ export default function MapScreen() {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       };
-      console.log("🎯 Animating to:", newRegion);
 
       mapRef.current.animateToRegion(newRegion, 1000);
-    } else {
-      console.log("🎯 Cannot recenter:", {
-        noUserLocation: !userLocation,
-        noMapRef: !mapRef.current,
-      });
     }
   };
 
@@ -1111,7 +1100,11 @@ export default function MapScreen() {
           <Ionicons
             name={dangerZonesVisible ? "shield" : "shield-outline"}
             size={24}
-            color={theme.colors.textOnPrimary}
+            color={
+              dangerZonesVisible
+                ? theme.colors.textOnPrimary
+                : theme.colors.error
+            }
           />
           <Text
             style={[
@@ -1440,7 +1433,7 @@ const styles = StyleSheet.create({
   recenterButtonContainer: {
     position: "absolute",
     right: 10,
-    zIndex: 1000,
+    zIndex: 10001,
     elevation: 10,
   },
   recenterButton: {

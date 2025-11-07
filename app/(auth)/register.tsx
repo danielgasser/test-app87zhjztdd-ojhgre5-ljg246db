@@ -7,13 +7,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   ScrollView,
   Keyboard,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { signUp } from "src/store/authSlice";
