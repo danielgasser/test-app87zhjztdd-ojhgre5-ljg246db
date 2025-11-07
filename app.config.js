@@ -2,6 +2,14 @@ module.exports = () => {
   const buildVariant = process.env.APP_VARIANT || "development";
   const IS_PREVIEW = buildVariant === "preview";
   const IS_PRODUCTION = buildVariant === "production";
+  console.log(
+    "🔧 Building with APP_VARIANT:",
+    buildVariant,
+    "IS_PREVIEW:",
+    IS_PREVIEW,
+    "IS_PRODUCTION:",
+    IS_PRODUCTION
+  );
 
   return {
     expo: {
