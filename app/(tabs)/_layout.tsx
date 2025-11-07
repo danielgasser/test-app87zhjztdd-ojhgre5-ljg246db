@@ -15,7 +15,11 @@ export default function TabLayout() {
 
   console.log(
     "APP version:",
-    appConfig.expo?.version + " | " + appConfig.expo?.name,
+    appConfig.expo?.version +
+      " | " +
+      appConfig.expo?.name +
+      " | " +
+      appConfig.expo?.ios.buildNumber,
     "Platform:",
     Platform.OS,
     "iOS Version:",
