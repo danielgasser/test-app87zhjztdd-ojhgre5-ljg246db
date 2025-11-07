@@ -10,6 +10,10 @@ import { supabase } from "@/services/supabase";
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
 import Constants from "expo-constants";
+console.log("Constants:", Constants);
+console.log("Constants.expoConfig:", Constants.expoConfig);
+console.log("Constants.manifest:", Constants.manifest);
+console.log("Constants.manifest2:", Constants.manifest2);
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
@@ -111,7 +115,13 @@ export default function TabLayout() {
       </Tabs>
       <View style={styles.versionFooter}>
         <Text style={styles.versionText}>
-          {`${Constants.expo?.name} version: ${Constants.expo?.version} (${Constants.expo?.ios.buildNumber}) Platform: ${Platform.OS} v: ${Platform.Version}`}
+          {`${Constants.expoConfig?.name} version: ${
+            Constants.expoConfig?.version
+          } (${
+            Platform.OS === "ios"
+              ? Constants.expoConfig?.ios?.buildNumber
+              : Constants.expoConfig?.android?.versionCode
+          }) Platform: ${Platform.OS} v: ${Platform.Version}`}
         </Text>
       </View>
     </View>
@@ -120,15 +130,18 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   versionFooter: {
     position: "absolute",
-    bottom: 8,
-    left: 40,
+    bottom: 14,
+    left: 0,
     right: 0,
-    alignItems: "flex-start",
+    alignItems: "center",
     pointerEvents: "none",
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.borderDark,
   },
   versionText: {
     fontSize: 12,
-    color: theme.colors.primary,
-    opacity: 0.4,
+    color: theme.colors.primaryDark,
+    opacity: 0.6,
+    marginTop: 1,
   },
 });
