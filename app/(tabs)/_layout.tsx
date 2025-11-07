@@ -7,22 +7,24 @@ import { fetchUserProfile } from "@/store/userSlice";
 import { RootState } from "@/store";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { supabase } from "@/services/supabase";
-const appConfig = require("../../app.config.js");
+const getAppConfig = require("../../app.config.js");
+const appConfig = getAppConfig();
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
 
   console.log(
-    "APP version:",
-    appConfig.expo?.version +
-      " | " +
-      appConfig.expo?.name +
-      " | " +
-      appConfig.expo?.ios.buildNumber,
+    "APP:",
+    appConfig.expo?.name +
+      " version: " +
+      appConfig.expo?.version +
+      " (" +
+      appConfig.expo?.ios.buildNumber +
+      ") ",
     "Platform:",
     Platform.OS,
-    "iOS Version:",
+    " v: ",
     Platform.Version
   );
 
