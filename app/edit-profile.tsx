@@ -97,9 +97,14 @@ export default function EditProfileScreen() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        email: email.trim(),
-      });
+      const { error } = await supabase.auth.updateUser(
+        {
+          email: email.trim(),
+        },
+        {
+          emailRedirectTo: "safepath://profile",
+        }
+      );
 
       if (error) {
         console.log("EMAIL ERROR", error.message);

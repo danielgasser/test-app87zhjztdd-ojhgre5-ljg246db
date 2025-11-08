@@ -352,6 +352,29 @@ function RootLayoutNav() {
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
+      // Handle email change confirmation
+      if (url.includes("safepath://email-change-confirm")) {
+        const hashPart = url.split("#")[1];
+        if (hashPart) {
+          const params = new URLSearchParams(hashPart);
+          const accessToken = params.get("access_token");
+          const refreshToken = params.get("refresh_token");
+          const type = params.get("type");
+
+          if (type === "email_change" && accessToken && refreshToken) {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (!error) {
+              notify.success("Email updated successfully!");
+              router.replace("/(tabs)/profile");
+            }
+          }
+        }
+        return;
+      }
       // Handle password reset
       if (url.includes("safepath://reset-password")) {
         const hashPart = url.split("#")[1];
