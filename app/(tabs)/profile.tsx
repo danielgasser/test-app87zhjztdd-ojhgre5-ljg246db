@@ -8,11 +8,10 @@ import {
   Image,
   ActivityIndicator,
   Linking,
-  Pressable,
   GestureResponderEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { signOut } from "src/store/authSlice";
@@ -362,6 +361,20 @@ export default function ProfileScreen() {
               onToggle={() => toggleSection("demographics")}
             >
               {renderDemographics()}
+              {/* Edit Demographics Button */}
+              <TouchableOpacity
+                style={styles.editDemographicsButton}
+                onPress={() => router.push("/onboarding")}
+              >
+                <Ionicons
+                  name="create"
+                  size={20}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.editDemographicsText}>
+                  Edit Demographics
+                </Text>
+              </TouchableOpacity>
             </CollapsibleSection>
             {/* Map Settings Section */}
             <CollapsibleSection
@@ -422,7 +435,7 @@ export default function ProfileScreen() {
             >
               <TouchableOpacity
                 style={styles.accountItem}
-                onPress={() => router.push("/onboarding")}
+                onPress={() => router.push("/edit-profile")}
               >
                 <Ionicons
                   name="create"
@@ -680,6 +693,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     fontStyle: "italic",
+  },
+  editDemographicsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    gap: theme.spacing.sm,
+  },
+  editDemographicsText: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    fontWeight: "500",
   },
   settingItem: {
     flexDirection: "row",

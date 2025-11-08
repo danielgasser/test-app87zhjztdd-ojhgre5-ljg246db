@@ -10,10 +10,6 @@ import { supabase } from "@/services/supabase";
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
 import Constants from "expo-constants";
-console.log("Constants:", Constants);
-console.log("Constants.expoConfig:", Constants.expoConfig);
-console.log("Constants.manifest:", Constants.manifest);
-console.log("Constants.manifest2:", Constants.manifest2);
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
