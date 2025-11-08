@@ -102,7 +102,7 @@ export default function EditProfileScreen() {
           email: email.trim(),
         },
         {
-          emailRedirectTo: "safepath://profile",
+          emailRedirectTo: "safepath://email-change-confirm",
         }
       );
 

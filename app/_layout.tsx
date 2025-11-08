@@ -368,6 +368,10 @@ function RootLayoutNav() {
             });
 
             if (!error) {
+              const { data: userData } = await supabase.auth.getUser();
+              if (userData?.user) {
+                dispatch(setSession({ ...session, user: userData.user }));
+              }
               notify.success("Email updated successfully!");
               router.replace("/(tabs)/profile");
             }
