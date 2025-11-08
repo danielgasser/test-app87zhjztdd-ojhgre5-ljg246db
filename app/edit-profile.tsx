@@ -148,6 +148,18 @@ export default function EditProfileScreen() {
       notify.error("New password must be at least 8 characters");
       return;
     }
+    // Check for uppercase, lowercase, digit, and special character
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasDigit = /\d/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasSpecialChar) {
+      notify.error(
+        "Password must contain uppercase, lowercase, number, and special character"
+      );
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       notify.error("New passwords do not match");
