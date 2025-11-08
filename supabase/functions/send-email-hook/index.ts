@@ -23,6 +23,16 @@ serve(async (req) => {
 
     console.log('📧 Action type:', email_action_type) // ← ADD THIS
     console.log('👤 User email:', user.email) // ← ADD THIS // Build email content based on action type
+    console.log('🔍 Full user object:', JSON.stringify(user, null, 2))  // ← ADD THIS
+    console.log('🔍 Full email_data:', JSON.stringify(email_data, null, 2))
+    let recipientEmail = user.email; // Default to current email
+
+    if (email_action_type === 'email_change' && user.new_email) {
+      recipientEmail = user.new_email;
+      console.log('✅ Sending to NEW email:', recipientEmail)
+    } else {
+      console.log('📤 Sending to current email:', recipientEmail)
+    }
     const emailContent = buildEmailContent(email_action_type, token, redirect_to, user);
     // Send email via Resend
     const response = await fetch(RESEND_API_URL, {
@@ -33,9 +43,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'SafePath <noreply@mail.safepathgo.com>',
-        to: [
-          user.email
-        ],
+        to: [recipientEmail],
         subject: emailContent.subject,
         html: emailContent.html
       })
