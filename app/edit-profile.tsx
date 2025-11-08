@@ -172,8 +172,13 @@ export default function EditProfileScreen() {
       });
 
       if (updateError) throw updateError;
+      await supabase.auth.signOut();
 
-      notify.success("Password updated successfully");
+      notify.success(
+        "Password updated successfully! Please sign in with your new password."
+      );
+      router.replace("/login");
+
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
