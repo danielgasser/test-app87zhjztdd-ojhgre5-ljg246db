@@ -19,6 +19,7 @@ import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
 import { useLocalSearchParams } from "expo-router";
 import { logger } from "@/utils/logger";
+import { passwordChecker } from "@/utils/passWordCheker";
 
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();
@@ -47,25 +48,9 @@ export default function ResetPasswordScreen() {
     checkSession();
   }, []);
   const validatePassword = (password: string): boolean => {
-    // At least 8 characters
-    if (password.length < 8) {
-      notify.error("Password must be at least 8 characters long");
+    if (!passwordChecker(newPassword)) {
       return false;
     }
-
-    // Check for uppercase, lowercase, digit, and special character
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasDigit = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-    if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasSpecialChar) {
-      notify.error(
-        "Password must contain uppercase, lowercase, number, and special character"
-      );
-      return false;
-    }
-
     return true;
   };
 

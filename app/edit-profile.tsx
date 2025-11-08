@@ -19,6 +19,7 @@ import { supabase } from "@/services/supabase";
 import { updateUserProfile } from "src/store/userSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { passwordChecker } from "@/utils/passWordCheker";
 
 export default function EditProfileScreen() {
   const dispatch = useAppDispatch();
@@ -107,7 +108,6 @@ export default function EditProfileScreen() {
       );
 
       if (error) {
-        console.log("EMAIL ERROR", error.message);
         throw error;
       }
       notify.success(
@@ -116,7 +116,7 @@ export default function EditProfileScreen() {
       setEmail(user?.email || "");
     } catch (error: any) {
       logger.error("Email update error:", error);
-      console.log("EMAIL ERROR", error.message);
+
       const errorMessage = error.message?.toLowerCase() || "";
       if (
         errorMessage.includes("already exists") ||
@@ -144,20 +144,7 @@ export default function EditProfileScreen() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      notify.error("New password must be at least 8 characters");
-      return;
-    }
-    // Check for uppercase, lowercase, digit, and special character
-    const hasUpperCase = /[A-Z]/.test(newPassword);
-    const hasLowerCase = /[a-z]/.test(newPassword);
-    const hasDigit = /\d/.test(newPassword);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
-
-    if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasSpecialChar) {
-      notify.error(
-        "Password must contain uppercase, lowercase, number, and special character"
-      );
+    if (!passwordChecker(newPassword)) {
       return;
     }
 
