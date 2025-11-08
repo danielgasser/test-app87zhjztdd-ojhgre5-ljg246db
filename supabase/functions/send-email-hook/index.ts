@@ -19,7 +19,7 @@ serve(async (req) => {
     const wh = new Webhook(hookSecret);
     // This will throw if verification fails
     const { user, email_data } = wh.verify(payload, headers);
-    const { email_action_type, token, redirect_to } = email_data;
+    const { email_action_type, token, token_hash, redirect_to } = email_data;
 
     console.log('📧 Action type:', email_action_type) // ← ADD THIS
     console.log('👤 User email:', user.email) // ← ADD THIS // Build email content based on action type
@@ -33,7 +33,7 @@ serve(async (req) => {
     } else {
       console.log('📤 Sending to current email:', recipientEmail)
     }
-    const emailContent = buildEmailContent(email_action_type, token, redirect_to, user);
+    const emailContent = buildEmailContent(email_action_type, token, token_hash, redirect_to, user);
     // Send email via Resend
     const response = await fetch(RESEND_API_URL, {
       method: 'POST',
@@ -83,9 +83,10 @@ serve(async (req) => {
     });
   }
 });
-function buildEmailContent(actionType, token, redirectTo, user) {
+function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
   const baseUrl = Deno.env.get('SUPABASE_URL') || 'https://jglobmuqzqzfcwpifocz.supabase.co';
-  const confirmationUrl = `${baseUrl}/auth/v1/verify?token=${token}&type=${actionType}&redirect_to=${encodeURIComponent(redirectTo)}`;
+  const tokenToUse = actionType === 'email_change' ? token_hash : token;
+  const confirmationUrl = `${baseUrl}/auth/v1/verify?token=${tokenToUse}&type=${actionType}&redirect_to=${encodeURIComponent(redirectTo)}`;
   switch (actionType) {
     case 'signup':
       return {

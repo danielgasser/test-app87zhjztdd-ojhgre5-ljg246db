@@ -363,36 +363,24 @@ function RootLayoutNav() {
           const accessToken = params.get("access_token");
           const refreshToken = params.get("refresh_token");
           const type = params.get("type");
+          console.log("TYPE: ", type);
           console.log("type:", type);
           if (type === "email_change" && accessToken && refreshToken) {
-            console.log("🔵 Verifying email change token...");
+            console.log("🔵 Confirming email change...");
 
-            // Use the token hash to verify the email change
-            const token = params.get("token");
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
 
-            if (token) {
-              const { data, error } = await supabase.auth.verifyOtp({
-                token_hash: token,
-                type: "email_change",
-              });
-
-              console.log("🔵 verifyOtp result:", { data, error });
-
-              if (!error && data?.user) {
-                console.log("🔵 Email updated to:", data.user.email);
-
-                // Update Redux with the new session
-                const { data: sessionData } = await supabase.auth.getSession();
-                if (sessionData?.session) {
-                  dispatch(setSession(sessionData.session));
-                }
-
-                notify.success("Email updated successfully!");
-                router.replace("/(tabs)/profile");
-              } else {
-                notify.error("Failed to confirm email change");
-                console.error("🔴 verifyOtp error:", error);
-              }
+            if (!error && data.session) {
+              console.log("🔵 Email updated to:", data.session.user.email);
+              dispatch(setSession(data.session));
+              notify.success("Email updated successfully!");
+              router.replace("/(tabs)/profile");
+            } else {
+              notify.error("Failed to confirm email change");
+              console.error("🔴 setSession error:", error);
             }
           }
         }
