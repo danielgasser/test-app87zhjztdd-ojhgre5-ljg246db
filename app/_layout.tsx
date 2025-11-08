@@ -352,6 +352,9 @@ function RootLayoutNav() {
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
+      console.log("🔵 FULL URL RECEIVED:", url);
+      console.log("🔵 URL contains '#':", url.includes("#"));
+      console.log("🔵 URL contains '?':", url.includes("?"));
       // Handle email change confirmation
       if (url.includes("safepath://email-change-confirm")) {
         const hashPart = url.split("#")[1];
@@ -360,7 +363,7 @@ function RootLayoutNav() {
           const accessToken = params.get("access_token");
           const refreshToken = params.get("refresh_token");
           const type = params.get("type");
-
+          console.log("type:", type);
           if (type === "email_change" && accessToken && refreshToken) {
             console.log("🔵 Verifying email change token...");
 

@@ -432,7 +432,7 @@ entrypoint = "./functions/location-safety-change-notifications/index.ts"
 # static_files = [ "./functions/location-safety-change-notifications/*.html" ]
 
 [functions.send-email-hook]
-enabled = true
+enabled = false
 verify_jwt = false
 import_map = "./functions/send-email-hook/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
