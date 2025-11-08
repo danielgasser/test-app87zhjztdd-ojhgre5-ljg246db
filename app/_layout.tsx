@@ -362,18 +362,34 @@ function RootLayoutNav() {
           const type = params.get("type");
 
           if (type === "email_change" && accessToken && refreshToken) {
-            const { error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
+            console.log("🔵 Verifying email change token...");
 
-            if (!error) {
-              const { data: userData } = await supabase.auth.getUser();
-              if (userData?.user) {
-                dispatch(setSession({ ...session, user: userData.user }));
+            // Use the token hash to verify the email change
+            const token = params.get("token");
+
+            if (token) {
+              const { data, error } = await supabase.auth.verifyOtp({
+                token_hash: token,
+                type: "email_change",
+              });
+
+              console.log("🔵 verifyOtp result:", { data, error });
+
+              if (!error && data?.user) {
+                console.log("🔵 Email updated to:", data.user.email);
+
+                // Update Redux with the new session
+                const { data: sessionData } = await supabase.auth.getSession();
+                if (sessionData?.session) {
+                  dispatch(setSession(sessionData.session));
+                }
+
+                notify.success("Email updated successfully!");
+                router.replace("/(tabs)/profile");
+              } else {
+                notify.error("Failed to confirm email change");
+                console.error("🔴 verifyOtp error:", error);
               }
-              notify.success("Email updated successfully!");
-              router.replace("/(tabs)/profile");
             }
           }
         }
