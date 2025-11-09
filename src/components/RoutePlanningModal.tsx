@@ -274,6 +274,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     const savedRoute = await dispatch(
       saveRouteToDatabase({
         route_coordinates: selectedRoute.coordinates,
+        steps: selectedRoute.steps,
         origin_name: fromLocation.name,
         destination_name: toLocation.name,
         distance_km: selectedRoute.distance_kilometers,
