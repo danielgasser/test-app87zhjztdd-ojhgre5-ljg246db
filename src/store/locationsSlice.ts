@@ -471,6 +471,7 @@ export const saveRouteToDatabase = createAsyncThunk(
   "locations/saveRouteToDatabase",
   async (route: {
     route_coordinates: RouteCoordinate[];
+    steps?: NavigationStep[];
     origin_name: string;
     destination_name: string;
     distance_km: number;
@@ -490,7 +491,7 @@ export const saveRouteToDatabase = createAsyncThunk(
         .insert({
           user_id: user.id,
           route_coordinates: route.route_coordinates as any,
-          steps: route.steps || null,
+          steps: route.steps ? (route.steps as any) : null,
           origin_name: route.origin_name,
           destination_name: route.destination_name,
           distance_km: route.distance_km,
