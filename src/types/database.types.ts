@@ -310,6 +310,7 @@ export type Database = {
           route_coordinates: Json
           safety_alerts_handled: Json | null
           safety_score: number | null
+          steps: Json | null
           updated_at: string
           user_id: string
         }
@@ -326,6 +327,7 @@ export type Database = {
           route_coordinates: Json
           safety_alerts_handled?: Json | null
           safety_score?: number | null
+          steps?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -342,6 +344,7 @@ export type Database = {
           route_coordinates?: Json
           safety_alerts_handled?: Json | null
           safety_score?: number | null
+          steps?: Json | null
           updated_at?: string
           user_id?: string
         }

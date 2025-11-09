@@ -489,7 +489,8 @@ export const saveRouteToDatabase = createAsyncThunk(
         .from("routes")
         .insert({
           user_id: user.id,
-          route_coordinates: route.route_coordinates as any, // Cast to any for JSONB
+          route_coordinates: route.route_coordinates as any,
+          steps: route.steps || null,
           origin_name: route.origin_name,
           destination_name: route.destination_name,
           distance_km: route.distance_km,

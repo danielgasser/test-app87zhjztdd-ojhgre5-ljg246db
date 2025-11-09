@@ -7,10 +7,17 @@ import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
 import { signOut } from './authSlice';
 import { logger } from '@/utils/logger';
 import { notify } from '@/utils/notificationService';
+export interface NotificationPreferences {
+  safety_alerts?: boolean;
+  route_safety_changes?: boolean;
+  location_triggers?: boolean;
+  time_format?: '12h' | '24h';
+  distance_unit?: 'metric' | 'imperial';
+}
 
 type DatabaseUserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type UserProfile = Omit<DatabaseUserProfile, 'notification_preferences' | 'preferences'> & {
-  notification_preferences?: Record<string, any> | null;
+  notification_preferences?: NotificationPreferences | null;
   preferences?: {
     search?: {
       radius_km?: number;
@@ -80,6 +87,7 @@ export const fetchUserProfile = createAsyncThunk<UserProfile, string>(
 export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string; profileData: Partial<UserProfile> }>(
   'user/updateProfile',
   async ({ userId, profileData }): Promise<UserProfile> => {
+    const dbProfileData = profileData as any;
     // Check if profile exists
     const { data: existingProfile } = await supabase
       .from('user_profiles')
@@ -93,7 +101,7 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
       // Update existing profile
       const { data, error } = await supabase
         .from('user_profiles')
-        .update(profileData)
+        .update(dbProfileData)
         .eq('id', userId)
         .select()
         .single();
@@ -106,7 +114,7 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
         .from('user_profiles')
         .insert({
           id: userId,
-          ...profileData,
+          ...dbProfileData,
         })
         .select()
         .single();
