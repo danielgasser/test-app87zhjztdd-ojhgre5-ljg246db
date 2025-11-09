@@ -591,35 +591,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           )}
         </View>
       </View>
-      {/* 🚨 TEMPORARY DEBUG - REMOVE AFTER TESTING */}
-      <View
-        style={{
-          position: "absolute",
-          top: 200,
-          left: 20,
-          right: 20,
-          backgroundColor: "rgba(255,0,0,0.8)",
-          padding: 10,
-          borderRadius: 8,
-          zIndex: 10001,
-        }}
-      >
-        <Text style={{ color: "white", fontSize: 18, fontFamily: "monospace" }}>
-          DEBUG INFO:{"\n"}
-          hasRoute: {String(debugInfo.hasRoute)}
-          {"\n"}
-          hasSteps: {String(debugInfo.hasSteps)}
-          {"\n"}
-          stepsLength: {debugInfo.stepsLength}
-          {"\n"}
-          currentStep: {String(debugInfo.currentStep)}
-          {"\n"}
-          hasStepData: {String(debugInfo.hasCurrentStepData)}
-          {"\n"}
-          distanceToTurn: {debugInfo.distanceToTurn.toFixed(0)}m{"\n"}
-          hasPosition: {String(debugInfo.hasPosition)}
-        </Text>
-      </View>
+
       {/* Bottom controls */}
       <View style={styles.controls}>
         <View style={styles.statsRow}>
