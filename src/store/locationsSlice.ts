@@ -1684,6 +1684,7 @@ export const checkForReroute = createAsyncThunk(
             const savedRoute = await dispatch(
               saveRouteToDatabase({
                 route_coordinates: result.optimized_route.coordinates,
+                steps: result.optimized_route.steps,
                 origin_name: "Current Location",
                 destination_name: routeRequest.destination.latitude + "," + routeRequest.destination.longitude,
                 distance_km: result.optimized_route.distance_kilometers,
@@ -1777,6 +1778,7 @@ export const checkForReroute = createAsyncThunk(
           const savedRoute = await dispatch(
             saveRouteToDatabase({
               route_coordinates: basicResult.route.coordinates,
+              steps: basicResult.route.steps,
               origin_name: "Current Location",
               destination_name: routeRequest.destination.latitude + "," + routeRequest.destination.longitude,
               distance_km: basicResult.route.distance_kilometers,
