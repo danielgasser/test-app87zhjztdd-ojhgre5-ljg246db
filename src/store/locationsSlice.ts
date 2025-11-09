@@ -1410,6 +1410,7 @@ export const generateSafeRoute = createAsyncThunk(
         name: routeName,
         route_type: routeType,
         coordinates: routeCoordinates,
+        steps: primaryRoute.steps,
         route_points: routeCoordinates,
         estimated_duration_minutes: Math.round(primaryRoute.duration / 60),
         distance_kilometers: Math.round(primaryRoute.distance / 1000 * 10) / 10,
@@ -1492,6 +1493,7 @@ export const generateRouteAlternatives = createAsyncThunk(
             name: routeName,
             route_type: routeType,
             coordinates: routeCoordinates,
+            steps: route.steps,
             estimated_duration_minutes: Math.round(route.duration / 60),
             distance_kilometers: Math.round(route.distance / 1000 * 10) / 10,
             safety_analysis: safetyAnalysis,
@@ -1563,6 +1565,7 @@ export const generateSmartRoute = createAsyncThunk(
         route_type: "safest",
         coordinates: optimizedCoords,
         route_points: optimizedCoords,
+        steps: data.optimized_route.steps,
         estimated_duration_minutes: Math.round(data.optimized_route.duration / 60),
         distance_kilometers: Math.round(data.optimized_route.distance / 1000 * 10) / 10,
         safety_analysis: {
@@ -1608,6 +1611,7 @@ export const generateSmartRoute = createAsyncThunk(
         route_type: "fastest",
         coordinates: originalCoords,
         route_points: originalCoords,
+        steps: data.original_route.steps,
         estimated_duration_minutes: Math.round(data.original_route.duration / 60),
         distance_kilometers: Math.round(data.original_route.distance / 1000 * 10) / 10,
         safety_analysis: data.original_safety || {

@@ -595,7 +595,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       <View
         style={{
           position: "absolute",
-          top: 180,
+          top: 200,
           left: 20,
           right: 20,
           backgroundColor: "rgba(255,0,0,0.8)",
@@ -604,7 +604,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           zIndex: 10001,
         }}
       >
-        <Text style={{ color: "white", fontSize: 10, fontFamily: "monospace" }}>
+        <Text style={{ color: "white", fontSize: 18, fontFamily: "monospace" }}>
           DEBUG INFO:{"\n"}
           hasRoute: {String(debugInfo.hasRoute)}
           {"\n"}

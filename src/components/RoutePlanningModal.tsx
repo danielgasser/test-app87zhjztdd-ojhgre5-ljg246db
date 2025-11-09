@@ -270,6 +270,13 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     };
 
     dispatch(setRouteRequest(routeRequestData));
+    console.log("🔍 RoutePlanningModal - About to save route:", {
+      hasSelectedRoute: !!selectedRoute,
+      hasSteps: !!selectedRoute?.steps,
+      stepsCount: selectedRoute?.steps?.length,
+      firstStep: selectedRoute?.steps?.[0]?.instruction,
+      routeSource: selectedRoute?.id, // To see where route came from
+    });
 
     const savedRoute = await dispatch(
       saveRouteToDatabase({

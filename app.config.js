@@ -8,7 +8,6 @@ module.exports = () => {
     : IS_PREVIEW
     ? "SafePath TEST"
     : "SafePath DEV";
-  console.log("🔧 Final app name:", appName);
 
   return {
     expo: {

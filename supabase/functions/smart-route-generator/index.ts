@@ -126,6 +126,26 @@ async function getGoogleRoute(
 
   // Transform to match expected format
   const route = data.routes[0];
+
+  const steps: any[] = [];
+  route.legs.forEach((leg: any) => {
+    leg.steps.forEach((step: any) => {
+      steps.push({
+        instruction: step.html_instructions.replace(/<[^>]*>/g, ""), // Strip HTML tags
+        distance_meters: step.distance.value,
+        duration_seconds: step.duration.value,
+        start_location: {
+          latitude: step.start_location.lat,
+          longitude: step.start_location.lng,
+        },
+        end_location: {
+          latitude: step.end_location.lat,
+          longitude: step.end_location.lng,
+        },
+        maneuver: step.maneuver || undefined,
+      });
+    });
+  });
   return {
     duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
     distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
@@ -141,7 +161,8 @@ async function getGoogleRoute(
         });
         return detailedCoords.length > 0 ? detailedCoords : decodePolyline(route.overview_polyline.points);
       })(),
-      type: 'LineString'
+      type: 'LineString',
+      steps: steps
     }
   };
 }

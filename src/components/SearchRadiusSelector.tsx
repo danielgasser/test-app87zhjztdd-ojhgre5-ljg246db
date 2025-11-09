@@ -11,9 +11,11 @@ import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateSearchRadius } from "@/store/userSlice";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 export default function SearchRadiusSelector() {
   const dispatch = useAppDispatch();
+  const { distanceUnit } = useUserPreferences();
   const userId = useAppSelector((state) => state.auth.user?.id);
   const currentRadius = useAppSelector((state) => state.user.searchRadiusKm);
   const [selectedRadius, setSelectedRadius] = useState(currentRadius);
@@ -96,32 +98,35 @@ export default function SearchRadiusSelector() {
 
       {/* Segmented Control */}
       <View style={styles.segmentedControl}>
-        {options.map((option) => (
-          <TouchableOpacity
-            key={option.value}
-            style={[
-              styles.segment,
-              selectedRadius === option.value && styles.segmentActive,
-            ]}
-            onPress={() => handleSelect(option.value)}
-            activeOpacity={0.7}
-          >
-            <Text
+        {options.map((option) => {
+          // Convert display values for imperial
+          let displayLabel: string = option.label;
+          if (distanceUnit === "imperial" && option.value < 999999) {
+            const miles = Math.round(option.value * 0.621371);
+            displayLabel = `${miles} mi`;
+          }
+
+          return (
+            <TouchableOpacity
+              key={option.value}
               style={[
-                styles.segmentText,
-                selectedRadius === option.value && styles.segmentTextActive,
+                styles.segment,
+                selectedRadius === option.value && styles.segmentActive,
               ]}
+              onPress={() => handleSelect(option.value)}
+              activeOpacity={0.7}
             >
-              {option.label}
-            </Text>
-            <Text
-              style={[
-                styles.segmentUnit,
-                selectedRadius === option.value && styles.segmentUnitActive,
-              ]}
-            ></Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.segmentText,
+                  selectedRadius === option.value && styles.segmentTextActive,
+                ]}
+              >
+                {displayLabel}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Description Labels */}
@@ -149,6 +154,10 @@ export default function SearchRadiusSelector() {
         <Text style={styles.infoText}>
           {selectedRadius >= 999999
             ? "Searching globally - all countries"
+            : distanceUnit === "imperial"
+            ? `Currently showing locations within ${Math.round(
+                selectedRadius * 0.621371
+              )} miles of map center`
             : `Currently showing locations within ${selectedRadius} km of map center`}
         </Text>
       </View>
