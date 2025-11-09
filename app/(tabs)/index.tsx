@@ -57,6 +57,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { calculateDistanceBetweenPoints } from "@/utils/distanceHelpers";
 import { getRouteLineColor } from "@/utils/safetyHelpers";
+import { formatTimeAgo, hoursAgo, formatDuration } from "@/utils/timeHelpers";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -1247,7 +1248,7 @@ export default function MapScreen() {
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {selectedRoute.estimated_duration_minutes}min
+                {formatDuration(selectedRoute.estimated_duration_minutes)}
               </Text>
               <Text style={styles.statLabel}>Duration</Text>
             </View>

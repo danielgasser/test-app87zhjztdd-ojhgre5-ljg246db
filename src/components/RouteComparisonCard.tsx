@@ -5,6 +5,7 @@ import { SmartRouteComparison } from "../store/locationsSlice";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { useAppSelector } from "@/store/hooks";
+import { formatDuration } from "@/utils/timeHelpers";
 
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
@@ -98,7 +99,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
                 color={theme.colors.textSecondary}
               />
               <Text style={styles.metricText}>
-                {original_route.estimated_duration_minutes} min
+                {formatDuration(original_route.estimated_duration_minutes)}
               </Text>
             </View>
             <View style={styles.metric}>
@@ -157,7 +158,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
                 color={theme.colors.textSecondary}
               />
               <Text style={styles.metricText}>
-                {optimized_route.estimated_duration_minutes} min
+                {formatDuration(optimized_route.estimated_duration_minutes)}
                 <Text style={styles.addedTime}>
                   (+{improvement_summary.time_added_minutes})
                 </Text>

@@ -19,7 +19,7 @@ import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
 import { useLocalSearchParams } from "expo-router";
 import { logger } from "@/utils/logger";
-import { passwordChecker } from "@/utils/passWordCheker";
+import { passwordChecker } from "@/utils/passwordChecker";
 
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();

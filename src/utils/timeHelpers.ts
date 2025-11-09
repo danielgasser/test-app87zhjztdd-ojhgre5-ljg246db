@@ -37,3 +37,39 @@ export function hoursAgo(pastDate: Date | string): number {
     const past = new Date(pastDate);
     return (Date.now() - past.getTime()) / (1000 * 60 * 60);
 }
+
+/**
+ * Format duration in minutes to human-readable format
+ * @param minutes - Duration in minutes
+ * @returns Formatted string (e.g., "5 min", "1h 15m", "2h 30m")
+ */
+export function formatDuration(minutes: number): string {
+    if (minutes < 60) {
+        return `${Math.round(minutes)} min`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+
+    if (mins === 0) {
+        return `${hours}h`;
+    }
+
+    return `${hours}h ${mins}m`;
+}
+
+/**
+ * Calculate and format arrival time based on duration
+ * @param durationMinutes - Duration in minutes from now
+ * @returns Formatted arrival time (e.g., "3:45 PM" or "15:45")
+ */
+export function formatArrivalTime(durationMinutes: number): string {
+    const now = new Date();
+    const arrival = new Date(now.getTime() + durationMinutes * 60000);
+
+    return arrival.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true // Set to false for 24-hour format
+    });
+}

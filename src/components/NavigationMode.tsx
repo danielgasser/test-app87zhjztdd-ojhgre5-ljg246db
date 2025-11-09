@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -25,6 +25,13 @@ import { logger } from "@/utils/logger";
 import { supabase } from "@/services/supabase";
 import { store } from "@/store";
 import { calculateDistance, formatDistance } from "@/utils/distanceHelpers";
+import {
+  formatTimeAgo,
+  hoursAgo,
+  formatDuration,
+  formatArrivalTime,
+} from "@/utils/timeHelpers";
+
 const { width, height } = Dimensions.get("window");
 
 interface NavigationModeProps {
@@ -99,6 +106,56 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     }
   };
 
+  const remainingDistance = useMemo(() => {
+    if (
+      !selectedRoute?.steps ||
+      currentNavigationStep === null ||
+      !currentPosition
+    ) {
+      return selectedRoute?.distance_kilometers
+        ? selectedRoute.distance_kilometers * 1000
+        : 0;
+    }
+
+    let remaining = 0;
+
+    // 1. Distance from current position to end of current step
+    const currentStep = selectedRoute.steps[currentNavigationStep];
+    if (currentStep) {
+      remaining += calculateDistance(
+        currentPosition.latitude,
+        currentPosition.longitude,
+        currentStep.end_location.latitude,
+        currentStep.end_location.longitude
+      );
+    }
+
+    // 2. Add all remaining steps after current
+    for (
+      let i = currentNavigationStep + 1;
+      i < selectedRoute.steps.length;
+      i++
+    ) {
+      remaining += selectedRoute.steps[i].distance_meters;
+    }
+
+    return remaining; // Already in meters
+  }, [selectedRoute, currentNavigationStep, currentPosition]);
+
+  const remainingMinutes = useMemo(() => {
+    if (!selectedRoute?.steps || currentNavigationStep === null) {
+      return selectedRoute?.estimated_duration_minutes || 0;
+    }
+
+    // Sum duration of remaining steps
+    let remaining = 0;
+    for (let i = currentNavigationStep; i < selectedRoute.steps.length; i++) {
+      remaining += selectedRoute.steps[i].duration_seconds;
+    }
+
+    return Math.round(remaining / 60); // Convert to minutes
+  }, [selectedRoute, currentNavigationStep]);
+
   // Record that a safety alert was handled by the user
   const recordSafetyAlertHandled = async (
     routeId: string,
@@ -150,6 +207,27 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       logger.error("Error in recordSafetyAlertHandled:", error);
     }
   };
+
+  // Add this useEffect to calculate initial distance
+  useEffect(() => {
+    if (
+      navigationActive &&
+      currentPosition &&
+      selectedRoute?.steps &&
+      currentNavigationStep !== null
+    ) {
+      const currentStep = selectedRoute.steps[currentNavigationStep];
+      if (currentStep) {
+        const initialDistance = calculateDistance(
+          currentPosition.latitude,
+          currentPosition.longitude,
+          currentStep.end_location.latitude,
+          currentStep.end_location.longitude
+        );
+        setDistanceToNextTurn(initialDistance);
+      }
+    }
+  }, [navigationActive, currentPosition, selectedRoute, currentNavigationStep]);
 
   // Start GPS tracking
   useEffect(() => {
@@ -356,29 +434,28 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           }
 
           // Calculate distance to next turn
+          // Calculate distance to next turn
           if (selectedRoute && currentNavigationStep !== null) {
-            const nextStepIndex = currentNavigationStep + 1;
             if (
               selectedRoute.steps &&
-              nextStepIndex < selectedRoute.steps.length
+              currentNavigationStep < selectedRoute.steps.length
             ) {
-              const nextStep = selectedRoute.steps[nextStepIndex];
+              const currentStep = selectedRoute.steps[currentNavigationStep]; // ← CURRENT step
               const distance = calculateDistance(
                 newPosition.latitude,
                 newPosition.longitude,
-                nextStep.end_location.latitude,
-                nextStep.end_location.longitude
+                currentStep.end_location.latitude, // ← Distance to CURRENT step's end
+                currentStep.end_location.longitude
               );
               setDistanceToNextTurn(distance);
 
-              // Check if we reached the turn
+              // Check if we reached the turn (within 20m of CURRENT step's end)
               if (distance < 20) {
-                // Within 20 meters
-                dispatch(updateNavigationProgress(nextStepIndex));
+                const nextStepIndex = currentNavigationStep + 1;
+                if (nextStepIndex < selectedRoute.steps.length) {
+                  dispatch(updateNavigationProgress(nextStepIndex));
+                }
               }
-
-              // Check if user deviated from route
-              checkDeviation(newPosition);
             }
           }
         }
@@ -514,13 +591,17 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>ETA</Text>
             <Text style={styles.statValue}>
-              {selectedRoute.estimated_duration_minutes}min
+              {formatDuration(remainingMinutes)}
+            </Text>
+            <Text style={styles.statLabel}>Arrival</Text>
+            <Text style={styles.statValue}>
+              {formatArrivalTime(remainingMinutes)}
             </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Distance</Text>
             <Text style={styles.statValue}>
-              {formatDistance(selectedRoute.distance_kilometers * 1000)}
+              {formatDistance(remainingDistance)}
             </Text>
           </View>
           <View style={styles.statItem}>
