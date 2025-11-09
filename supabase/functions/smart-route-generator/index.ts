@@ -3,7 +3,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { decodePolyline } from '../_shared/polyline-decoder';
+import { decodePolyline } from '../_shared/polyline-decoder.ts';
 // Import Deno global type for TypeScript
 /// <reference lib="deno.ns" />
 

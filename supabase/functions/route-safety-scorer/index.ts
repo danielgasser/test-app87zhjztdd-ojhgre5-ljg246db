@@ -4,7 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { EDGE_CONFIG } from '../_shared/config.ts';
-import { calculateDistanceBetweenPoints } from '../_shared/distance-helpers.js';
+import { calculateDistanceBetweenPoints } from '../_shared/distance-helpers.ts';
 
 // Types
 interface RouteCoordinate {

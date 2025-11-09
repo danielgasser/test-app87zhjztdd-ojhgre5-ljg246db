@@ -191,7 +191,7 @@ export async function logNotification(
     }
 }
 
-export { calculateDistance } from "./distance-helpers.js";
+export { calculateDistance } from "./distance-helpers.ts";
 
 
 /**

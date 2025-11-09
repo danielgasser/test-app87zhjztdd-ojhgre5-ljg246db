@@ -4,11 +4,9 @@ import { EDGE_CONFIG } from '../_shared/config.ts';
 import {
   getSeverityLevel,
   isDemographicallyRelevant,
-  wasRecentlyNotifiedForRoute,
   logNotification,
   calculateDistance,
   type PushNotification,
-  type UserProfile,
 } from "../_shared/notification-helpers.ts";
 
 const corsHeaders = {
@@ -67,10 +65,6 @@ interface BatchedReview {
   };
   distance?: number;
   severity?: any;
-}
-
-function toRad(degrees: number): number {
-  return degrees * (Math.PI / 180);
 }
 
 // Check if user was recently notified for this route
