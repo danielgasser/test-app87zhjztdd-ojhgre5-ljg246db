@@ -25,13 +25,8 @@ import { logger } from "@/utils/logger";
 import { supabase } from "@/services/supabase";
 import { store } from "@/store";
 import { calculateDistance, formatDistance } from "@/utils/distanceHelpers";
-import {
-  formatTimeAgo,
-  hoursAgo,
-  formatDuration,
-  formatArrivalTime,
-} from "@/utils/timeHelpers";
-
+import { formatDuration, formatArrivalTime } from "@/utils/timeHelpers";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 const { width, height } = Dimensions.get("window");
 
 interface NavigationModeProps {
@@ -40,7 +35,8 @@ interface NavigationModeProps {
 }
 
 const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
-  useRealtimeReviews(); // This already listens for new reviews!
+  useRealtimeReviews();
+  const { timeFormat, distanceUnit } = useUserPreferences();
 
   const dispatch = useAppDispatch();
   const { communityReviews } = useAppSelector((state) => state.locations);
@@ -581,7 +577,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       <View style={styles.instructionPanel}>
         <View style={styles.distanceContainer}>
           <Text style={styles.distanceText}>
-            {formatDistance(distanceToNextTurn)}
+            {formatDistance(distanceToNextTurn, distanceUnit)}
           </Text>
           <Ionicons name="arrow-up" size={60} color={theme.colors.card} />
         </View>
@@ -634,13 +630,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             </Text>
             <Text style={styles.statLabel}>Arrival</Text>
             <Text style={styles.statValue}>
-              {formatArrivalTime(remainingMinutes)}
+              {formatArrivalTime(remainingMinutes, timeFormat === "24h")}
             </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Distance</Text>
             <Text style={styles.statValue}>
-              {formatDistance(remainingDistance)}
+              {formatDistance(remainingDistance, distanceUnit)}
             </Text>
           </View>
           <View style={styles.statItem}>

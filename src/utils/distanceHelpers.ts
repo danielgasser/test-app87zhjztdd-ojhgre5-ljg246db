@@ -46,15 +46,40 @@ function toRad(degrees: number): number {
 }
 
 /**
- * Format distance for display
+ * Format distance for display with metric or imperial units
  * @param meters - Distance in meters
- * @returns Formatted string (e.g., "150m" or "1.2km")
+ * @param unit - Unit system ('metric' | 'imperial'), defaults to 'metric'
+ * @returns Formatted string (e.g., "150m", "1.2km", "350ft", "2.5mi")
  */
-export function formatDistance(meters: number): string {
+export function formatDistance(meters: number, unit: 'metric' | 'imperial' = 'metric'): string {
+    if (unit === 'imperial') {
+        const feet = meters * 3.28084;
+        const miles = meters * 0.000621371;
+
+        // 0-528ft (0.1mi) → show feet
+        if (feet < 528) {
+            return `${Math.round(feet)}ft`;
+        }
+        // 528-5279ft (0.1-1mi) → show miles with 1 decimal
+        if (feet < 5280) {
+            return `${miles.toFixed(1)}mi`;
+        }
+        // 5280-52799ft (1-10mi) → show miles with 1 decimal
+        if (miles < 10) {
+            return `${miles.toFixed(1)}mi`;
+        }
+        // 10mi+ → show miles with no decimals
+        return `${Math.round(miles)}mi`;
+    }
+
+    // Metric (default)
     if (meters < 1000) {
         return `${Math.round(meters)}m`;
     }
-    return `${(meters / 1000).toFixed(1)}km`;
+    if (meters < 10000) {
+        return `${(meters / 1000).toFixed(1)}km`;
+    }
+    return `${Math.round(meters / 1000)}km`;
 }
 
 /**

@@ -55,9 +55,16 @@ import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { calculateDistanceBetweenPoints } from "@/utils/distanceHelpers";
+import {
+  calculateDistanceBetweenPoints,
+  formatDistance,
+} from "@/utils/distanceHelpers";
 import { getRouteLineColor } from "@/utils/safetyHelpers";
-import { formatTimeAgo, hoursAgo, formatDuration } from "@/utils/timeHelpers";
+import { formatDuration } from "@/utils/timeHelpers";
+import { updateUserProfile, NotificationPreferences } from "@/store/userSlice";
+import { getDefaultPreferences } from "@/utils/preferenceDefaults";
+import { store } from "@/store";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -146,6 +153,9 @@ export default function MapScreen() {
   const dangerZonesLoading = useAppSelector(
     (state) => state.locations.dangerZonesLoading
   );
+
+  const { distanceUnit } = useUserPreferences();
+
   // Check profile completeness for GENERAL (danger zones need full profile)
   const profileCheck = React.useMemo(() => {
     if (!userProfile) return { canUse: true, missingFields: [] };
@@ -673,6 +683,46 @@ export default function MapScreen() {
       );
     }
   }, [nearbyLocations, userProfile, dispatch]);
+
+  // Initialize display preferences on first load based on user country
+  useEffect(() => {
+    const initializePreferences = async () => {
+      if (!userProfile || !userId) return;
+
+      const prefs: NotificationPreferences =
+        userProfile.notification_preferences || {};
+
+      // Check if preferences are already set
+      if (prefs.time_format && prefs.distance_unit) {
+        return; // Already initialized
+      }
+
+      // Get user country (from Redux state)
+      const state = store.getState();
+      const userCountryCode = state.locations.userCountry;
+      // Get defaults based on country
+      const defaults = getDefaultPreferences(userCountryCode);
+
+      // Initialize missing preferences
+      const updatedPrefs: NotificationPreferences = {
+        ...prefs,
+        time_format: prefs.time_format ?? defaults.time_format,
+        distance_unit: prefs.distance_unit ?? defaults.distance_unit,
+      };
+
+      // Save to database (async, don't wait)
+      dispatch(
+        updateUserProfile({
+          userId,
+          profileData: { notification_preferences: updatedPrefs },
+        })
+      ).catch((error) => {
+        logger.error("Failed to initialize display preferences:", error);
+      });
+    };
+
+    initializePreferences();
+  }, [userProfile, userId, dispatch]);
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
@@ -1254,11 +1304,11 @@ export default function MapScreen() {
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {(
-                  (selectedRoute.safety_analysis?.total_distance_meters ??
-                    selectedRoute.distance_kilometers * 1000) / 1000
-                ).toFixed(1)}
-                km
+                {formatDistance(
+                  selectedRoute.safety_analysis?.total_distance_meters ??
+                    selectedRoute.distance_kilometers * 1000,
+                  distanceUnit
+                )}
               </Text>
               <Text style={styles.statLabel}>Distance</Text>
             </View>

@@ -425,6 +425,22 @@ export default function ProfileScreen() {
                   color={theme.colors.textSecondary}
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.settingItem}
+                onPress={() => router.push("/display-settings")}
+              >
+                <Ionicons
+                  name="color-palette"
+                  size={24}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.settingText}>Display Preferences</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={theme.colors.textSecondary}
+                />
+              </TouchableOpacity>
             </CollapsibleSection>
             {/* Account Section */}
             <CollapsibleSection

@@ -61,15 +61,16 @@ export function formatDuration(minutes: number): string {
 /**
  * Calculate and format arrival time based on duration
  * @param durationMinutes - Duration in minutes from now
+ * @param use24Hour - Use 24-hour format (true) or 12-hour format (false), defaults to false
  * @returns Formatted arrival time (e.g., "3:45 PM" or "15:45")
  */
-export function formatArrivalTime(durationMinutes: number): string {
+export function formatArrivalTime(durationMinutes: number, use24Hour: boolean = false): string {
     const now = new Date();
     const arrival = new Date(now.getTime() + durationMinutes * 60000);
 
     return arrival.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: true // Set to false for 24-hour format
+        hour12: !use24Hour // Invert: use24Hour=true means hour12=false
     });
 }

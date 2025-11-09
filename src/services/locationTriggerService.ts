@@ -9,6 +9,7 @@ import { supabase } from './supabase';
 import { calculateDistance } from '../utils/distanceHelpers';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { logger } from "@/utils/logger";
+import { NotificationPreferences } from '@/store/userSlice';
 
 
 // ============================================
@@ -22,7 +23,7 @@ interface UserProfile {
     lgbtq_status?: boolean | null;
     disability_status?: string[] | null;
     religion?: string | null;
-    notification_preferences?: Record<string, any> | null;
+    notification_preferences?: NotificationPreferences | null;
 
 }
 

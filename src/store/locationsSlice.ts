@@ -480,6 +480,13 @@ export const saveRouteToDatabase = createAsyncThunk(
     navigation_session_id?: string;
   }, { rejectWithValue }) => {
     try {
+      console.log('🔍 saveRouteToDatabase received:', {
+        hasSteps: !!route.steps,
+        stepsCount: route.steps?.length,
+        firstStep: route.steps?.[0]?.instruction,
+        stepsType: typeof route.steps
+      });
+
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -554,6 +561,7 @@ function dbRouteToSafeRoute(dbRoute: any): SafeRoute {
     route_type: "balanced",
     coordinates: dbRoute.route_coordinates as RouteCoordinate[],
     route_points: dbRoute.route_coordinates as RouteCoordinate[],
+    steps: dbRoute.steps as NavigationStep[] || undefined,
     estimated_duration_minutes: dbRoute.duration_minutes,
     distance_kilometers: dbRoute.distance_km,
     safety_analysis: {
@@ -1303,7 +1311,11 @@ export const getGoogleRoute = createAsyncThunk(
           });
         });
       });
-
+      console.log('🔍 Transformed route:', {
+        hasSteps: !!steps,
+        stepsCount: steps?.length,
+        firstStep: steps?.[0]?.instruction
+      });
       return {
         duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
         distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
@@ -1314,7 +1326,6 @@ export const getGoogleRoute = createAsyncThunk(
         steps: steps,
       };
     });
-
     return transformedRoutes;
   }
 );
@@ -1681,6 +1692,11 @@ export const checkForReroute = createAsyncThunk(
 
           if (hasImprovement) {
             // 🆕 Save the new route to database
+            console.log('🔍 About to save SMART route:', {
+              hasSteps: !!result.optimized_route.steps,
+              stepsCount: result.optimized_route.steps?.length,
+              firstStep: result.optimized_route.steps?.[0]?.instruction
+            });
             const savedRoute = await dispatch(
               saveRouteToDatabase({
                 route_coordinates: result.optimized_route.coordinates,
@@ -1774,6 +1790,11 @@ export const checkForReroute = createAsyncThunk(
         ).unwrap();
 
         if (basicResult.route) {
+          console.log('🔍 About to save Basic route:', {
+            hasSteps: !!basicResult.route.steps,
+            stepsCount: basicResult.route.steps?.length,
+            firstStep: basicResult.route.steps?.[0]?.instruction
+          });
           // 🆕 Save the fallback route to database
           const savedRoute = await dispatch(
             saveRouteToDatabase({

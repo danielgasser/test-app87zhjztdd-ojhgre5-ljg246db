@@ -13,46 +13,44 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { theme } from "../src/styles/theme";
 import SettingToggle from "../src/components/SettingToggle";
 import { useAppSelector, useAppDispatch } from "../src/store/hooks";
-import { updateUserProfile } from "../src/store/userSlice";
+import {
+  updateUserProfile,
+  NotificationPreferences,
+} from "../src/store/userSlice";
+import { getDefaultPreferences } from "@/utils/preferenceDefaults";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { NotificationPreferences } from "../src/store/userSlice";
 
-export default function NotificationSettings() {
+export default function DisplaySettings() {
   const user = useAppSelector((state: any) => state.auth.user);
   const profile = useAppSelector((state: any) => state.user.profile);
+  const userCountry = useAppSelector(
+    (state: any) => state.locations.userCountry
+  );
 
-  // Notification preferences state
-  const [safetyAlerts, setSafetyAlerts] = useState(true);
-  const [routeSafetyChanges, setRouteSafetyChanges] = useState(true);
-  const [locationTriggers, setLocationTriggers] = useState(false);
+  const [timeFormat, setTimeFormat] = useState<"12h" | "24h">("12h");
+  const [distanceUnit, setDistanceUnit] = useState<"metric" | "imperial">(
+    "metric"
+  );
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
 
   // Load settings from profile when available
   useEffect(() => {
     if (profile) {
-      // TODO: Load from profile notification preferences when we add the field
-      setLoading(false);
-    }
-  }, [profile]);
-
-  useEffect(() => {
-    if (profile) {
       const prefs: NotificationPreferences =
         profile.notification_preferences || {};
-      setSafetyAlerts(prefs.safety_alerts ?? true);
-      setRouteSafetyChanges(prefs.route_safety_changes ?? true);
-      setLocationTriggers(prefs.location_triggers ?? false);
+
+      // Load preferences or use country-based defaults
+      const defaults = getDefaultPreferences(userCountry);
+      setTimeFormat(prefs.time_format ?? defaults.time_format);
+      setDistanceUnit(prefs.distance_unit ?? defaults.distance_unit);
 
       setLoading(false);
     }
-  }, [profile]);
+  }, [profile, userCountry]);
 
-  const saveNotificationPreference = async (
-    field: string,
-    value: boolean | string
-  ) => {
+  const savePreference = async (field: string, value: string) => {
     try {
       const updatedPrefs = {
         ...profile.notification_preferences,
@@ -65,8 +63,10 @@ export default function NotificationSettings() {
           profileData: { notification_preferences: updatedPrefs },
         })
       ).unwrap();
+
+      notify.success("Preference saved");
     } catch (error) {
-      notify.error("Failed to save setting. Please try again.");
+      notify.error("Failed to save preference. Please try again.");
       logger.error("Save error:", error);
     }
   };
@@ -95,41 +95,40 @@ export default function NotificationSettings() {
             color={theme.colors.text}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notifications</Text>
+        <Text style={styles.headerTitle}>Display Preferences</Text>
         <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content}>
+        <Text style={styles.sectionDescription}>
+          Customize how times and distances are displayed throughout the app
+        </Text>
+
         <SettingToggle
-          label="Safety Alerts"
-          description="Get real-time alerts about unsafe areas on your route"
-          value={safetyAlerts}
+          label="Time Format"
+          description={`Show times in ${
+            timeFormat === "12h" ? "12-hour (3:45 PM)" : "24-hour (15:45)"
+          } format`}
+          value={timeFormat === "12h"}
           onToggle={async () => {
-            const newValue = !safetyAlerts;
-            setSafetyAlerts(newValue);
-            await saveNotificationPreference("safety_alerts", newValue);
+            const newFormat = timeFormat === "12h" ? "24h" : "12h";
+            setTimeFormat(newFormat);
+            await savePreference("time_format", newFormat);
           }}
         />
 
         <SettingToggle
-          label="Location Safety Changes"
-          description="Alerts when a previously-safe location gets new negative reviews"
-          value={routeSafetyChanges}
+          label="Distance Units"
+          description={`Show distances in ${
+            distanceUnit === "metric"
+              ? "kilometers and meters"
+              : "miles and feet"
+          }`}
+          value={distanceUnit === "metric"}
           onToggle={async () => {
-            const newValue = !routeSafetyChanges;
-            setRouteSafetyChanges(newValue);
-            await saveNotificationPreference("route_safety_changes", newValue);
-          }}
-        />
-
-        <SettingToggle
-          label="Location-Based Triggers"
-          description="Get notified when you're near a highly-rated spot"
-          value={locationTriggers}
-          onToggle={async () => {
-            const newValue = !locationTriggers;
-            setLocationTriggers(newValue);
-            await saveNotificationPreference("location_triggers", newValue);
+            const newUnit = distanceUnit === "metric" ? "imperial" : "metric";
+            setDistanceUnit(newUnit);
+            await savePreference("distance_unit", newUnit);
           }}
         />
       </ScrollView>
@@ -165,14 +164,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: theme.spacing.lg,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-  },
-  sectionTitleSpaced: {
-    marginTop: theme.spacing.xl,
+  sectionDescription: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.lg,
+    lineHeight: 20,
   },
   loadingContainer: {
     flex: 1,
