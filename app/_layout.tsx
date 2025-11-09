@@ -45,6 +45,7 @@ import * as Notifications from "expo-notifications";
 import NetInfo from "@react-native-community/netinfo";
 import { offlineQueue } from "@/services/offlineQueue";
 import { clearAllSessions } from "@/utils/debugUtils";
+import { formatTimeAgo, hoursAgo } from "@/utils/timeHelpers";
 
 // Initialize Sentry
 Sentry.init({
@@ -551,9 +552,10 @@ function RootLayoutNav() {
         }
         // User has unfinished route but not currently navigating - ask them
         const routeTime = new Date(activeRoute.navigation_started_at);
-        const timeAgo = formatDistanceToNow(routeTime, { addSuffix: true });
-        const hoursAgo = (Date.now() - routeTime.getTime()) / (1000 * 60 * 60);
-        if (hoursAgo > 24) {
+        const timeAgo = formatTimeAgo(routeTime);
+        const hoursSinceStart = hoursAgo(routeTime);
+
+        if (hoursSinceStart > 24) {
           await dispatch(endNavigationSession(activeRoute.id));
           dispatch(endNavigation());
 

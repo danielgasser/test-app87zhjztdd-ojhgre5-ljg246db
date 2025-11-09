@@ -26,6 +26,7 @@ import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { APP_CONFIG } from "@/utils/appConfig";
+import { validateVisitDateTime } from "@/utils/dateValidation";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -401,14 +402,11 @@ export default function EditReviewScreen() {
                       newDateTime.setMinutes(selectedDate.getMinutes());
 
                       // Check if the combined date+time is in the future
-                      if (newDateTime > new Date()) {
-                        notify.error("Visit time cannot be in the future");
-                        const now = new Date();
-                        newDateTime.setHours(now.getHours());
-                        newDateTime.setMinutes(now.getMinutes());
+                      const result = validateVisitDateTime(newDateTime);
+                      if (!result.isValid) {
+                        notify.error(result.errorMessage || "Invalid date");
                       }
-
-                      setVisitDateTime(newDateTime);
+                      setVisitDateTime(result.validatedDate);
                     }
                   }}
                 />

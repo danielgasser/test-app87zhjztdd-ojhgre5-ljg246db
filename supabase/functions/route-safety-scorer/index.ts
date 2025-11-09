@@ -4,6 +4,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { EDGE_CONFIG } from '../_shared/config.ts';
+import { calculateDistanceBetweenPoints } from '../_shared/distance-helpers.js';
 
 // Types
 interface RouteCoordinate {
@@ -92,24 +93,6 @@ const CONFIG = {
 };
 
 /**
- * Calculate distance between two coordinates in meters
- */
-function calculateDistance(coord1: RouteCoordinate, coord2: RouteCoordinate): number {
-  const R = 6371e3; // Earth's radius in meters
-  const φ1 = coord1.latitude * Math.PI / 180;
-  const φ2 = coord2.latitude * Math.PI / 180;
-  const Δφ = (coord2.latitude - coord1.latitude) * Math.PI / 180;
-  const Δλ = (coord2.longitude - coord1.longitude) * Math.PI / 180;
-
-  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) *
-    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c;
-}
-
-/**
  * Segment route into analysis chunks
  */
 function segmentRoute(coordinates: RouteCoordinate[]): RouteSegment[] {
@@ -120,7 +103,7 @@ function segmentRoute(coordinates: RouteCoordinate[]): RouteSegment[] {
   let segmentStart = coordinates[0];
 
   for (let i = 1; i < coordinates.length; i++) {
-    const segmentDistance = calculateDistance(coordinates[i - 1], coordinates[i]);
+    const segmentDistance = calculateDistanceBetweenPoints(coordinates[i - 1], coordinates[i]);
     currentDistance += segmentDistance;
 
     // Create segment when we've traveled the target distance or reached the end

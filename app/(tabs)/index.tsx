@@ -50,13 +50,13 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
 import { supabase } from "@/services/supabase";
 import NavigationMode from "src/components/NavigationMode";
-import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
 import ProfileBanner from "@/components/ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
-import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { calculateDistanceBetweenPoints } from "@/utils/distanceHelpers";
+import { getRouteLineColor } from "@/utils/safetyHelpers";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -448,42 +448,6 @@ export default function MapScreen() {
     setShowRoutePlanningModal(false);
   };
 
-  const getRouteLineColor = (route: any) => {
-    if (!route.safety_analysis)
-      return APP_CONFIG.ROUTE_DISPLAY.COLORS.SELECTED_ROUTE;
-
-    const score = route.safety_analysis.overall_route_score;
-
-    if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
-      return APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE;
-    } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
-      return APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE;
-    } else {
-      return APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
-    }
-  };
-
-  /**
-   * Calculate distance between two coordinates in meters
-   */
-  const calculateDistance = (
-    coord1: { latitude: number; longitude: number },
-    coord2: { latitude: number; longitude: number }
-  ): number => {
-    const R = 6371e3; // Earth's radius in meters
-    const φ1 = (coord1.latitude * Math.PI) / 180;
-    const φ2 = (coord2.latitude * Math.PI) / 180;
-    const Δφ = ((coord2.latitude - coord1.latitude) * Math.PI) / 180;
-    const Δλ = ((coord2.longitude - coord1.longitude) * Math.PI) / 180;
-
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c;
-  };
-
   /**
    * Split route_points into chunks matching segment boundaries
    */
@@ -503,7 +467,10 @@ export default function MapScreen() {
     // Build cumulative distances for each route point
     const pointDistances: number[] = [0];
     for (let i = 1; i < routePoints.length; i++) {
-      const dist = calculateDistance(routePoints[i - 1], routePoints[i]);
+      const dist = calculateDistanceBetweenPoints(
+        routePoints[i - 1],
+        routePoints[i]
+      );
       pointDistances.push(pointDistances[i - 1] + dist);
     }
 

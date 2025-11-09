@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { formatDistanceToNow } from "date-fns";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
   fetchRecentReviews,
@@ -31,6 +30,8 @@ import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import UserProfileModal from "@/components/UserProfileModal";
+import { getSafetyColor as getRatingColor } from "@/utils/safetyHelpers";
+import { formatTimeAgo } from "@/utils/timeHelpers";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -184,16 +185,8 @@ export default function CommunityScreen() {
     await dispatch(saveCommunityFeedMode(newMode)).unwrap();
   };
 
-  const getRatingColor = (rating: number) => {
-    if (rating >= 4) return theme.colors.safeGreen;
-    if (rating >= 3) return theme.colors.mixedYellow;
-    return theme.colors.unsafeRed;
-  };
-
   const renderSafetyInsight = (insight: SafetyInsight) => {
-    const timeAgo = formatDistanceToNow(new Date(insight.created_at), {
-      addSuffix: true,
-    });
+    const timeAgo = formatTimeAgo(insight.created_at);
 
     const getSeverityColor = () => {
       switch (insight.severity) {
@@ -244,9 +237,7 @@ export default function CommunityScreen() {
   };
 
   const renderReviewItem = (review: any) => {
-    const timeAgo = formatDistanceToNow(new Date(review.created_at), {
-      addSuffix: true,
-    });
+    const timeAgo = formatTimeAgo(review.created_at);
 
     // Parse the overall_rating string to float
     const rating = parseFloat(review.overall_rating) || 0;
