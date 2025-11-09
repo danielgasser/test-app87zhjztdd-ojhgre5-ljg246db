@@ -701,7 +701,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   nextInstructionText: {
-    fontSize: 11,
+    fontSize: 16,
     color: "rgba(255,255,255,0.8)",
   },
   controls: {

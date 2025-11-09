@@ -161,9 +161,9 @@ async function getGoogleRoute(
         });
         return detailedCoords.length > 0 ? detailedCoords : decodePolyline(route.overview_polyline.points);
       })(),
-      type: 'LineString',
-      steps: steps
-    }
+      type: 'LineString'
+    },
+    steps: steps
   };
 }
 
