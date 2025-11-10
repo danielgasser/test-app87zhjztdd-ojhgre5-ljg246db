@@ -89,6 +89,75 @@ export type Database = {
         }
         Relationships: []
       }
+      neighborhood_stats: {
+        Row: {
+          block_group_fips: string
+          boundary: unknown
+          city: string
+          county_name: string | null
+          created_at: string | null
+          crime_rate_per_1000: number | null
+          data_source: string | null
+          data_year: number | null
+          diversity_index: number | null
+          hate_crime_incidents: number | null
+          id: string
+          last_updated: string | null
+          pct_minority: number | null
+          police_response_min: number | null
+          population: number | null
+          property_crime_rate: number | null
+          state_code: string
+          updated_at: string | null
+          violent_crime_rate: number | null
+          walkability_score: number | null
+        }
+        Insert: {
+          block_group_fips: string
+          boundary: unknown
+          city: string
+          county_name?: string | null
+          created_at?: string | null
+          crime_rate_per_1000?: number | null
+          data_source?: string | null
+          data_year?: number | null
+          diversity_index?: number | null
+          hate_crime_incidents?: number | null
+          id?: string
+          last_updated?: string | null
+          pct_minority?: number | null
+          police_response_min?: number | null
+          population?: number | null
+          property_crime_rate?: number | null
+          state_code: string
+          updated_at?: string | null
+          violent_crime_rate?: number | null
+          walkability_score?: number | null
+        }
+        Update: {
+          block_group_fips?: string
+          boundary?: unknown
+          city?: string
+          county_name?: string | null
+          created_at?: string | null
+          crime_rate_per_1000?: number | null
+          data_source?: string | null
+          data_year?: number | null
+          diversity_index?: number | null
+          hate_crime_incidents?: number | null
+          id?: string
+          last_updated?: string | null
+          pct_minority?: number | null
+          police_response_min?: number | null
+          population?: number | null
+          property_crime_rate?: number | null
+          state_code?: string
+          updated_at?: string | null
+          violent_crime_rate?: number | null
+          walkability_score?: number | null
+        }
+        Relationships: []
+      }
       notification_logs: {
         Row: {
           created_at: string
