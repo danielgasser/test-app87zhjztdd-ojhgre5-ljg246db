@@ -1052,7 +1052,7 @@ export type Database = {
           police_response_min: number
           population: number
           property_crime_rate: number
-          state: string
+          state_code: string
           violent_crime_rate: number
           walkability_score: number
         }[]
