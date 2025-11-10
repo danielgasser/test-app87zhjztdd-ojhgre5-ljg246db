@@ -32,6 +32,7 @@ import { logger } from "@/utils/logger";
 import UserProfileModal from "@/components/UserProfileModal";
 import { getSafetyColor as getRatingColor } from "@/utils/safetyHelpers";
 import { formatTimeAgo } from "@/utils/timeHelpers";
+import VoteButtons from "@/components/VoteButtons";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -316,6 +317,12 @@ export default function CommunityScreen() {
           </View>
           <Text style={styles.timeText}>{timeAgo}</Text>
         </View>
+        <VoteButtons
+          reviewId={review.id}
+          initialHelpfulCount={review.helpful_count || 0}
+          initialUnhelpfulCount={review.unhelpful_count || 0}
+          currentUserVote={null}
+        />
       </TouchableOpacity>
     );
   };

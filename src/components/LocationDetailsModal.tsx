@@ -23,6 +23,7 @@ import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { logger } from "@/utils/logger";
 import UserProfileModal from "./UserProfileModal";
+import VoteButtons from "./VoteButtons";
 
 interface SearchResult {
   id: string;
@@ -85,21 +86,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   // Add these console logs RIGHT BEFORE the PredictionBadge render
   // (around line 250 in LocationDetailsModal.tsx)
 
-  console.log("🔍 Debug PredictionBadge visibility:");
-  console.log("  - selectedLocation:", selectedLocation);
-  console.log("  - review_count:", selectedLocation?.review_count);
-  console.log("  - locationId:", locationId);
-  console.log("  - googlePlaceId:", googlePlaceId);
-  console.log("  - mlPredictions keys:", Object.keys(mlPredictions));
-  console.log(
-    "  - mlPredictions[locationId]:",
-    mlPredictions[locationId || ""]
-  );
-  console.log(
-    "  - Condition result:",
-    (selectedLocation && selectedLocation.review_count === 0) ||
-      (!selectedLocation && (locationId || googlePlaceId))
-  );
   useEffect(() => {
     if (!visible) return;
 
@@ -649,6 +635,13 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         <Text style={styles.reviewDate}>
                           {new Date(review.created_at).toLocaleDateString()}
                         </Text>
+                        <VoteButtons
+                          reviewId={review.id}
+                          initialHelpfulCount={review.helpful_count || 0}
+                          initialUnhelpfulCount={review.unhelpful_count || 0}
+                          currentUserVote={null}
+                          onVoteChange={() => fetchReviews(locationId!)}
+                        />
                       </View>
                     ))
                   ) : (
