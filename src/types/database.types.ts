@@ -103,6 +103,8 @@ export type Database = {
           hate_crime_incidents: number | null
           id: string
           last_updated: string | null
+          name: string | null
+          notes: string | null
           pct_minority: number | null
           police_response_min: number | null
           population: number | null
@@ -125,6 +127,8 @@ export type Database = {
           hate_crime_incidents?: number | null
           id?: string
           last_updated?: string | null
+          name?: string | null
+          notes?: string | null
           pct_minority?: number | null
           police_response_min?: number | null
           population?: number | null
@@ -147,6 +151,8 @@ export type Database = {
           hate_crime_incidents?: number | null
           id?: string
           last_updated?: string | null
+          name?: string | null
+          notes?: string | null
           pct_minority?: number | null
           police_response_min?: number | null
           population?: number | null
@@ -1030,6 +1036,25 @@ export type Database = {
           user_lgbtq_status: boolean
           user_race_ethnicity: string[]
           user_show_demographics: boolean
+        }[]
+      }
+      get_neighborhood_stats_for_point: {
+        Args: { lat: number; lng: number }
+        Returns: {
+          block_group_fips: string
+          city: string
+          crime_rate_per_1000: number
+          data_source: string
+          diversity_index: number
+          hate_crime_incidents: number
+          name: string
+          pct_minority: number
+          police_response_min: number
+          population: number
+          property_crime_rate: number
+          state: string
+          violent_crime_rate: number
+          walkability_score: number
         }[]
       }
       get_safety_insights: {

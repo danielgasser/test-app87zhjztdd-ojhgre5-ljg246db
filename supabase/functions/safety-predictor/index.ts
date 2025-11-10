@@ -7,6 +7,26 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
+
+// Helper: Calculate safety score from crime statistics
+function calculateStatsScore(stats: any): number {
+  // Lower crime rate = higher safety (invert scale)
+  // Crime rate typically 0-100+ per 1000, normalize to 1-5 scale
+  const crimeScore = Math.max(1, 5 - (stats.crime_rate_per_1000 / 20));
+
+  // Hate crimes significantly reduce safety
+  const hateImpact = Math.min(2, stats.hate_crime_incidents * 0.5);
+
+  return Math.max(1, Math.min(5, crimeScore - hateImpact));
+}
+
+// Helper: Calculate safety contribution from diversity metrics
+function calculateDiversityScore(stats: any): number {
+  // Higher diversity often correlates with safety for minorities
+  // Diversity index 0-100, normalize to safety contribution
+  return 2.5 + (stats.diversity_index / 100) * 2.5; // Range: 2.5-5.0
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
@@ -44,6 +64,15 @@ serve(async (req) => {
       };
     }
 
+    // Fetch neighborhood stats for this location
+    const { data: neighborhoodStats } = await supabase.rpc('get_neighborhood_stats_for_point', {
+      lat: latitude || location.latitude,
+      lng: longitude || location.longitude
+    });
+
+    const hasStats = neighborhoodStats && neighborhoodStats.length > 0;
+    const stats = hasStats ? neighborhoodStats[0] : null;
+
     // Check if we already have reviews for this location
     const { data: existingScores } = await supabase.from('safety_scores').select('*').eq('location_id', location_id);
     if (existingScores && existingScores.length > 0) {
@@ -67,6 +96,12 @@ serve(async (req) => {
         });
       }
     }
+
+    const hasReviews = existingScores && existingScores.length > 0;
+    const hasDemographicReviews = hasReviews && existingScores.some(score =>
+      score.demographic_type !== 'overall'
+    );
+
     // No reviews exist - predict based on similar locations
     // Factor 1: Average scores for this place type
     let placeTypeQuery = supabase.from('locations').select(`
@@ -92,23 +127,60 @@ serve(async (req) => {
       lng: location.longitude || longitude,
       radius_meters: EDGE_CONFIG.ML_PARAMS.NEARBY_LOCATION_RADIUS
     });
+    // Determine scoring scenario
+    let scenario: 'WITH_REVIEWS' | 'ML_ONLY' | 'COLD_START';
+
+    if (hasDemographicReviews) {
+      scenario = 'WITH_REVIEWS';
+    } else if ((placeTypeScores && placeTypeScores.length > 0) || (nearbyLocations && nearbyLocations.length > 0)) {
+      scenario = 'ML_ONLY';
+    } else {
+      scenario = 'COLD_START';
+    }
+
+    const weights = EDGE_CONFIG.STATISTICAL_WEIGHTS[scenario];
+
     // Factor 3: Scores from similar demographics at similar places
     const demographicMatches = placeTypeScores?.filter((loc) => {
       return loc.safety_scores.some((score) => matchesDemographic(score, user_demographics));
     }) || [];
-    // Calculate predictions
-    let safetySum = 0, comfortSum = 0, overallSum = 0, count = 0;
-    // Weight place type average
-    placeTypeScores?.forEach((loc) => {
-      loc.safety_scores.forEach((score) => {
-        if (score.demographic_type === 'overall') {
-          safetySum += Number(score.avg_safety_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-          comfortSum += Number(score.avg_comfort_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-          overallSum += Number(score.avg_overall_score) * EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-          count += EDGE_CONFIG.ML_PARAMS.PREDICTION_WEIGHTS.PLACE_TYPE_OVERALL;
-        }
+
+    // Weighted scoring based on scenario
+    let safetyScore = 0;
+    let totalWeight = 0;
+    const breakdown: any = {};
+
+    // 1. User Reviews (if available in WITH_REVIEWS scenario)
+    if (scenario === 'WITH_REVIEWS' && hasReviews) {
+      const reviewScore = existingScores.reduce((sum, score) =>
+        sum + Number(score.avg_safety_score), 0) / existingScores.length;
+      safetyScore += reviewScore * (weights as any).userReviews;
+      totalWeight += (weights as any).userReviews;
+      breakdown.userReviews = reviewScore;
+    }
+
+    // 2. ML Prediction (place type scores) - not used in COLD_START
+    if (scenario !== 'COLD_START' && placeTypeScores && placeTypeScores.length > 0) {
+      let mlScore = 0;
+      let mlCount = 0;
+
+      placeTypeScores.forEach((loc) => {
+        loc.safety_scores.forEach((score) => {
+          if (score.demographic_type === 'overall') {
+            mlScore += Number(score.avg_safety_score);
+            mlCount++;
+          }
+        });
       });
-    });
+
+      if (mlCount > 0) {
+        mlScore = mlScore / mlCount;
+        safetyScore += mlScore * (weights as any).mlPrediction;
+        totalWeight += (weights as any).mlPrediction;
+        breakdown.mlPrediction = mlScore;
+      }
+    }
+
     // Weight demographic-specific scores higher
     demographicMatches.forEach((loc) => {
       loc.safety_scores.forEach((score) => {

@@ -98,6 +98,23 @@ export const EDGE_CONFIG = {
             MEDIUM: 1.0,
             LOW: 0.5,
         }
+    },
+    STATISTICAL_WEIGHTS: {
+        ML_ONLY: {
+            mlPrediction: 0.60,
+            demographics: 0.25,
+            statistics: 0.15
+        },
+        WITH_REVIEWS: {
+            userReviews: 0.70,
+            mlPrediction: 0.20,
+            statistics: 0.10
+        },
+        COLD_START: {
+            statistics: 0.40,
+            demographics: 0.40,
+            mlExtrapolation: 0.20
+        }
     }
 
 }
