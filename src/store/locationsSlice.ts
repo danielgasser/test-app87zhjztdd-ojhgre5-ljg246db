@@ -88,12 +88,18 @@ interface CommunityReview {
   };
 }
 
-interface MLPrediction {
+export interface MLPrediction {
   predicted_safety_score: number;
   confidence: number;
   similar_users_count: number;
   based_on_locations: number;
   risk_factors: string[];
+  primary_source?: 'community_reviews' | 'ml_prediction' | 'statistics';
+  based_on?: {
+    reviewsFromMatchingDemo: number;
+    hasMLPrediction: boolean;
+    hasStatisticalData: boolean;
+  };
 }
 
 // Route Planning Types
@@ -1112,6 +1118,7 @@ export const fetchMLPredictions = createAsyncThunk(
       }
 
       const prediction = await response.json();
+      console.log('🧪 ML Prediction Response:', JSON.stringify(prediction, null, 2));
 
       return {
         locationId,

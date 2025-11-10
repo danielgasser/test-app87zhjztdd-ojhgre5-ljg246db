@@ -11,7 +11,10 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { fetchLocationDetails } from "src/store/locationsSlice";
+import {
+  fetchLocationDetails,
+  fetchMLPredictions,
+} from "src/store/locationsSlice";
 import { supabase } from "src/services/supabase";
 import { ReviewWithUser } from "src/types/supabase";
 import PredictionBadge from "./PredictionBadge";
@@ -78,6 +81,71 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       fetchPlaceDetails();
     }
   }, [selectedLocation, googlePlaceId, visible]);
+
+  // Add these console logs RIGHT BEFORE the PredictionBadge render
+  // (around line 250 in LocationDetailsModal.tsx)
+
+  console.log("🔍 Debug PredictionBadge visibility:");
+  console.log("  - selectedLocation:", selectedLocation);
+  console.log("  - review_count:", selectedLocation?.review_count);
+  console.log("  - locationId:", locationId);
+  console.log("  - googlePlaceId:", googlePlaceId);
+  console.log("  - mlPredictions keys:", Object.keys(mlPredictions));
+  console.log(
+    "  - mlPredictions[locationId]:",
+    mlPredictions[locationId || ""]
+  );
+  console.log(
+    "  - Condition result:",
+    (selectedLocation && selectedLocation.review_count === 0) ||
+      (!selectedLocation && (locationId || googlePlaceId))
+  );
+  useEffect(() => {
+    if (!visible) return;
+
+    // Determine the identifier for this location
+    const identifier = locationId || googlePlaceId || searchMarker?.id;
+    if (!identifier) return;
+
+    // Wait for location details to load
+    if (loading || loadingReviews) return;
+
+    const hasNoReviews =
+      (selectedLocation && selectedLocation.review_count === 0) ||
+      !selectedLocation; // No selectedLocation means not in DB = no reviews
+
+    const hasPrediction = mlPredictions[identifier];
+    const isLoading = mlPredictionsLoading[identifier];
+
+    // Fetch prediction if location has no reviews and we don't have a prediction yet
+    if (hasNoReviews && !hasPrediction && !isLoading) {
+      // For temporary locations, we need coordinates
+      const lat = selectedLocation?.latitude || searchMarker?.latitude;
+      const lng = selectedLocation?.longitude || searchMarker?.longitude;
+
+      if (lat && lng) {
+        dispatch(
+          fetchMLPredictions({
+            locationId: identifier, // Use the identifier, not null
+            latitude: lat,
+            longitude: lng,
+          })
+        );
+      }
+    }
+  }, [
+    visible,
+    locationId,
+    googlePlaceId,
+    searchMarker,
+    selectedLocation,
+    reviews,
+    loading,
+    loadingReviews,
+    mlPredictions,
+    mlPredictionsLoading,
+    dispatch,
+  ]);
 
   const fetchReviews = async (locId?: string) => {
     const idToUse = locId || locationId;
@@ -423,11 +491,18 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               {/* ML Prediction Badge for locations with no reviews */}
 
               {((selectedLocation && selectedLocation.review_count === 0) ||
-                (!selectedLocation && (locationId || googlePlaceId))) && (
+                (!selectedLocation &&
+                  (locationId || googlePlaceId || searchMarker))) && (
                 <PredictionBadge
-                  prediction={mlPredictions[locationId || googlePlaceId || ""]}
+                  prediction={
+                    mlPredictions[
+                      locationId || googlePlaceId || searchMarker?.id || ""
+                    ]
+                  }
                   loading={
-                    mlPredictionsLoading[locationId || googlePlaceId || ""]
+                    mlPredictionsLoading[
+                      locationId || googlePlaceId || searchMarker?.id || ""
+                    ]
                   }
                 />
               )}

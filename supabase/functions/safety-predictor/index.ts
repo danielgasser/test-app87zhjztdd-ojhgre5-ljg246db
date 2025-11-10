@@ -113,24 +113,15 @@ serve(async (req) => {
 
     if (location_id) {
       const { data, error: locError } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('id', location_id)
+        .rpc('get_location_with_coords', { location_id: location_id })
         .single();
 
       if (locError || !data) {
         throw new Error('Location not found');
       }
       location = data;
-
-      // Extract coordinates from PostGIS point
-      const coordsMatch = data.coordinates.match(/POINT\(([^ ]+) ([^ ]+)\)/);
-      if (coordsMatch) {
-        lng = parseFloat(coordsMatch[1]);
-        lat = parseFloat(coordsMatch[2]);
-      } else {
-        throw new Error('Invalid coordinates format');
-      }
+      lat = data.latitude;
+      lng = data.longitude;
     } else {
       location = {
         id: 'temp-location',
