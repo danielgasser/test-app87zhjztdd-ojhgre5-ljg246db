@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -43,6 +43,33 @@ export default function ProfileScreen() {
     account: false,
   });
 
+  const [voteStats, setVoteStats] = useState<{
+    helpful_votes_given: number;
+    unhelpful_votes_given: number;
+    total_votes_given: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchVoteStats = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data, error } = await supabase.rpc("get_user_vote_stats", {
+          p_user_id: user.id,
+        });
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setVoteStats(data[0]);
+        }
+      } catch (error) {
+        logger.error("Error fetching vote stats:", error);
+      }
+    };
+
+    fetchVoteStats();
+  }, [user?.id]);
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -59,30 +86,6 @@ export default function ProfileScreen() {
       notify.error("Failed to sign out");
     }
   };
-
-  const handleEditProfile = () => {
-    router.push("/onboarding");
-  };
-
-  const handleVersionLongPress = () => {
-    // Check if user is authorized
-    if (
-      user?.email &&
-      APP_CONFIG.DEBUG.AUTHORIZED_EMAILS.includes(user.email)
-    ) {
-      router.push("/(tabs)/debug");
-    }
-  };
-  // Calculate profile completion
-  const profileCompletion = React.useMemo(() => {
-    if (!profile) return { missingFields: [], completionPercentage: 0 };
-
-    const result = checkProfileCompleteness(profile);
-    return {
-      missingFields: result.missingFields,
-      completionPercentage: result.completionPercentage,
-    };
-  }, [profile]);
 
   const pickImage = async () => {
     // Request permissions
@@ -350,6 +353,19 @@ export default function ProfileScreen() {
                     {profile?.total_reviews || 0}
                   </Text>
                   <Text style={styles.statLabel}>Reviews Posted</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statNumber}>
+                    {voteStats?.helpful_votes_given || 0}
+                  </Text>
+                  <Text style={styles.statLabel}>Helpful Votes</Text>
+                </View>
+
+                <View style={styles.statBox}>
+                  <Text style={styles.statNumber}>
+                    {voteStats?.unhelpful_votes_given || 0}
+                  </Text>
+                  <Text style={styles.statLabel}>Unhelpful Votes</Text>
                 </View>
               </View>
             </CollapsibleSection>
@@ -684,7 +700,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: theme.colors.textSecondary,
   },
   demographicsChipContainer: {

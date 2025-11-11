@@ -353,9 +353,6 @@ function RootLayoutNav() {
   // Deep link listener for OAuth callback
   useEffect(() => {
     const handleUrl = async ({ url }: { url: string }) => {
-      console.log("🔵 FULL URL RECEIVED:", url);
-      console.log("🔵 URL contains '#':", url.includes("#"));
-      console.log("🔵 URL contains '?':", url.includes("?"));
       // Handle email change confirmation
       if (url.includes("safepath://email-change-confirm")) {
         const hashPart = url.split("#")[1];
@@ -364,24 +361,19 @@ function RootLayoutNav() {
           const accessToken = params.get("access_token");
           const refreshToken = params.get("refresh_token");
           const type = params.get("type");
-          console.log("TYPE: ", type);
-          console.log("type:", type);
-          if (type === "email_change" && accessToken && refreshToken) {
-            console.log("🔵 Confirming email change...");
 
+          if (type === "email_change" && accessToken && refreshToken) {
             const { data, error } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken,
             });
 
             if (!error && data.session) {
-              console.log("🔵 Email updated to:", data.session.user.email);
               dispatch(setSession(data.session));
               notify.success("Email updated successfully!");
               router.replace("/(tabs)/profile");
             } else {
               notify.error("Failed to confirm email change");
-              console.error("🔴 setSession error:", error);
             }
           }
         }

@@ -24,6 +24,7 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { logger } from "@/utils/logger";
 import UserProfileModal from "./UserProfileModal";
 import VoteButtons from "./VoteButtons";
+import PredictionVoteButtons from "./PredictionVoteButtons";
 
 interface SearchResult {
   id: string;
@@ -491,6 +492,31 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     ]
                   }
                 />
+              )}
+              {/* Prediction Vote Buttons */}
+              {mlPredictions[
+                locationId || googlePlaceId || searchMarker?.id || ""
+              ] && (
+                <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                  <PredictionVoteButtons
+                    locationId={locationId || selectedLocation?.id || ""}
+                    predictionSource={
+                      mlPredictions[
+                        locationId || googlePlaceId || searchMarker?.id || ""
+                      ]?.primary_source || "ml_prediction"
+                    }
+                    predictedSafetyScore={
+                      mlPredictions[
+                        locationId || googlePlaceId || searchMarker?.id || ""
+                      ]?.predicted_safety_score || 3.0
+                    }
+                    demographicType="overall"
+                    demographicValue={null}
+                    initialAccurateCount={0}
+                    initialInaccurateCount={0}
+                    currentUserVote={null}
+                  />
+                </View>
               )}
               {/* Write Review Button - ALWAYS show if user is logged in and hasn't reviewed */}
               {currentUser && !userHasReviewed && (

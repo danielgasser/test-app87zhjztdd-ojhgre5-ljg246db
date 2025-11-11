@@ -1129,6 +1129,14 @@ export type Database = {
           title: string
         }[]
       }
+      get_user_vote_stats: {
+        Args: { p_user_id: string }
+        Returns: {
+          helpful_votes_given: number
+          total_votes_given: number
+          unhelpful_votes_given: number
+        }[]
+      }
       gettransactionid: { Args: never; Returns: unknown }
       increment_review_count: {
         Args: { count_field: string; review_id: string }
