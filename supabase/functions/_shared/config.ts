@@ -13,6 +13,12 @@ export const EDGE_CONFIG = {
             NEARBY_DEMOGRAPHIC: 0.4,           // 40% weight for nearby demographic matches
         },
         NEARBY_LOCATION_RADIUS: 1000,
+        VOTE_WEIGHTS: {
+            HELPFUL_BONUS: 0.1,        // +10% weight per helpful vote
+            UNHELPFUL_PENALTY: 0.2,    // -20% weight per unhelpful vote
+            MIN_WEIGHT: 0.1,           // Minimum weight for any review
+            SPAM_THRESHOLD: 0,         // Reviews with weight <= 0 are filtered out
+        },
     },
     SAFETY_THRESHOLDS: {
         SAFE_MINIMUM: 4.0,

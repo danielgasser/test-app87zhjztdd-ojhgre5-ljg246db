@@ -1020,6 +1020,7 @@ export type Database = {
           content: string
           created_at: string
           distance_meters: number
+          helpful_count: number
           id: string
           location_address: string
           location_id: string
@@ -1029,6 +1030,7 @@ export type Database = {
           overall_rating: number
           safety_rating: number
           title: string
+          unhelpful_count: number
           user_disability_status: string[]
           user_full_name: string
           user_gender: string

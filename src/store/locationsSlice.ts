@@ -917,6 +917,8 @@ export const fetchRecentReviews = createAsyncThunk(
         overall_rating: review.overall_rating,
         comment: review.content,
         created_at: review.created_at,
+        helpful_count: review.helpful_count || 0,
+        unhelpful_count: review.unhelpful_count || 0,
         user_demographics: {
           full_name: review.user_full_name,
           show_demographics: review.user_show_demographics,

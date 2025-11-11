@@ -156,15 +156,22 @@ async function analyzeLocation(
   // Pattern 2: Statistical Outliers (need review data)
   const { data: reviews } = await supabase
     .from('reviews')
-    .select('*, user_profiles!inner(race_ethnicity, gender, lgbtq_status, religion)')
+    .select('*, helpful_count, unhelpful_count, user_profiles!inner(race_ethnicity, gender, lgbtq_status, religion)')
     .eq('location_id', locationId)
     .order('created_at', { ascending: false })
 
-  if (reviews && reviews.length >= 5) {
-    // Check for outlier reviews (1-2 stars when average is 4+, or vice versa)
-    const avgRating = reviews.reduce((sum, r) => sum + r.overall_rating, 0) / reviews.length
+  const qualityReviews = reviews?.filter(review => {
+    const helpfulCount = review.helpful_count || 0;
+    const unhelpfulCount = review.unhelpful_count || 0;
+    const weight = 1 + (helpfulCount * 0.1) - (unhelpfulCount * 0.2);
+    return weight > 0; // Only use reviews with positive weight
+  }) || [];
 
-    const outliers = reviews.filter(r =>
+  if (qualityReviews && qualityReviews.length >= 5) {
+    // Check for outlier reviews (1-2 stars when average is 4+, or vice versa)
+    const avgRating = qualityReviews.reduce((sum, r) => sum + r.overall_rating, 0) / qualityReviews.length
+
+    const outliers = qualityReviews.filter(r =>
       Math.abs(r.overall_rating - avgRating) >= 2.5
     )
 
@@ -217,13 +224,13 @@ async function analyzeLocation(
   }
 
   // Pattern 3: Sudden temporal changes
-  if (reviews && reviews.length >= 10) {
+  if (qualityReviews && qualityReviews.length >= 10) {
     // Split reviews into old vs recent
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-    const recentReviews = reviews.filter(r => new Date(r.created_at) > thirtyDaysAgo)
-    const olderReviews = reviews.filter(r => new Date(r.created_at) <= thirtyDaysAgo)
+    const recentReviews = qualityReviews.filter(r => new Date(r.created_at) > thirtyDaysAgo)
+    const olderReviews = qualityReviews.filter(r => new Date(r.created_at) <= thirtyDaysAgo)
 
     if (recentReviews.length >= 3 && olderReviews.length >= 3) {
       const recentAvg = recentReviews.reduce((sum, r) => sum + r.overall_rating, 0) / recentReviews.length
