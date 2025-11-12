@@ -103,6 +103,37 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
       <Text style={styles.confidenceText}>
         {getConfidenceLevel(confidencePercent)} • {getBasedOnText()}
       </Text>
+      {/* Vote validation info */}
+      {prediction.vote_validation &&
+        prediction.vote_validation.total_votes > 0 && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: 4,
+              gap: 4,
+            }}
+          >
+            <Ionicons
+              name={
+                prediction.vote_validation.accuracy_rate >= 0.7
+                  ? "checkmark-circle"
+                  : "alert-circle"
+              }
+              size={14}
+              color={
+                prediction.vote_validation.accuracy_rate >= 0.7
+                  ? theme.colors.success
+                  : theme.colors.accent
+              }
+            />
+            <Text style={styles.voteText}>
+              {prediction.vote_validation.accurate_votes} of
+              {prediction.vote_validation.total_votes} users confirmed this
+              prediction
+            </Text>
+          </View>
+        )}
     </View>
   );
 };
@@ -139,6 +170,10 @@ const styles = StyleSheet.create({
   loadingText: {
     color: theme.colors.textSecondary,
     fontSize: 14,
+  },
+  voteText: {
+    fontSize: 11,
+    color: theme.colors.textSecondary,
   },
 });
 

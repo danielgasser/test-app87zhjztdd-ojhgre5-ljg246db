@@ -22,6 +22,14 @@ interface PredictionVoteButtonsProps {
   initialAccurateCount?: number;
   initialInaccurateCount?: number;
   currentUserVote?: "accurate" | "inaccurate" | null;
+  onVoteSuccess?: () => void;
+}
+
+// Helper to determine if ID is a UUID (database location) or other identifier
+function isUUID(id: string): boolean {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
 }
 
 export default function PredictionVoteButtons({
@@ -33,6 +41,7 @@ export default function PredictionVoteButtons({
   initialAccurateCount = 0,
   initialInaccurateCount = 0,
   currentUserVote = null,
+  onVoteSuccess,
 }: PredictionVoteButtonsProps) {
   const [userVote, setUserVote] = useState<"accurate" | "inaccurate" | null>(
     currentUserVote
@@ -62,7 +71,21 @@ export default function PredictionVoteButtons({
         notify.error("Please log in to vote");
         return;
       }
-
+      const payload = {
+        ...(isUUID(locationId)
+          ? { location_id: locationId }
+          : { google_place_id: locationId }),
+        vote_type: voteType,
+        prediction_source: predictionSource,
+        predicted_safety_score: predictedSafetyScore,
+        demographic_type: demographicType,
+        demographic_value: demographicValue,
+        user_demographics: {
+          race_ethnicity: userDemographics?.race_ethnicity,
+          gender: userDemographics?.gender,
+          lgbtq_status: userDemographics?.lgbtq_status,
+        },
+      };
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/vote-prediction`,
         {
@@ -71,25 +94,14 @@ export default function PredictionVoteButtons({
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({
-            location_id: locationId,
-            vote_type: voteType,
-            prediction_source: predictionSource,
-            predicted_safety_score: predictedSafetyScore,
-            demographic_type: demographicType,
-            demographic_value: demographicValue,
-            user_demographics: {
-              race_ethnicity: userDemographics?.race_ethnicity,
-              gender: userDemographics?.gender,
-              lgbtq_status: userDemographics?.lgbtq_status,
-            },
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
       const result = await response.json();
 
       if (!response.ok) {
+        console.log("Failed to vote", result.error);
         throw new Error(result.error || "Failed to vote");
       }
 
@@ -118,8 +130,12 @@ export default function PredictionVoteButtons({
           setAccurateCount((prev) => Math.max(0, prev - 1));
         }
       }
+      if (onVoteSuccess) {
+        onVoteSuccess();
+      }
     } catch (error) {
       logger.error("Error voting on prediction:", error);
+      console.error("Error voting on prediction:", error);
       notify.error("Failed to submit vote");
     } finally {
       setLoading(false);

@@ -18,6 +18,12 @@ export const EDGE_CONFIG = {
             UNHELPFUL_PENALTY: 0.2,    // -20% weight per unhelpful vote
             MIN_WEIGHT: 0.1,           // Minimum weight for any review
             SPAM_THRESHOLD: 0,         // Reviews with weight <= 0 are filtered out
+            MIN_VOTES_FOR_CONFIDENCE_ADJUSTMENT: 3      // Minimum number of votes required before vote accuracy affects prediction confidence.
+            // Below this threshold: votes are collected but don't impact predictions yet
+            // Above this threshold: confidence is multiplied by accuracy rate
+            // Example: If set to 5, and 8 users voted with 75% accuracy, 
+            //          a 70% confidence prediction becomes 70% × 75% = 52.5% confidence
+            // Recommendation: 1 for testing, 5-10 for production (statistical significance)
         },
     },
     SAFETY_THRESHOLDS: {

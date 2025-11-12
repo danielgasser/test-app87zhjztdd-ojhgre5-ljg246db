@@ -32,6 +32,7 @@ serve(async (req) => {
 
     const {
       location_id,
+      google_place_id,
       vote_type,
       prediction_source,
       predicted_safety_score,
@@ -40,7 +41,7 @@ serve(async (req) => {
       user_demographics
     } = await req.json()
 
-    if (!location_id || !vote_type || !prediction_source || !predicted_safety_score) {
+    if ((!location_id && !google_place_id) || !vote_type || !prediction_source || predicted_safety_score === undefined || predicted_safety_score === null) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -54,33 +55,47 @@ serve(async (req) => {
       })
     }
 
-    // Check if user already voted
-    const { data: existingVote } = await supabaseClient
+    let existingVoteQuery = supabaseClient
       .from('prediction_votes')
       .select('*')
-      .eq('location_id', location_id)
       .eq('user_id', user.id)
-      .single()
+
+    if (location_id) {
+      existingVoteQuery = existingVoteQuery.eq('location_id', location_id)
+    } else {
+      existingVoteQuery = existingVoteQuery.eq('google_place_id', google_place_id)
+    }
+
+    // Check if user already voted
+    const { data: existingVote } = await existingVoteQuery.single()
+
 
     if (existingVote) {
       // User is changing or removing vote
       if (existingVote.vote_type === vote_type) {
-        // Remove vote (toggle off)
-        await supabaseClient
+        let deleteQuery = supabaseClient
           .from('prediction_votes')
           .delete()
-          .eq('location_id', location_id)
           .eq('user_id', user.id)
 
-        // Decrement count
-        const countField = vote_type === 'accurate' ? 'accurate_count' : 'inaccurate_count'
-        await supabaseClient.rpc('decrement_prediction_vote_count', {
-          p_location_id: location_id,
-          p_demographic_type: demographic_type || 'overall',
-          p_demographic_value: demographic_value || null,
-          p_count_field: countField
-        })
+        if (location_id) {
+          deleteQuery = deleteQuery.eq('location_id', location_id)
+        } else {
+          deleteQuery = deleteQuery.eq('google_place_id', google_place_id)
+        }
+        await deleteQuery
 
+        // Decrement count
+        // Decrement count only if location exists in DB
+        if (location_id) {
+          const countField = vote_type === 'accurate' ? 'accurate_count' : 'inaccurate_count'
+          await supabaseClient.rpc('decrement_prediction_vote_count', {
+            p_location_id: location_id,
+            p_demographic_type: demographic_type || 'overall',
+            p_demographic_value: demographic_value || null,
+            p_count_field: countField
+          })
+        }
         return new Response(JSON.stringify({ success: true, action: 'removed' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
@@ -90,7 +105,7 @@ serve(async (req) => {
         const newCountField = vote_type === 'accurate' ? 'accurate_count' : 'inaccurate_count'
 
         // Update vote
-        await supabaseClient
+        let updateQuery = supabaseClient
           .from('prediction_votes')
           .update({
             vote_type,
@@ -99,25 +114,31 @@ serve(async (req) => {
             user_demographics,
             updated_at: new Date().toISOString()
           })
-          .eq('location_id', location_id)
           .eq('user_id', user.id)
 
-        // Decrement old count
-        await supabaseClient.rpc('decrement_prediction_vote_count', {
-          p_location_id: location_id,
-          p_demographic_type: demographic_type || 'overall',
-          p_demographic_value: demographic_value || null,
-          p_count_field: oldCountField
-        })
+        if (location_id) {
+          updateQuery = updateQuery.eq('location_id', location_id)
+        } else {
+          updateQuery = updateQuery.eq('google_place_id', google_place_id)
+        }
 
-        // Increment new count
-        await supabaseClient.rpc('increment_prediction_vote_count', {
-          p_location_id: location_id,
-          p_demographic_type: demographic_type || 'overall',
-          p_demographic_value: demographic_value || null,
-          p_count_field: newCountField
-        })
+        await updateQuery
+        if (location_id) {
+          await supabaseClient.rpc('decrement_prediction_vote_count', {
+            p_location_id: location_id,
+            p_demographic_type: demographic_type || 'overall',
+            p_demographic_value: demographic_value || null,
+            p_count_field: oldCountField
+          })
 
+          // Increment new count
+          await supabaseClient.rpc('increment_prediction_vote_count', {
+            p_location_id: location_id,
+            p_demographic_type: demographic_type || 'overall',
+            p_demographic_value: demographic_value || null,
+            p_count_field: newCountField
+          })
+        }
         return new Response(JSON.stringify({ success: true, action: 'switched' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
@@ -127,7 +148,8 @@ serve(async (req) => {
       await supabaseClient
         .from('prediction_votes')
         .insert({
-          location_id,
+          location_id: location_id || null,
+          google_place_id: google_place_id || null,
           user_id: user.id,
           vote_type,
           prediction_source,
@@ -136,14 +158,15 @@ serve(async (req) => {
         })
 
       // Increment count
-      const countField = vote_type === 'accurate' ? 'accurate_count' : 'inaccurate_count'
-      await supabaseClient.rpc('increment_prediction_vote_count', {
-        p_location_id: location_id,
-        p_demographic_type: demographic_type || 'overall',
-        p_demographic_value: demographic_value || null,
-        p_count_field: countField
-      })
-
+      if (location_id) {
+        const countField = vote_type === 'accurate' ? 'accurate_count' : 'inaccurate_count'
+        await supabaseClient.rpc('increment_prediction_vote_count', {
+          p_location_id: location_id,
+          p_demographic_type: demographic_type || 'overall',
+          p_demographic_value: demographic_value || null,
+          p_count_field: countField
+        })
+      }
       return new Response(JSON.stringify({ success: true, action: 'added' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

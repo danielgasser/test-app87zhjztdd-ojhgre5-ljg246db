@@ -100,6 +100,12 @@ export interface MLPrediction {
     hasMLPrediction: boolean;
     hasStatisticalData: boolean;
   };
+  vote_validation?: {
+    total_votes: number;
+    accurate_votes: number;
+    inaccurate_votes: number;
+    accuracy_rate: number;
+  } | null;
 }
 
 // Route Planning Types
@@ -1091,6 +1097,7 @@ export const fetchMLPredictions = createAsyncThunk(
         requestBody.latitude = latitude;
         requestBody.longitude = longitude;
         requestBody.place_type = 'temporary_location';
+        requestBody.google_place_id = locationId;
       } else {
         requestBody.location_id = locationId;
       }

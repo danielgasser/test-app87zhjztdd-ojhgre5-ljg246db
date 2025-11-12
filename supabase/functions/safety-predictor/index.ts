@@ -90,6 +90,52 @@ function calculateDemographicsScore(stats: any, user_demographics: any): number 
   return Math.max(1.0, Math.min(5.0, score));
 }
 
+// Query vote statistics for a location
+async function getVoteStats(supabaseClient: any, locationId: string, googlePlaceId?: string) {
+  if (locationId && locationId !== 'temp-location' && locationId !== 'none') {
+    // Database location - check safety_scores table
+    const { data } = await supabaseClient
+      .from('safety_scores')
+      .select('accurate_count, inaccurate_count')
+      .eq('location_id', locationId)
+      .eq('demographic_type', 'overall')
+      .single();
+
+    if (data) {
+      const total = (data.accurate_count || 0) + (data.inaccurate_count || 0);
+      return {
+        accurate: data.accurate_count || 0,
+        inaccurate: data.inaccurate_count || 0,
+        total,
+        accuracyRate: total > 0 ? data.accurate_count / total : 0
+      };
+    }
+  }
+
+  if (googlePlaceId) {
+    // Temporary location - check prediction_votes table directly
+    const { data } = await supabaseClient
+      .from('prediction_votes')
+      .select('vote_type')
+      .eq('google_place_id', googlePlaceId);
+
+    if (data && data.length > 0) {
+      const accurate = data.filter((v: any) => v.vote_type === 'accurate').length;
+      const inaccurate = data.filter((v: any) => v.vote_type === 'inaccurate').length;
+      const total = accurate + inaccurate;
+
+      return {
+        accurate,
+        inaccurate,
+        total,
+        accuracyRate: total > 0 ? accurate / total : 0
+      };
+    }
+  }
+
+  return { accurate: 0, inaccurate: 0, total: 0, accuracyRate: 0 };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -100,8 +146,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { location_id, latitude, longitude, user_demographics, place_type } = await req.json();
-
+    const { location_id, google_place_id, latitude, longitude, user_demographics, place_type } = await req.json();
     // Must have either location_id OR coordinates
     if ((!location_id && (!latitude || !longitude)) || !user_demographics) {
       throw new Error('Either location_id or (latitude + longitude) and user_demographics are required');
@@ -128,7 +173,8 @@ serve(async (req) => {
         name: 'Temporary Location',
         latitude: latitude,
         longitude: longitude,
-        place_type: place_type || 'other'
+        place_type: place_type || 'other',
+        google_place_id: google_place_id
       };
       lat = latitude;
       lng = longitude;
@@ -181,6 +227,11 @@ serve(async (req) => {
     });
 
     // ====================================================================
+    // STEP 3.5: Query vote statistics for this location
+    // ====================================================================
+    const voteStats = await getVoteStats(supabase, location.id, location.google_place_id);
+
+    // ====================================================================
     // STEP 4: Determine scoring scenario and calculate weighted score
     // ====================================================================
     let finalScore: number;
@@ -226,7 +277,10 @@ serve(async (req) => {
       );
 
       confidence = Math.min(demographicMatchingReviews.length / 5, 0.95); // High confidence with reviews
-
+      // Adjust confidence based on vote feedback
+      if (voteStats.total >= EDGE_CONFIG.ML_PARAMS.VOTE_WEIGHTS.MIN_VOTES_FOR_CONFIDENCE_ADJUSTMENT) {
+        confidence *= voteStats.accuracyRate;
+      }
       breakdown = {
         userReviews: reviewScore.toFixed(2),
         mlPrediction: mlScore.toFixed(2),
@@ -278,7 +332,10 @@ serve(async (req) => {
       );
 
       confidence = Math.min((placeTypeScores.length + (stats ? 3 : 0)) / 15, 0.75);
-
+      // Adjust confidence based on vote feedback
+      if (voteStats.total >= EDGE_CONFIG.ML_PARAMS.VOTE_WEIGHTS.MIN_VOTES_FOR_CONFIDENCE_ADJUSTMENT) {
+        confidence *= voteStats.accuracyRate;
+      }
       breakdown = {
         mlPrediction: mlScore.toFixed(2),
         demographics: demoScore.toFixed(2),
@@ -314,7 +371,10 @@ serve(async (req) => {
       );
 
       confidence = stats ? 0.35 : 0.15; // Low confidence without reviews or predictions
-
+      // Adjust confidence based on vote feedback
+      if (voteStats.total >= EDGE_CONFIG.ML_PARAMS.VOTE_WEIGHTS.MIN_VOTES_FOR_CONFIDENCE_ADJUSTMENT) {
+        confidence *= voteStats.accuracyRate;
+      }
       breakdown = {
         statistics: statsScore.toFixed(2),
         demographics: demoScore.toFixed(2),
@@ -344,6 +404,13 @@ serve(async (req) => {
 
       // Confidence and transparency
       confidence: Number(confidence.toFixed(2)),
+      vote_validation: voteStats.total > 0 ? {
+        total_votes: voteStats.total,
+        accurate_votes: voteStats.accurate,
+        inaccurate_votes: voteStats.inaccurate,
+        accuracy_rate: Number(voteStats.accuracyRate.toFixed(2))
+      } : null,
+
       primary_source: primarySource,
 
       // Detailed breakdown

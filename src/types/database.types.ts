@@ -205,6 +205,53 @@ export type Database = {
           },
         ]
       }
+      prediction_votes: {
+        Row: {
+          created_at: string | null
+          google_place_id: string | null
+          id: string
+          location_id: string | null
+          predicted_safety_score: number
+          prediction_source: string
+          updated_at: string | null
+          user_demographics: Json | null
+          user_id: string | null
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          google_place_id?: string | null
+          id?: string
+          location_id?: string | null
+          predicted_safety_score: number
+          prediction_source: string
+          updated_at?: string | null
+          user_demographics?: Json | null
+          user_id?: string | null
+          vote_type: string
+        }
+        Update: {
+          created_at?: string | null
+          google_place_id?: string | null
+          id?: string
+          location_id?: string | null
+          predicted_safety_score?: number
+          prediction_source?: string
+          updated_at?: string | null
+          user_demographics?: Json | null
+          user_id?: string | null
+          vote_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_votes_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -435,6 +482,7 @@ export type Database = {
       }
       safety_scores: {
         Row: {
+          accurate_count: number | null
           avg_comfort_score: number | null
           avg_overall_score: number | null
           avg_safety_score: number | null
@@ -442,11 +490,13 @@ export type Database = {
           demographic_type: string
           demographic_value: string | null
           id: string
+          inaccurate_count: number | null
           last_review_date: string | null
           location_id: string
           review_count: number | null
         }
         Insert: {
+          accurate_count?: number | null
           avg_comfort_score?: number | null
           avg_overall_score?: number | null
           avg_safety_score?: number | null
@@ -454,11 +504,13 @@ export type Database = {
           demographic_type: string
           demographic_value?: string | null
           id?: string
+          inaccurate_count?: number | null
           last_review_date?: string | null
           location_id: string
           review_count?: number | null
         }
         Update: {
+          accurate_count?: number | null
           avg_comfort_score?: number | null
           avg_overall_score?: number | null
           avg_safety_score?: number | null
@@ -466,6 +518,7 @@ export type Database = {
           demographic_type?: string
           demographic_value?: string | null
           id?: string
+          inaccurate_count?: number | null
           last_review_date?: string | null
           location_id?: string
           review_count?: number | null
@@ -751,6 +804,15 @@ export type Database = {
         Returns: undefined
       }
       cleanup_old_notification_logs: { Args: never; Returns: undefined }
+      decrement_prediction_vote_count: {
+        Args: {
+          p_count_field: string
+          p_demographic_type: string
+          p_demographic_value: string
+          p_location_id: string
+        }
+        Returns: undefined
+      }
       decrement_review_count: {
         Args: { count_field: string; review_id: string }
         Returns: undefined
@@ -1138,6 +1200,15 @@ export type Database = {
         }[]
       }
       gettransactionid: { Args: never; Returns: unknown }
+      increment_prediction_vote_count: {
+        Args: {
+          p_count_field: string
+          p_demographic_type: string
+          p_demographic_value: string
+          p_location_id: string
+        }
+        Returns: undefined
+      }
       increment_review_count: {
         Args: { count_field: string; review_id: string }
         Returns: undefined

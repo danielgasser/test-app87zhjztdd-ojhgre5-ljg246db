@@ -84,9 +84,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     }
   }, [selectedLocation, googlePlaceId, visible]);
 
-  // Add these console logs RIGHT BEFORE the PredictionBadge render
-  // (around line 250 in LocationDetailsModal.tsx)
-
   useEffect(() => {
     if (!visible) return;
 
@@ -475,11 +472,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   </View>
                 )}
               </View>
-              {/* ML Prediction Badge for locations with no reviews */}
-
-              {((selectedLocation && selectedLocation.review_count === 0) ||
-                (!selectedLocation &&
-                  (locationId || googlePlaceId || searchMarker))) && (
+              {/* ML Prediction Badge - Always show when available */}
+              {(locationId || googlePlaceId || searchMarker?.id) && (
                 <PredictionBadge
                   prediction={
                     mlPredictions[
@@ -499,7 +493,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               ] && (
                 <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
                   <PredictionVoteButtons
-                    locationId={locationId || selectedLocation?.id || ""}
+                    locationId={
+                      locationId || googlePlaceId || searchMarker?.id || ""
+                    }
                     predictionSource={
                       mlPredictions[
                         locationId || googlePlaceId || searchMarker?.id || ""
@@ -515,6 +511,30 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     initialAccurateCount={0}
                     initialInaccurateCount={0}
                     currentUserVote={null}
+                    onVoteSuccess={() => {
+                      const identifier =
+                        locationId || googlePlaceId || searchMarker?.id;
+                      // If it's a database location (UUID), just send location_id
+                      if (locationId) {
+                        dispatch(fetchMLPredictions(locationId));
+                      } else {
+                        // For temporary locations, send coordinates + identifier
+                        const lat =
+                          selectedLocation?.latitude || searchMarker?.latitude;
+                        const lng =
+                          selectedLocation?.longitude ||
+                          searchMarker?.longitude;
+                        if (identifier && lat && lng) {
+                          dispatch(
+                            fetchMLPredictions({
+                              locationId: identifier,
+                              latitude: lat,
+                              longitude: lng,
+                            })
+                          );
+                        }
+                      }
+                    }}
                   />
                 </View>
               )}
