@@ -1,0 +1,11 @@
+node_modules/
+.vscode/
+.env
+.DS_Store
+.expo/
+assets/
+Reviews_Import_Locations.csv
+Reviews_Import_Reviews.csv
+Reviews_OUTPUT.csv
+SafePath_Smoke_Tests.xlsx
+test-danger-zones.js
