@@ -1,174 +1,136 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+// src/providers/AuthProvider.tsx - INDUSTRY STANDARD VERSION
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/services/supabase";
-import { useAppDispatch } from "@/store/hooks";
-import { setSession } from "@/store/authSlice";
-import { notificationService } from "@/services/notificationService";
+import * as SecureStore from "expo-secure-store";
 import { logger } from "@/utils/logger";
 
-export interface AuthState {
-  user: User | null;
+type AuthAction =
+  | { type: "RESTORE_TOKEN"; token: Session | null }
+  | { type: "SIGN_IN"; session: Session }
+  | { type: "SIGN_OUT" };
+
+interface AuthState {
+  userToken: string | null;
   session: Session | null;
+  user: User | null;
   isLoading: boolean;
+  isSignout: boolean;
   needsOnboarding: boolean;
-  isAuthenticated: boolean;
 }
+
+const authReducer = (prevState: AuthState, action: AuthAction): AuthState => {
+  switch (action.type) {
+    case "RESTORE_TOKEN":
+      return {
+        ...prevState,
+        userToken: action.token?.access_token || null,
+        session: action.token,
+        user: action.token?.user || null,
+        isLoading: false,
+      };
+    case "SIGN_IN":
+      return {
+        ...prevState,
+        isSignout: false,
+        userToken: action.session.access_token,
+        session: action.session,
+        user: action.session.user,
+      };
+    case "SIGN_OUT":
+      return {
+        ...prevState,
+        isSignout: true,
+        userToken: null,
+        session: null,
+        user: null,
+        needsOnboarding: false,
+      };
+  }
+};
 
 interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
-  refreshAuthState: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    session: null,
+  const [state, dispatch] = useReducer(authReducer, {
     isLoading: true,
+    isSignout: false,
+    userToken: null,
+    session: null,
+    user: null,
     needsOnboarding: false,
-    isAuthenticated: false,
   });
 
-  const dispatch = useAppDispatch();
-
-  const checkOnboardingStatus = useCallback(
-    async (user: User): Promise<boolean> => {
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_complete")
-          .eq("user_id", user.id)
-          .single();
-
-        return !profile || !profile.onboarding_complete;
-      } catch (error) {
-        logger.error("Failed to check onboarding status:", error);
-        return true; // Default to needs onboarding on error
-      }
-    },
-    []
-  );
-
-  const registerPushNotifications = useCallback(async (userId: string) => {
-    try {
-      const pushToken =
-        await notificationService.registerForPushNotifications();
-      if (pushToken) {
-        await notificationService.savePushToken(userId, pushToken);
-      }
-    } catch (error) {
-      logger.error("Failed to register push notifications:", error);
-    }
-  }, []);
-
-  const updateAuthState = useCallback(
-    async (session: Session | null) => {
-      setAuthState((prev) => ({ ...prev, isLoading: true }));
-
-      if (!session) {
-        setAuthState({
-          user: null,
-          session: null,
-          isLoading: false,
-          needsOnboarding: false,
-          isAuthenticated: false,
-        });
-        dispatch(setSession(null));
-        return;
-      }
-
-      const needsOnboarding = await checkOnboardingStatus(session.user);
-
-      setAuthState({
-        user: session.user,
-        session,
-        isLoading: false,
-        needsOnboarding,
-        isAuthenticated: true,
-      });
-
-      dispatch(setSession(session));
-
-      // Register push notifications (non-blocking)
-      registerPushNotifications(session.user.id);
-    },
-    [checkOnboardingStatus, dispatch, registerPushNotifications]
-  );
-
-  const signOut = useCallback(async () => {
-    setAuthState((prev) => ({ ...prev, isLoading: true }));
-    await supabase.auth.signOut();
-  }, []);
-
-  const refreshAuthState = useCallback(async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    await updateAuthState(session);
-  }, [updateAuthState]);
-
+  // Simple initialization - NO complex dependencies
   useEffect(() => {
-    // Get initial session
-    const initializeAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      await updateAuthState(session);
+    const bootstrapAsync = async () => {
+      let userSession: Session | null = null;
+
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        userSession = session;
+      } catch (e) {
+        logger.error("Failed to restore session:", e);
+      }
+
+      dispatch({ type: "RESTORE_TOKEN", token: userSession });
     };
 
-    initializeAuth();
+    bootstrapAsync();
+  }, []);
 
-    // Listen for auth changes
+  // Simple auth state listener - NO complex dependencies
+  useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       logger.info(`Auth event: ${event}`);
 
       if (event === "SIGNED_OUT") {
-        setAuthState({
-          user: null,
-          session: null,
-          isLoading: false,
-          needsOnboarding: false,
-          isAuthenticated: false,
-        });
-        dispatch(setSession(null));
+        dispatch({ type: "SIGN_OUT" });
       } else if (
-        event === "SIGNED_IN" ||
-        event === "TOKEN_REFRESHED" ||
-        event === "INITIAL_SESSION"
+        session &&
+        (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")
       ) {
-        await updateAuthState(session);
+        dispatch({ type: "SIGN_IN", session });
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [updateAuthState, dispatch]);
+    return () => subscription.unsubscribe();
+  }, []);
 
-  const contextValue: AuthContextType = {
-    ...authState,
-    signOut,
-    refreshAuthState,
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    dispatch({ type: "SIGN_OUT" });
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ ...state, signOut }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 }
+
+// Helper hooks for conditional rendering
+export const useIsSignedIn = () => {
+  const { userToken } = useAuth();
+  return userToken != null;
+};
+
+export const useIsSignedOut = () => {
+  return !useIsSignedIn();
+};
