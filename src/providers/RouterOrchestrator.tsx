@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -20,6 +20,7 @@ import {
 import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 import { clearAllSessions } from "@/utils/debugUtils";
 import { logger } from "@/utils/logger";
+import { theme } from "@/styles/theme";
 
 export function RouterOrchestrator({
   children,
@@ -28,7 +29,7 @@ export function RouterOrchestrator({
 }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [showDebug] = useState(__DEV__);
-
+  const isInitializing = useRef(false);
   const router = useRouter();
   const authState = useAuth();
   const dispatch = useAppDispatch();
@@ -38,12 +39,23 @@ export function RouterOrchestrator({
 
   // Single initialization effect
   useEffect(() => {
+    console.log("🔄 RouterOrchestrator useEffect triggered");
+    console.log("  - authState.isLoading:", authState.isLoading);
+    console.log("  - authState.isAuthenticated:", authState.isAuthenticated);
+    console.log("  - isInitialized:", isInitialized);
+    if (isInitialized || isInitializing.current || authState.isLoading) {
+      return;
+    }
+    isInitializing.current = true; // Mark as initializing
+
     let isMounted = true;
 
     const initializeApp = async () => {
       try {
         logger.info("RouterOrchestrator: Starting app initialization");
-
+        if (isInitialized) {
+          return;
+        }
         // Wait for auth to finish loading
         if (authState.isLoading) {
           return;
@@ -95,12 +107,14 @@ export function RouterOrchestrator({
 
         if (isMounted) {
           setIsInitialized(true);
+          isInitializing.current = false;
           logger.info("RouterOrchestrator: App initialization complete");
         }
       } catch (error) {
         logger.error("RouterOrchestrator: Initialization failed", { error });
         if (isMounted) {
-          setIsInitialized(true); // Still mark as initialized to show UI
+          setIsInitialized(true); // Still mark as initialized to show UI$
+          setIsInitialized(true);
         }
       }
     };
@@ -110,7 +124,15 @@ export function RouterOrchestrator({
     return () => {
       isMounted = false;
     };
-  }, [authState, router, dispatch, checkForUnfinishedNavigation]);
+  }, [
+    authState.isAuthenticated,
+    authState.isLoading,
+    authState.needsOnboarding,
+    isInitialized,
+    router,
+    dispatch,
+    checkForUnfinishedNavigation,
+  ]);
 
   // Set up deep link listener
   useEffect(() => {
@@ -204,7 +226,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.text,
   },
   loadingText: {
     fontSize: 24,
@@ -218,11 +240,11 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#ff4444",
+    backgroundColor: theme.colors.accent,
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: theme.colors.backdrop,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

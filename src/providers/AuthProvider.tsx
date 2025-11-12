@@ -140,7 +140,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isAuthenticated: false,
         });
         dispatch(setSession(null));
-      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+      } else if (
+        event === "SIGNED_IN" ||
+        event === "TOKEN_REFRESHED" ||
+        event === "INITIAL_SESSION"
+      ) {
         await updateAuthState(session);
       }
     });
