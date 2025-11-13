@@ -16,21 +16,19 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
-import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { signIn, setSession } from "src/store/authSlice";
-import { supabase } from "@/services/supabase";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { notify } from "@/utils/notificationService";
+import { useAuth } from "@/providers/AuthManager";
+import { supabase } from "@/services/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const dispatch = useAppDispatch();
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const { isLoading } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -39,8 +37,12 @@ export default function LoginScreen() {
     }
 
     try {
-      const result = await dispatch(signIn({ email, password })).unwrap();
-
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+      if (error) throw error;
+      const result = data;
       // Check onboarding status
       const { data: profile } = await supabase
         .from("profiles")
@@ -55,7 +57,7 @@ export default function LoginScreen() {
         router.replace("/(tabs)");
       }
     } catch (err) {
-      notify.error(error || "Invalid credentials", "Login Failed");
+      notify.error(`${err}` || "Invalid credentials", "Login Failed");
     }
   };
 
@@ -75,11 +77,6 @@ export default function LoginScreen() {
       });
 
       if (error) throw error;
-
-      // CRITICAL: Update Redux state with the session
-      if (data.session) {
-        dispatch(setSession(data.session));
-      }
 
       // Check if user has completed onboarding
       const { data: profile } = await supabase
@@ -179,12 +176,12 @@ export default function LoginScreen() {
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, isLoading && styles.buttonDisabled]}
                 onPress={handleLogin}
-                disabled={loading}
+                disabled={isLoading}
               >
                 <Text style={styles.buttonText}>
-                  {loading ? "Signing in..." : "Sign In"}
+                  {isLoading ? "Signing in..." : "Sign In"}
                 </Text>
               </TouchableOpacity>
               {/* Social Login Divider */}

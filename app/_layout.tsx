@@ -1,11 +1,11 @@
-// app/_layout.tsx - INDUSTRY STANDARD PATTERN
+// app/_layout.tsx - CLEAN, SIMPLE LAYOUT
 import React from "react";
 import { Stack } from "expo-router";
 import { Provider } from "react-redux";
-import { Text, View, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { store } from "@/store";
-import { AuthProvider, useAuth } from "@/providers/AuthProvider";
-import { DeepLinkProvider, useDeepLink } from "@/providers/DeepLinkQueue";
+import { AuthManager, useAuth } from "@/providers/AuthManager";
+import { DeepLinkManager } from "@/providers/DeepLinkManager";
 import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
@@ -17,46 +17,41 @@ Sentry.init({
   tracesSampleRate: __DEV__ ? 0 : 0.1,
 });
 
-// Loading screen component
+// Loading screen
 function SplashScreen() {
   return (
-    <View style={styles.loadingContainer}>
-      <Text style={styles.loadingText}>SafePath</Text>
+    <View style={styles.splash}>
+      <Text style={styles.splashText}>SafePath</Text>
     </View>
   );
 }
 
-// Navigation component with conditional rendering
-function RootNavigator() {
-  const { isLoading, userToken, needsOnboarding } = useAuth();
-  const { processQueuedLinks } = useDeepLink();
+// Main navigation based on auth state
+function AppNavigator() {
+  const { isLoading, isAuthenticated, needsOnboarding } = useAuth();
 
-  // Process queued deep links when user signs in
-  React.useEffect(() => {
-    if (userToken && !needsOnboarding) {
-      processQueuedLinks();
-    }
-  }, [userToken, needsOnboarding, processQueuedLinks]);
-
-  // Show splash while loading
+  // Show loading screen during auth initialization
   if (isLoading) {
     return <SplashScreen />;
   }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {userToken ? (
-        // Authenticated screens
-        <>
-          {needsOnboarding ? (
-            <Stack.Screen name="onboarding" />
-          ) : (
-            <>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="review" />
-            </>
-          )}
-        </>
+      {isAuthenticated ? (
+        // Authenticated user screens
+        needsOnboarding ? (
+          <Stack.Screen name="onboarding" />
+        ) : (
+          <>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="review" />
+            <Stack.Screen name="edit-profile" />
+            <Stack.Screen name="privacy-settings" />
+            <Stack.Screen name="notification-settings" />
+            <Stack.Screen name="display-settings" />
+            <Stack.Screen name="edit-review" />
+          </>
+        )
       ) : (
         // Unauthenticated screens
         <>
@@ -68,31 +63,32 @@ function RootNavigator() {
   );
 }
 
+// Root layout with providers
 function RootLayout() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <DeepLinkProvider>
+      <AuthManager>
+        <DeepLinkManager>
           <NotificationProvider>
-            <RootNavigator />
+            <AppNavigator />
           </NotificationProvider>
-        </DeepLinkProvider>
-      </AuthProvider>
+        </DeepLinkManager>
+      </AuthManager>
     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
+  splash: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: theme.colors.background,
   },
-  loadingText: {
-    fontSize: 24,
+  splashText: {
+    fontSize: 32,
     fontWeight: "bold",
-    color: theme.colors.text,
+    color: theme.colors.primary,
   },
 });
 

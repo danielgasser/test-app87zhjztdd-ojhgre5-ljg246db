@@ -4,7 +4,6 @@ import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/utils/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
-import { signOut } from './authSlice';
 import { logger } from '@/utils/logger';
 import { notify } from '@/utils/notificationService';
 export interface NotificationPreferences {
@@ -298,14 +297,6 @@ const userSlice = createSlice({
       .addCase(fetchPublicUserReviews.rejected, (state) => {
         state.publicReviewsLoading = false;
         state.publicReviews = [];
-      })
-      // Clear user data on logout
-      .addCase(signOut.fulfilled, (state) => {
-        state.profile = null;
-        state.publicReviews = [];
-        state.loading = false;
-        state.error = null;
-        state.onboardingComplete = false;
       })
       // Update search radius
       .addCase(updateSearchRadius.pending, (state) => {

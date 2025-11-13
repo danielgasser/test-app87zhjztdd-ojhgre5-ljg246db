@@ -15,18 +15,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
-import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { signUp } from "src/store/authSlice";
 import { notify } from "@/utils/notificationService";
+import { supabase } from "@/services/supabase";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { loading } = useAppSelector((state) => state.auth);
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
       notify.error("Please fill in all fields");
@@ -39,8 +36,14 @@ export default function RegisterScreen() {
     }
 
     try {
-      const result = await dispatch(signUp({ email, password })).unwrap();
-      // Check if email confirmation is required
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+      });
+      if (error) throw error;
+      const result = data;
+      setIsLoading(false); // Check if email confirmation is required
       if (result.user && !result.session) {
         // Email confirmation required
         notify.confirm(
@@ -109,12 +112,12 @@ export default function RegisterScreen() {
               />
 
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, isLoading && styles.buttonDisabled]}
                 onPress={handleRegister}
-                disabled={loading}
+                disabled={isLoading}
               >
                 <Text style={styles.buttonText}>
-                  {loading ? "Creating account..." : "Sign Up"}
+                  {isLoading ? "Creating account..." : "Sign Up"}
                 </Text>
               </TouchableOpacity>
 

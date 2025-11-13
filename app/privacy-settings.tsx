@@ -19,13 +19,13 @@ import { ActivityIndicator } from "react-native";
 import { updateUserProfile } from "../src/store/userSlice";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "../src/store/hooks";
-import { signOut } from "../src/store/authSlice";
+import { useAuth } from "@/providers/AuthManager";
 import { fetchRecentReviews } from "@/store/locationsSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 
 export default function PrivacySettings() {
-  const user = useAppSelector((state: any) => state.auth.user);
+  const { user, signOut } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
   const userLocation = useAppSelector((state) => state.locations.userLocation);
 
@@ -57,6 +57,7 @@ export default function PrivacySettings() {
   }, [viewDataModalVisible]);
 
   const savePrivacySetting = async (field: string, value: any) => {
+    if (!user) return;
     try {
       await dispatch(
         updateUserProfile({
@@ -104,6 +105,7 @@ export default function PrivacySettings() {
   };
 
   const handleExportData = async () => {
+    if (!user) return;
     try {
       // Fetch user's reviews with location details
       const { data: reviews, error: reviewsError } = await supabase
@@ -128,7 +130,7 @@ export default function PrivacySettings() {
         )
       `
         )
-        .eq("user_id", user?.id)
+        .eq("user_id", user.id)
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -283,7 +285,7 @@ export default function PrivacySettings() {
       }
 
       // Rest of success handling...
-      await dispatch(signOut()).unwrap();
+      await signOut();
 
       notify.confirm(
         "Account Deleted",
@@ -467,7 +469,8 @@ export default function PrivacySettings() {
               Name: {profile?.full_name || "Not set"}
             </Text>
             <Text style={styles.dataText}>
-              Account Created: {new Date(user?.created_at).toLocaleDateString()}
+              Account Created:
+              {new Date(profile.created_at).toLocaleDateString()}
             </Text>
             <Text style={styles.dataSection}>Demographic Data</Text>
             <Text style={styles.dataText}>

@@ -14,25 +14,21 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { signOut } from "src/store/authSlice";
 import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { supabase } from "src/services/supabase";
 import { theme } from "src/styles/theme";
 import { router } from "expo-router";
 import { decode } from "base64-arraybuffer";
-import ProfileCompletionWidget from "@/components/ProfileCompletionWidget";
-import { checkProfileCompleteness } from "@/utils/profileValidation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { resetAll } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { APP_CONFIG } from "@/utils/appConfig";
 import SearchRadiusSelector from "@/components/SearchRadiusSelector";
+import { useAuth } from "@/providers/AuthManager";
+
 const appConfig = require("../../app.config.js");
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, signOut } = useAuth();
   const { profile, loading } = useAppSelector((state) => state.user);
   const [uploading, setUploading] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -80,7 +76,7 @@ export default function ProfileScreen() {
   const hasCompletedOnboarding = !!profile;
   const handleLogout = async () => {
     try {
-      await dispatch(signOut()).unwrap();
+      await signOut();
       router.replace("/(auth)/login");
     } catch (error) {
       notify.error("Failed to sign out");

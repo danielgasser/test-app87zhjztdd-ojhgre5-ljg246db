@@ -20,10 +20,11 @@ import { updateUserProfile } from "src/store/userSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { passwordChecker } from "@/utils/passwordChecker";
+import { useAuth } from "@/providers/AuthManager";
 
 export default function EditProfileScreen() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user } = useAuth();
   const { profile } = useAppSelector((state) => state.user);
 
   const [fullName, setFullName] = useState("");

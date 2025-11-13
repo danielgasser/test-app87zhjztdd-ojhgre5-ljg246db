@@ -25,6 +25,7 @@ import { supabase } from "@/services/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { useAuth } from "@/providers/AuthManager";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -53,7 +54,7 @@ const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, completeOnboarding, processPendingDeepLink } = useAuth();
   const { profile, loading, error } = useAppSelector((state) => state.user);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
@@ -289,13 +290,6 @@ export default function OnboardingScreen() {
     };
 
     try {
-      await dispatch(
-        updateUserProfile({
-          userId: user.id,
-          profileData: processedData,
-        })
-      ).unwrap();
-
       await supabase
         .from("profiles")
         .update({ onboarding_complete: true })
@@ -316,6 +310,9 @@ export default function OnboardingScreen() {
           await notificationService.savePushToken(user.id, pushToken);
         }
       }
+      // Update auth state
+      completeOnboarding();
+      processPendingDeepLink();
     } catch (error) {
       notify.error("Failed to save profile. Please try again.");
       logger.error("Profile save error:", error);
