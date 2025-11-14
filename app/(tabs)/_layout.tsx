@@ -52,82 +52,80 @@ export default function TabLayout() {
   }, [user?.id, dispatch]);
 
   return (
-    <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: theme.colors.primary,
-          tabBarInactiveTintColor: theme.colors.textLight,
-          tabBarStyle: {
-            backgroundColor: theme.colors.card,
-            borderTopWidth: 1,
-            borderTopColor: theme.colors.separator,
-          },
-          tabBarLabelStyle: {
-            fontSize: 16,
-            fontWeight: "600",
-          },
-          headerStyle: {
-            backgroundColor: theme.colors.secondary,
-          },
-          headerTintColor: theme.colors.textOnPrimary,
-          headerTitleStyle: {
-            fontWeight: "bold",
-            fontSize: 22,
-          },
-        }}
-        tabBar={(props) => (
-          <View>
-            <BottomTabBar {...props} />
-            <View style={styles.versionFooter}>
-              <Text style={styles.versionText}>
-                {`${Constants.expoConfig?.name} version: ${
-                  Constants.expoConfig?.version
-                } (${
-                  Platform.OS === "ios"
-                    ? Constants.expoConfig?.ios?.buildNumber
-                    : Constants.expoConfig?.android?.versionCode
-                }) Platform: ${Platform.OS} v: ${Platform.Version}`}
-              </Text>
-            </View>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textLight,
+        tabBarStyle: {
+          backgroundColor: theme.colors.card,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.separator,
+        },
+        tabBarLabelStyle: {
+          fontSize: 16,
+          fontWeight: "600",
+        },
+        headerStyle: {
+          backgroundColor: theme.colors.secondary,
+        },
+        headerTintColor: theme.colors.textOnPrimary,
+        headerTitleStyle: {
+          fontWeight: "bold",
+          fontSize: 22,
+        },
+      }}
+      tabBar={(props) => (
+        <View>
+          <BottomTabBar {...props} />
+          <View style={styles.versionFooter}>
+            <Text style={styles.versionText}>
+              {`${Constants.expoConfig?.name} version: ${
+                Constants.expoConfig?.version
+              } (${
+                Platform.OS === "ios"
+                  ? Constants.expoConfig?.ios?.buildNumber
+                  : Constants.expoConfig?.android?.versionCode
+              }) Platform: ${Platform.OS} v: ${Platform.Version}`}
+            </Text>
           </View>
-        )}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Map",
-            tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="map" size={32} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="community"
-          options={{
-            title: "Community",
-            tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="people" size={32} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: "Profile",
-            tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="person" size={32} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="debug"
-          options={{
-            href: null, // Hide from tab bar
-            title: "Debug",
-          }}
-        />
-      </Tabs>
-    </View>
+        </View>
+      )}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Map",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="map" size={32} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          title: "Community",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="people" size={32} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person" size={32} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="debug"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Debug",
+        }}
+      />
+    </Tabs>
   );
 }
 const styles = StyleSheet.create({

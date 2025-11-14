@@ -62,7 +62,6 @@ function AppNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       {isAuthenticated ? (
-        // Authenticated user screens
         needsOnboarding ? (
           <Stack.Screen name="onboarding" />
         ) : (
@@ -77,7 +76,6 @@ function AppNavigator() {
           </>
         )
       ) : (
-        // Unauthenticated screens
         <>
           <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
           <Stack.Screen name="(auth)" />
