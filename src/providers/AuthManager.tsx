@@ -238,7 +238,7 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
             break;
 
           case "TOKEN_REFRESHED":
-            if (session?.user) {
+            if (session) {
               dispatch({ type: "SESSION_UPDATED", session });
             } else {
               dispatch({ type: "SIGNED_OUT" });

@@ -43,7 +43,12 @@ export default function ForgotPasswordScreen() {
     try {
       // Use Supabase's built-in resetPasswordForEmail
       // This will trigger your send-email-hook for custom email template
-      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail);
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        trimmedEmail,
+        {
+          redirectTo: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth-verify?next=reset-password`,
+        }
+      );
 
       if (error) throw error;
 

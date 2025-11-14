@@ -9,7 +9,7 @@
  */ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const hookSecret = (Deno.env.get('SEND_EMAIL_HOOK_SECRET') || '').replace('v1,whsec_', '');
+const hookSecret = (Deno.env.get('SEND_EMAIL_HOOK_SECRET') || '').replace('v1,', '');
 const RESEND_API_URL = 'https://api.resend.com/emails';
 serve(async (req) => {
   try {
