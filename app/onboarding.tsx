@@ -53,7 +53,6 @@ const FIELD_TO_STEP_MAP: { [key: string]: number } = {
 const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
 export default function OnboardingScreen() {
-  console.log("📝 Onboarding screen render, timestamp:", Date.now());
   const dispatch = useAppDispatch();
   const { user, completeOnboarding, processPendingDeepLink } = useAuth();
   const { profile, loading, error } = useAppSelector((state) => state.user);
@@ -291,10 +290,70 @@ export default function OnboardingScreen() {
     };
 
     try {
-      const result = await supabase
-        .from("profiles")
-        .update({ onboarding_complete: true, demographics: processedData })
-        .eq("user_id", user.id);
+      console.log("🎯 Starting onboarding save for user:", user.id);
+
+      const { data: existingProfile } = await supabase
+        .from("user_profiles")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+
+      console.log("🔍 Existing profile check:", existingProfile);
+
+      let profileResult;
+
+      if (existingProfile) {
+        // Update existing profile
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .update({
+            full_name: processedData.full_name,
+            race_ethnicity: processedData.race_ethnicity,
+            gender: processedData.gender,
+            lgbtq_status: processedData.lgbtq_status,
+            disability_status: processedData.disability_status,
+            religion: processedData.religion,
+            age_range: processedData.age_range,
+            privacy_level: processedData.privacy_level,
+            show_demographics: processedData.show_demographics,
+          })
+          .eq("id", user.id)
+          .select()
+          .single();
+
+        profileResult = { data, error };
+      } else {
+        // Insert new profile
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .insert({
+            id: user.id,
+            full_name: processedData.full_name,
+            race_ethnicity: processedData.race_ethnicity,
+            gender: processedData.gender,
+            lgbtq_status: processedData.lgbtq_status,
+            disability_status: processedData.disability_status,
+            religion: processedData.religion,
+            age_range: processedData.age_range,
+            privacy_level: processedData.privacy_level,
+            show_demographics: processedData.show_demographics,
+          })
+          .select()
+          .single();
+
+        profileResult = { data, error };
+      }
+
+      console.log("💾 User_profiles save result:", profileResult);
+      if (profileResult) {
+        logger.error("Failed to save to user_profiles:", profileResult);
+      }
+      console.log("🔄 Fetching profile for Redux...");
+
+      await dispatch(fetchUserProfile(user.id)).unwrap();
+      console.log("✅ Profile fetched after onboarding:", profileResult);
+
+      completeOnboarding();
 
       notify.success(
         isEditing
@@ -311,8 +370,7 @@ export default function OnboardingScreen() {
           await notificationService.savePushToken(user.id, pushToken);
         }
       }
-      // Update auth state
-      completeOnboarding();
+
       processPendingDeepLink();
     } catch (error) {
       notify.error("Failed to save profile. Please try again.");

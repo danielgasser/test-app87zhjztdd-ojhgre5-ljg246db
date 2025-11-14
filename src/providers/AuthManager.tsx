@@ -166,8 +166,6 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
         "User ID:",
         session?.user?.id
       );
-      const timestamp = Date.now();
-      console.log("⏱️ Auth event timestamp:", timestamp);
       const timeoutId = setTimeout(() => {
         console.log("⏰ Auth handler timeout - forcing loading to stop");
         dispatch({ type: "LOADING", loading: false });

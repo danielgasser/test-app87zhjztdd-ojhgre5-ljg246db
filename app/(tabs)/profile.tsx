@@ -73,7 +73,14 @@ export default function ProfileScreen() {
     }));
   };
   const isLoggedIn = !!user;
-  const hasCompletedOnboarding = !!profile;
+  const hasCompletedOnboarding = useAppSelector(
+    (state) => state.user.onboardingComplete
+  );
+  console.log("🔍 Profile screen debug:", {
+    hasCompletedOnboarding,
+    profile: useAppSelector((state) => state.user.profile),
+    user: user?.id,
+  });
   const handleLogout = async () => {
     try {
       await signOut();

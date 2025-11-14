@@ -219,7 +219,7 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
     if (isAuthenticated && !needsOnboarding) {
       processPendingDeepLink();
     }
-  }, [isAuthenticated, needsOnboarding, processPendingDeepLink]);
+  }, [isAuthenticated, needsOnboarding]);
 
   return <>{children}</>;
 }

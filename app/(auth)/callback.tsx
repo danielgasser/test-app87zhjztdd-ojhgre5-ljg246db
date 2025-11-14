@@ -97,7 +97,7 @@ export default function AuthCallback() {
         }
       } catch (error) {
         logger.error("Auth callback error:", error);
-        setStatus(`Authentication failed: ${error}`);
+        setStatus(`Authentication failed`);
         setTimeout(() => router.replace("/(auth)/login"), 3000);
       }
     };
