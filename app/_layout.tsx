@@ -10,7 +10,6 @@ import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
 import { supabase } from "@/services/supabase";
-
 // Initialize Sentry
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -29,7 +28,7 @@ function SplashScreen() {
 
 // Main navigation based on auth state
 function AppNavigator() {
-  const { isLoading, isAuthenticated, needsOnboarding } = useAuth();
+  const { isLoading, isAuthenticated, needsOnboarding, signOut } = useAuth();
   // Check if user exists in DB
   useEffect(() => {
     const checkUserExists = async () => {
@@ -115,6 +114,3 @@ const styles = StyleSheet.create({
 });
 
 export default Sentry.wrap(RootLayout);
-function signOut() {
-  throw new Error("Function not implemented.");
-}
