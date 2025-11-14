@@ -60,26 +60,16 @@ function AppNavigator() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {isAuthenticated ? (
-        needsOnboarding ? (
-          <Stack.Screen name="onboarding" />
-        ) : (
-          <>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="review" />
-            <Stack.Screen name="edit-profile" />
-            <Stack.Screen name="privacy-settings" />
-            <Stack.Screen name="notification-settings" />
-            <Stack.Screen name="display-settings" />
-            <Stack.Screen name="edit-review" />
-          </>
-        )
-      ) : (
-        <>
-          <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
-          <Stack.Screen name="(auth)" />
-        </>
-      )}
+      <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="onboarding" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="review" />
+      <Stack.Screen name="edit-profile" />
+      <Stack.Screen name="privacy-settings" />
+      <Stack.Screen name="notification-settings" />
+      <Stack.Screen name="display-settings" />
+      <Stack.Screen name="edit-review" />
     </Stack>
   );
 }
