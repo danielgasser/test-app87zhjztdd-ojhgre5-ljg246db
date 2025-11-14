@@ -12,6 +12,7 @@ import { supabase } from "@/services/supabase";
 import { useAppSelector } from "@/store/hooks";
 import { logger } from "@/utils/logger";
 import { notify } from "@/utils/notificationService";
+import { useAuth } from "@/providers";
 
 interface PredictionVoteButtonsProps {
   locationId: string;
@@ -52,7 +53,8 @@ export default function PredictionVoteButtons({
   );
   const [loading, setLoading] = useState(false);
 
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const { user } = useAuth();
+  const userId = user?.id;
   const userDemographics = useAppSelector((state) => state.user.profile);
 
   const handleVote = async (voteType: "accurate" | "inaccurate") => {
@@ -101,7 +103,6 @@ export default function PredictionVoteButtons({
       const result = await response.json();
 
       if (!response.ok) {
-        console.log("Failed to vote", result.error);
         throw new Error(result.error || "Failed to vote");
       }
 

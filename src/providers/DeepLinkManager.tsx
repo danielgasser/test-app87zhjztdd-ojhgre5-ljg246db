@@ -32,6 +32,15 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
     try {
       logger.info("Parsing deep link:", { url });
 
+      // Welcome/marketing links
+      if (url.includes("/welcome") || url.includes("welcome")) {
+        return {
+          action: "welcome",
+          params: extractUrlParams(url),
+          targetRoute: "/welcome",
+        };
+      }
+
       // Password reset links
       if (url.includes("type=recovery")) {
         return {
@@ -65,15 +74,6 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
           action: "notification",
           params: {},
           targetRoute: url.replace(/.*:\/\/[^\/]+/, ""), // Remove scheme and host
-        };
-      }
-
-      // Welcome/marketing links
-      if (url.includes("/welcome")) {
-        return {
-          action: "welcome",
-          params: {},
-          targetRoute: "/welcome",
         };
       }
 
@@ -111,6 +111,7 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
 
   // Handle deep link
   const handleDeepLink = async (url: string) => {
+    console.log("🔗 handleDeepLink called:", url, "timestamp:", Date.now());
     const parsed = parseDeepLink(url);
     if (!parsed) {
       logger.warn("Unhandled deep link:", { url });
@@ -123,23 +124,16 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
       case "password-reset":
         const { access_token, refresh_token, type } = parsed.params;
         if (type === "recovery" && access_token && refresh_token) {
-          logger.info("Setting recovery session");
-          try {
-            const { error } = await supabase.auth.setSession({
+          logger.info("Navigating to reset-password with tokens");
+          // Pass tokens as navigation params instead of setting session here
+          router.push({
+            pathname: "/(auth)/reset-password",
+            params: {
               access_token,
               refresh_token,
-            });
-
-            if (!error && parsed.targetRoute) {
-              router.push(parsed.targetRoute as any);
-            } else {
-              logger.error("Error setting session:", error);
-              router.push("/(auth)/forgot-password");
-            }
-          } catch (error) {
-            logger.error("Session setting failed:", error);
-            router.push("/(auth)/forgot-password");
-          }
+              type,
+            },
+          } as any);
         } else {
           logger.warn("Missing tokens for password reset");
           router.push("/(auth)/forgot-password");
@@ -166,8 +160,29 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
         break;
 
       case "welcome":
-        // Marketing links - always handle immediately
-        if (parsed.targetRoute) {
+        const {
+          access_token: welcomeAccessToken,
+          refresh_token: welcomeRefreshToken,
+          type: welcomeType,
+        } = parsed.params;
+
+        if (
+          welcomeType === "signup" &&
+          welcomeAccessToken &&
+          welcomeRefreshToken
+        ) {
+          try {
+            await supabase.auth.setSession({
+              access_token: welcomeAccessToken,
+              refresh_token: welcomeRefreshToken,
+            });
+            logger.info("Session set for new signup, navigating to welcome");
+            router.push("/welcome");
+          } catch (error) {
+            logger.error("Failed to set session for signup:", error);
+            router.push("/welcome");
+          }
+        } else if (parsed.targetRoute) {
           router.push(parsed.targetRoute as any);
         }
         break;

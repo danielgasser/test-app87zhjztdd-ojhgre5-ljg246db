@@ -33,6 +33,22 @@ export default function ResetPasswordScreen() {
 
   useEffect(() => {
     const checkSession = async () => {
+      // First try to set session from URL params
+      const { access_token, refresh_token, type } = params;
+
+      if (access_token && refresh_token && type === "recovery") {
+        const { error } = await supabase.auth.setSession({
+          access_token: access_token as string,
+          refresh_token: refresh_token as string,
+        });
+
+        if (!error) {
+          setIsValidatingToken(false);
+          return;
+        }
+      }
+
+      // Fallback: check for existing session
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -41,12 +57,13 @@ export default function ResetPasswordScreen() {
         setIsValidatingToken(false);
       } else {
         notify.error("Invalid or expired reset link.");
-        router.replace("/forgot-password");
+        router.replace("/(auth)/forgot-password");
       }
     };
 
     checkSession();
   }, []);
+
   const validatePassword = (password: string): boolean => {
     if (!passwordChecker(newPassword)) {
       return false;

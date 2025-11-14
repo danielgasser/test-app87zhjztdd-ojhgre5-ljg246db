@@ -13,6 +13,7 @@ import {
   ScrollView,
   Keyboard,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, useRouter } from "expo-router";
 import { notify } from "@/utils/notificationService";
@@ -22,6 +23,8 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const handleRegister = async () => {
@@ -94,23 +97,48 @@ export default function RegisterScreen() {
                 keyboardType="email-address"
                 autoComplete="email"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoComplete="password-new"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                autoComplete="password-new"
-              />
-
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoComplete="password-new"
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={24}
+                    color={theme.colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  autoComplete="password-new"
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  <Ionicons
+                    name={
+                      showConfirmPassword ? "eye-off-outline" : "eye-outline"
+                    }
+                    size={24}
+                    color={theme.colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 style={[styles.button, isLoading && styles.buttonDisabled]}
                 onPress={handleRegister}
@@ -120,7 +148,6 @@ export default function RegisterScreen() {
                   {isLoading ? "Creating account..." : "Sign Up"}
                 </Text>
               </TouchableOpacity>
-
               <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
                 <Link href="/login" asChild>
@@ -172,6 +199,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 18,
     backgroundColor: theme.colors.inputBackground,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: theme.spacing.md,
+    fontSize: 16,
+    color: theme.colors.text,
+  },
+  eyeButton: {
+    padding: theme.spacing.md,
   },
   button: {
     backgroundColor: theme.colors.primary,

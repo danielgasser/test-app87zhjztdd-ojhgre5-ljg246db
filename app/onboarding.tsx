@@ -53,6 +53,7 @@ const FIELD_TO_STEP_MAP: { [key: string]: number } = {
 const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
 export default function OnboardingScreen() {
+  console.log("📝 Onboarding screen render, timestamp:", Date.now());
   const dispatch = useAppDispatch();
   const { user, completeOnboarding, processPendingDeepLink } = useAuth();
   const { profile, loading, error } = useAppSelector((state) => state.user);
@@ -265,8 +266,6 @@ export default function OnboardingScreen() {
       notify.error("User session not found. Please log in again.");
       return;
     }
-    console.log("🟡 Starting onboarding completion for user:", user.id);
-    console.log("🟡 Form data:", formData);
 
     // Process "Other" inputs and merge with main data
     const processedData = {
@@ -292,13 +291,10 @@ export default function OnboardingScreen() {
     };
 
     try {
-      console.log("🟡 Updating profiles table for user:", user.id);
-
       const result = await supabase
         .from("profiles")
         .update({ onboarding_complete: true, demographics: processedData })
         .eq("user_id", user.id);
-      console.log("🟡 Profiles update result:", result);
 
       notify.success(
         isEditing
@@ -876,6 +872,21 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity
+        onPress={async () => {
+          await supabase.auth.signOut();
+          router.replace("/(auth)/login");
+        }}
+        style={{
+          position: "absolute",
+          top: 50,
+          right: 20,
+          zIndex: 999,
+          padding: 10,
+        }}
+      >
+        <Text style={{ color: "red", fontWeight: "bold" }}>DEV: Sign Out</Text>
+      </TouchableOpacity>
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>

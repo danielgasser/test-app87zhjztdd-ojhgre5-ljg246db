@@ -30,14 +30,13 @@ serve(async (req) => {
     );
     const verifyParams: any = { type: type as any };
 
-    if (type === 'recovery' || type === 'email_change') {
-      // For recovery and email change, use token_hash
+    // Use token_hash for all magic link verifications (signup, recovery, email_change)
+    if (token_hash) {
       verifyParams.token_hash = token_hash;
-    } else {
-      // For signup and other types, use token
+    } else if (token) {
+      // Use token only for OTP codes (6-digit codes)
       verifyParams.token = token;
     }
-
     // Verify the OTP/token_hash
     const { data, error } = await supabase.auth.verifyOtp(verifyParams);
 

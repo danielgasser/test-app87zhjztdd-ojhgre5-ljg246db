@@ -66,14 +66,12 @@ const initialState: UserState = {
 export const fetchUserProfile = createAsyncThunk<UserProfile | null, string>(
   'user/fetchProfile',
   async (userId: string) => {
-    console.log('🔍 fetchUserProfile starting for userId:', userId);
 
     const { data, error } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single();
-    console.log('🔍 fetchUserProfile result:', { data, error });
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       throw error;

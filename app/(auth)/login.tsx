@@ -29,6 +29,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { isLoading } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -161,14 +162,26 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 autoComplete="email"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoComplete="password"
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoComplete="password"
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={24}
+                    color={theme.colors.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity
                 onPress={() => router.push("/forgot-password")}
                 style={styles.forgotPassword}
@@ -282,6 +295,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 18,
     backgroundColor: theme.colors.inputBackground,
+  },
+  eyeButton: {
+    padding: theme.spacing.md,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: theme.spacing.md,
+    fontSize: 16,
+    color: theme.colors.text,
   },
   forgotPassword: {
     alignSelf: "flex-end",

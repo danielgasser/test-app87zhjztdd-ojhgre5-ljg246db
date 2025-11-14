@@ -23,6 +23,11 @@ type AuthAction =
   | { type: "LOADING"; loading: boolean }
   | { type: "SESSION_RESTORED"; session: Session | null }
   | { type: "SESSION_UPDATED"; session: Session }
+  | {
+      type: "SIGNED_IN_WITH_ONBOARDING";
+      session: Session;
+      needsOnboarding: boolean;
+    }
   | { type: "SIGNED_OUT" }
   | { type: "ONBOARDING_STATUS"; needsOnboarding: boolean }
   | { type: "SET_PENDING_LINK"; url: string | null };
@@ -49,7 +54,14 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         session: action.session,
         user: action.session.user,
       };
-
+    case "SIGNED_IN_WITH_ONBOARDING":
+      return {
+        ...state,
+        isAuthenticated: true,
+        session: action.session,
+        user: action.session.user,
+        needsOnboarding: action.needsOnboarding,
+      };
     case "SIGNED_OUT":
       return {
         ...state,
@@ -154,6 +166,8 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
         "User ID:",
         session?.user?.id
       );
+      const timestamp = Date.now();
+      console.log("⏱️ Auth event timestamp:", timestamp);
       const timeoutId = setTimeout(() => {
         console.log("⏰ Auth handler timeout - forcing loading to stop");
         dispatch({ type: "LOADING", loading: false });
@@ -167,71 +181,24 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
 
           case "SIGNED_IN":
             if (session?.user) {
-              console.log("✅ About to dispatch SESSION_UPDATED");
-              dispatch({ type: "SESSION_UPDATED", session });
+              console.log("✅ SIGNED_IN event, checking onboarding");
 
-              console.log(
-                "🔍 About to query profiles table for user:",
-                session.user.id
-              );
-              // Check onboarding with proper error handling
-              try {
-                console.log(
-                  "🔍 About to query profiles table for user:",
-                  session.user.id
-                );
+              supabase
+                .from("profiles")
+                .select("onboarding_complete")
+                .eq("user_id", session.user.id)
+                .single()
+                .then(({ data: profile, error }) => {
+                  const needsOnboarding =
+                    !!error || !profile?.onboarding_complete;
 
-                // Test simple query first
-                console.log("🧪 Testing simple query...");
-                const { data: testData, error: testError } = await supabase
-                  .from("profiles")
-                  .select("id")
-                  .limit(1);
-                console.log("🧪 Simple query result:", { testData, testError });
-
-                // Test specific user query without .single()
-                console.log("🧪 Testing user query without .single()...");
-                const { data: userProfiles, error: userError } = await supabase
-                  .from("profiles")
-                  .select("onboarding_complete")
-                  .eq("user_id", session.user.id);
-                console.log("🧪 User query result:", {
-                  userProfiles,
-                  userError,
-                  count: userProfiles?.length,
-                });
-
-                const { data: profile, error } = await supabase
-                  .from("profiles")
-                  .select("onboarding_complete")
-                  .eq("user_id", session.user.id)
-                  .single();
-                console.log("📊 Profiles query result:", { profile, error });
-
-                if (error) {
-                  console.log("❌ Profiles query error:", error);
-                  logger.error("Database error checking profile:", error);
+                  // Single dispatch with all info
                   dispatch({
-                    type: "ONBOARDING_STATUS",
-                    needsOnboarding: true,
+                    type: "SIGNED_IN_WITH_ONBOARDING",
+                    session,
+                    needsOnboarding,
                   });
-                } else {
-                  console.log(
-                    "✅ Profiles query success, onboarding_complete:",
-                    profile?.onboarding_complete
-                  );
-                  dispatch({
-                    type: "ONBOARDING_STATUS",
-                    needsOnboarding: !profile?.onboarding_complete,
-                  });
-                }
-              } catch (error) {
-                logger.error("Profile check failed:", error);
-                dispatch({
-                  type: "ONBOARDING_STATUS",
-                  needsOnboarding: true,
                 });
-              }
             } else {
               dispatch({ type: "SIGNED_OUT" });
             }
@@ -242,6 +209,12 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
               dispatch({ type: "SESSION_UPDATED", session });
             } else {
               dispatch({ type: "SIGNED_OUT" });
+            }
+            break;
+          case "USER_UPDATED":
+            // User updated their profile/password - just update session
+            if (session?.user) {
+              dispatch({ type: "SESSION_UPDATED", session });
             }
             break;
 

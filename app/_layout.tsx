@@ -30,7 +30,30 @@ function SplashScreen() {
 // Main navigation based on auth state
 function AppNavigator() {
   const { isLoading, isAuthenticated, needsOnboarding } = useAuth();
+  // Check if user exists in DB
+  useEffect(() => {
+    const checkUserExists = async () => {
+      if (isAuthenticated) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
+        if (user) {
+          const { data: profile, error } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .single();
+
+          if (error && error.code === "PGRST116") {
+            await signOut();
+          }
+        }
+      }
+    };
+
+    checkUserExists();
+  }, [isAuthenticated]);
   // Show loading screen during auth initialization
   if (isLoading) {
     return <SplashScreen />;
@@ -41,7 +64,10 @@ function AppNavigator() {
       {isAuthenticated ? (
         // Authenticated user screens
         needsOnboarding ? (
-          <Stack.Screen name="onboarding" />
+          <>
+            {console.log("🎯 Rendering onboarding stack")}
+            <Stack.Screen name="onboarding" />
+          </>
         ) : (
           <>
             <Stack.Screen name="(tabs)" />
@@ -94,3 +120,6 @@ const styles = StyleSheet.create({
 });
 
 export default Sentry.wrap(RootLayout);
+function signOut() {
+  throw new Error("Function not implemented.");
+}
