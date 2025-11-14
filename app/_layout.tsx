@@ -64,10 +64,7 @@ function AppNavigator() {
       {isAuthenticated ? (
         // Authenticated user screens
         needsOnboarding ? (
-          <>
-            {console.log("🎯 Rendering onboarding stack")}
-            <Stack.Screen name="onboarding" />
-          </>
+          <Stack.Screen name="onboarding" />
         ) : (
           <>
             <Stack.Screen name="(tabs)" />
