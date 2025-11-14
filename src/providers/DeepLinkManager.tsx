@@ -33,7 +33,7 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
       logger.info("Parsing deep link:", { url });
 
       // Password reset links
-      if (url.includes("#type=recovery")) {
+      if (url.includes("type=recovery")) {
         return {
           action: "password-reset",
           params: extractUrlParams(url),
@@ -42,7 +42,7 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
       }
 
       // Email change confirmation
-      if (url.includes("#type=email_change")) {
+      if (url.includes("type=email_change")) {
         return {
           action: "email-change-confirm",
           params: extractUrlParams(url),
@@ -51,7 +51,7 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
       }
 
       // OAuth callbacks
-      if (url.includes("#access_token=")) {
+      if (url.includes("access_token=")) {
         return {
           action: "oauth-callback",
           params: extractUrlParams(url),

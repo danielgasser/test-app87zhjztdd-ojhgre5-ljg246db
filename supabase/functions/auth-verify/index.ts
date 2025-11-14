@@ -28,13 +28,18 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+    const verifyParams: any = { type: type as any };
+
+    if (type === 'recovery' || type === 'email_change') {
+      // For recovery and email change, use token_hash
+      verifyParams.token_hash = token_hash;
+    } else {
+      // For signup and other types, use token
+      verifyParams.token = token;
+    }
 
     // Verify the OTP/token_hash
-    const { data, error } = await supabase.auth.verifyOtp({
-      type: type as any,
-      token: token || undefined,
-      token_hash: token_hash || undefined,
-    });
+    const { data, error } = await supabase.auth.verifyOtp(verifyParams);
 
     if (error) {
       console.error('OTP verification failed:', error);

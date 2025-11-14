@@ -466,7 +466,7 @@ entrypoint = "./functions/vote-prediction/index.ts"
 
 [functions.auth-verify]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/auth-verify/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

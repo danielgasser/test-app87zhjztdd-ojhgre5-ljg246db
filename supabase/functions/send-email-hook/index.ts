@@ -86,7 +86,16 @@ serve(async (req) => {
 function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
   const baseUrl = Deno.env.get('SUPABASE_URL') || 'https://jglobmuqzqzfcwpifocz.supabase.co';
   const tokenToUse = actionType === 'email_change' ? token_hash : token;
-  const confirmationUrl = `${baseUrl}/auth/v1/verify?token=${tokenToUse}&type=${actionType}&redirect_to=${encodeURIComponent(redirectTo)}`;
+  const getNextRoute = (actionType) => {
+    switch (actionType) {
+      case 'recovery': return 'reset-password';
+      case 'signup': return 'welcome';
+      case 'email_change': return 'email-change-confirm';
+      case 'reauthentication': return 'reauthentication';
+      default: return 'reset-password';
+    }
+  };
+  const confirmationUrl = `${baseUrl}/functions/v1/auth-verify?token=${tokenToUse}&token_hash=${token_hash}&type=${actionType}&next=${getNextRoute(actionType)}`;
   switch (actionType) {
     case 'signup':
       return {
