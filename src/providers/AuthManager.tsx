@@ -139,32 +139,201 @@ export function AuthManager({ children }: { children: React.ReactNode }) {
 
   // Auth state listener
   useEffect(() => {
+    console.log("🔧 Supabase config:", {
+      url: process.env.EXPO_PUBLIC_SUPABASE_URL ? "SET" : "MISSING",
+      key: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ? "SET" : "MISSING",
+    });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      logger.info("Auth event:", { event });
+      console.log(
+        "🔥 Auth event:",
+        event,
+        "Has session:",
+        !!session,
+        "User ID:",
+        session?.user?.id
+      );
+      const timeoutId = setTimeout(() => {
+        console.log("⏰ Auth handler timeout - forcing loading to stop");
+        dispatch({ type: "LOADING", loading: false });
+      }, 5000);
 
-      if (event === "SIGNED_OUT") {
-        dispatch({ type: "SIGNED_OUT" });
-      } else if (
-        session &&
-        (event === "SIGNED_IN" || event === "TOKEN_REFRESHED")
-      ) {
-        dispatch({ type: "SESSION_UPDATED", session });
+      try {
+        switch (event) {
+          case "SIGNED_OUT":
+            dispatch({ type: "SIGNED_OUT" });
+            break;
 
-        // Check onboarding for new sessions
-        if (event === "SIGNED_IN") {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("onboarding_complete")
-            .eq("user_id", session.user.id)
-            .single();
+          case "SIGNED_IN":
+            if (session?.user) {
+              console.log("✅ About to dispatch SESSION_UPDATED");
+              dispatch({ type: "SESSION_UPDATED", session });
 
-          dispatch({
-            type: "ONBOARDING_STATUS",
-            needsOnboarding: !profile?.onboarding_complete,
-          });
+              console.log(
+                "🔍 About to query profiles table for user:",
+                session.user.id
+              );
+              // Check onboarding with proper error handling
+              try {
+                console.log(
+                  "🔍 About to query profiles table for user:",
+                  session.user.id
+                );
+
+                // Test simple query first
+                console.log("🧪 Testing simple query...");
+                const { data: testData, error: testError } = await supabase
+                  .from("profiles")
+                  .select("id")
+                  .limit(1);
+                console.log("🧪 Simple query result:", { testData, testError });
+
+                // Test specific user query without .single()
+                console.log("🧪 Testing user query without .single()...");
+                const { data: userProfiles, error: userError } = await supabase
+                  .from("profiles")
+                  .select("onboarding_complete")
+                  .eq("user_id", session.user.id);
+                console.log("🧪 User query result:", {
+                  userProfiles,
+                  userError,
+                  count: userProfiles?.length,
+                });
+
+                const { data: profile, error } = await supabase
+                  .from("profiles")
+                  .select("onboarding_complete")
+                  .eq("user_id", session.user.id)
+                  .single();
+                console.log("📊 Profiles query result:", { profile, error });
+
+                if (error) {
+                  console.log("❌ Profiles query error:", error);
+                  logger.error("Database error checking profile:", error);
+                  dispatch({
+                    type: "ONBOARDING_STATUS",
+                    needsOnboarding: true,
+                  });
+                } else {
+                  console.log(
+                    "✅ Profiles query success, onboarding_complete:",
+                    profile?.onboarding_complete
+                  );
+                  dispatch({
+                    type: "ONBOARDING_STATUS",
+                    needsOnboarding: !profile?.onboarding_complete,
+                  });
+                }
+              } catch (error) {
+                logger.error("Profile check failed:", error);
+                dispatch({
+                  type: "ONBOARDING_STATUS",
+                  needsOnboarding: true,
+                });
+              }
+            } else {
+              dispatch({ type: "SIGNED_OUT" });
+            }
+            break;
+
+          case "TOKEN_REFRESHED":
+            if (session?.user) {
+              dispatch({ type: "SESSION_UPDATED", session });
+            } else {
+              dispatch({ type: "SIGNED_OUT" });
+            }
+            break;
+
+          case "INITIAL_SESSION":
+            // Handle initial session restoration
+            if (session?.user) {
+              dispatch({ type: "SESSION_RESTORED", session });
+
+              // Check onboarding for initial session
+              try {
+                const { data: profile, error } = await supabase
+                  .from("profiles")
+                  .select("onboarding_complete")
+                  .eq("user_id", session.user.id)
+                  .single();
+
+                if (error) {
+                  if (error.code === "PGRST116") {
+                    // No profile found - create one
+                    logger.info(
+                      "No profile found during init, creating new profile"
+                    );
+
+                    const { error: insertError } = await supabase
+                      .from("profiles")
+                      .insert({
+                        user_id: session.user.id,
+                        onboarding_complete: false,
+                      });
+
+                    if (insertError) {
+                      logger.error(
+                        "Failed to create profile during init:",
+                        insertError
+                      );
+                    }
+
+                    dispatch({
+                      type: "ONBOARDING_STATUS",
+                      needsOnboarding: true,
+                    });
+                  } else {
+                    logger.error("Database error during init:", error);
+                    dispatch({
+                      type: "ONBOARDING_STATUS",
+                      needsOnboarding: true,
+                    });
+                  }
+                } else {
+                  dispatch({
+                    type: "ONBOARDING_STATUS",
+                    needsOnboarding: !profile?.onboarding_complete,
+                  });
+                }
+              } catch (error) {
+                logger.error("Initial session profile check failed:", error);
+                dispatch({
+                  type: "ONBOARDING_STATUS",
+                  needsOnboarding: true,
+                });
+              }
+            } else {
+              dispatch({ type: "SESSION_RESTORED", session: null });
+            }
+            break;
+
+          default:
+            // For any unhandled events
+            logger.info("Unhandled auth event, checking current session:", {
+              event,
+            });
+
+            try {
+              const { data: currentSession } = await supabase.auth.getSession();
+              dispatch({
+                type: "SESSION_RESTORED",
+                session: currentSession.session,
+              });
+            } catch (error) {
+              logger.error("Failed to get current session:", error);
+              dispatch({ type: "SESSION_RESTORED", session: null });
+            }
+            break;
         }
+      } catch (error) {
+        logger.error("Auth state change handler error:", error);
+        // On any error, ensure we're not stuck in loading
+        dispatch({ type: "SESSION_RESTORED", session: null });
+      } finally {
+        // Always clear timeout and stop loading
+        clearTimeout(timeoutId);
+        dispatch({ type: "LOADING", loading: false });
       }
     });
 

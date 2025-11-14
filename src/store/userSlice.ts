@@ -63,20 +63,23 @@ const initialState: UserState = {
 };
 
 // Fetch user profile
-export const fetchUserProfile = createAsyncThunk<UserProfile, string>(
+export const fetchUserProfile = createAsyncThunk<UserProfile | null, string>(
   'user/fetchProfile',
   async (userId: string) => {
+    console.log('🔍 fetchUserProfile starting for userId:', userId);
+
     const { data, error } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
       .single();
+    console.log('🔍 fetchUserProfile result:', { data, error });
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       throw error;
     }
     if (!data) {
-      throw new Error('Profile not found');
+      return null;
     }
     return data as UserProfile;
   }
@@ -88,11 +91,14 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
   async ({ userId, profileData }): Promise<UserProfile> => {
     const dbProfileData = profileData as any;
     // Check if profile exists
+    console.log('🔍 Checking if user_profiles exists for:', userId);
+
     const { data: existingProfile } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('id', userId)
       .single();
+    console.log('🔍 Existing profile result:', existingProfile);
 
     let result;
 
@@ -245,6 +251,13 @@ const userSlice = createSlice({
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loading = false;
+        if (action.payload === null) {
+          // New user with no profile yet - set defaults
+          state.profile = null;
+          state.onboardingComplete = false;
+          state.searchRadiusKm = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000;
+          return;
+        }
         state.profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
         const preferences = action.payload.preferences as any;

@@ -38,6 +38,7 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import * as Crypto from "expo-crypto";
+import { useAuth } from "@/providers/AuthManager";
 
 interface RoutePlanningModalProps {
   visible: boolean;
@@ -86,7 +87,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   } = useAppSelector((state) => state.locations);
   const searchRadiusKm = useAppSelector((state) => state.user.searchRadiusKm);
 
-  const currentUser = useAppSelector((state) => state.auth.user);
+  const { user: currentUser } = useAuth();
   const userProfile = useAppSelector((state) => state.user.profile);
 
   const bannerState = useAppSelector((state) => state.profileBanner);

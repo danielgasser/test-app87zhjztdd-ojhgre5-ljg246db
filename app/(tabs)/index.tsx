@@ -65,6 +65,7 @@ import { updateUserProfile, NotificationPreferences } from "@/store/userSlice";
 import { getDefaultPreferences } from "@/utils/preferenceDefaults";
 import { store } from "@/store";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useAuth } from "@/providers/AuthManager";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -142,7 +143,8 @@ export default function MapScreen() {
     navigationIntent,
   } = useAppSelector((state: any) => state.locations);
 
-  const userId = useAppSelector((state: any) => state.auth.user?.id);
+  const { user } = useAuth();
+  const userId = user?.id;
   const userProfile = useAppSelector((state: any) => state.user.profile);
 
   const bannerState = useAppSelector((state: any) => state.profileBanner);

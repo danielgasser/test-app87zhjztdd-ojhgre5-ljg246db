@@ -41,13 +41,30 @@ export default function ForgotPasswordScreen() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        trimmedEmail,
+      // Call our edge function instead of resetPasswordForEmail
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/reset-password`,
         {
-          redirectTo: "safepath://reset-password",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${
+              session?.access_token || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+            }`,
+          },
+          body: JSON.stringify({ email: trimmedEmail }),
         }
       );
-      if (error) throw error;
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send reset email");
+      }
 
       setEmailSent(true);
       notify.success(

@@ -4,6 +4,7 @@ import { Linking } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "./AuthManager";
 import { logger } from "@/utils/logger";
+import { supabase } from "@/services/supabase";
 
 type DeepLinkAction =
   | "password-reset"
@@ -109,7 +110,7 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
   };
 
   // Handle deep link
-  const handleDeepLink = (url: string) => {
+  const handleDeepLink = async (url: string) => {
     const parsed = parseDeepLink(url);
     if (!parsed) {
       logger.warn("Unhandled deep link:", { url });
@@ -120,6 +121,30 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
 
     switch (parsed.action) {
       case "password-reset":
+        const { access_token, refresh_token, type } = parsed.params;
+        if (type === "recovery" && access_token && refresh_token) {
+          logger.info("Setting recovery session");
+          try {
+            const { error } = await supabase.auth.setSession({
+              access_token,
+              refresh_token,
+            });
+
+            if (!error && parsed.targetRoute) {
+              router.push(parsed.targetRoute as any);
+            } else {
+              logger.error("Error setting session:", error);
+              router.push("/(auth)/forgot-password");
+            }
+          } catch (error) {
+            logger.error("Session setting failed:", error);
+            router.push("/(auth)/forgot-password");
+          }
+        } else {
+          logger.warn("Missing tokens for password reset");
+          router.push("/(auth)/forgot-password");
+        }
+        break;
       case "email-change-confirm":
       case "oauth-callback":
         // Auth-related links - always handle immediately
@@ -159,16 +184,16 @@ export function DeepLinkManager({ children }: { children: React.ReactNode }) {
       const initialUrl = await Linking.getInitialURL();
       if (initialUrl) {
         logger.info("Initial deep link:", { initialUrl });
-        handleDeepLink(initialUrl);
+        await handleDeepLink(initialUrl);
       }
     };
 
     getInitialUrl();
 
     // Listen for subsequent URLs (app already running)
-    const subscription = Linking.addEventListener("url", ({ url }) => {
+    const subscription = Linking.addEventListener("url", async ({ url }) => {
       logger.info("Incoming deep link:", { url });
-      handleDeepLink(url);
+      await handleDeepLink(url);
     });
 
     return () => subscription?.remove();

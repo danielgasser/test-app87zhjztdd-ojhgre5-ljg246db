@@ -265,6 +265,8 @@ export default function OnboardingScreen() {
       notify.error("User session not found. Please log in again.");
       return;
     }
+    console.log("🟡 Starting onboarding completion for user:", user.id);
+    console.log("🟡 Form data:", formData);
 
     // Process "Other" inputs and merge with main data
     const processedData = {
@@ -290,10 +292,13 @@ export default function OnboardingScreen() {
     };
 
     try {
-      await supabase
+      console.log("🟡 Updating profiles table for user:", user.id);
+
+      const result = await supabase
         .from("profiles")
-        .update({ onboarding_complete: true })
+        .update({ onboarding_complete: true, demographics: processedData })
         .eq("user_id", user.id);
+      console.log("🟡 Profiles update result:", result);
 
       notify.success(
         isEditing

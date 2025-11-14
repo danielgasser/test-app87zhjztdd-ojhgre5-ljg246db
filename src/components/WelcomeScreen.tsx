@@ -59,11 +59,6 @@ const WelcomeScreenNew = () => {
     router.replace("/(auth)/login");
   };
 
-  const handleDemo = () => {
-    // For now, just navigate to the map - later we can add a demo mode
-    router.replace("/(tabs)");
-  };
-
   const styles = getStyles(isDark);
 
   return (
@@ -211,14 +206,6 @@ const WelcomeScreenNew = () => {
           activeOpacity={0.7}
         >
           <Text style={styles.secondaryButtonText}>Sign In</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.demoButton}
-          onPress={handleDemo}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.demoButtonText}>See how it works</Text>
         </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>

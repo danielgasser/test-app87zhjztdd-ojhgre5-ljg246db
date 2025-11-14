@@ -1,5 +1,5 @@
 // app/_layout.tsx - CLEAN, SIMPLE LAYOUT
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { Provider } from "react-redux";
 import { View, Text, StyleSheet } from "react-native";
@@ -9,6 +9,7 @@ import { DeepLinkManager } from "@/providers/DeepLinkManager";
 import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
+import { supabase } from "@/services/supabase";
 
 // Initialize Sentry
 Sentry.init({

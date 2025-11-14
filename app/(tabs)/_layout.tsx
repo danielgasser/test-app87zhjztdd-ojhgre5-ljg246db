@@ -7,14 +7,15 @@ import { fetchUserProfile } from "@/store/userSlice";
 import { RootState } from "@/store";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { supabase } from "@/services/supabase";
+import { useAuth } from "@/providers/AuthManager";
+import Constants from "expo-constants";
+
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
-import Constants from "expo-constants";
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state: RootState) => state.auth.user);
-
+  const { user } = useAuth();
   console.log(
     "APP:",
     appConfig.expo?.name +
