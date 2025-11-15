@@ -97,10 +97,7 @@ export default function OnboardingScreen() {
       for (const key of possibleKeys) {
         try {
           await SecureStore.deleteItemAsync(key);
-          console.log(`Deleted: ${key}`);
-        } catch (e) {
-          console.log(`Couldn't delete ${key}`);
-        }
+        } catch (e) {}
       }
 
       await AsyncStorage.clear();

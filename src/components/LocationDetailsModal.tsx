@@ -25,6 +25,7 @@ import { logger } from "@/utils/logger";
 import UserProfileModal from "./UserProfileModal";
 import VoteButtons from "./VoteButtons";
 import PredictionVoteButtons from "./PredictionVoteButtons";
+import { useAuth } from "@/providers";
 
 interface SearchResult {
   id: string;
@@ -55,7 +56,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const { selectedLocation, loading } = useAppSelector(
     (state) => state.locations
   );
-  const currentUser = useAppSelector((state) => state.auth.user);
+  const { user } = useAuth();
+  const currentUser = user;
+
   const [reviews, setReviews] = useState<ReviewWithUser[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [placeDetails, setPlaceDetails] = useState<PlaceDetails | null>(null);

@@ -65,15 +65,12 @@ export default function AuthCallback() {
 
           if (error) throw error;
 
-          if (mounted) {
-            setStatus("Success! Redirecting...");
+          setStatus("Success! Redirecting...");
 
-            // Refresh onboarding status (will update AuthProvider state)
-            await refreshOnboardingStatus();
+          // Wait for auth state to propagate
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-            // NavigationController will handle routing based on auth state
-            // No need to manually route here
-          }
+          // NavigationController will handle routing
           return;
         }
 
@@ -108,7 +105,7 @@ export default function AuthCallback() {
     return () => {
       mounted = false;
     };
-  }, [params]);
+  }, []);
 
   return (
     <View style={styles.container}>

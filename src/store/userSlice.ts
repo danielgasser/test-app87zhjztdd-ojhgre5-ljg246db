@@ -89,14 +89,12 @@ export const updateUserProfile = createAsyncThunk<UserProfile, { userId: string;
   async ({ userId, profileData }): Promise<UserProfile> => {
     const dbProfileData = profileData as any;
     // Check if profile exists
-    console.log('🔍 Checking if user_profiles exists for:', userId);
 
     const { data: existingProfile } = await supabase
       .from('user_profiles')
       .select('id')
       .eq('id', userId)
       .single();
-    console.log('🔍 Existing profile result:', existingProfile);
 
     let result;
 

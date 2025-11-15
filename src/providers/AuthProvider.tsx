@@ -212,20 +212,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============================================================================
   const checkOnboardingStatus = async (userId: string) => {
     try {
-      console.log(`🔐 Checking onboarding status for user: ${userId}`);
+      // Add 5 second timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Query timeout after 5s")), 3000)
+      );
 
-      const { data: profile, error } = await supabase
+      const queryPromise = supabase
         .from("profiles")
         .select("onboarding_complete")
         .eq("user_id", userId)
         .maybeSingle();
-      console.log("🔐 Query result:", { profile, error });
+
+      const { data: profile, error } = (await Promise.race([
+        queryPromise,
+        timeoutPromise,
+      ])) as any;
 
       if (!mounted.current) return;
 
       if (error) {
         logger.error("Failed to check onboarding status:", error);
-        // Default to needing onboarding if we can't check
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
         return;
       }

@@ -12,11 +12,13 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateSearchRadius } from "@/store/userSlice";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useAuth } from "@/providers";
 
 export default function SearchRadiusSelector() {
   const dispatch = useAppDispatch();
   const { distanceUnit } = useUserPreferences();
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const { user } = useAuth();
+  const userId = user?.id;
   const currentRadius = useAppSelector((state) => state.user.searchRadiusKm);
   const [selectedRadius, setSelectedRadius] = useState(currentRadius);
   const [showSaved, setShowSaved] = useState(false);

@@ -11,6 +11,7 @@ import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { useAppSelector } from "@/store/hooks";
 import { notify } from "@/utils/notificationService";
+import { useAuth } from "@/providers";
 
 interface VoteButtonsProps {
   reviewId: string;
@@ -27,7 +28,8 @@ export default function VoteButtons({
   currentUserVote,
   onVoteChange,
 }: VoteButtonsProps) {
-  const userId = useAppSelector((state) => state.auth.user?.id);
+  const { user } = useAuth();
+  const userId = user?.id;
   const [helpfulCount, setHelpfulCount] = useState(initialHelpfulCount);
   const [unhelpfulCount, setUnhelpfulCount] = useState(initialUnhelpfulCount);
   const [userVote, setUserVote] = useState<"helpful" | "unhelpful" | null>(
