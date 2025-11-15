@@ -213,12 +213,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
   useEffect(() => {
-    if (
-      state.session?.user &&
-      !state.onboardingChecked &&
-      state.isAuthenticated
-    ) {
+    if (!state.session?.user || state.onboardingChecked) {
+      return;
+    }
+    const userWithAmr = state.session.user as any;
+    const isPasswordRecovery = userWithAmr.amr?.some(
+      (item: any) => item.method === "recovery"
+    );
+
+    if (!isPasswordRecovery && state.isAuthenticated) {
       logger.info(`🔐 Session in state, checking onboarding status`);
       checkOnboardingStatus(state.session.user.id);
     }
