@@ -13,6 +13,8 @@ import { NavigationController } from "@/providers/NavigationController";
 import { AuthProvider } from "@/providers/AuthProvider";
 import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
 import { notificationService } from "@/services/notificationService";
+import * as Notifications from "expo-notifications";
+import { logger } from "@/utils/logger";
 
 // Initialize Sentry
 Sentry.init({
@@ -37,7 +39,14 @@ function AppNavigator() {
 
   useEffect(() => {
     notificationService.setupNotificationResponseHandler(router);
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("📬 Notification received:", notification);
+        logger.info("📬 Notification received:", notification);
+      }
+    );
   }, []);
+
   if (isLoading) {
     return <SplashScreen />;
   }

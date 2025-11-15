@@ -9,6 +9,7 @@ import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/services/supabase";
 import { logger } from "@/utils/logger";
 import { router } from "expo-router";
+import { notificationService } from "@/services/notificationService";
 
 // ============================================================================
 // STATE TYPES
@@ -194,6 +195,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  // ============================================================================
+  // REFRESH PUSH TOKEN: When user logs in
+  // ============================================================================
+  useEffect(() => {
+    const refreshPushToken = async () => {
+      // Only refresh if authenticated and onboarding complete
+      if (!state.isAuthenticated || !state.user || state.needsOnboarding) {
+        return;
+      }
+
+      try {
+        const pushToken =
+          await notificationService.registerForPushNotifications();
+        if (pushToken) {
+          await notificationService.savePushToken(state.user.id, pushToken);
+          logger.info(`✅ Push token refreshed on login: ${pushToken}`);
+        }
+      } catch (error) {
+        logger.error("Failed to refresh push token:", error);
+      }
+    };
+
+    refreshPushToken();
+  }, [state.isAuthenticated, state.user?.id, state.needsOnboarding]);
 
   useEffect(() => {
     if (!state.session?.user || state.onboardingChecked) {

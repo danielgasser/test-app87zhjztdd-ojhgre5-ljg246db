@@ -668,7 +668,6 @@ export default function MapScreen() {
       mapReady &&
       !hasInitiallyRecentered
     ) {
-      console.log("Centering the user");
       // Small delay to ensure map is fully rendered
       setTimeout(() => {
         handleRecenterToUserLocation();
