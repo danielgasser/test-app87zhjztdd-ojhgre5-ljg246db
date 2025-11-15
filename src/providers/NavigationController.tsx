@@ -119,6 +119,7 @@ export function NavigationController({
         "register",
         "forgot-password",
         "reset-password",
+        "callback",
       ];
       const isOnPublicRoute = publicRoutes.some(
         (route) => currentSegment === route || pathname?.includes(route)

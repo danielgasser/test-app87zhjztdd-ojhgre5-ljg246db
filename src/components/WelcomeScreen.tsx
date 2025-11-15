@@ -237,9 +237,9 @@ const getStyles = (isDark: boolean) =>
       alignItems: "center",
     },
     logoContainer: {
-      marginBottom: 24,
+      marginBottom: 10,
       position: "relative",
-      top: 30,
+      top: 20,
       left: 0,
     },
     logoPlaceholder: {
@@ -258,7 +258,7 @@ const getStyles = (isDark: boolean) =>
     },
     heroSection: {
       alignItems: "center",
-      marginBottom: 30,
+      marginBottom: 20,
     },
     heroTitle: {
       fontSize: 33,
@@ -281,7 +281,7 @@ const getStyles = (isDark: boolean) =>
       paddingHorizontal: 20,
     },
     illustrationContainer: {
-      marginBottom: 40,
+      marginBottom: 30,
     },
     mapMockup: {
       width: 200,
