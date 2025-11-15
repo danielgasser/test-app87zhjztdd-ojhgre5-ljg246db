@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { store } from "@/store";
 import { useAuth } from "@/providers/AuthProvider";
-import { DeepLinkManager } from "@/providers/DeepLinkManager";
+import { DeepLinkHandler } from "@/providers/DeepLinkHandler";
 import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
@@ -60,11 +60,11 @@ function RootLayout() {
     <Provider store={store}>
       <AuthProvider>
         <NavigationController>
-          <DeepLinkManager>
+          <DeepLinkHandler>
             <NotificationProvider>
               <AppNavigator />
             </NotificationProvider>
-          </DeepLinkManager>
+          </DeepLinkHandler>
         </NavigationController>
       </AuthProvider>
     </Provider>

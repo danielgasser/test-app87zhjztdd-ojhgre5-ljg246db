@@ -54,7 +54,7 @@ const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
-  const { user } = useAuth();
+  const { user, refreshOnboardingStatus } = useAuth();
   const { profile, loading, error } = useAppSelector((state) => state.user);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 
@@ -353,7 +353,7 @@ export default function OnboardingScreen() {
       await dispatch(fetchUserProfile(user.id)).unwrap();
       console.log("✅ Profile fetched after onboarding:", profileResult);
 
-      completeOnboarding();
+      await refreshOnboardingStatus();
 
       notify.success(
         isEditing
@@ -370,8 +370,6 @@ export default function OnboardingScreen() {
           await notificationService.savePushToken(user.id, pushToken);
         }
       }
-
-      processPendingDeepLink();
     } catch (error) {
       notify.error("Failed to save profile. Please try again.");
       logger.error("Profile save error:", error);
