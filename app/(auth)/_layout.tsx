@@ -28,6 +28,20 @@ export default function AuthLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="forgot-password"
+        options={{
+          title: "Reset Password",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="reset-password"
+        options={{
+          title: "Set New Password",
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 }
