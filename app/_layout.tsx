@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { Provider } from "react-redux";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { store } from "@/store";
 import { AuthManager, useAuth } from "@/providers/AuthManager";
 import { DeepLinkManager } from "@/providers/DeepLinkManager";
@@ -10,6 +10,10 @@ import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
 import { supabase } from "@/services/supabase";
+import { NavigationController } from "@/providers/NavigationController";
+import { AuthProvider } from "@/providers/AuthProvider";
+import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
+
 // Initialize Sentry
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -21,6 +25,7 @@ Sentry.init({
 function SplashScreen() {
   return (
     <View style={styles.splash}>
+      <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
       <Text style={styles.splashText}>SafePath</Text>
     </View>
   );
@@ -28,32 +33,8 @@ function SplashScreen() {
 
 // Main navigation based on auth state
 function AppNavigator() {
-  const { isLoading, isAuthenticated, needsOnboarding, signOut } = useAuth();
-  // Check if user exists in DB
-  useEffect(() => {
-    const checkUserExists = async () => {
-      if (isAuthenticated) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+  const { isLoading } = useAuth();
 
-        if (user) {
-          const { data: profile, error } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("user_id", user.id)
-            .single();
-
-          if (error && error.code === "PGRST116") {
-            await signOut();
-          }
-        }
-      }
-    };
-
-    checkUserExists();
-  }, [isAuthenticated]);
-  // Show loading screen during auth initialization
   if (isLoading) {
     return <SplashScreen />;
   }
@@ -78,13 +59,15 @@ function AppNavigator() {
 function RootLayout() {
   return (
     <Provider store={store}>
-      <AuthManager>
-        <DeepLinkManager>
-          <NotificationProvider>
-            <AppNavigator />
-          </NotificationProvider>
-        </DeepLinkManager>
-      </AuthManager>
+      <AuthProvider>
+        <NavigationController>
+          <DeepLinkManager>
+            <NotificationProvider>
+              <AppNavigator />
+            </NotificationProvider>
+          </DeepLinkManager>
+        </NavigationController>
+      </AuthProvider>
     </Provider>
   );
 }
@@ -100,6 +83,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: theme.colors.primary,
+  },
+  logoImage: {
+    width: 150,
+    height: 150,
+    marginBottom: 10,
   },
 });
 
