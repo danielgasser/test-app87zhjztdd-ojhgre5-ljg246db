@@ -27,6 +27,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { validateVisitDateTime } from "@/utils/dateValidation";
+import { useAuth } from "@/providers/AuthProvider";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -67,7 +68,7 @@ const RatingInput: React.FC<RatingProps> = ({
 
 export default function EditReviewScreen() {
   const router = useRouter();
-  const user = useAppSelector((state) => state.auth.user);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!requireAuth(user?.id, "edit reviews")) {

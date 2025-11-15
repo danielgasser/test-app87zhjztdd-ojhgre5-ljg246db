@@ -51,8 +51,19 @@ module.exports = () => {
           backgroundColor: "#FFFFFF",
         },
         package: "com.keradaniel.safepath.app",
+        useNextNotificationsApi: true,
       },
-      plugins: ["expo-router", "expo-secure-store"],
+      plugins: [
+        "expo-router",
+        "expo-secure-store",
+        [
+          "expo-notifications",
+          {
+            icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
+            color: "#2A5C99",
+          },
+        ],
+      ],
       extra: {
         router: {},
         eas: {
@@ -60,6 +71,12 @@ module.exports = () => {
         },
       },
       owner: "toesslab",
+      notification: {
+        icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
+        color: "#2A5C99",
+        androidMode: "default",
+        androidCollapsedTitle: "SafePath Safety Alert",
+      },
     },
   };
 };

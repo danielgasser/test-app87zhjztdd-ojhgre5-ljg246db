@@ -28,6 +28,7 @@ import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { validateVisitDateTime } from "@/utils/dateValidation";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface RatingProps {
   label: string;
@@ -81,7 +82,7 @@ export default function ReviewScreen() {
   const [showVisitTypePicker, setShowVisitTypePicker] = useState(false);
 
   const { loading } = useAppSelector((state) => state.locations);
-  const user = useAppSelector((state) => state.auth.user);
+  const { user } = useAuth();
   useEffect(() => {
     requireAuth(user?.id, "write reviews");
   }, [user]);

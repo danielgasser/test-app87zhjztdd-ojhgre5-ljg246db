@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Keyboard,
+  Platform,
 } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -128,6 +129,7 @@ export default function MapScreen() {
   const [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState<
     string | null
   >(null);
+  const [hasInitiallyRecentered, setHasInitiallyRecentered] = useState(false);
 
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
@@ -607,6 +609,9 @@ export default function MapScreen() {
               key={`segment-${index}`}
               coordinates={segmentChunks[index]}
               strokeColors={[segmentColor]}
+              {...(Platform.OS === "ios"
+                ? { strokeColors: [segmentColor] }
+                : { strokeColor: segmentColor })}
               strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
             />
           </React.Fragment>
@@ -655,6 +660,23 @@ export default function MapScreen() {
   };
 
   // ============= EFFECTS =============
+  useEffect(() => {
+    if (
+      userId &&
+      userLocation &&
+      mapRef.current &&
+      mapReady &&
+      !hasInitiallyRecentered
+    ) {
+      console.log("Centering the user");
+      // Small delay to ensure map is fully rendered
+      setTimeout(() => {
+        handleRecenterToUserLocation();
+        setHasInitiallyRecentered(true);
+      }, 750);
+    }
+  }, [userId, userLocation, mapReady, hasInitiallyRecentered]);
+
   useEffect(() => {
     requestLocationPermission();
   }, []);
@@ -929,6 +951,7 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={false}
         showsCompass={true}
+        onTouchStart={() => Keyboard.dismiss()}
         onLongPress={handleMapPress}
         onMapReady={() => {
           setMapReady(true);
@@ -1106,7 +1129,13 @@ export default function MapScreen() {
                   coordinates={
                     selectedRoute.route_points || selectedRoute.coordinates
                   }
-                  strokeColors={[getRouteLineColor(selectedRoute)]}
+                  {...(Platform.OS === "ios"
+                    ? {
+                        strokeColors: [getRouteLineColor(selectedRoute)],
+                      }
+                    : {
+                        strokeColor: getRouteLineColor(selectedRoute),
+                      })}
                   strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
                 />
               </>
@@ -1128,7 +1157,16 @@ export default function MapScreen() {
               <Polyline
                 key={route.id}
                 coordinates={route.coordinates}
-                strokeColor={APP_CONFIG.ROUTE_DISPLAY.COLORS.ALTERNATIVE_ROUTE}
+                {...(Platform.OS === "ios"
+                  ? {
+                      strokeColors: [
+                        APP_CONFIG.ROUTE_DISPLAY.COLORS.ALTERNATIVE_ROUTE,
+                      ],
+                    }
+                  : {
+                      strokeColor:
+                        APP_CONFIG.ROUTE_DISPLAY.COLORS.ALTERNATIVE_ROUTE,
+                    })}
                 strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.ALTERNATIVE}
                 lineDashPattern={[10, 5]}
               />
@@ -1234,7 +1272,7 @@ export default function MapScreen() {
         <View
           style={[
             styles.dangerZoneLegend,
-            { bottom: navigationActive ? 120 : 20 },
+            { bottom: navigationActive ? 120 : 140 },
           ]}
         >
           {dangerZones.length > 0 ? (

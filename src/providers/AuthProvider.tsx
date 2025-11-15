@@ -186,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           break;
 
         default:
-          logger.info(`🔐 Unhandled auth event: ${event}`);
+        //logger.info(`🔐 Unhandled auth event: ${event}`);
       }
     });
 

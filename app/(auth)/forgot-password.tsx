@@ -76,14 +76,6 @@ export default function ForgotPasswordScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.content}>
-            {/* Back Button */}
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
-
             {/* Header */}
             <View style={styles.header}>
               <Ionicons
