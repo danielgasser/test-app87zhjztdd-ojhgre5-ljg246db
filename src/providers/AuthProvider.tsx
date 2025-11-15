@@ -223,6 +223,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============================================================================
   const checkOnboardingStatus = async (userId: string) => {
     logger.info(`🔐 START checkOnboardingStatus for user: ${userId}`);
+
+    // TEST: Direct query without timeout
+    logger.info(`🔐 Testing direct query...`);
+    try {
+      const testResult = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      logger.info(`🔐 Direct query result:`, testResult);
+    } catch (err) {
+      logger.error(`🔐 Direct query error:`, err);
+    }
     try {
       // Add 5 second timeout
       logger.info(`🔐 Creating timeout promise`);

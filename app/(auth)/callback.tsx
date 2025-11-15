@@ -29,6 +29,7 @@ export default function AuthCallback() {
     const handleCallback = async () => {
       try {
         setStatus("Completing sign in...");
+        logger.info(`🔐 Callback params received:`, params); // <-- ADD THIS
 
         // Get tokens from URL params (passed by DeepLinkHandler)
         const {
@@ -95,7 +96,6 @@ export default function AuthCallback() {
         setStatus(`Authentication failed: ${error.message}`);
       } finally {
         if (mounted) {
-          processing.current = false; // ← Reset flag
         }
       }
     };
