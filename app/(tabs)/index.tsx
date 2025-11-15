@@ -173,7 +173,13 @@ export default function MapScreen() {
   const showProfileBanner = React.useMemo(() => {
     if (profileCheck.canUse) return false;
   }, [profileCheck.canUse, , dangerZonesVisible, bannerState]);
-
+  console.log("📦 Redux state that could trigger re-render:", {
+    selectedLocationId: selectedLocationId,
+    nearbyLocationsCount: nearbyLocations.length,
+    userLocationLat: userLocation?.latitude,
+    loading,
+    // Add any other Redux state you're selecting
+  });
   // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
     const hasReviews =
