@@ -113,7 +113,13 @@ export function NavigationController({
 
     if (!isAuthenticated) {
       // -------- NOT AUTHENTICATED --------
-      const publicRoutes = ["welcome", "login", "register"];
+      const publicRoutes = [
+        "welcome",
+        "login",
+        "register",
+        "forgot-password",
+        "reset-password",
+      ];
       const isOnPublicRoute = publicRoutes.some(
         (route) => currentSegment === route || pathname?.includes(route)
       );

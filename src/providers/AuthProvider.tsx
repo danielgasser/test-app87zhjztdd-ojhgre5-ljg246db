@@ -8,6 +8,7 @@ import React, {
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/services/supabase";
 import { logger } from "@/utils/logger";
+import { router } from "expo-router";
 
 // ============================================================================
 // STATE TYPES
@@ -181,19 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         case "SIGNED_IN":
         case "TOKEN_REFRESHED":
         case "USER_UPDATED":
-          logger.info(`🔐 AuthProvider: Handling ${event}`);
           dispatch({ type: "SET_SESSION", session });
-          // Check onboarding for new sessions
-          if (session?.user && event === "SIGNED_IN") {
-            logger.info(
-              `🔐 AuthProvider: Calling checkOnboardingStatus for SIGNED_IN`
-            );
-            await checkOnboardingStatus(session.user.id);
-          } else {
-            logger.info(
-              `🔐 AuthProvider: Skipping checkOnboardingStatus (event: ${event})`
-            );
-          }
           break;
 
         case "SIGNED_OUT":
@@ -217,6 +206,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+  useEffect(() => {
+    if (state.session?.user && !state.onboardingChecked) {
+      logger.info(`🔐 Session in state, checking onboarding status`);
+      checkOnboardingStatus(state.session.user.id);
+    }
+  }, [state.session?.user?.id, state.onboardingChecked]);
 
   // ============================================================================
   // CHECK ONBOARDING STATUS
@@ -296,6 +291,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     logger.info("🔐 Signing out...");
     await supabase.auth.signOut();
+
     // State will be updated by onAuthStateChange listener
   };
 

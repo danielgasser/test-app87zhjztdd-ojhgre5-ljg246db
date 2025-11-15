@@ -17,14 +17,12 @@ export default function AuthCallback() {
   const { refreshOnboardingStatus } = useAuth();
   const [status, setStatus] = useState("Processing authentication...");
   const params = useLocalSearchParams();
-  const processing = useRef(false);
   useEffect(() => {
-    if (processing.current) {
-      logger.info("🔐 Already processing callback, skipping...");
+    if (!params.access_token && !params.refresh_token) {
+      logger.info("🔐 Waiting for OAuth params...");
       return;
     }
     let mounted = true;
-    processing.current = true;
 
     const handleCallback = async () => {
       try {
@@ -69,7 +67,7 @@ export default function AuthCallback() {
           setStatus("Success! Redirecting...");
 
           // Wait for auth state to propagate
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
 
           // NavigationController will handle routing
           return;
@@ -105,7 +103,7 @@ export default function AuthCallback() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [params.access_token, params.refresh_token]);
 
   return (
     <View style={styles.container}>
