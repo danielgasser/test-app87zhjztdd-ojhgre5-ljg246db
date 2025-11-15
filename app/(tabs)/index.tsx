@@ -66,6 +66,7 @@ import { getDefaultPreferences } from "@/utils/preferenceDefaults";
 import { store } from "@/store";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useAuth } from "@/providers/AuthProvider";
+import { shallowEqual } from "react-redux";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -120,7 +121,8 @@ export default function MapScreen() {
   const [showRoutePlanningModal, setShowRoutePlanningModal] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const userSearchRadiusKm = useAppSelector(
-    (state) => state.user.searchRadiusKm
+    (state) => state.user.searchRadiusKm,
+    shallowEqual
   );
   const [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState<
     string | null
@@ -141,19 +143,30 @@ export default function MapScreen() {
     routes,
     showRouteSegments,
     navigationIntent,
-  } = useAppSelector((state: any) => state.locations);
+  } = useAppSelector((state: any) => state.locations, shallowEqual);
 
   const { user } = useAuth();
   const userId = user?.id;
-  const userProfile = useAppSelector((state: any) => state.user.profile);
+  const userProfile = useAppSelector(
+    (state: any) => state.user.profile,
+    shallowEqual
+  );
 
-  const bannerState = useAppSelector((state: any) => state.profileBanner);
-  const dangerZones = useAppSelector((state) => state.locations.dangerZones);
+  const bannerState = useAppSelector(
+    (state: any) => state.profileBanner,
+    shallowEqual
+  );
+  const dangerZones = useAppSelector(
+    (state) => state.locations.dangerZones,
+    shallowEqual
+  );
   const dangerZonesVisible = useAppSelector(
-    (state) => state.locations.dangerZonesVisible
+    (state) => state.locations.dangerZonesVisible,
+    shallowEqual
   );
   const dangerZonesLoading = useAppSelector(
-    (state) => state.locations.dangerZonesLoading
+    (state) => state.locations.dangerZonesLoading,
+    shallowEqual
   );
 
   const { distanceUnit } = useUserPreferences();
@@ -172,15 +185,34 @@ export default function MapScreen() {
   // Determine if we should show the banner
   const showProfileBanner = React.useMemo(() => {
     if (profileCheck.canUse) return false;
-  }, [profileCheck.canUse, , dangerZonesVisible, bannerState]);
+  }, [profileCheck.canUse, dangerZonesVisible, bannerState]);
   console.log("📦 Redux state that could trigger re-render:", {
-    selectedLocationId: selectedLocationId,
+    // From state.locations
     nearbyLocationsCount: nearbyLocations.length,
-    userLocationLat: userLocation?.latitude,
+    nearbyLocationsIds: nearbyLocations.map((l: any) => l.id),
     loading,
-    // Add any other Redux state you're selecting
-  });
-  // ============= HELPER FUNCTIONS =============
+    userLocationLat: userLocation?.latitude,
+    userLocationLng: userLocation?.longitude,
+    navigationActive,
+    mlPredictionsKeys: Object.keys(mlPredictions),
+    mlPredictionsLoadingKeys: Object.keys(mlPredictionsLoading),
+    selectedRouteId: selectedRoute?.id,
+    routesCount: routes.length,
+    showRouteSegments,
+    navigationIntentTargetTab: navigationIntent?.targetTab,
+    navigationIntentLocationId: navigationIntent?.locationId,
+    dangerZonesCount: dangerZones.length,
+    dangerZonesVisible,
+    dangerZonesLoading,
+
+    // From state.user
+    userSearchRadiusKm,
+    userProfileId: userProfile?.id,
+    userProfileUpdatedAt: userProfile?.updated_at,
+
+    // From state.profileBanner
+    bannerStateKeys: Object.keys(bannerState),
+  }); // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
     const hasReviews =
       location.demographic_safety_score || location.avg_safety_score;
