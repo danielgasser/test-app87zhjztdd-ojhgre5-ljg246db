@@ -32,6 +32,7 @@ type AuthState = {
 type AuthAction =
   | { type: "SET_LOADING"; loading: boolean }
   | { type: "SET_SESSION"; session: Session | null }
+  | { type: "SET_RECOVERY_SESSION"; session: Session | null }
   | { type: "SET_ONBOARDING_STATUS"; needsOnboarding: boolean }
   | { type: "SET_PENDING_LINK"; url: string | null }
   | { type: "SIGN_OUT" };
@@ -56,7 +57,13 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         onboardingChecked: false,
         needsOnboarding: false,
       };
-
+    case "SET_RECOVERY_SESSION":
+      return {
+        ...state,
+        session: action.session,
+        user: action.session?.user || null,
+        isAuthenticated: false,
+      };
     case "SET_ONBOARDING_STATUS":
       return {
         ...state,
@@ -193,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         case "PASSWORD_RECOVERY":
           logger.info(`🔐 AuthProvider: Handling PASSWORD_RECOVERY`);
           // Password recovery is handled by reset-password screen
-          dispatch({ type: "SET_SESSION", session });
+          dispatch({ type: "SET_RECOVERY_SESSION", session });
           break;
 
         default:
@@ -207,11 +214,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
   useEffect(() => {
-    if (state.session?.user && !state.onboardingChecked) {
+    if (
+      state.session?.user &&
+      !state.onboardingChecked &&
+      state.isAuthenticated
+    ) {
       logger.info(`🔐 Session in state, checking onboarding status`);
       checkOnboardingStatus(state.session.user.id);
     }
-  }, [state.session?.user?.id, state.onboardingChecked]);
+  }, [state.session?.user?.id, state.onboardingChecked, state.isAuthenticated]);
 
   // ============================================================================
   // CHECK ONBOARDING STATUS
