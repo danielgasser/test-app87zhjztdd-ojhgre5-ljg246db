@@ -41,7 +41,6 @@ function AppNavigator() {
     notificationService.setupNotificationResponseHandler(router);
     const subscription = Notifications.addNotificationReceivedListener(
       (notification) => {
-        console.log("📬 Notification received:", notification);
         logger.info("📬 Notification received:", notification);
       }
     );

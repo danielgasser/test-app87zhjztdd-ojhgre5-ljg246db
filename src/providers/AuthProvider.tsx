@@ -201,27 +201,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============================================================================
   useEffect(() => {
     const refreshPushToken = async () => {
-      console.log("🔍 Token refresh check:", {
-        isAuthenticated: state.isAuthenticated,
-        hasUser: !!state.user,
-        userId: state.user?.id,
-        needsOnboarding: state.needsOnboarding,
-      });
       // Only refresh if authenticated and onboarding complete
       if (!state.isAuthenticated || !state.user || state.needsOnboarding) {
-        console.log("⏭️ Skipping token refresh - conditions not met");
         return;
       }
 
       try {
-        console.log("🔄 Refreshing push token...");
         const pushToken =
           await notificationService.registerForPushNotifications();
         if (pushToken) {
           await notificationService.savePushToken(state.user.id, pushToken);
-          console.log("✅ Push token refreshed on login:", pushToken);
-        } else {
-          console.log("❌ No push token returned");
         }
       } catch (error) {
         logger.error("Failed to refresh push token:", error);
