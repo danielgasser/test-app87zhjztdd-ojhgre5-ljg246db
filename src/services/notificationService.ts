@@ -22,32 +22,38 @@ export const notificationService = {
     async registerForPushNotifications(): Promise<string | null> {
         // Check if device is physical (push notifications don't work on simulators)
         if (!Device.isDevice) {
-            logger.error('Push notifications only work on physical devices');
+            console.error('Push notifications only work on physical devices');
             return null;
         }
+        console.log('📱 Device check passed, requesting permissions...');
 
         // Request permissions
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
+        console.log('🔔 Existing permission status:', existingStatus);
 
         if (existingStatus !== 'granted') {
             const { status } = await Notifications.requestPermissionsAsync();
             finalStatus = status;
+            console.log('🔔 New permission status:', status);
         }
 
         if (finalStatus !== 'granted') {
+            console.error('❌ Notification permissions not granted:', finalStatus);
             return null;
         }
 
         // Get push token
         try {
+            console.log('🎫 Getting Expo push token...');
             const tokenData = await Notifications.getExpoPushTokenAsync({
                 projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
             });
+            console.log('✅ Got push token:', tokenData.data);
 
             return tokenData.data;
         } catch (error) {
-            logger.error('Error getting push token:', error);
+            console.error('Error getting push token:', error);
             return null;
         }
     },

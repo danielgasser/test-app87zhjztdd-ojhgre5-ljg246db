@@ -52,6 +52,8 @@ module.exports = () => {
         },
         package: "com.keradaniel.safepath.app",
         useNextNotificationsApi: true,
+        googleServiceFile:
+          "safepath-e097a-firebase-adminsdk-fbsvc-dfa14a113a.json",
       },
       plugins: [
         "expo-router",
