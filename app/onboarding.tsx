@@ -202,7 +202,7 @@ export default function OnboardingScreen() {
 
       if (hasRealData) {
         setIsEditing(true);
-
+        setCurrentStep(1);
         // Parse race/ethnicity array and handle "Other" values
         const fullName = profile.full_name || "";
         const parsedRaceEthnicity: string[] = [];
@@ -411,8 +411,11 @@ export default function OnboardingScreen() {
           await notificationService.savePushToken(user.id, pushToken);
         }
       }
-
-      //router.replace("/(tabs)");
+      if (isEditing) {
+        router.replace("/(tabs)/profile");
+      } else {
+        router.replace("/(tabs)");
+      }
     } catch (error) {
       logger.error("Profile save error:", error);
       notify.error("Failed to save profile. Please try again.");
@@ -422,7 +425,7 @@ export default function OnboardingScreen() {
   const handleSkip = () => {
     if (isEditing) {
       // If editing existing profile, allow cancel back to main app
-      router.back();
+      router.push("/(tabs)/profile");
     } else {
       // If initial setup, show alert that profile is required
       notify.info(
@@ -497,21 +500,6 @@ export default function OnboardingScreen() {
 
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
-      <TouchableOpacity
-        onPress={nukeEverything}
-        style={{
-          position: "absolute",
-          bottom: 50,
-          right: 20,
-          zIndex: 9999,
-          backgroundColor: "red",
-          padding: 20,
-        }}
-      >
-        <Text style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
-          NUKE
-        </Text>
-      </TouchableOpacity>
       <Text style={styles.stepTitle}>Welcome to SafePath!</Text>
       <Text style={styles.stepDescription}>
         To provide personalized safety information, we need to understand your

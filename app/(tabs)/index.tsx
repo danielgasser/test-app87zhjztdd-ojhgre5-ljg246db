@@ -1140,7 +1140,7 @@ export default function MapScreen() {
       <View
         style={[
           styles.recenterButtonContainer,
-          { bottom: navigationActive ? 180 : 10 },
+          { bottom: navigationActive ? 210 : 10 },
         ]}
       >
         <TouchableOpacity
@@ -1154,7 +1154,7 @@ export default function MapScreen() {
       <View
         style={[
           styles.dangerZoneContainer,
-          { bottom: navigationActive ? 20 : -20 }, // ✅ Dynamic
+          { bottom: navigationActive ? 50 : -20 }, // ✅ Dynamic
         ]}
       >
         <TouchableOpacity

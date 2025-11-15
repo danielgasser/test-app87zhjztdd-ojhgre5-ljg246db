@@ -153,6 +153,7 @@ export function NavigationController({
           "display-settings",
           "edit-review",
           "reset-password",
+          "onboarding",
         ];
         const isOnProtectedRoute = protectedRoutes.some(
           (route) => currentSegment === route || pathname?.includes(route)
