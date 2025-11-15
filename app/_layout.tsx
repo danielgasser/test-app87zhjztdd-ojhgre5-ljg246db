@@ -1,6 +1,6 @@
 // app/_layout.tsx - CLEAN, SIMPLE LAYOUT
-import React from "react";
-import { Stack } from "expo-router";
+import React, { useEffect } from "react";
+import { Stack, useRouter } from "expo-router";
 import { Provider } from "react-redux";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { store } from "@/store";
@@ -12,6 +12,7 @@ import * as Sentry from "@sentry/react-native";
 import { NavigationController } from "@/providers/NavigationController";
 import { AuthProvider } from "@/providers/AuthProvider";
 import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
+import { notificationService } from "@/services/notificationService";
 
 // Initialize Sentry
 Sentry.init({
@@ -32,7 +33,11 @@ function SplashScreen() {
 // Main navigation based on auth state
 function AppNavigator() {
   const { isLoading } = useAuth();
+  const router = useRouter();
 
+  useEffect(() => {
+    notificationService.setupNotificationResponseHandler(router);
+  }, []);
   if (isLoading) {
     return <SplashScreen />;
   }

@@ -93,4 +93,26 @@ export const notificationService = {
             logger.error('Error in removePushToken:', error);
         }
     },
+    /**
+     * Set up notification tap handler
+     * Call this once when app starts
+     */
+    setupNotificationResponseHandler(router: any): void {
+        // Listen for notification taps
+        Notifications.addNotificationResponseReceivedListener(response => {
+            const data = response.notification.request.content.data;
+
+            logger.info('📲 Notification tapped:', data);
+
+            // Handle different notification types
+            if (data.type === 'route_safety_alert' && data.locationId) {
+                // Navigate to location details
+                router.push(`/(tabs)?openLocationId=${data.locationId}&refresh=${Date.now()}`);
+            } else if (data.type === 'location_safety_change' && data.locationId) {
+                // Navigate to location details
+                router.push(`/(tabs)?openLocationId=${data.locationId}&refresh=${Date.now()}`);
+            }
+            // Add more notification types as needed
+        });
+    },
 };
