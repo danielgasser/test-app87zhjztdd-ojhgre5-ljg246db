@@ -219,7 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select("onboarding_complete")
         .eq("user_id", userId)
         .maybeSingle();
-      console.log("🔐 Query result:", { profile, error }); // ← ADD THIS
+      console.log("🔐 Query result:", { profile, error });
 
       if (!mounted.current) return;
 
