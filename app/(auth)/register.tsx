@@ -50,8 +50,6 @@ export default function RegisterScreen() {
     }
 
     try {
-      logger.info(`🔐 Attempting registration for: ${trimmedEmail}`);
-
       const { data, error } = await supabase.auth.signUp({
         email: trimmedEmail,
         password: trimmedPassword,
@@ -66,8 +64,6 @@ export default function RegisterScreen() {
         data.user.identities?.length === 0;
 
       if (emailConfirmationRequired) {
-        logger.info(`🔐 Email confirmation required`);
-
         // User needs to confirm email
         Alert.alert(
           "Verify Your Email",
@@ -83,8 +79,6 @@ export default function RegisterScreen() {
           ]
         );
       } else {
-        logger.info(`🔐 Registration successful, auto-signed in`);
-
         // User is auto-signed in (email confirmation disabled or already confirmed)
         // Refresh onboarding status
         await refreshOnboardingStatus();

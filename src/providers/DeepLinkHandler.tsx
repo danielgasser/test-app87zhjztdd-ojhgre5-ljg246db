@@ -139,9 +139,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
         const { access_token, refresh_token, type } = parsed.params;
 
         if (type === "recovery" && access_token && refresh_token) {
-          logger.info(
-            `🔗 Password reset link detected, navigating with tokens`
-          );
           // Pass tokens to reset-password screen
           router.push({
             pathname: "/(auth)/reset-password",
@@ -164,7 +161,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
       // EMAIL CHANGE - Navigate immediately
       // ========================================================================
       case "email-change": {
-        logger.info(`🔗 Email change confirmation link detected`);
         if (parsed.targetRoute) {
           router.push(parsed.targetRoute as any);
         }
@@ -175,8 +171,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
       // OAUTH CALLBACK - Navigate immediately
       // ========================================================================
       case "oauth-callback": {
-        logger.info(`🔗 OAuth callback detected`);
-        logger.info(`🔗 OAuth params being passed:`, parsed.params); // <-- ADD THIS
         router.push({
           pathname: "/(auth)/callback",
           params: parsed.params, // This includes access_token, refresh_token, etc.
@@ -192,7 +186,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
 
         if (type === "signup" && access_token && refresh_token) {
           try {
-            logger.info(`🔗 Signup confirmation, setting session`);
             await supabase.auth.setSession({
               access_token,
               refresh_token,
@@ -215,16 +208,9 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
         if (!parsed.targetRoute) break;
 
         if (isAuthenticated && !needsOnboarding) {
-          // Ready to navigate now
-          logger.info(
-            `🔗 User ready, navigating to content: ${parsed.targetRoute}`
-          );
           router.push(parsed.targetRoute as any);
         } else {
           // Queue for later (NavigationController will process)
-          logger.info(
-            `🔗 Queueing content link for after auth: ${parsed.targetRoute}`
-          );
           setPendingDeepLink(parsed.targetRoute);
         }
         break;
@@ -250,7 +236,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
       try {
         const initialUrl = await Linking.getInitialURL();
         if (initialUrl) {
-          logger.info(`🔗 Initial deep link: ${initialUrl}`);
           await handleDeepLink(initialUrl);
         }
       } catch (error) {

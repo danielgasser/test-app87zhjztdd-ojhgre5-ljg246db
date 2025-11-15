@@ -19,7 +19,6 @@ export default function AuthCallback() {
   const params = useLocalSearchParams();
   useEffect(() => {
     if (!params.access_token && !params.refresh_token) {
-      logger.info("🔐 Waiting for OAuth params...");
       return;
     }
     let mounted = true;
@@ -27,7 +26,6 @@ export default function AuthCallback() {
     const handleCallback = async () => {
       try {
         setStatus("Completing sign in...");
-        logger.info(`🔐 Callback params received:`, params); // <-- ADD THIS
 
         // Get tokens from URL params (passed by DeepLinkHandler)
         const {
@@ -54,8 +52,6 @@ export default function AuthCallback() {
             ? refresh_token[0]
             : refresh_token;
 
-          logger.info(`🔐 Setting OAuth session from callback`);
-
           // Set the session
           const { error } = await supabase.auth.setSession({
             access_token: accessTokenStr,
@@ -74,7 +70,6 @@ export default function AuthCallback() {
         }
 
         // If no tokens, try to get current session
-        logger.info(`🔐 No tokens in params, checking current session`);
         const {
           data: { session },
           error,

@@ -42,10 +42,6 @@ export function NavigationController({
 
     const checkProfileExists = async () => {
       try {
-        logger.info(
-          "🧭 NavigationController: Checking if profile exists in DB"
-        );
-
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -126,7 +122,6 @@ export function NavigationController({
       );
 
       if (!isOnPublicRoute) {
-        logger.info("🧭 Not authenticated, navigating to welcome");
         router.replace("/welcome");
         hasNavigated.current = true;
       }
@@ -135,7 +130,6 @@ export function NavigationController({
 
       // Check if we have a pending deep link and we're ready to process it
       if (pendingDeepLink && !needsOnboarding) {
-        logger.info(`🧭 Processing pending deep link: ${pendingDeepLink}`);
         router.push(pendingDeepLink as any);
         clearPendingDeepLink();
         hasNavigated.current = true;
@@ -165,7 +159,6 @@ export function NavigationController({
         );
 
         if (!isOnProtectedRoute) {
-          logger.info("🧭 Authenticated and onboarded, navigating to app");
           router.replace("/(tabs)");
           hasNavigated.current = true;
         }

@@ -127,8 +127,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        logger.info("🔐 AuthProvider: Initializing...");
-
         const {
           data: { session },
           error,
@@ -143,11 +141,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         dispatch({ type: "SET_SESSION", session });
-        logger.info("🔐 AuthProvider: Initial session loaded", {
-          authenticated: !!session,
-          userId: session?.user?.id,
-        });
-
         // If we have a session, check onboarding status
         if (session?.user) {
           await checkOnboardingStatus(session.user.id);
@@ -171,19 +164,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // LISTEN: Auth state changes from Supabase
   // ============================================================================
   useEffect(() => {
-    console.log("++++++++++++++++++++++++++++++++++++++++++++++++");
-    logger.info("🔐 AuthProvider: Setting up auth listener");
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted.current) return;
-
-      logger.info("🔐 AuthProvider: Auth state changed", {
-        event,
-        authenticated: !!session,
-        userId: session?.user?.id,
-      });
 
       switch (event) {
         case "SIGNED_IN":
@@ -193,12 +177,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           break;
 
         case "SIGNED_OUT":
-          logger.info(`🔐 AuthProvider: Handling SIGNED_OUT`);
           dispatch({ type: "SIGN_OUT" });
           break;
 
         case "PASSWORD_RECOVERY":
-          logger.info(`🔐 AuthProvider: Handling PASSWORD_RECOVERY`);
           // Password recovery is handled by reset-password screen
           dispatch({ type: "SET_RECOVERY_SESSION", session });
           break;
@@ -209,7 +191,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
-      logger.info("🔐 AuthProvider: Cleaning up auth listener");
       subscription.unsubscribe();
     };
   }, []);
@@ -224,7 +205,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     if (!isPasswordRecovery && state.isAuthenticated) {
-      logger.info(`🔐 Session in state, checking onboarding status`);
       checkOnboardingStatus(state.session.user.id);
     }
   }, [state.session?.user?.id, state.onboardingChecked, state.isAuthenticated]);
@@ -233,24 +213,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // CHECK ONBOARDING STATUS
   // ============================================================================
   const checkOnboardingStatus = async (userId: string) => {
-    logger.info(`🔐 START checkOnboardingStatus for user: ${userId}`);
-
-    // TEST: Direct query without timeout
-    logger.info(`🔐 Testing direct query...`);
     try {
       const testResult = await supabase
         .from("profiles")
         .select("onboarding_complete")
         .eq("user_id", userId)
         .maybeSingle();
-
-      logger.info(`🔐 Direct query result:`, testResult);
     } catch (err) {
       logger.error(`🔐 Direct query error:`, err);
     }
     try {
       // Add 5 second timeout
-      logger.info(`🔐 Creating timeout promise`);
       const timeoutPromise = new Promise<{ data: null; error: any }>(
         (resolve) =>
           setTimeout(
@@ -258,19 +231,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             3000
           )
       );
-      logger.info(`🔐 Creating query promise`);
       const queryPromise = supabase
         .from("profiles")
         .select("onboarding_complete")
         .eq("user_id", userId)
         .maybeSingle();
 
-      logger.info(`🔐 Waiting for race...`);
       const { data: profile, error } = (await Promise.race([
         queryPromise,
         timeoutPromise,
       ])) as any;
-      logger.info(`🔐 Race completed:`, { profile, error });
 
       if (!mounted.current) {
         logger.warn(`🔐 Component unmounted, exiting`);
@@ -285,19 +255,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const needsOnboarding = !profile?.onboarding_complete;
       dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding });
-
-      logger.info("🔐 Onboarding status:", {
-        userId,
-        needsOnboarding,
-        onboardingComplete: profile?.onboarding_complete,
-      });
     } catch (error) {
       logger.error("🔐 CATCH block error:", error);
       if (mounted.current) {
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
       }
     }
-    logger.info(`🔐 END checkOnboardingStatus`);
   };
 
   // ============================================================================
@@ -305,14 +268,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============================================================================
 
   const signOut = async () => {
-    logger.info("🔐 Signing out...");
     await supabase.auth.signOut();
 
     // State will be updated by onAuthStateChange listener
   };
 
   const setPendingDeepLink = (url: string | null) => {
-    logger.info(`🔐 Setting pending deep link: ${url}`);
     dispatch({ type: "SET_PENDING_LINK", url });
   };
 

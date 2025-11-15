@@ -42,16 +42,12 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      logger.info(`🔐 Attempting email/password login`);
-
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) throw error;
-
-      logger.info(`🔐 Login successful, refreshing onboarding status`);
 
       // Refresh onboarding status (updates AuthProvider)
       await refreshOnboardingStatus();
@@ -68,8 +64,6 @@ export default function LoginScreen() {
 
   const handleAppleSignIn = async () => {
     try {
-      logger.info(`🔐 Attempting Apple Sign-In`);
-
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -84,8 +78,6 @@ export default function LoginScreen() {
       });
 
       if (error) throw error;
-
-      logger.info(`🔐 Apple Sign-In successful, refreshing onboarding status`);
 
       // Refresh onboarding status
       await refreshOnboardingStatus();
@@ -102,8 +94,6 @@ export default function LoginScreen() {
 
   const handleGoogleSignIn = async () => {
     try {
-      logger.info(`🔐 Attempting Google Sign-In`);
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

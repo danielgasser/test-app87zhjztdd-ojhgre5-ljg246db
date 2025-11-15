@@ -90,7 +90,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           (alert: SafetyAlertHandled) => alert.review_id === reviewId
         );
         if (handled) {
-          logger.info(`✅ Review ${reviewId} already handled in this session`);
           return true;
         }
       }
@@ -196,8 +195,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
       if (updateError) {
         logger.error("Error updating route alerts:", updateError);
-      } else {
-        logger.info(`✅ Recorded ${action} for review ${review.id}`);
       }
     } catch (error) {
       logger.error("Error in recordSafetyAlertHandled:", error);

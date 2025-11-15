@@ -101,10 +101,9 @@ export default function OnboardingScreen() {
       }
 
       await AsyncStorage.clear();
-      console.log("CLEARED EVERYTHING");
       Alert.alert("CLEARED! Force close app now (swipe up), then reopen");
     } catch (error) {
-      console.error(error);
+      logger.error(`${error}`);
     }
   };
   // Get navigation params
@@ -376,24 +375,16 @@ export default function OnboardingScreen() {
       }
 
       if (profileResult.error) {
-        console.error("Failed to save user_profiles:", profileResult.error);
         notify.error("Failed to save profile. Please try again.");
         return;
       }
-      console.log(`==========================================================`);
 
       // 3. Mark onboarding complete in profiles
-      console.log(`Updating profiles.onboarding_complete for user ${user.id}`);
       const { data: profileUpdateData, error: profilesError } = await supabase
         .from("profiles")
         .update({ onboarding_complete: true })
         .eq("user_id", user.id)
         .select();
-
-      console.log("Profile update result:", {
-        data: profileUpdateData,
-        error: profilesError,
-      });
 
       if (profilesError) {
         console.error("Failed to update profiles:", profilesError);

@@ -174,7 +174,7 @@ export const updateSearchRadius = createAsyncThunk<
       if (error) throw error;
       if (!data) throw new Error('Failed to update preferences');
 
-      notify.info(`Search radius updated to ${clampedRadius}km`);
+      //   notify.info(`Search radius updated to ${clampedRadius}km`);
       return data as UserProfile;
     } catch (error) {
       logger.error('❌ Failed to update search radius:', error);
