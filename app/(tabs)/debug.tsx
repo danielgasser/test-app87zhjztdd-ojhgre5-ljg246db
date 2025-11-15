@@ -31,12 +31,13 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import * as Device from "expo-device";
 import * as Application from "expo-application";
 import { notify } from "@/utils/notificationService";
+import { useAuth } from "@/providers/AuthProvider";
 
 const appConfig = require("../../app.config.js");
 
 export default function DebugScreen() {
   const router = useRouter();
-  const user = useAppSelector((state) => state.auth.user);
+  const { user } = useAuth();
   const profile = useAppSelector((state) => state.user.profile);
 
   const [cacheStats, setCacheStats] = useState<any>(null);

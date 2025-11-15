@@ -17,9 +17,10 @@ import { updateUserProfile } from "../src/store/userSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { NotificationPreferences } from "../src/store/userSlice";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function NotificationSettings() {
-  const user = useAppSelector((state: any) => state.auth.user);
+  const { user } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
 
   // Notification preferences state
@@ -53,6 +54,7 @@ export default function NotificationSettings() {
     field: string,
     value: boolean | string
   ) => {
+    if (!user) return;
     try {
       const updatedPrefs = {
         ...profile.notification_preferences,

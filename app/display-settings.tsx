@@ -20,9 +20,10 @@ import {
 import { getDefaultPreferences } from "@/utils/preferenceDefaults";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function DisplaySettings() {
-  const user = useAppSelector((state: any) => state.auth.user);
+  const { user } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
   const userCountry = useAppSelector(
     (state: any) => state.locations.userCountry
@@ -51,6 +52,7 @@ export default function DisplaySettings() {
   }, [profile, userCountry]);
 
   const savePreference = async (field: string, value: string) => {
+    if (!user) return;
     try {
       const updatedPrefs = {
         ...profile.notification_preferences,

@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { useAppSelector } from '../store/hooks';
 import { locationTriggerService } from '../services/locationTriggerService';
+import { useAuth } from '@/providers/AuthProvider';
 
 /**
  * Hook to manage location trigger service lifecycle
@@ -15,7 +16,7 @@ import { locationTriggerService } from '../services/locationTriggerService';
  */
 
 export function useLocationTriggers() {
-    const user = useAppSelector((state) => state.auth.user);
+    const { user } = useAuth();
     const profile = useAppSelector((state) => state.user.profile);
 
     useEffect(() => {
