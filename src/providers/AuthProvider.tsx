@@ -212,13 +212,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============================================================================
   const checkOnboardingStatus = async (userId: string) => {
     try {
-      logger.info(`🔐 Checking onboarding status for user: ${userId}`);
+      console.log(`🔐 Checking onboarding status for user: ${userId}`);
 
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("onboarding_complete")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
+      console.log("🔐 Query result:", { profile, error }); // ← ADD THIS
 
       if (!mounted.current) return;
 

@@ -925,21 +925,6 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        onPress={async () => {
-          await supabase.auth.signOut();
-          router.replace("/(auth)/login");
-        }}
-        style={{
-          position: "absolute",
-          top: 50,
-          right: 20,
-          zIndex: 999,
-          padding: 10,
-        }}
-      >
-        <Text style={{ color: "red", fontWeight: "bold" }}>DEV: Sign Out</Text>
-      </TouchableOpacity>
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>

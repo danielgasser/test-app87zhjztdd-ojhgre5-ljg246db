@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/services/supabase";
 import { useAuth } from "@/providers/AuthProvider";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AuthCallback() {
   const { refreshOnboardingStatus } = useAuth();
   const [status, setStatus] = useState("Processing authentication...");
   const params = useLocalSearchParams();
-
+  const processing = useRef(false);
   useEffect(() => {
+    if (processing.current) {
+      logger.info("🔐 Already processing callback, skipping...");
+      return;
+    }
     let mounted = true;
+    processing.current = true;
 
     const handleCallback = async () => {
       try {
@@ -84,8 +96,10 @@ export default function AuthCallback() {
       } catch (error: any) {
         logger.error(`🔐 Auth callback error:`, error);
         setStatus(`Authentication failed: ${error.message}`);
-
-        // AuthProvider will see no session and NavigationController will route to welcome
+      } finally {
+        if (mounted) {
+          processing.current = false; // ← Reset flag
+        }
       }
     };
 
@@ -98,6 +112,22 @@ export default function AuthCallback() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        onPress={async () => {
+          await supabase.auth.signOut();
+          await AsyncStorage.clear();
+          router.replace("/(auth)/login");
+        }}
+        style={{
+          position: "absolute",
+          top: 50,
+          right: 20,
+          zIndex: 999,
+          padding: 10,
+        }}
+      >
+        <Text style={{ color: "red", fontWeight: "bold" }}>DEV: Sign Out</Text>
+      </TouchableOpacity>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.statusText}>{status}</Text>
     </View>
