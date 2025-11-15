@@ -11,6 +11,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -26,6 +27,8 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
+import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -80,6 +83,33 @@ export default function OnboardingScreen() {
     disability_other: "",
   });
 
+  const nukeEverything = async () => {
+    try {
+      // Delete all possible Supabase keys
+      const possibleKeys = [
+        "supabase.auth.token",
+        `sb-${
+          process.env.EXPO_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0]
+        }-auth-token`,
+        "supabase-auth-token",
+      ];
+
+      for (const key of possibleKeys) {
+        try {
+          await SecureStore.deleteItemAsync(key);
+          console.log(`Deleted: ${key}`);
+        } catch (e) {
+          console.log(`Couldn't delete ${key}`);
+        }
+      }
+
+      await AsyncStorage.clear();
+      console.log("CLEARED EVERYTHING");
+      Alert.alert("CLEARED! Force close app now (swipe up), then reopen");
+    } catch (error) {
+      console.error(error);
+    }
+  };
   // Get navigation params
   const params = useLocalSearchParams();
   const jumpToField = params.jumpToField as string | undefined;
@@ -267,7 +297,6 @@ export default function OnboardingScreen() {
       return;
     }
 
-    // Process "Other" inputs and merge with main data
     const processedData = {
       ...formData,
       race_ethnicity: formData.race_ethnicity.map((race) =>
@@ -291,6 +320,20 @@ export default function OnboardingScreen() {
     };
 
     try {
+      // 1. FIRST: Ensure profiles entry exists
+      await supabase
+        .from("profiles")
+        .insert({ user_id: user.id, onboarding_complete: false })
+        .select()
+        .single()
+        .then((result) => {
+          // Ignore duplicate key errors (profile already exists)
+          if (result.error && result.error.code !== "23505") {
+            throw result.error;
+          }
+        });
+
+      // 2. Save to user_profiles
       const { data: existingProfile } = await supabase
         .from("user_profiles")
         .select("id")
@@ -300,7 +343,6 @@ export default function OnboardingScreen() {
       let profileResult;
 
       if (existingProfile) {
-        // Update existing profile
         profileResult = await supabase
           .from("user_profiles")
           .update({
@@ -318,7 +360,6 @@ export default function OnboardingScreen() {
           .select()
           .single();
       } else {
-        // Insert new profile
         profileResult = await supabase
           .from("user_profiles")
           .insert({
@@ -336,33 +377,37 @@ export default function OnboardingScreen() {
           .select()
           .single();
       }
+
       if (profileResult.error) {
-        console.error("Failed to save user_profiles:", profileResult.error);
+        logger.error("Failed to save user_profiles:", profileResult.error);
         notify.error("Failed to save profile. Please try again.");
         return;
       }
+
+      // 3. Mark onboarding complete in profiles
       const { error: profilesError } = await supabase
         .from("profiles")
         .update({ onboarding_complete: true })
         .eq("user_id", user.id);
 
       if (profilesError) {
-        logger.error("Failed to save to user_profiles:", profileResult);
+        logger.error("Failed to update profiles:", profilesError);
         notify.error("Failed to complete onboarding. Please try again.");
+        return;
       }
 
+      // 4. Update Redux and refresh auth state
       await dispatch(fetchUserProfile(user.id)).unwrap();
-
       await refreshOnboardingStatus();
 
       notify.success(
         isEditing
           ? "Your profile has been updated successfully."
-          : "Your profile has been set up. You can now start using the app and contributing to our safety community.",
+          : "Your profile has been set up. You can now start using the app!",
         isEditing ? "Profile Updated!" : "Welcome to SafePath!"
       );
-      router.replace("/(tabs)");
 
+      // 5. Register push notifications for new users
       if (!isEditing && user?.id) {
         const pushToken =
           await notificationService.registerForPushNotifications();
@@ -370,11 +415,11 @@ export default function OnboardingScreen() {
           await notificationService.savePushToken(user.id, pushToken);
         }
       }
+
+      router.replace("/(tabs)");
     } catch (error) {
-      notify.error("Failed to save profile. Please try again.");
       logger.error("Profile save error:", error);
-    } finally {
-      setLoading(false);
+      notify.error("Failed to save profile. Please try again.");
     }
   };
 
@@ -402,6 +447,17 @@ export default function OnboardingScreen() {
         ...formData,
         race_ethnicity: [...formData.race_ethnicity, race],
       });
+    }
+  };
+
+  const emergencyClear = async () => {
+    try {
+      await SecureStore.deleteItemAsync("supabase.auth.token");
+      await AsyncStorage.clear();
+      await supabase.auth.signOut({ scope: "local" });
+      notify.success("Cleared! Close and reopen app.");
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -445,6 +501,21 @@ export default function OnboardingScreen() {
 
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
+      <TouchableOpacity
+        onPress={nukeEverything}
+        style={{
+          position: "absolute",
+          bottom: 50,
+          right: 20,
+          zIndex: 9999,
+          backgroundColor: "red",
+          padding: 20,
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
+          NUKE
+        </Text>
+      </TouchableOpacity>
       <Text style={styles.stepTitle}>Welcome to SafePath!</Text>
       <Text style={styles.stepDescription}>
         To provide personalized safety information, we need to understand your

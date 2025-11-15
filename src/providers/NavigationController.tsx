@@ -66,8 +66,8 @@ export function NavigationController({
           logger.warn("🧭 Profile not found in DB, signing out", {
             userId: user.id,
           });
-          await signOut();
-          return;
+          //await signOut();
+          //return;
         }
 
         if (error) {

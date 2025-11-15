@@ -25,7 +25,6 @@ function SplashScreen() {
   return (
     <View style={styles.splash}>
       <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
-      <Text style={styles.splashText}>SafePath</Text>
     </View>
   );
 }
