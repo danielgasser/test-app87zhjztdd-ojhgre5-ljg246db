@@ -55,7 +55,6 @@ function AppNavigator() {
 
 // Root layout with providers
 function RootLayout() {
-  console.log("🟠 ROOT LAYOUT NAV RENDER");
   return (
     <Provider store={store}>
       <AuthProvider>

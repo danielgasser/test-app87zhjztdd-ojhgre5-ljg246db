@@ -14,7 +14,6 @@ const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
 
 export default function TabLayout() {
-  console.log("🟣 TAB LAYOUT RENDER");
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   console.log(

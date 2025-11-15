@@ -1073,8 +1073,10 @@ export const fetchMLPredictions = createAsyncThunk(
     const longitude = typeof payload === 'object' ? payload.longitude : undefined;
     try {
       const state = getState() as any;
-      const userId = state.auth.user?.id;
       const userProfile = state.user.profile;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
 
       if (!userId || !userProfile) {
         throw new Error("User not authenticated or profile not loaded");

@@ -67,6 +67,7 @@ import { store } from "@/store";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useAuth } from "@/providers/AuthProvider";
 import { shallowEqual } from "react-redux";
+import { shouldShowBanner } from "@/store/profileBannerSlice";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -144,6 +145,14 @@ export default function MapScreen() {
     showRouteSegments,
     navigationIntent,
   } = useAppSelector((state: any) => state.locations, shallowEqual);
+  // ADD THIS RIGHT HERE:
+  const locationsStateRef = useRef(null);
+  const locationsState = useAppSelector((state: any) => state.locations);
+
+  if (locationsStateRef.current !== locationsState) {
+    locationsStateRef.current = locationsState;
+  }
+  // END OF ADDITION
 
   const { user } = useAuth();
   const userId = user?.id;
@@ -171,6 +180,25 @@ export default function MapScreen() {
 
   const { distanceUnit } = useUserPreferences();
 
+  // ===== ADD ALL THIS LOGGING HERE =====
+  const renderCountRef = useRef(0);
+  renderCountRef.current++;
+
+  const userProfileRef = useRef(userProfile);
+  const profileCheckRef = useRef<{
+    canUse: boolean;
+    missingFields: string[];
+  } | null>(null);
+  const showProfileBannerRef = useRef<any>(null);
+
+  if (userProfileRef.current !== userProfile) {
+    userProfileRef.current = userProfile;
+  }
+  // ===== END OF LOGGING BLOCK =====
+
+  // ... existing code stays here
+  // ===== END OF LOGGING BLOCK =====
+
   // Check profile completeness for GENERAL (danger zones need full profile)
   const profileCheck = React.useMemo(() => {
     if (!userProfile) return { canUse: true, missingFields: [] };
@@ -181,38 +209,21 @@ export default function MapScreen() {
       missingFields: validation.missingFieldsForFeature,
     };
   }, [userProfile]);
-
+  if (profileCheckRef.current !== profileCheck) {
+    profileCheckRef.current = profileCheck;
+  }
   // Determine if we should show the banner
   const showProfileBanner = React.useMemo(() => {
     if (profileCheck.canUse) return false;
+    return shouldShowBanner(
+      bannerState,
+      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE
+    );
   }, [profileCheck.canUse, dangerZonesVisible, bannerState]);
-  console.log("📦 Redux state that could trigger re-render:", {
-    // From state.locations
-    nearbyLocationsCount: nearbyLocations.length,
-    nearbyLocationsIds: nearbyLocations.map((l: any) => l.id),
-    loading,
-    userLocationLat: userLocation?.latitude,
-    userLocationLng: userLocation?.longitude,
-    navigationActive,
-    mlPredictionsKeys: Object.keys(mlPredictions),
-    mlPredictionsLoadingKeys: Object.keys(mlPredictionsLoading),
-    selectedRouteId: selectedRoute?.id,
-    routesCount: routes.length,
-    showRouteSegments,
-    navigationIntentTargetTab: navigationIntent?.targetTab,
-    navigationIntentLocationId: navigationIntent?.locationId,
-    dangerZonesCount: dangerZones.length,
-    dangerZonesVisible,
-    dangerZonesLoading,
-
-    // From state.user
-    userSearchRadiusKm,
-    userProfileId: userProfile?.id,
-    userProfileUpdatedAt: userProfile?.updated_at,
-
-    // From state.profileBanner
-    bannerStateKeys: Object.keys(bannerState),
-  }); // ============= HELPER FUNCTIONS =============
+  if (showProfileBannerRef.current !== showProfileBanner) {
+    showProfileBannerRef.current = showProfileBanner;
+  }
+  // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
     const hasReviews =
       location.demographic_safety_score || location.avg_safety_score;
