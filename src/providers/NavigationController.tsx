@@ -75,7 +75,6 @@ export function NavigationController({
           return;
         }
 
-        logger.info("🧭 Profile exists in DB", { profileId: profile.id });
         profileChecked.current = true;
       } catch (error) {
         logger.error("🧭 Error in profile check:", error);
@@ -98,25 +97,15 @@ export function NavigationController({
   useEffect(() => {
     // Don't navigate while loading
     if (isLoading) {
-      logger.info("🧭 NavigationController: Still loading, waiting...");
       return;
     }
 
     // Don't navigate until onboarding status is checked (for authenticated users)
     if (isAuthenticated && !onboardingChecked) {
-      logger.info("🧭 NavigationController: Waiting for onboarding status...");
       return;
     }
 
     const currentSegment = segments[0];
-    logger.info("🧭 NavigationController: Navigation check", {
-      isAuthenticated,
-      needsOnboarding,
-      onboardingChecked,
-      currentSegment,
-      pathname,
-      hasNavigated: hasNavigated.current,
-    });
 
     // ========================================================================
     // ROUTE DECISION LOGIC
@@ -124,7 +113,7 @@ export function NavigationController({
 
     if (!isAuthenticated) {
       // -------- NOT AUTHENTICATED --------
-      const publicRoutes = ["welcome", "(auth)"];
+      const publicRoutes = ["welcome", "login", "register"];
       const isOnPublicRoute = publicRoutes.some(
         (route) => currentSegment === route || pathname?.includes(route)
       );
@@ -149,7 +138,6 @@ export function NavigationController({
       if (needsOnboarding) {
         // -------- NEEDS ONBOARDING --------
         if (currentSegment !== "onboarding") {
-          logger.info("🧭 Needs onboarding, navigating to onboarding");
           router.replace("/onboarding");
           hasNavigated.current = true;
         }

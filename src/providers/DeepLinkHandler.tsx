@@ -35,8 +35,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
   // ============================================================================
   const parseDeepLink = (url: string): ParsedDeepLink => {
     try {
-      logger.info(`🔗 Parsing deep link: ${url}`);
-
       // Extract params from URL
       const params = extractUrlParams(url);
 
@@ -132,12 +130,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
   // ============================================================================
   const handleDeepLink = async (url: string) => {
     const parsed = parseDeepLink(url);
-
-    logger.info(`🔗 Deep link parsed:`, {
-      action: parsed.action,
-      targetRoute: parsed.targetRoute,
-      hasParams: Object.keys(parsed.params).length > 0,
-    });
 
     switch (parsed.action) {
       // ========================================================================
@@ -269,7 +261,6 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
 
     // Listen for subsequent URLs (app already running)
     const subscription = Linking.addEventListener("url", async ({ url }) => {
-      logger.info(`🔗 Incoming deep link: ${url}`);
       await handleDeepLink(url);
     });
 

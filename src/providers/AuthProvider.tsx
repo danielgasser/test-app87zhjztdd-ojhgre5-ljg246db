@@ -163,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // LISTEN: Auth state changes from Supabase
   // ============================================================================
   useEffect(() => {
+    console.log("++++++++++++++++++++++++++++++++++++++++++++++++");
     logger.info("🔐 AuthProvider: Setting up auth listener");
 
     const {
@@ -180,18 +181,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         case "SIGNED_IN":
         case "TOKEN_REFRESHED":
         case "USER_UPDATED":
+          logger.info(`🔐 AuthProvider: Handling ${event}`);
           dispatch({ type: "SET_SESSION", session });
           // Check onboarding for new sessions
           if (session?.user && event === "SIGNED_IN") {
+            logger.info(
+              `🔐 AuthProvider: Calling checkOnboardingStatus for SIGNED_IN`
+            );
             await checkOnboardingStatus(session.user.id);
+          } else {
+            logger.info(
+              `🔐 AuthProvider: Skipping checkOnboardingStatus (event: ${event})`
+            );
           }
           break;
 
         case "SIGNED_OUT":
+          logger.info(`🔐 AuthProvider: Handling SIGNED_OUT`);
           dispatch({ type: "SIGN_OUT" });
           break;
 
         case "PASSWORD_RECOVERY":
+          logger.info(`🔐 AuthProvider: Handling PASSWORD_RECOVERY`);
           // Password recovery is handled by reset-password screen
           dispatch({ type: "SET_SESSION", session });
           break;
@@ -211,27 +222,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // CHECK ONBOARDING STATUS
   // ============================================================================
   const checkOnboardingStatus = async (userId: string) => {
+    logger.info(`🔐 START checkOnboardingStatus for user: ${userId}`);
     try {
       // Add 5 second timeout
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Query timeout after 5s")), 3000)
+      logger.info(`🔐 Creating timeout promise`);
+      const timeoutPromise = new Promise<{ data: null; error: any }>(
+        (resolve) =>
+          setTimeout(
+            () => resolve({ data: null, error: { message: "Query timeout" } }),
+            3000
+          )
       );
-
+      logger.info(`🔐 Creating query promise`);
       const queryPromise = supabase
         .from("profiles")
         .select("onboarding_complete")
         .eq("user_id", userId)
         .maybeSingle();
 
+      logger.info(`🔐 Waiting for race...`);
       const { data: profile, error } = (await Promise.race([
         queryPromise,
         timeoutPromise,
       ])) as any;
+      logger.info(`🔐 Race completed:`, { profile, error });
 
-      if (!mounted.current) return;
+      if (!mounted.current) {
+        logger.warn(`🔐 Component unmounted, exiting`);
+        return;
+      }
 
       if (error) {
-        logger.error("Failed to check onboarding status:", error);
+        logger.error("🔐 Query error:", error);
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
         return;
       }
@@ -245,11 +267,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onboardingComplete: profile?.onboarding_complete,
       });
     } catch (error) {
-      logger.error("Error checking onboarding status:", error);
+      logger.error("🔐 CATCH block error:", error);
       if (mounted.current) {
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
       }
     }
+    logger.info(`🔐 END checkOnboardingStatus`);
   };
 
   // ============================================================================
