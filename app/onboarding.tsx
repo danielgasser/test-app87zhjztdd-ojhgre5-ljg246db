@@ -55,8 +55,9 @@ const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
   const { user, refreshOnboardingStatus } = useAuth();
-  const { profile, loading, error } = useAppSelector((state) => state.user);
+  const { profile, error } = useAppSelector((state) => state.user);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -300,7 +301,7 @@ export default function OnboardingScreen() {
 
       if (existingProfile) {
         // Update existing profile
-        const { data, error } = await supabase
+        profileResult = await supabase
           .from("user_profiles")
           .update({
             full_name: processedData.full_name,
@@ -316,11 +317,9 @@ export default function OnboardingScreen() {
           .eq("id", user.id)
           .select()
           .single();
-
-        profileResult = { data, error };
       } else {
         // Insert new profile
-        const { data, error } = await supabase
+        profileResult = await supabase
           .from("user_profiles")
           .insert({
             id: user.id,
@@ -336,13 +335,17 @@ export default function OnboardingScreen() {
           })
           .select()
           .single();
-
-        profileResult = { data, error };
+      }
+      if (profileResult.error) {
+        console.error("Failed to save user_profiles:", profileResult.error);
+        notify.error("Failed to save profile. Please try again.");
+        return;
       }
       const { error: profilesError } = await supabase
         .from("profiles")
         .update({ onboarding_complete: true })
         .eq("user_id", user.id);
+
       if (profilesError) {
         logger.error("Failed to save to user_profiles:", profileResult);
         notify.error("Failed to complete onboarding. Please try again.");
@@ -370,6 +373,8 @@ export default function OnboardingScreen() {
     } catch (error) {
       notify.error("Failed to save profile. Please try again.");
       logger.error("Profile save error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
