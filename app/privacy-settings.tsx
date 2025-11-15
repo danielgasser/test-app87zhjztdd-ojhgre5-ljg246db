@@ -19,7 +19,7 @@ import { ActivityIndicator } from "react-native";
 import { updateUserProfile } from "../src/store/userSlice";
 import { supabase } from "@/services/supabase";
 import { useAppDispatch } from "../src/store/hooks";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 import { fetchRecentReviews } from "@/store/locationsSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";

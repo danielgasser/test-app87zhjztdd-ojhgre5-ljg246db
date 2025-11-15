@@ -65,7 +65,7 @@ import { updateUserProfile, NotificationPreferences } from "@/store/userSlice";
 import { getDefaultPreferences } from "@/utils/preferenceDefaults";
 import { store } from "@/store";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {

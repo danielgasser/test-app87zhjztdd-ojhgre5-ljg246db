@@ -20,16 +20,18 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { notify } from "@/utils/notificationService";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/services/supabase";
+import { logger } from "@/utils/logger";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { refreshOnboardingStatus } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -37,33 +39,37 @@ export default function LoginScreen() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      logger.info(`🔐 Attempting email/password login`);
+
+      const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
-      if (error) throw error;
-      const result = data;
-      // Check onboarding status
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("onboarding_complete")
-        .eq("user_id", result.user.id)
-        .single();
 
-      // Route based on onboarding
-      if (!profile || !profile.onboarding_complete) {
-        router.replace("/onboarding");
-      } else {
-        router.replace("/(tabs)");
-      }
-    } catch (err) {
-      notify.error(`${err}` || "Invalid credentials", "Login Failed");
+      if (error) throw error;
+
+      logger.info(`🔐 Login successful, refreshing onboarding status`);
+
+      // Refresh onboarding status (updates AuthProvider)
+      await refreshOnboardingStatus();
+
+      // NavigationController will handle routing based on auth state
+      // No manual routing needed!
+    } catch (err: any) {
+      logger.error(`🔐 Login error:`, err);
+      notify.error(err.message || "Invalid credentials", "Login Failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleAppleSignIn = async () => {
     try {
+      logger.info(`🔐 Attempting Apple Sign-In`);
+
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -72,36 +78,32 @@ export default function LoginScreen() {
       });
 
       // Sign in to Supabase with the Apple credential
-      const { data, error } = await supabase.auth.signInWithIdToken({
+      const { error } = await supabase.auth.signInWithIdToken({
         provider: "apple",
         token: credential.identityToken!,
       });
 
       if (error) throw error;
 
-      // Check if user has completed onboarding
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("onboarding_complete")
-        .eq("user_id", data.user.id)
-        .single();
+      logger.info(`🔐 Apple Sign-In successful, refreshing onboarding status`);
 
-      // Route based on onboarding status
-      if (!profile || !profile.onboarding_complete) {
-        router.replace("/onboarding");
-      } else {
-        router.replace("/(tabs)");
-      }
+      // Refresh onboarding status
+      await refreshOnboardingStatus();
+
+      // NavigationController will handle routing
     } catch (error: any) {
       if (error.code === "ERR_REQUEST_CANCELED") {
         return; // User canceled
       }
+      logger.error(`🔐 Apple Sign-In error:`, error);
       notify.error(error.message || "Failed to sign in with Apple");
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
+      logger.info(`🔐 Attempting Google Sign-In`);
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -130,7 +132,9 @@ export default function LoginScreen() {
       }
 
       await Linking.openURL(data.url);
+      // OAuth callback will be handled by DeepLinkHandler -> callback.tsx
     } catch (error: any) {
+      logger.error(`🔐 Google Sign-In error:`, error);
       notify.error(error.message);
     }
   };
@@ -183,7 +187,7 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
-                onPress={() => router.push("/forgot-password")}
+                onPress={() => router.push("/(auth)/forgot-password")}
                 style={styles.forgotPassword}
               >
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
@@ -197,6 +201,7 @@ export default function LoginScreen() {
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Text>
               </TouchableOpacity>
+
               {/* Social Login Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.divider} />
@@ -222,7 +227,6 @@ export default function LoginScreen() {
                     </Text>
                   </TouchableOpacity>
 
-                  {/* Move the OR divider inside the Platform check */}
                   <View style={styles.dividerContainer}>
                     <View style={styles.divider} />
                     <Text style={styles.dividerText}>OR</Text>
@@ -244,9 +248,10 @@ export default function LoginScreen() {
                 />
                 <Text style={styles.googleButtonText}>Sign in with Google</Text>
               </TouchableOpacity>
+
               <View style={styles.footer}>
                 <Text style={styles.footerText}>Don't have an account? </Text>
-                <Link href="/register" asChild>
+                <Link href="/(auth)/register" asChild>
                   <TouchableOpacity>
                     <Text style={styles.link}>Sign Up</Text>
                   </TouchableOpacity>
@@ -352,7 +357,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   googleButton: {
-    backgroundColor: "#4285F4", // Google blue
+    backgroundColor: "#4285F4",
     padding: theme.spacing.md,
     borderRadius: 8,
     alignItems: "center",

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { theme } from "src/styles/theme";
-
 import {
   View,
   Text,
@@ -9,15 +7,20 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
   ScrollView,
+  TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link, useRouter } from "expo-router";
-import { notify } from "@/utils/notificationService";
+import { Link } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "src/styles/theme";
 import { supabase } from "@/services/supabase";
+import { notify } from "@/utils/notificationService";
+import { passwordChecker } from "@/utils/passwordChecker";
+import { logger } from "@/utils/logger";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
@@ -25,47 +28,72 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { refreshOnboardingStatus } = useAuth();
+
   const handleRegister = async () => {
-    if (!email || !password || !confirmPassword) {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+
+    if (!trimmedEmail || !trimmedPassword || !trimmedConfirmPassword) {
       notify.error("Please fill in all fields");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (trimmedPassword !== trimmedConfirmPassword) {
       notify.error("Passwords do not match");
       return;
     }
 
+    if (!passwordChecker(trimmedPassword)) {
+      return;
+    }
+
     try {
-      setIsLoading(true);
+      logger.info(`🔐 Attempting registration for: ${trimmedEmail}`);
+
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password: password.trim(),
+        email: trimmedEmail,
+        password: trimmedPassword,
       });
+
       if (error) throw error;
-      const result = data;
-      setIsLoading(false); // Check if email confirmation is required
-      if (result.user && !result.session) {
-        // Email confirmation required
-        notify.confirm(
-          "Check Your Email",
-          "We've sent you a confirmation email. Please check your inbox and click the link to verify your account.",
+
+      // Check if email confirmation is required
+      const emailConfirmationRequired =
+        data?.user &&
+        !data.user.confirmed_at &&
+        data.user.identities?.length === 0;
+
+      if (emailConfirmationRequired) {
+        logger.info(`🔐 Email confirmation required`);
+
+        // User needs to confirm email
+        Alert.alert(
+          "Verify Your Email",
+          "Please check your email and click the verification link to activate your account.",
           [
             {
               text: "OK",
               onPress: () => {
-                router.replace("/login");
+                // Don't route - just inform user
+                // They'll need to click email link and come back
               },
             },
           ]
         );
       } else {
-        // Auto-login (confirmation disabled or already confirmed)
-        router.replace("/onboarding");
+        logger.info(`🔐 Registration successful, auto-signed in`);
+
+        // User is auto-signed in (email confirmation disabled or already confirmed)
+        // Refresh onboarding status
+        await refreshOnboardingStatus();
+
+        // NavigationController will handle routing to onboarding or tabs
+        // No manual routing needed!
       }
     } catch (err: any) {
+      logger.error(`🔐 Registration error:`, err);
       notify.error(err.message || "Please try again", "Registration Failed");
     }
   };
@@ -139,18 +167,14 @@ export default function RegisterScreen() {
                   />
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={[styles.button, isLoading && styles.buttonDisabled]}
-                onPress={handleRegister}
-                disabled={isLoading}
-              >
-                <Text style={styles.buttonText}>
-                  {isLoading ? "Creating account..." : "Sign Up"}
-                </Text>
+
+              <TouchableOpacity style={styles.button} onPress={handleRegister}>
+                <Text style={styles.buttonText}>Create Account</Text>
               </TouchableOpacity>
+
               <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account? </Text>
-                <Link href="/login" asChild>
+                <Link href="/(auth)/login" asChild>
                   <TouchableOpacity>
                     <Text style={styles.link}>Sign In</Text>
                   </TouchableOpacity>
@@ -179,13 +203,13 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   title: {
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: "bold",
     color: theme.colors.primary,
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 22,
     color: theme.colors.textSecondary,
   },
   form: {
@@ -207,7 +231,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
   },
   passwordInput: {
     flex: 1,
@@ -225,9 +249,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
   buttonText: {
     color: theme.colors.textOnPrimary,
     fontSize: 18,
@@ -240,11 +261,11 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: theme.colors.textSecondary,
-    fontSize: 18,
+    fontSize: 16,
   },
   link: {
     color: theme.colors.primary,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
   },
 });

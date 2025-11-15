@@ -1,15 +1,14 @@
 // app/_layout.tsx - CLEAN, SIMPLE LAYOUT
-import React, { useEffect } from "react";
+import React from "react";
 import { Stack } from "expo-router";
 import { Provider } from "react-redux";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { store } from "@/store";
-import { AuthManager, useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 import { DeepLinkManager } from "@/providers/DeepLinkManager";
 import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
-import { supabase } from "@/services/supabase";
 import { NavigationController } from "@/providers/NavigationController";
 import { AuthProvider } from "@/providers/AuthProvider";
 import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";

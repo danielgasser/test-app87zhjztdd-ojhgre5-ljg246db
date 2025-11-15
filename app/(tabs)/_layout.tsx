@@ -2,12 +2,11 @@ import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { theme } from "src/styles/theme";
 import React, { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import { fetchUserProfile } from "@/store/userSlice";
-import { RootState } from "@/store";
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { supabase } from "@/services/supabase";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 import Constants from "expo-constants";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
 

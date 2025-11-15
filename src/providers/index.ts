@@ -1,4 +1,5 @@
 // src/providers/index.ts
-export { AuthManager, useAuth } from './AuthManager';
-export { DeepLinkManager } from './DeepLinkManager';
-export { useNavigationManager } from './NavigationManager'; 
+export { AuthProvider, useAuth } from './AuthProvider';
+export { NavigationController } from './NavigationController';
+export { DeepLinkHandler } from './DeepLinkHandler';
+export { useNavigationManager } from './NavigationManager';

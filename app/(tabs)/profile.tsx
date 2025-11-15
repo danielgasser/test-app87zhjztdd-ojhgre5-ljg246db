@@ -22,7 +22,7 @@ import { decode } from "base64-arraybuffer";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import SearchRadiusSelector from "@/components/SearchRadiusSelector";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 
 const appConfig = require("../../app.config.js");
 

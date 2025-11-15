@@ -1,15 +1,13 @@
-// app/(auth)/callback.tsx - REACT NATIVE CALLBACK HANDLING
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { supabase } from "@/services/supabase";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
-import * as Linking from "expo-linking";
 
 export default function AuthCallback() {
-  const { completeOnboarding } = useAuth();
+  const { refreshOnboardingStatus } = useAuth();
   const [status, setStatus] = useState("Processing authentication...");
   const params = useLocalSearchParams();
 
@@ -20,7 +18,7 @@ export default function AuthCallback() {
       try {
         setStatus("Completing sign in...");
 
-        // Method 1: Check if we have tokens in URL params (from deep link)
+        // Get tokens from URL params (passed by DeepLinkHandler)
         const {
           access_token,
           refresh_token,
@@ -28,6 +26,7 @@ export default function AuthCallback() {
           error_description,
         } = params;
 
+        // Check for errors
         if (urlError) {
           const errorMsg = Array.isArray(error_description)
             ? error_description[0]
@@ -44,43 +43,30 @@ export default function AuthCallback() {
             ? refresh_token[0]
             : refresh_token;
 
-          // We have tokens from URL params - set session
-          const { data, error } = await supabase.auth.setSession({
+          logger.info(`🔐 Setting OAuth session from callback`);
+
+          // Set the session
+          const { error } = await supabase.auth.setSession({
             access_token: accessTokenStr,
             refresh_token: refreshTokenStr,
           });
 
           if (error) throw error;
 
-          if (data.session && mounted) {
-            setStatus("Setting up your account...");
-            await checkOnboardingAndRoute(data.session.user.id);
+          if (mounted) {
+            setStatus("Success! Redirecting...");
+
+            // Refresh onboarding status (will update AuthProvider state)
+            await refreshOnboardingStatus();
+
+            // NavigationController will handle routing based on auth state
+            // No need to manually route here
           }
           return;
         }
 
-        // Method 2: Check for initial URL (when app is opened from deep link)
-        const initialUrl = await Linking.getInitialURL();
-        if (initialUrl && initialUrl.includes("#access_token=")) {
-          const urlParams = parseUrlHash(initialUrl);
-
-          if (urlParams.access_token && urlParams.refresh_token) {
-            const { data, error } = await supabase.auth.setSession({
-              access_token: urlParams.access_token,
-              refresh_token: urlParams.refresh_token,
-            });
-
-            if (error) throw error;
-
-            if (data.session && mounted) {
-              setStatus("Setting up your account...");
-              await checkOnboardingAndRoute(data.session.user.id);
-            }
-            return;
-          }
-        }
-
-        // Method 3: Check current session (Supabase might have handled it automatically)
+        // If no tokens, try to get current session
+        logger.info(`🔐 No tokens in params, checking current session`);
         const {
           data: { session },
           error,
@@ -89,56 +75,17 @@ export default function AuthCallback() {
         if (error) throw error;
 
         if (session) {
-          // User is authenticated, check onboarding
-          await checkOnboardingAndRoute(session.user.id);
+          setStatus("Success! Redirecting...");
+          await refreshOnboardingStatus();
+          // NavigationController will handle routing
         } else {
-          setStatus("Authentication failed - no session found");
-          setTimeout(() => router.replace("/(auth)/login"), 2000);
+          throw new Error("No session found");
         }
-      } catch (error) {
-        logger.error("Auth callback error:", error);
-        setStatus(`Authentication failed`);
-        setTimeout(() => router.replace("/(auth)/login"), 3000);
-      }
-    };
+      } catch (error: any) {
+        logger.error(`🔐 Auth callback error:`, error);
+        setStatus(`Authentication failed: ${error.message}`);
 
-    // Helper function to parse URL hash parameters
-    const parseUrlHash = (url: string): Record<string, string> => {
-      const hashPart = url.split("#")[1];
-      if (!hashPart) return {};
-
-      const params: Record<string, string> = {};
-      hashPart.split("&").forEach((param) => {
-        const [key, value] = param.split("=");
-        if (key && value) {
-          params[key] = decodeURIComponent(value);
-        }
-      });
-      return params;
-    };
-
-    const checkOnboardingAndRoute = async (userId: string) => {
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_complete")
-          .eq("user_id", userId)
-          .single();
-
-        if (!mounted) return;
-
-        if (!profile?.onboarding_complete) {
-          setStatus("Redirecting to setup...");
-          router.replace("/onboarding");
-        } else {
-          completeOnboarding(); // Update auth state
-          setStatus("Welcome back!");
-          router.replace("/(tabs)");
-        }
-      } catch (error) {
-        logger.error("Onboarding check error:", error);
-        // Assume needs onboarding if check fails
-        router.replace("/onboarding");
+        // AuthProvider will see no session and NavigationController will route to welcome
       }
     };
 
@@ -147,12 +94,12 @@ export default function AuthCallback() {
     return () => {
       mounted = false;
     };
-  }, [params, completeOnboarding]);
+  }, [params]);
 
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color={theme.colors.primary} />
-      <Text style={styles.status}>{status}</Text>
+      <Text style={styles.statusText}>{status}</Text>
     </View>
   );
 }
@@ -165,7 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     padding: 20,
   },
-  status: {
+  statusText: {
     marginTop: 20,
     fontSize: 16,
     color: theme.colors.text,

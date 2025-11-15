@@ -38,7 +38,7 @@ import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import * as Crypto from "expo-crypto";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface RoutePlanningModalProps {
   visible: boolean;

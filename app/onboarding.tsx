@@ -25,7 +25,7 @@ import { supabase } from "@/services/supabase";
 import { APP_CONFIG } from "@/utils/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -54,7 +54,7 @@ const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
 
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
-  const { user, completeOnboarding, processPendingDeepLink } = useAuth();
+  const { user } = useAuth();
   const { profile, loading, error } = useAppSelector((state) => state.user);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
 

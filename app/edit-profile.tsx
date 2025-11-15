@@ -20,7 +20,7 @@ import { updateUserProfile } from "src/store/userSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { passwordChecker } from "@/utils/passwordChecker";
-import { useAuth } from "@/providers/AuthManager";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function EditProfileScreen() {
   const dispatch = useAppDispatch();
