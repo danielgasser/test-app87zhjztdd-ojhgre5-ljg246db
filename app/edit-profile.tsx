@@ -44,7 +44,6 @@ export default function EditProfileScreen() {
       // Detect OAuth provider
       const provider =
         user.app_metadata?.provider || user.app_metadata?.providers?.[0];
-      console.log("provider", user.app_metadata);
       if (provider && provider !== "email") {
         setIsOAuthUser(true);
         setOAuthProvider(

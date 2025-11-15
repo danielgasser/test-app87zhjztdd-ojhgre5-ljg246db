@@ -290,15 +290,11 @@ export default function OnboardingScreen() {
     };
 
     try {
-      console.log("🎯 Starting onboarding save for user:", user.id);
-
       const { data: existingProfile } = await supabase
         .from("user_profiles")
         .select("id")
         .eq("id", user.id)
         .single();
-
-      console.log("🔍 Existing profile check:", existingProfile);
 
       let profileResult;
 
@@ -343,15 +339,16 @@ export default function OnboardingScreen() {
 
         profileResult = { data, error };
       }
-
-      console.log("💾 User_profiles save result:", profileResult);
-      if (profileResult) {
+      const { error: profilesError } = await supabase
+        .from("profiles")
+        .update({ onboarding_complete: true })
+        .eq("user_id", user.id);
+      if (profilesError) {
         logger.error("Failed to save to user_profiles:", profileResult);
+        notify.error("Failed to complete onboarding. Please try again.");
       }
-      console.log("🔄 Fetching profile for Redux...");
 
       await dispatch(fetchUserProfile(user.id)).unwrap();
-      console.log("✅ Profile fetched after onboarding:", profileResult);
 
       await refreshOnboardingStatus();
 

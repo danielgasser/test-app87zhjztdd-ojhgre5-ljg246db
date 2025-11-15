@@ -184,9 +184,10 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
       // ========================================================================
       case "oauth-callback": {
         logger.info(`🔗 OAuth callback detected`);
-        if (parsed.targetRoute) {
-          router.push(parsed.targetRoute as any);
-        }
+        router.push({
+          pathname: "/(auth)/callback",
+          params: parsed.params, // This includes access_token, refresh_token, etc.
+        } as any);
         break;
       }
 
