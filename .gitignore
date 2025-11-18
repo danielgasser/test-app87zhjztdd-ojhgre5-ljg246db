@@ -55,3 +55,4 @@ test-address.js
 
 credentials.json
 google-services.json
+*.aab
