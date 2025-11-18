@@ -396,13 +396,25 @@ export const fetchNearbyLocations = createAsyncThunk(
       const { data, error } = await (supabase.rpc as any)("get_nearby_locations", {
         lat: latitude,
         lng: longitude,
-        radius_meters: radius,
+        radius_meters: radiusMeters,
       });
 
       if (error) throw error;
       return data || [];
     }
+  }, {
+  condition: (_, { getState }) => {
+    const state = getState() as any;
+    const { userId } = state.user;
+
+    // Only require userId - profile is optional
+    if (!userId) {
+      return false;
+    }
+
+    return true;
   }
+}
 );
 
 export const fetchLocationDetails = createAsyncThunk(

@@ -162,6 +162,7 @@ export default function MapScreen() {
     (state: any) => state.user.profile,
     shallowEqual
   );
+  const isAppReady = userId && userProfile && userLocation;
 
   const bannerState = useAppSelector(
     (state: any) => state.profileBanner,
@@ -915,6 +916,14 @@ export default function MapScreen() {
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Getting your location...</Text>
+      </View>
+    );
+  }
+  if (!isAppReady) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text>Initializing SafePath...</Text>
       </View>
     );
   }

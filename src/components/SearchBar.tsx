@@ -19,6 +19,8 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { APP_CONFIG } from "@/utils/appConfig";
 import * as Sentry from "@sentry/react-native";
+import { useAuth } from "@/providers/AuthProvider";
+import { store } from "@/store";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -53,6 +55,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [showResults, setShowResults] = useState(false);
   const [mapboxResults, setMapboxResults] = useState<SearchResult[]>([]);
   const searchRadiusKm = useAppSelector((state) => state.user.searchRadiusKm);
+  const { user } = useAuth();
+  const userId = user?.id;
+  const userProfile = useAppSelector((state: any) => state.user.profile);
 
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
@@ -120,7 +125,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
     Keyboard.dismiss();
     setSearchText(location.name);
     setShowResults(false);
+    // GUARD: Wait for profile to be ready
+    if (!userProfile && userId) {
+      notify.info("Loading profile...");
+      // Give it 2 seconds to load
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
+      // Check again
+      const state = store.getState();
+      if (!state.user.profile) {
+        notify.error("Profile not loaded. Please try again.");
+        return;
+      }
+    }
     // If location already has coordinates (database result), use it directly
     if (location.latitude !== 0 && location.longitude !== 0) {
       onLocationSelect(location);
