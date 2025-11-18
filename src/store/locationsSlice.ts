@@ -402,19 +402,8 @@ export const fetchNearbyLocations = createAsyncThunk(
       if (error) throw error;
       return data || [];
     }
-  }, {
-  condition: (_, { getState }) => {
-    const state = getState() as any;
-    const { userId } = state.user;
 
-    // Only require userId - profile is optional
-    if (!userId) {
-      return false;
-    }
-
-    return true;
   }
-}
 );
 
 export const fetchLocationDetails = createAsyncThunk(
