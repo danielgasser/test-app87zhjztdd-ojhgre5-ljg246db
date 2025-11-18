@@ -232,6 +232,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
+    if (!userProfile) {
+      notify.error("Profile not loaded. Please try again.", "Not Ready");
+      return;
+    }
     const navigationSessionId = Crypto.randomUUID();
     dispatch(setNavigationSessionId(navigationSessionId));
 
