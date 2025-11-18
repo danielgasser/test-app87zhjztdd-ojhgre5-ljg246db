@@ -903,7 +903,7 @@ export default function MapScreen() {
     );
   }
 
-  if (loading && nearbyLocations.length === 0) {
+  if (loading && nearbyLocations.length === 0 && !mapReady) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
