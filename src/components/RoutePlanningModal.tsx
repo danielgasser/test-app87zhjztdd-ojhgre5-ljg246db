@@ -178,11 +178,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         query,
         latitude: userLocation?.latitude,
         longitude: userLocation?.longitude,
-        components: `country:${country}`,
       };
 
       if (searchRadiusKm < 999999) {
         autocompleteParams.radius = searchRadiusKm * 1000; // Convert km to meters
+        autocompleteParams.components = `country:${country}`;
       }
 
       const results = await googlePlacesService.autocomplete(

@@ -13,7 +13,9 @@ const { createClient } = require("@supabase/supabase-js");
 
 // Initialize Supabase client
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("❌ Error: Supabase credentials not found in .env.local");
@@ -52,31 +54,59 @@ function parseCSV(csvText) {
 }
 
 // Get user UUID by email
+// Get user UUID by email and ensure profile exists
 async function getUserByEmail(email) {
   if (!email || email === "") return null;
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("user_id")
-    .eq("user_id", email)
-    .single();
+  try {
+    // Step 1: Get user from auth.users by email
+    const {
+      data: { users },
+      error: userError,
+    } = await supabase.auth.admin.listUsers();
 
-  if (error || !data) {
-    // Try auth.users table
-    const { data: authData, error: authError } = await supabase
-      .from("auth.users")
-      .select("id")
-      .eq("email", email)
-      .single();
-
-    if (authError || !authData) {
-      console.warn(`   ⚠️  User not found: ${email}`);
+    if (userError) {
+      console.error(`   ❌ Error fetching users:`, userError.message);
       return null;
     }
-    return authData.id;
-  }
 
-  return data.user_id;
+    const user = users.find((u) => u.email === email);
+
+    if (!user) {
+      console.warn(`   ⚠️  User not found in auth: ${email}`);
+      return null;
+    }
+
+    const userId = user.id;
+
+    // Step 2: Check if profile exists
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .eq("user_id", userId)
+      .single();
+
+    // Step 3: Create profile if it doesn't exist
+    if (profileError && profileError.code === "PGRST116") {
+      console.log(`   📝 Creating profile for ${email}...`);
+
+      const { error: insertError } = await supabase.from("profiles").insert({
+        user_id: userId,
+        demographics: {},
+        onboarding_complete: false,
+      });
+
+      if (insertError) {
+        console.error(`   ❌ Error creating profile:`, insertError.message);
+        return null;
+      }
+    }
+
+    return userId;
+  } catch (error) {
+    console.error(`   ❌ Error in getUserByEmail:`, error.message);
+    return null;
+  }
 }
 
 // Import locations
@@ -117,14 +147,17 @@ async function importLocations(locationsFile) {
       active: true,
     };
 
-    // Add coordinates if present
-    if (row.lat && row.lng && row.lat !== "" && row.lng !== "") {
-      const lat = parseFloat(row.lat);
-      const lng = parseFloat(row.lng);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        locationData.coordinates = `POINT(${lng} ${lat})`;
-      }
+    // Coordinates are REQUIRED
+    const lat = parseFloat(row.lat);
+    const lng = parseFloat(row.lng);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.error(`   ❌ Error: Invalid coordinates for ${row.name}`);
+      skipCount++;
+      continue;
     }
+
+    locationData.coordinates = `POINT(${lng} ${lat})`;
 
     // Insert to database
     const { data, error } = await supabase
@@ -204,7 +237,9 @@ async function importReviews(reviewsFile, locationIdMap) {
         ? parseInt(row.accessibility_rating)
         : null,
       service_rating: row.service_rating ? parseInt(row.service_rating) : null,
-      visit_type: row.visit_type || null,
+      visit_type: row.visit_type
+        ? row.visit_type.toLowerCase().trim().replace(/\r/g, "")
+        : null,
       visited_at: row.visited_at || null,
       status: "active",
     };

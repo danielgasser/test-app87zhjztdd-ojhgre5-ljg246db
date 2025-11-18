@@ -977,15 +977,22 @@ export default function MapScreen() {
               })
             );
 
-            // Calculate dynamic radius based on zoom level
-            const latRadius = newRegion.latitudeDelta * 111 * 1000;
-            const dynamicRadius = Math.min(Math.max(latRadius, 10000), 100000);
+            // Calculate radius based on user preference
+            let fetchRadius: number;
+
+            if (userSearchRadiusKm >= 999999) {
+              // Infinite search - use a very large radius
+              fetchRadius = 999999000; // 999,999 km in meters
+            } else {
+              // Use user's preferred radius (convert km to meters)
+              fetchRadius = userSearchRadiusKm * 1000;
+            }
 
             dispatch(
               fetchNearbyLocations({
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
-                radius: dynamicRadius,
+                radius: fetchRadius,
               })
             );
           }

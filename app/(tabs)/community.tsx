@@ -47,6 +47,11 @@ export default function CommunityScreen() {
     mapCenter,
     communityFeedMode,
   } = useAppSelector((state) => state.locations);
+
+  const { searchRadiusKm: userSearchRadiusKm } = useAppSelector(
+    (state) => state.user
+  );
+
   const [refreshing, setRefreshing] = React.useState(false);
 
   const { profile } = useAppSelector((state) => state.user);
@@ -74,6 +79,15 @@ export default function CommunityScreen() {
     );
   }, [profileCheck.canUse, bannerState]);
 
+  // Calculate fetch radius based on user preference
+  const getFetchRadius = (): number => {
+    if (userSearchRadiusKm >= 999999) {
+      // Infinite search - use Earth's half-circumference
+      return 20000000; // 20,000 km in meters
+    }
+    return userSearchRadiusKm * 1000; // Convert km to meters
+  };
+
   useRealtimeReviews();
 
   useEffect(() => {
@@ -87,6 +101,8 @@ export default function CommunityScreen() {
     if (!coords) return;
 
     const fetchData = async () => {
+      const fetchRadius = getFetchRadius();
+
       try {
         await Promise.all([
           dispatch(
@@ -94,6 +110,7 @@ export default function CommunityScreen() {
               limit: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
               latitude: coords.latitude,
               longitude: coords.longitude,
+              radius: fetchRadius, // ✅ Use user's radius
             })
           ).unwrap(),
           dispatch(
@@ -106,7 +123,7 @@ export default function CommunityScreen() {
             fetchSafetyInsights({
               latitude: coords.latitude,
               longitude: coords.longitude,
-              radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+              radius: fetchRadius, // ✅ Use user's radius
               maxResults: 5,
             })
           ).unwrap(),
@@ -123,6 +140,7 @@ export default function CommunityScreen() {
     mapCenter?.latitude,
     mapCenter?.longitude,
     communityFeedMode,
+    userSearchRadiusKm,
     dispatch,
   ]);
 
@@ -135,13 +153,16 @@ export default function CommunityScreen() {
     const coords = communityFeedMode === "near_me" ? userLocation : mapCenter;
     if (!coords) return;
 
+    const fetchRadius = getFetchRadius();
+
     try {
       await Promise.all([
         dispatch(
           fetchRecentReviews({
             limit: 10,
-            latitude: userLocation?.latitude,
-            longitude: userLocation?.longitude,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            radius: fetchRadius, // ✅ Use user's radius
           })
         ).unwrap(),
         dispatch(
@@ -154,7 +175,7 @@ export default function CommunityScreen() {
           fetchSafetyInsights({
             latitude: coords.latitude,
             longitude: coords.longitude,
-            radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
+            radius: fetchRadius, // ✅ Use user's radius
             maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
           })
         ).unwrap(),

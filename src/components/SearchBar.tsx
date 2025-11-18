@@ -57,28 +57,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
       const country = userCountry || "us";
-      /*
-      Sentry.captureMessage("🔍 Search Debug", {
-        level: "info",
-        extra: {
-          userCountry: userCountry,
-          fallbackCountry: country,
-          hasUserLocation: !!userLocation,
-          userLat: userLocation?.latitude,
-          userLng: userLocation?.longitude,
-          searchQuery: query,
-        },
-      });
-      */
+
       const autocompleteParams: any = {
         query,
         latitude: userLocation?.latitude,
         longitude: userLocation?.longitude,
-        components: `country:${country}`,
       };
 
       if (searchRadiusKm < 999999) {
-        autocompleteParams.radius = searchRadiusKm * 1000; // Convert km to meters
+        autocompleteParams.radius = searchRadiusKm * 1000;
+        autocompleteParams.components = `country:${country}`;
       } else if (!searchRadiusKm) {
         autocompleteParams.radius =
           APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS; // fallback
