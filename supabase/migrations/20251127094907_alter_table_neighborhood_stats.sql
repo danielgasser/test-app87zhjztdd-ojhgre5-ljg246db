@@ -1,0 +1,2 @@
+ALTER TABLE neighborhood_stats 
+ALTER COLUMN boundary TYPE GEOGRAPHY(GEOMETRY, 4326);

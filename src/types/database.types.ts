@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_signups: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          ip_address: string | null
+          source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id?: string
+          ip_address?: string | null
+          source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          ip_address?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           active: boolean | null
@@ -626,6 +653,24 @@ export type Database = {
         }
         Relationships: []
       }
+      website_signup_rate_limits: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       geography_columns: {
@@ -799,11 +844,16 @@ export type Database = {
             }
             Returns: string
           }
+      batch_insert_neighborhood_stats: {
+        Args: { p_records: Json }
+        Returns: number
+      }
       calculate_location_safety_scores: {
         Args: { p_location_id: string }
         Returns: undefined
       }
       cleanup_old_notification_logs: { Args: never; Returns: undefined }
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       decrement_prediction_vote_count: {
         Args: {
           p_count_field: string

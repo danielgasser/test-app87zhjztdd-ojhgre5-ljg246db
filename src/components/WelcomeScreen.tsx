@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
 import { theme } from "@/styles/theme";
+import ShieldSvg from "assets/images/shield.svg";
 
 const { width, height } = Dimensions.get("window");
 
@@ -97,12 +98,18 @@ const WelcomeScreenNew = () => {
         <Animated.View
           style={[styles.logoContainer, { transform: [{ scale: scaleAnim }] }]}
         >
-          {/* New image logo */}
-          <Image
-            source={logoImage}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+          <View style={styles.shieldContainer}>
+            <ShieldSvg
+              width={180}
+              height={200}
+              style={styles.shieldBackground}
+            />
+            <Image
+              source={logoImage}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </View>
         </Animated.View>
 
         {/* Hero Text */}
@@ -214,10 +221,23 @@ const WelcomeScreenNew = () => {
 
 const getStyles = (isDark: boolean) =>
   StyleSheet.create({
+    shieldContainer: {
+      position: "relative",
+      alignItems: "center",
+      justifyContent: "center",
+      width: 180,
+      height: 200,
+    },
+    shieldBackground: {
+      position: "absolute",
+      width: 180,
+      height: 200,
+    },
     logoImage: {
       width: 150,
       height: 150,
       marginBottom: 10,
+      zIndex: -1,
     },
     container: {
       flex: 1,

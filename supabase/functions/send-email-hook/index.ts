@@ -5,7 +5,6 @@
  * It uses Resend's HTTP API instead of SMTP for reliable delivery.
  * 
  * Required environment variable:
- * - RESEND_API_KEY: Your Resend API key (re_...)
  */ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
