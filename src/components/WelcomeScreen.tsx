@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
 import { theme } from "@/styles/theme";
 import ShieldSvg from "assets/images/shield.svg";
+import MapBgSvg from "assets/images/map-bg.svg";
 
 const { width, height } = Dimensions.get("window");
 
@@ -101,7 +102,7 @@ const WelcomeScreenNew = () => {
           <View style={styles.shieldContainer}>
             <ShieldSvg
               width={180}
-              height={200}
+              height={180}
               style={styles.shieldBackground}
             />
             <Image
@@ -115,8 +116,7 @@ const WelcomeScreenNew = () => {
         {/* Hero Text */}
         <View style={styles.heroSection}>
           <Text style={styles.heroTitle}>
-            Travel Safely.{"\n"}
-            <Text style={styles.heroAccent}>Belong Everywhere.</Text>
+            Travel Safely &{"\n"} Belong Everywhere
           </Text>
 
           <Text style={styles.heroSubtitle}>
@@ -134,6 +134,13 @@ const WelcomeScreenNew = () => {
         >
           {/* Map Mockup */}
           <View style={styles.mapMockup}>
+            <View style={styles.mapBgContainer}>
+              <MapBgSvg
+                width={200}
+                height={120}
+                style={{ position: "absolute", top: 0, left: 0 }}
+              />
+            </View>
             <View style={styles.mapPin1}>
               <View
                 style={[
@@ -225,19 +232,19 @@ const getStyles = (isDark: boolean) =>
       position: "relative",
       alignItems: "center",
       justifyContent: "center",
-      width: 180,
-      height: 200,
+      width: 205,
+      height: 145,
+      zIndex: 0,
     },
     shieldBackground: {
       position: "absolute",
-      width: 180,
-      height: 200,
+      top: 0,
     },
     logoImage: {
-      width: 150,
-      height: 150,
+      width: 140,
+      height: 140,
       marginBottom: 10,
-      zIndex: -1,
+      zIndex: 1,
     },
     container: {
       flex: 1,
@@ -259,7 +266,7 @@ const getStyles = (isDark: boolean) =>
     logoContainer: {
       marginBottom: 10,
       position: "relative",
-      top: 20,
+      top: 8,
       left: 0,
     },
     logoPlaceholder: {
@@ -281,12 +288,12 @@ const getStyles = (isDark: boolean) =>
       marginBottom: 20,
     },
     heroTitle: {
-      fontSize: 33,
+      fontSize: 26,
       fontWeight: "bold",
       color: theme.colors.background,
       textAlign: "center",
-      lineHeight: 42,
-      marginBottom: 16,
+      lineHeight: 32,
+      marginBottom: 18,
     },
     heroAccent: {
       fontSize: 24,
@@ -302,6 +309,14 @@ const getStyles = (isDark: boolean) =>
     },
     illustrationContainer: {
       marginBottom: 30,
+    },
+    mapBgContainer: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: 200,
+      height: 120,
+      zIndex: 100,
     },
     mapMockup: {
       width: 200,
