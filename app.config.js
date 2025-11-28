@@ -37,7 +37,7 @@ module.exports = () => {
         },
       },
       android: {
-        versionCode: 2,
+        versionCode: 3,
         minSdkVersion: 24, // Android 7.0
         targetSdkVersion: 34, // Android 14
         permissions: ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],

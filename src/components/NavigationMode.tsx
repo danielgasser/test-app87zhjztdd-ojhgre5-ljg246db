@@ -7,6 +7,8 @@ import {
   Dimensions,
 } from "react-native";
 import MapView from "react-native-maps";
+import { Marker } from "react-native-maps";
+
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -34,6 +36,40 @@ interface NavigationModeProps {
   mapRef: React.RefObject<MapView | null>;
 }
 
+const getManeuverIcon = (maneuver?: string): string => {
+  switch (maneuver) {
+    case "turn-left":
+      return "arrow-back";
+    case "turn-right":
+      return "arrow-forward";
+    case "turn-slight-left":
+      return "arrow-back-outline";
+    case "turn-slight-right":
+      return "arrow-forward-outline";
+    case "turn-sharp-left":
+      return "return-down-back";
+    case "turn-sharp-right":
+      return "return-down-forward";
+    case "uturn-left":
+    case "uturn-right":
+      return "return-up-back";
+    case "roundabout-left":
+    case "roundabout-right":
+      return "sync-circle";
+    case "ramp-left":
+    case "fork-left":
+      return "arrow-back-outline";
+    case "ramp-right":
+    case "fork-right":
+      return "arrow-forward-outline";
+    case "merge":
+      return "git-merge";
+    case "straight":
+    default:
+      return "arrow-up";
+  }
+};
+
 const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useRealtimeReviews();
   const { timeFormat, distanceUnit } = useUserPreferences();
@@ -58,9 +94,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const [distanceToNextTurn, setDistanceToNextTurn] = useState<number>(0);
   const [locationSubscription, setLocationSubscription] = useState<any>(null);
+  const [showInstructionText, setShowInstructionText] = useState(false);
 
   const alertShownRef = useRef(false);
   const unhandledDangersRef = useRef<any[]>([]);
+
+  const [showDebug, setShowDebug] = useState(false);
+
   // Check if this review has already been handled in this navigation session
   const checkIfAlertAlreadyHandled = async (
     reviewId: string
@@ -550,6 +590,24 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     return "Follow the route";
   })();
 
+  const currentManeuver = (() => {
+    if (
+      selectedRoute.steps &&
+      selectedRoute.steps[currentNavigationStep || 0]
+    ) {
+      return selectedRoute.steps[currentNavigationStep || 0].maneuver;
+    }
+    return undefined;
+  })();
+
+  const nextManeuver = (() => {
+    const nextStepIndex = (currentNavigationStep || 0) + 1;
+    if (selectedRoute.steps && selectedRoute.steps[nextStepIndex]) {
+      return selectedRoute.steps[nextStepIndex].maneuver;
+    }
+    return undefined;
+  })();
+
   const nextInstruction = (() => {
     const nextStepIndex = (currentNavigationStep || 0) + 1;
     if (selectedRoute.steps && selectedRoute.steps[nextStepIndex]) {
@@ -558,35 +616,64 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     return null;
   })();
 
-  const debugInfo = {
-    hasRoute: !!selectedRoute,
-    hasSteps: !!selectedRoute?.steps,
-    stepsLength: selectedRoute?.steps?.length || 0,
-    currentStep: currentNavigationStep,
-    hasCurrentStepData: !!selectedRoute?.steps?.[currentNavigationStep || 0],
-    distanceToTurn: distanceToNextTurn,
-    hasPosition: !!currentPosition,
-  };
-
   return (
     <>
-      {/* Top instruction panel */}
-      <View style={styles.instructionPanel}>
-        <View style={styles.distanceContainer}>
+      {/* Navigation Arrow Marker */}
+      {currentPosition && mapRef?.current && (
+        <Marker
+          coordinate={currentPosition}
+          anchor={{ x: 0.5, y: 0.5 }}
+          flat={true}
+          rotation={currentPosition.heading || 0}
+        >
+          <View style={styles.navigationArrow}>
+            <Ionicons name="navigate" size={32} color={theme.colors.primary} />
+          </View>
+        </Marker>
+      )}
+      {/* Navigation instruction container */}
+      <View style={styles.navigationInstructionContainer}>
+        <View
+          style={[
+            styles.instructionPanel,
+            nextInstruction && { borderBottomLeftRadius: 0 },
+          ]}
+        >
+          <Ionicons
+            name={getManeuverIcon(currentManeuver) as any}
+            size={60}
+            color={theme.colors.card}
+          />
           <Text style={styles.distanceText}>
             {formatDistance(distanceToNextTurn, distanceUnit)}
           </Text>
-          <Ionicons name="arrow-up" size={60} color={theme.colors.card} />
-        </View>
-
-        <View style={styles.instructionTextContainer}>
-          <Text style={styles.instructionText}>{currentInstruction}</Text>
-          {nextInstruction && (
-            <Text style={styles.nextInstructionText}>
-              Then: {nextInstruction}
-            </Text>
+          <TouchableOpacity
+            style={styles.infoButton}
+            onPress={() => setShowInstructionText(!showInstructionText)}
+          >
+            <Ionicons
+              name={showInstructionText ? "chevron-up" : "chevron-down"}
+              size={24}
+              color={theme.colors.card}
+            />
+          </TouchableOpacity>
+          {showInstructionText && (
+            <View style={styles.instructionTextContainer}>
+              <Text style={styles.instructionText}>{currentInstruction}</Text>
+            </View>
           )}
         </View>
+
+        {nextInstruction && (
+          <View style={styles.thenPill}>
+            <Text style={styles.thenText}>Then</Text>
+            <Ionicons
+              name={getManeuverIcon(nextManeuver) as any}
+              size={24}
+              color={theme.colors.card}
+            />
+          </View>
+        )}
       </View>
 
       {/* Bottom controls */}
@@ -624,19 +711,76 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           <Text style={styles.endButtonText}>End Navigation</Text>
         </TouchableOpacity>
       </View>
+      {/* Temporary debug overlay */}
+      <TouchableOpacity
+        style={styles.debugButton}
+        onPress={() => setShowDebug(!showDebug)}
+      >
+        <Text style={{ color: "white", fontSize: 10 }}>DBG</Text>
+      </TouchableOpacity>
+
+      {showDebug && selectedRoute?.steps && (
+        <View style={styles.debugOverlay}>
+          <Text style={styles.debugTitle}>
+            Steps ({selectedRoute.steps.length}):
+          </Text>
+          {selectedRoute.steps.slice(0, 5).map((step, i) => (
+            <Text
+              key={i}
+              style={[
+                styles.debugText,
+                i === currentNavigationStep && { color: "yellow" },
+              ]}
+            >
+              {i}: {step.maneuver || "-"} | {step.distance_meters}m
+            </Text>
+          ))}
+        </View>
+      )}
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  debugButton: {
+    position: "absolute",
+    top: 120,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 8,
+    borderRadius: 4,
+  },
+  debugOverlay: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    padding: 10,
+    borderRadius: 8,
+    maxWidth: 200,
+    zIndex: 10001,
+  },
+  debugTitle: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 11,
+    marginBottom: 4,
+  },
+  debugText: {
+    color: "white",
+    fontSize: 10,
+  },
   container: {
     flex: 1,
   },
-  instructionPanel: {
+  navigationInstructionContainer: {
     position: "absolute",
     top: 4,
-    left: 20,
-    right: 20,
+    left: 10,
+    right: 10,
+    zIndex: 10000,
+  },
+  instructionPanel: {
     backgroundColor: theme.colors.primary,
     borderRadius: 16,
     padding: 10,
@@ -644,8 +788,31 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    zIndex: 10000,
     elevation: 8,
+  },
+  thenPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: theme.colors.borderDark,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    marginTop: 0,
+    shadowColor: theme.colors.shadowDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+    gap: 6,
+  },
+  thenText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: theme.colors.card,
   },
   distanceContainer: {
     flexDirection: "row",
@@ -658,6 +825,23 @@ const styles = StyleSheet.create({
     color: theme.colors.card,
     marginRight: 12,
   },
+  infoButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    marginLeft: "auto",
+    padding: 4,
+  },
+  navigationArrow: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
   instructionTextContainer: {
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.3)",
@@ -669,10 +853,7 @@ const styles = StyleSheet.create({
     color: theme.colors.card,
     marginBottom: 2,
   },
-  nextInstructionText: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
-  },
+
   controls: {
     position: "absolute",
     bottom: 10,
@@ -687,10 +868,12 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
     shadowColor: theme.colors.shadowDark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.95,
+    shadowRadius: 12,
+    elevation: 8,
+    borderColor: "rgba(0,0,0,0.2)",
+    borderWidth: 1,
   },
   statItem: {
     alignItems: "center",

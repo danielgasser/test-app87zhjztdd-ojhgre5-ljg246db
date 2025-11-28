@@ -146,6 +146,7 @@ export default function MapScreen() {
     routes,
     showRouteSegments,
     navigationIntent,
+    currentNavigationStep,
   } = useAppSelector((state: any) => state.locations, shallowEqual);
   // ADD THIS RIGHT HERE:
   const locationsStateRef = useRef(null);
@@ -594,15 +595,21 @@ export default function MapScreen() {
           return null;
         }
 
-        const segmentColor =
-          (segment.safety_score || segment.overall_score) >=
-          APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
-            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
-            : (segment.safety_score || segment.overall_score) >=
-              APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
-            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
-            : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+        // Check if segment is behind user's current position
+        const isTraveled =
+          navigationActive &&
+          currentNavigationStep !== null &&
+          index < currentNavigationStep;
 
+        const segmentColor = isTraveled
+          ? "rgba(150, 150, 150, 0.5)"
+          : (segment.safety_score || segment.overall_score) >=
+            APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
+          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
+          : (segment.safety_score || segment.overall_score) >=
+            APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
+          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
+          : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
         // Try wrapping in Fragment with timestamp key to force re-render
         return (
           <React.Fragment key={`segment-${index}-${Date.now()}`}>
@@ -956,7 +963,7 @@ export default function MapScreen() {
         showsPointsOfInterest={true}
         style={styles.map}
         initialRegion={region}
-        showsUserLocation={true}
+        showsUserLocation={!navigationActive}
         showsMyLocationButton={false}
         showsCompass={true}
         onTouchStart={() => Keyboard.dismiss()}
