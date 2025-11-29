@@ -19,6 +19,7 @@ import {
   startNavigationSession,
   endNavigationSession,
   SafetyAlertHandled,
+  setNavigationPosition,
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
@@ -452,7 +453,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           };
 
           setCurrentPosition(newPosition);
-
+          dispatch(setNavigationPosition(newPosition));
+          checkDeviation(newPosition);
           // Update map camera to follow user
           if (mapRef?.current) {
             mapRef.current.animateCamera(
@@ -580,8 +582,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     if (selectedRoute?.databaseId) {
       await dispatch(endNavigationSession(selectedRoute.databaseId));
     }
+    dispatch(setNavigationPosition(null));
 
-    // Redux state cleanup
     dispatch(endNavigation());
     // Component cleanup
     onExit();
@@ -637,7 +639,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   return (
     <>
-      {/* Navigation Arrow Marker */}
+      {/* Navigation Arrow Marker 
       {currentPosition && mapRef?.current && (
         <Marker
           coordinate={currentPosition}
@@ -649,7 +651,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             <Ionicons name="navigate" size={32} color={theme.colors.primary} />
           </View>
         </Marker>
-      )}
+      )}*/}
       {/* Navigation instruction container */}
       <View style={styles.navigationInstructionContainer}>
         <View
@@ -738,12 +740,20 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         <Text style={{ color: "white", fontSize: 10 }}>DBG</Text>
       </TouchableOpacity>
 
-      {showDebug && selectedRoute?.steps && (
+      {showDebug && selectedRoute && (
         <View style={styles.debugOverlay}>
           <Text style={styles.debugTitle}>
-            Steps ({selectedRoute.steps.length}):
+            Steps: {selectedRoute.steps?.length || 0} | Current:{" "}
+            {currentNavigationStep}
           </Text>
-          {selectedRoute.steps.slice(0, 5).map((step, i) => (
+          <Text style={styles.debugText}>
+            Segments:{" "}
+            {selectedRoute.safety_analysis?.segment_scores?.length || "NONE"}
+          </Text>
+          <Text style={styles.debugText}>
+            Route pts: {selectedRoute.route_points?.length || "NONE"}
+          </Text>
+          {selectedRoute.steps?.slice(0, 4).map((step, i) => (
             <Text
               key={i}
               style={[
@@ -763,11 +773,12 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 const styles = StyleSheet.create({
   debugButton: {
     position: "absolute",
-    top: 120,
+    top: 200,
     right: 20,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    padding: 8,
-    borderRadius: 4,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    padding: 12,
+    borderRadius: 8,
+    zIndex: 99999,
   },
   debugOverlay: {
     position: "absolute",

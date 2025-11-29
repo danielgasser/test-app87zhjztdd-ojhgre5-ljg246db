@@ -284,6 +284,7 @@ interface LocationsState {
   navigationStartTime: string | null;
   navigationSessionId: string | null;
   isRerouting: boolean;
+  navigationPosition: { latitude: number; longitude: number; heading?: number } | null;
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -364,6 +365,7 @@ const initialState: LocationsState = {
   navigationStartTime: null,
   navigationSessionId: null,
   isRerouting: false,
+  navigationPosition: null,
 };
 
 
@@ -2068,6 +2070,9 @@ const locationsSlice = createSlice({
       }
       state.navigationSessionId = action.payload;
     },
+    setNavigationPosition: (state, action: PayloadAction<{ latitude: number; longitude: number; heading?: number } | null>) => {
+      state.navigationPosition = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
@@ -2435,6 +2440,7 @@ export const {
   updateNavigationProgress,
   setRerouting,
   setNavigationSessionId,
+  setNavigationPosition,
 } = locationsSlice.actions;
 
 export default locationsSlice.reducer;

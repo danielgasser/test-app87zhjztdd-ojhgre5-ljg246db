@@ -147,6 +147,7 @@ export default function MapScreen() {
     showRouteSegments,
     navigationIntent,
     currentNavigationStep,
+    navigationPosition,
   } = useAppSelector((state: any) => state.locations, shallowEqual);
   // ADD THIS RIGHT HERE:
   const locationsStateRef = useRef(null);
@@ -1142,6 +1143,23 @@ export default function MapScreen() {
             description="Route ending point"
           />
         )}
+        {/* Navigation Arrow */}
+        {navigationActive && navigationPosition && (
+          <Marker
+            coordinate={navigationPosition}
+            anchor={{ x: 0.5, y: 0.5 }}
+            flat={true}
+            rotation={navigationPosition.heading || 0}
+          >
+            <View style={styles.navigationArrow}>
+              <Ionicons
+                name="navigate"
+                size={32}
+                color={theme.colors.primary}
+              />
+            </View>
+          </Marker>
+        )}
         {selectedRoute && (
           <>
             {/* Only show main line when NOT using colored segments */}
@@ -1163,9 +1181,23 @@ export default function MapScreen() {
               </>
             )}
             {/* Show colored segments */}
-            {navigationActive
-              ? renderRouteSegments(selectedRoute, true)
-              : showRouteSegments && renderRouteSegments(selectedRoute)}
+            {navigationActive ? (
+              selectedRoute.safety_analysis?.segment_scores ? (
+                renderRouteSegments(selectedRoute, true)
+              ) : (
+                <Polyline
+                  coordinates={
+                    selectedRoute.route_points || selectedRoute.coordinates
+                  }
+                  {...(Platform.OS === "ios"
+                    ? { strokeColors: [getRouteLineColor(selectedRoute)] }
+                    : { strokeColor: getRouteLineColor(selectedRoute) })}
+                  strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+                />
+              )
+            ) : (
+              showRouteSegments && renderRouteSegments(selectedRoute)
+            )}
           </>
         )}
 
@@ -1800,6 +1832,16 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     backgroundColor: theme.colors.primary,
     borderRadius: 16,
+  },
+  navigationArrow: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   segmentToggleText: {
     color: theme.colors.background,
