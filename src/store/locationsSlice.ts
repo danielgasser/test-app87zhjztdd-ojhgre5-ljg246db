@@ -25,7 +25,6 @@ import { logger } from "@/utils/logger";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
-
 // Helper function to get the current auth token
 async function getAuthToken(): Promise<string> {
   const { data: { session }, error } = await supabase.auth.getSession();
@@ -207,7 +206,6 @@ export interface SafeRoute {
   };
   waypoints_added?: any; // NEW: track why route was modified
 }
-
 // ================================
 // STATE INTERFACE
 // ================================
@@ -284,6 +282,10 @@ interface LocationsState {
   navigationStartTime: string | null;
   navigationSessionId: string | null;
   isRerouting: boolean;
+  routeHistory: RouteHistoryItem[];
+  routeHistoryLoading: boolean;
+  routeHistoryPage: number;
+  routeHistoryHasMore: boolean;
   navigationPosition: { latitude: number; longitude: number; heading?: number } | null;
 }
 export interface RouteImprovementSummary {
@@ -307,6 +309,23 @@ export interface SmartRouteComparison {
   improvement_summary: RouteImprovementSummary;
   waypoints_added: SafeWaypoint[];
   message: string;
+}
+export interface RouteHistoryItem {
+  id: string;
+  user_id: string;
+  origin_name: string;
+  destination_name: string;
+  distance_km: number;
+  duration_minutes: number;
+  safety_score: number | null;
+  navigation_started_at: string | null;
+  navigation_ended_at: string | null;
+  navigation_session_id: string | null;
+  created_at: string;
+  updated_at: string;
+  route_coordinates: RouteCoordinate[];
+  steps: NavigationStep[] | null;
+  safety_alerts_handled: SafetyAlertHandled[] | null;
 }
 // ================================
 // INITIAL STATE
@@ -365,6 +384,10 @@ const initialState: LocationsState = {
   navigationStartTime: null,
   navigationSessionId: null,
   isRerouting: false,
+  routeHistory: [],
+  routeHistoryLoading: false,
+  routeHistoryPage: 0,
+  routeHistoryHasMore: true,
   navigationPosition: null,
 };
 
@@ -580,6 +603,26 @@ function dbRouteToSafeRoute(dbRoute: any): SafeRoute {
     },
     created_at: dbRoute.created_at,
     databaseId: dbRoute.id,
+  };
+}
+
+function dbRowToRouteHistoryItem(row: any): RouteHistoryItem {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    origin_name: row.origin_name,
+    destination_name: row.destination_name,
+    distance_km: row.distance_km,
+    duration_minutes: row.duration_minutes,
+    safety_score: row.safety_score,
+    navigation_started_at: row.navigation_started_at,
+    navigation_ended_at: row.navigation_ended_at,
+    navigation_session_id: row.navigation_session_id,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    route_coordinates: row.route_coordinates as RouteCoordinate[],
+    steps: row.steps as NavigationStep[] | null,
+    safety_alerts_handled: row.safety_alerts_handled as SafetyAlertHandled[] | null,
   };
 }
 // ================================
@@ -1899,6 +1942,36 @@ export const checkForReroute = createAsyncThunk(
     }
   }
 );
+
+export const fetchUserRouteHistory = createAsyncThunk(
+  "locations/fetchUserRouteHistory",
+  async ({ userId, page = 0, pageSize = 10 }: { userId: string; page?: number; pageSize?: number }) => {
+    const { data, error } = await supabase
+      .from("routes")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    if (error) throw error;
+
+    const routes = (data || []).map(dbRowToRouteHistoryItem);
+    return { routes, page, hasMore: (data?.length || 0) === pageSize };
+  }
+);
+
+export const deleteRouteFromHistory = createAsyncThunk(
+  "locations/deleteRouteFromHistory",
+  async (routeId: string) => {
+    const { error } = await supabase
+      .from("routes")
+      .delete()
+      .eq("id", routeId);
+
+    if (error) throw error;
+    return routeId;
+  }
+);
 // ================================
 // HELPER FUNCTIONS
 // ================================
@@ -2245,6 +2318,7 @@ const locationsSlice = createSlice({
         state.communityLoading = false;
         state.error = action.error.message || "Failed to fetch community reviews";
       })
+
       // Trending Locations
       .addCase(fetchTrendingLocations.pending, (state) => {
         state.trendingLoading = true;
@@ -2258,6 +2332,7 @@ const locationsSlice = createSlice({
         state.trendingLoading = false;
         state.error = action.error.message || "Failed to fetch trending locations";
       })
+
       // Danger Zones
       .addCase(fetchDangerZones.pending, (state) => {
         state.dangerZonesLoading = true;
@@ -2358,6 +2433,7 @@ const locationsSlice = createSlice({
       .addCase(generateRouteAlternatives.rejected, (state, action) => {
         logger.error("Failed to generate alternatives:", action.payload);
       })
+
       // Generate Smart Route
       .addCase(generateSmartRoute.pending, (state) => {
         state.routeLoading = true;
@@ -2402,6 +2478,26 @@ const locationsSlice = createSlice({
       .addCase(generateSmartRoute.rejected, (state, action) => {
         state.routeLoading = false;
         state.routeError = action.payload as string || "Failed to generate smart route";
+      })
+      // Route History
+      .addCase(fetchUserRouteHistory.pending, (state) => {
+        state.routeHistoryLoading = true;
+      })
+      .addCase(fetchUserRouteHistory.fulfilled, (state, action) => {
+        state.routeHistoryLoading = false;
+        if (action.payload.page === 0) {
+          state.routeHistory = action.payload.routes;
+        } else {
+          state.routeHistory = [...state.routeHistory, ...action.payload.routes];
+        }
+        state.routeHistoryPage = action.payload.page;
+        state.routeHistoryHasMore = action.payload.hasMore;
+      })
+      .addCase(fetchUserRouteHistory.rejected, (state) => {
+        state.routeHistoryLoading = false;
+      })
+      .addCase(deleteRouteFromHistory.fulfilled, (state, action) => {
+        state.routeHistory = state.routeHistory.filter(r => r.id !== action.payload);
       })
   },
 });

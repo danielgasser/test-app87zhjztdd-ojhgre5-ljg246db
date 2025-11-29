@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Linking,
   GestureResponderEvent,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,6 +24,13 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import SearchRadiusSelector from "@/components/SearchRadiusSelector";
 import { useAuth } from "@/providers/AuthProvider";
+import {
+  fetchUserRouteHistory,
+  deleteRouteFromHistory,
+  setSelectedRoute,
+  setNavigationIntent,
+  RouteHistoryItem,
+} from "@/store/locationsSlice";
 
 const appConfig = require("../../app.config.js");
 
@@ -30,9 +38,16 @@ export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const { user, signOut } = useAuth();
   const { profile, loading } = useAppSelector((state) => state.user);
+  const {
+    routeHistory,
+    routeHistoryLoading,
+    routeHistoryHasMore,
+    routeHistoryPage,
+  } = useAppSelector((state) => state.locations);
   const [uploading, setUploading] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     activity: false,
+    routeHistory: false,
     demographics: false,
     mapSettings: false,
     settings: false,
@@ -65,6 +80,16 @@ export default function ProfileScreen() {
 
     fetchVoteStats();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (
+      expandedSections.routeHistory &&
+      user?.id &&
+      routeHistory.length === 0
+    ) {
+      dispatch(fetchUserRouteHistory({ userId: user.id, page: 0 }));
+    }
+  }, [expandedSections.routeHistory, user?.id]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -208,6 +233,41 @@ export default function ProfileScreen() {
       ],
       "warning"
     );
+  };
+
+  const handleLoadMoreRoutes = () => {
+    if (!routeHistoryLoading && routeHistoryHasMore && user?.id) {
+      dispatch(
+        fetchUserRouteHistory({ userId: user.id, page: routeHistoryPage + 1 })
+      );
+    }
+  };
+
+  const handleDeleteRoute = (routeId: string) => {
+    notify.confirm(
+      "Are you sure you want to delete this route from your history?",
+      "Delete Route",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => {} },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => dispatch(deleteRouteFromHistory(routeId)),
+        },
+      ],
+      "warning"
+    );
+  };
+
+  const handleNavigateToRoute = (route: RouteHistoryItem) => {
+    dispatch(
+      setNavigationIntent({
+        targetTab: "map",
+        action: "view_location",
+        data: { route },
+      })
+    );
+    router.push("/(tabs)");
   };
 
   const renderDemographics = () => {
@@ -366,6 +426,99 @@ export default function ProfileScreen() {
                   <Text style={styles.statLabel}>Unhelpful Votes</Text>
                 </View>
               </View>
+            </CollapsibleSection>
+            {/* Route History Section */}
+            <CollapsibleSection
+              title="Route History"
+              icon="navigate"
+              isExpanded={expandedSections.routeHistory}
+              onToggle={() => toggleSection("routeHistory")}
+            >
+              {routeHistoryLoading && routeHistory.length === 0 ? (
+                <ActivityIndicator size="small" color={theme.colors.primary} />
+              ) : routeHistory.length === 0 ? (
+                <Text style={styles.noRoutesText}>No routes yet</Text>
+              ) : (
+                <>
+                  {routeHistory.map((route) => (
+                    <View key={route.id} style={styles.routeHistoryItem}>
+                      <TouchableOpacity
+                        style={styles.routeHistoryContent}
+                        onPress={() => handleNavigateToRoute(route)}
+                      >
+                        <View style={styles.routeHistoryHeader}>
+                          <Ionicons
+                            name="location"
+                            size={16}
+                            color={theme.colors.primary}
+                          />
+                          <Text
+                            style={styles.routeHistoryOrigin}
+                            numberOfLines={1}
+                          >
+                            {route.origin_name}
+                          </Text>
+                        </View>
+                        <View style={styles.routeHistoryHeader}>
+                          <Ionicons
+                            name="flag"
+                            size={16}
+                            color={theme.colors.error}
+                          />
+                          <Text
+                            style={styles.routeHistoryDestination}
+                            numberOfLines={1}
+                          >
+                            {route.destination_name}
+                          </Text>
+                        </View>
+                        <View style={styles.routeHistoryMeta}>
+                          <Text style={styles.routeHistoryMetaText}>
+                            {route.distance_km.toFixed(1)} km
+                          </Text>
+                          <Text style={styles.routeHistoryMetaText}>•</Text>
+                          <Text style={styles.routeHistoryMetaText}>
+                            {route.duration_minutes} min
+                          </Text>
+                          <Text style={styles.routeHistoryMetaText}>•</Text>
+                          <Text style={styles.routeHistoryMetaText}>
+                            Safety: {route.safety_score?.toFixed(1) || "N/A"}
+                          </Text>
+                        </View>
+                        <Text style={styles.routeHistoryDate}>
+                          {new Date(route.created_at).toLocaleDateString()}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.routeHistoryDelete}
+                        onPress={() => handleDeleteRoute(route.id)}
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={20}
+                          color={theme.colors.error}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  {routeHistoryHasMore && (
+                    <TouchableOpacity
+                      style={styles.loadMoreButton}
+                      onPress={handleLoadMoreRoutes}
+                      disabled={routeHistoryLoading}
+                    >
+                      {routeHistoryLoading ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={theme.colors.primary}
+                        />
+                      ) : (
+                        <Text style={styles.loadMoreText}>Load More</Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
             </CollapsibleSection>
             {/* Demographics Section */}
             <CollapsibleSection
@@ -767,5 +920,75 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: theme.colors.text,
+  },
+  noRoutesText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontStyle: "italic",
+    textAlign: "center",
+    padding: theme.spacing.md,
+  },
+  routeHistoryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+    overflow: "hidden",
+  },
+  routeHistoryContent: {
+    flex: 1,
+    padding: theme.spacing.md,
+  },
+  routeHistoryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.xs,
+  },
+  routeHistoryOrigin: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    flex: 1,
+  },
+  routeHistoryDestination: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    flex: 1,
+  },
+  routeHistoryMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.xs,
+  },
+  routeHistoryMetaText: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+  },
+  routeHistoryDate: {
+    fontSize: 11,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.xs,
+  },
+  routeHistoryDelete: {
+    padding: theme.spacing.md,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadMoreButton: {
+    padding: theme.spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.md,
+    marginTop: theme.spacing.sm,
+  },
+  loadMoreText: {
+    fontSize: 14,
+    color: theme.colors.primary,
+    fontWeight: "500",
   },
 });

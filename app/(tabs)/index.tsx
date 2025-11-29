@@ -34,6 +34,9 @@ import {
   endNavigation,
   startNavigation,
   setDangerZonesVisible,
+  setSelectedRoute,
+  RouteHistoryItem,
+  SafeRoute,
 } from "../../src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -804,6 +807,45 @@ export default function MapScreen() {
 
     initializePreferences();
   }, [userProfile, userId, dispatch]);
+
+  useEffect(() => {
+    if (
+      navigationIntent?.action === "view_location" &&
+      navigationIntent.data?.route
+    ) {
+      const historyRoute = navigationIntent.data.route as RouteHistoryItem;
+
+      // Convert RouteHistoryItem to SafeRoute format
+      const safeRoute: SafeRoute = {
+        id: `history_${historyRoute.id}`,
+        name: `${historyRoute.origin_name} → ${historyRoute.destination_name}`,
+        route_type: "balanced",
+        coordinates: historyRoute.route_coordinates,
+        route_points: historyRoute.route_coordinates,
+        steps: historyRoute.steps || undefined,
+        estimated_duration_minutes: historyRoute.duration_minutes,
+        distance_kilometers: historyRoute.distance_km,
+        safety_analysis: {
+          confidence_score: null,
+          overall_route_score: historyRoute.safety_score || 3.0,
+          safety_notes: ["Route loaded from history"],
+        },
+        created_at: historyRoute.created_at,
+        databaseId: historyRoute.id,
+      };
+
+      dispatch(setSelectedRoute(safeRoute));
+      dispatch(clearNavigationIntent());
+
+      // Center map on route
+      if (mapRef.current && historyRoute.route_coordinates.length > 0) {
+        mapRef.current.fitToCoordinates(historyRoute.route_coordinates, {
+          edgePadding: { top: 100, right: 50, bottom: 300, left: 50 },
+          animated: true,
+        });
+      }
+    }
+  }, [navigationIntent]);
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
