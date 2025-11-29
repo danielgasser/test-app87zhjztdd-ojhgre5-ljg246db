@@ -482,8 +482,27 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               );
               setDistanceToNextTurn(distance);
 
-              // Check if we reached the turn (within 20m of CURRENT step's end)
-              if (distance < 20) {
+              // Check if we reached or passed the turn
+              // Either within 20m, OR we're now closer to the NEXT step's start than current step's end
+              const passedStep = (() => {
+                if (distance < 30) return true; // Close enough to current step end
+
+                const nextStepIndex = currentNavigationStep + 1;
+                if (nextStepIndex < selectedRoute.steps.length) {
+                  const nextStep = selectedRoute.steps[nextStepIndex];
+                  const distToNextStart = calculateDistance(
+                    newPosition.latitude,
+                    newPosition.longitude,
+                    nextStep.start_location.latitude,
+                    nextStep.start_location.longitude
+                  );
+                  // If closer to next step's start than current step's end, we passed it
+                  return distToNextStart < distance;
+                }
+                return false;
+              })();
+
+              if (passedStep) {
                 const nextStepIndex = currentNavigationStep + 1;
                 if (nextStepIndex < selectedRoute.steps.length) {
                   dispatch(updateNavigationProgress(nextStepIndex));
