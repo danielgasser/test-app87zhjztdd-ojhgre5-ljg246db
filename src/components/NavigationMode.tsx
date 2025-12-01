@@ -30,6 +30,10 @@ import { store } from "@/store";
 import { calculateDistance, formatDistance } from "@/utils/distanceHelpers";
 import { formatDuration, formatArrivalTime } from "@/utils/timeHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+
+// Only for testing/logging purposes
+import { navLog, navLogEvents } from "@/utils/navigationLogger";
+
 const { width, height } = Dimensions.get("window");
 
 interface NavigationModeProps {
@@ -99,6 +103,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const alertShownRef = useRef(false);
   const unhandledDangersRef = useRef<any[]>([]);
+  const positionUpdatesCount = useRef(0);
 
   const [showDebug, setShowDebug] = useState(false);
 
@@ -267,6 +272,17 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useEffect(() => {
     const initNavigation = async () => {
       // Update database timestamp
+      await navLog.startSession();
+      console.log(
+        "[NavLog] selectedRoute:",
+        selectedRoute?.name,
+        selectedRoute?.distance_kilometers
+      );
+
+      navLogEvents.navigationStarted(
+        selectedRoute?.name || "Route",
+        selectedRoute?.distance_kilometers || 0
+      );
       if (selectedRoute?.databaseId) {
         await dispatch(startNavigationSession(selectedRoute.databaseId));
       }
@@ -455,6 +471,11 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           setCurrentPosition(newPosition);
           dispatch(setNavigationPosition(newPosition));
           checkDeviation(newPosition);
+          navLogEvents.positionUpdate(
+            newPosition.latitude,
+            newPosition.longitude,
+            newPosition.heading
+          );
           // Update map camera to follow user
           if (mapRef?.current) {
             mapRef.current.animateCamera(
@@ -508,6 +529,11 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                 const nextStepIndex = currentNavigationStep + 1;
                 if (nextStepIndex < selectedRoute.steps.length) {
                   dispatch(updateNavigationProgress(nextStepIndex));
+                  navLogEvents.stepAdvanced(
+                    currentNavigationStep,
+                    nextStepIndex,
+                    "passed_turn"
+                  );
                 }
               }
             }
@@ -533,8 +559,12 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     latitude: number;
     longitude: number;
   }) => {
+    // Skip deviation check for first 5 position updates (let GPS settle)
+    positionUpdatesCount.current++;
+    if (positionUpdatesCount.current < 10) {
+      return;
+    }
     // Check if user is more than 50m from route
-    // Simple check - can be improved
     if (selectedRoute?.route_points && selectedRoute.route_points.length > 0) {
       const closestPoint = findClosestPointOnRoute(
         position,
@@ -546,9 +576,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         closestPoint.latitude,
         closestPoint.longitude
       );
+      navLogEvents.deviationCheck(distance, 100, distance > 100);
 
       // If more than 50m off route, trigger reroute
-      if (distance > 50) {
+      if (distance > 100) {
         dispatch(checkForReroute(position));
       }
     }
@@ -583,7 +614,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       await dispatch(endNavigationSession(selectedRoute.databaseId));
     }
     dispatch(setNavigationPosition(null));
-
+    navLogEvents.navigationEnded("user_ended", false);
+    await navLog.endSession();
+    // Offer to export logs
+    await navLog.share();
     dispatch(endNavigation());
     // Component cleanup
     onExit();

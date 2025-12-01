@@ -22,6 +22,9 @@ import { shouldShowBanner, incrementShowCount, BannerType } from "./profileBanne
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 
+// Only for testing/logging purposes
+import { navLog, navLogEvents } from '@/utils/navigationLogger';
+
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -1723,7 +1726,7 @@ export const checkForReroute = createAsyncThunk(
       "Finding a new & safer route...",
       "Recalculating Route"
     );
-
+    navLogEvents.rerouteTriggered('deviation', currentPosition.latitude, currentPosition.longitude);
     try {
       // Create new route request from current position to original destination
       const newRouteRequest: RouteRequest = {
@@ -1788,6 +1791,8 @@ export const checkForReroute = createAsyncThunk(
 
             // 🆕 Clear dismissed alerts - fresh start with new safer route
 
+            navLogEvents.rerouteComplete(true, result.optimized_route.distance_kilometers);
+            navLogEvents.routeSaved(savedRoute.id, 'reroute_safer');
             notify.info(
               `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
               "Route Updated"
@@ -1879,7 +1884,8 @@ export const checkForReroute = createAsyncThunk(
           // 🆕 Start new navigation session
           await dispatch(startNavigationSession(savedRoute.id));
 
-
+          navLogEvents.rerouteComplete(true, basicResult.route.distance_kilometers);
+          navLogEvents.routeSaved(savedRoute.id, 'reroute_fallback');
           notify.success(
             "New route calculated from your current position",
             "Route Updated"
@@ -1897,6 +1903,8 @@ export const checkForReroute = createAsyncThunk(
     } catch (error) {
       // @ts-ignore
       dispatch(setRerouting(false));
+      navLogEvents.rerouteComplete(false);
+      navLogEvents.error('checkForReroute', error instanceof Error ? error.message : String(error));
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
