@@ -246,7 +246,7 @@ export default function ProfileScreen() {
   const handleDeleteRoute = (routeId: string) => {
     notify.confirm(
       "Are you sure you want to delete this route from your history?",
-      "Delete Route",
+      "",
       [
         { text: "Cancel", style: "cancel", onPress: () => {} },
         {
