@@ -114,6 +114,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     []
   );
   const currentStepRef = useRef<number | null>(currentNavigationStep);
+  const selectedRouteRef = useRef(selectedRoute);
 
   const [showDebug, setShowDebug] = useState(false);
 
@@ -268,6 +269,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useEffect(() => {
     currentStepRef.current = currentNavigationStep;
   }, [currentNavigationStep]);
+
+  useEffect(() => {
+    selectedRouteRef.current = selectedRoute;
+  }, [selectedRoute]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -567,12 +572,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           }
 
           // Calculate distance to next turn
-          if (selectedRoute && currentStepRef.current !== null) {
+          if (selectedRouteRef.current && currentStepRef.current !== null) {
             if (
-              selectedRoute.steps &&
-              currentStepRef.current < selectedRoute.steps.length
+              selectedRouteRef.current.steps &&
+              currentStepRef.current < selectedRouteRef.current.steps.length
             ) {
-              const currentStep = selectedRoute.steps[currentStepRef.current];
+              const currentStep =
+                selectedRouteRef.current.steps[currentStepRef.current];
               const distance = calculateDistance(
                 newPosition.latitude,
                 newPosition.longitude,
@@ -589,8 +595,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                 if (distance < 30) return true; // Close enough to current step end
 
                 const nextStepIndex = currentStepRef.current + 1;
-                if (nextStepIndex < selectedRoute.steps.length) {
-                  const nextStep = selectedRoute.steps[nextStepIndex];
+                if (nextStepIndex < selectedRouteRef.current.steps.length) {
+                  const nextStep =
+                    selectedRouteRef.current.steps[nextStepIndex];
                   const distToNextStart = calculateDistance(
                     newPosition.latitude,
                     newPosition.longitude,
@@ -605,7 +612,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
               if (passedStep) {
                 const nextStepIndex = currentStepRef.current + 1;
-                if (nextStepIndex < selectedRoute.steps.length) {
+                if (nextStepIndex < selectedRouteRef.current.steps.length) {
                   // Only advance if we haven't already advanced to this step
                   if (lastAdvancedStep.current !== nextStepIndex) {
                     lastAdvancedStep.current = nextStepIndex;

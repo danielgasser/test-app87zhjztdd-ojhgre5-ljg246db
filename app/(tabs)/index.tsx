@@ -642,7 +642,7 @@ export default function MapScreen() {
         return (
           <React.Fragment key={`segment-${index}-${Date.now()}`}>
             <Polyline
-              key={`segment-${index}`}
+              key={`segment-${index}-${isTraveled ? "traveled" : "active"}`}
               coordinates={segmentChunks[index]}
               strokeColors={[segmentColor]}
               {...(Platform.OS === "ios"
@@ -761,9 +761,6 @@ export default function MapScreen() {
   }, [dispatch]);
 
   const requestedPredictions = useRef<Set<string>>(new Set());
-  const lastSegmentUpdatePos = useRef<{ lat: number; lng: number } | null>(
-    null
-  );
 
   // Auto-fetch ML predictions for locations without reviews
   useEffect(() => {
@@ -873,24 +870,6 @@ export default function MapScreen() {
       }
     }
   }, [navigationIntent]);
-
-  useEffect(() => {
-    if (navigationActive && navigationPosition) {
-      const last = lastSegmentUpdatePos.current;
-      if (
-        !last ||
-        Math.abs(last.lat - navigationPosition.latitude) > 0.0005 ||
-        Math.abs(last.lng - navigationPosition.longitude) > 0.0005
-      ) {
-        lastSegmentUpdatePos.current = {
-          lat: navigationPosition.latitude,
-          lng: navigationPosition.longitude,
-        };
-        setMapKey((prev) => prev + 1);
-      }
-    }
-  }, [navigationActive, navigationPosition]);
-
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
