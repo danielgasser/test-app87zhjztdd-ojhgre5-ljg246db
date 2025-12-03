@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  AppState,
+  AppStateStatus,
 } from "react-native";
 import MapView from "react-native-maps";
 import { Marker } from "react-native-maps";
@@ -104,8 +106,19 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const alertShownRef = useRef(false);
   const unhandledDangersRef = useRef<any[]>([]);
   const positionUpdatesCount = useRef(0);
+  const lastAdvancedStep = useRef<number>(-1);
+  const lastRerouteTime = useRef<number>(0);
+  const appStateRef = useRef(AppState.currentState);
 
   const [showDebug, setShowDebug] = useState(false);
+
+  // Round distance based on proximity
+  const roundDistance = (meters: number): number => {
+    if (meters > 1000) return Math.round(meters / 100) * 100; // Round to 100m
+    if (meters > 200) return Math.round(meters / 50) * 50; // Round to 50m
+    if (meters > 50) return Math.round(meters / 10) * 10; // Round to 10m
+    return Math.round(meters); // Exact when very close
+  };
 
   // Check if this review has already been handled in this navigation session
   const checkIfAlertAlreadyHandled = async (
@@ -247,7 +260,25 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     }
   };
 
-  // Add this useEffect to calculate initial distance
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      (nextAppState: AppStateStatus) => {
+        if (
+          appStateRef.current.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          // App came to foreground - reset position counter to skip first updates
+          positionUpdatesCount.current = 0;
+          navLogEvents.appStateChange("resumed");
+        }
+        appStateRef.current = nextAppState;
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
+
   useEffect(() => {
     if (
       navigationActive &&
@@ -263,7 +294,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           currentStep.end_location.latitude,
           currentStep.end_location.longitude
         );
-        setDistanceToNextTurn(initialDistance);
+        const roundedInitial = roundDistance(initialDistance);
+        setDistanceToNextTurn(roundedInitial);
       }
     }
   }, [navigationActive, currentPosition, selectedRoute, currentNavigationStep]);
@@ -442,6 +474,24 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     return () => clearInterval(interval);
   }, [currentPosition]);
 
+  // Background token refresh during navigation
+  useEffect(() => {
+    const refreshInterval = setInterval(async () => {
+      try {
+        const { error } = await supabase.auth.refreshSession();
+        if (error) {
+          console.warn("[Navigation] Token refresh failed:", error.message);
+        } else {
+          console.log("[Navigation] Token refreshed");
+        }
+      } catch (e) {
+        console.warn("[Navigation] Token refresh error:", e);
+      }
+    }, 30 * 60 * 1000); // Every 30 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, []);
+
   const startNavigation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -503,8 +553,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                 currentStep.end_location.latitude, // ← Distance to CURRENT step's end
                 currentStep.end_location.longitude
               );
-              setDistanceToNextTurn(distance);
-
+              const roundedDistance = roundDistance(distance);
+              if (roundedDistance !== distanceToNextTurn) {
+                setDistanceToNextTurn(roundedDistance);
+              }
               // Check if we reached or passed the turn
               // Either within 20m, OR we're now closer to the NEXT step's start than current step's end
               const passedStep = (() => {
@@ -528,12 +580,16 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               if (passedStep) {
                 const nextStepIndex = currentNavigationStep + 1;
                 if (nextStepIndex < selectedRoute.steps.length) {
-                  dispatch(updateNavigationProgress(nextStepIndex));
-                  navLogEvents.stepAdvanced(
-                    currentNavigationStep,
-                    nextStepIndex,
-                    "passed_turn"
-                  );
+                  // Only advance if we haven't already advanced to this step
+                  if (lastAdvancedStep.current !== nextStepIndex) {
+                    lastAdvancedStep.current = nextStepIndex;
+                    dispatch(updateNavigationProgress(nextStepIndex));
+                    navLogEvents.stepAdvanced(
+                      currentNavigationStep,
+                      nextStepIndex,
+                      "passed_turn"
+                    );
+                  }
                 }
               }
             }
@@ -559,6 +615,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     latitude: number;
     longitude: number;
   }) => {
+    // Skip if already rerouting
+    if (isRerouting) {
+      return;
+    }
     // Skip deviation check for first 5 position updates (let GPS settle)
     positionUpdatesCount.current++;
     if (positionUpdatesCount.current < 10) {
@@ -580,7 +640,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
       // If more than 50m off route, trigger reroute
       if (distance > 100) {
-        dispatch(checkForReroute(position));
+        const now = Date.now();
+        const timeSinceLastReroute = now - lastRerouteTime.current;
+
+        // Only reroute if at least 60 seconds since last reroute
+        if (timeSinceLastReroute > 60000) {
+          lastRerouteTime.current = now;
+          dispatch(checkForReroute(position));
+        }
       }
     }
   };
@@ -610,6 +677,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const handleEndNavigation = async () => {
     // Update database timestamp
+    stopNavigation();
     if (selectedRoute?.databaseId) {
       await dispatch(endNavigationSession(selectedRoute.databaseId));
     }

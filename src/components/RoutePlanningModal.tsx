@@ -290,6 +290,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     ).unwrap();
     const optimizedRoute = {
       ...smartRouteComparison.optimized_route,
+      route_points: smartRouteComparison.optimized_route.coordinates,
       databaseId: savedRoute.id,
       navigationSessionId: navigationSessionId,
     };

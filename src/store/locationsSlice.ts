@@ -1765,6 +1765,7 @@ export const checkForReroute = createAsyncThunk(
             // 🆕 Attach database ID to the route
             const routeWithDbId = {
               ...result.optimized_route,
+              route_points: result.optimized_route.coordinates,
               databaseId: savedRoute.id,
               navigationSessionId: navigationSessionId,
             };
@@ -1861,6 +1862,7 @@ export const checkForReroute = createAsyncThunk(
           // 🆕 Attach database ID
           const routeWithDbId = {
             ...basicResult.route,
+            route_points: basicResult.route.coordinates,
             databaseId: savedRoute.id,
             navigationSessionId: selectedRoute.navigationSessionId ?? undefined,
           };
@@ -1886,10 +1888,18 @@ export const checkForReroute = createAsyncThunk(
 
           navLogEvents.rerouteComplete(true, basicResult.route.distance_kilometers);
           navLogEvents.routeSaved(savedRoute.id, 'reroute_fallback');
-          notify.success(
-            "New route calculated from your current position",
-            "Route Updated"
-          );
+
+          // Only notify if route actually changed significantly
+          const oldDistance = selectedRoute.distance_kilometers || 0;
+          const newDistance = result.optimized_route.distance_kilometers || 0;
+          const distanceDiff = Math.abs(newDistance - oldDistance);
+
+          if (distanceDiff >= 0.5) {
+            notify.success(
+              "New route calculated from your current position",
+              "Route Updated"
+            );
+          }
           setTimeout(() => {
             // @ts-ignore
             dispatch(setRerouting(false));

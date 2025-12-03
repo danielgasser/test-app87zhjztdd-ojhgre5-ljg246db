@@ -72,6 +72,7 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useAuth } from "@/providers/AuthProvider";
 import { shallowEqual } from "react-redux";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
+import NavigationArrow from "@/components/NavigationArrow";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -600,10 +601,35 @@ export default function MapScreen() {
         }
 
         // Check if segment is behind user's current position
-        const isTraveled =
-          navigationActive &&
-          currentNavigationStep !== null &&
-          index < currentNavigationStep;
+        // Check if segment is behind user's current position
+        const isTraveled = (() => {
+          if (!navigationActive || !navigationPosition) return false;
+
+          const segmentCoords = segmentChunks[index];
+          if (!segmentCoords || segmentCoords.length < 2) return false;
+
+          // Get segment end point (last point of this segment)
+          const segmentEnd = segmentCoords[segmentCoords.length - 1];
+
+          // Get route origin (first point of first segment)
+          const routeStart = segmentChunks[0]?.[0];
+          if (!routeStart) return false;
+
+          // Distance from route start to segment end
+          const segmentEndDistFromStart = calculateDistanceBetweenPoints(
+            routeStart,
+            segmentEnd
+          );
+
+          // Distance from route start to user position
+          const userDistFromStart = calculateDistanceBetweenPoints(
+            routeStart,
+            navigationPosition
+          );
+
+          // Segment is traveled if user has passed the segment end
+          return userDistFromStart > segmentEndDistFromStart;
+        })();
 
         const segmentColor = isTraveled
           ? "rgba(150, 150, 150, 0.5)"
@@ -1192,14 +1218,9 @@ export default function MapScreen() {
             anchor={{ x: 0.5, y: 0.5 }}
             flat={true}
             rotation={navigationPosition.heading || 0}
+            tracksViewChanges={false}
           >
-            <View style={styles.navigationArrow}>
-              <Ionicons
-                name="navigate"
-                size={32}
-                color={theme.colors.primary}
-              />
-            </View>
+            <NavigationArrow size={40} color={theme.colors.primary} />
           </Marker>
         )}
         {selectedRoute && (
