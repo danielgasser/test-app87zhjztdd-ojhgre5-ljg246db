@@ -757,11 +757,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   }
 
   const currentInstruction = (() => {
-    if (
-      selectedRoute.steps &&
-      selectedRoute.steps[currentNavigationStep || 0]
-    ) {
-      return selectedRoute.steps[currentNavigationStep || 0].instruction;
+    const displayStep = (currentNavigationStep || 0) + 1;
+    if (selectedRoute.steps && selectedRoute.steps[displayStep]) {
+      return selectedRoute.steps[displayStep].instruction;
     }
     // Fallback: simple instruction based on progress
     if (distanceToNextTurn < 100) {
@@ -771,17 +769,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   })();
 
   const currentManeuver = (() => {
-    if (
-      selectedRoute.steps &&
-      selectedRoute.steps[currentNavigationStep || 0]
-    ) {
-      return selectedRoute.steps[currentNavigationStep || 0].maneuver;
+    const displayStep = (currentNavigationStep || 0) + 1;
+    if (selectedRoute.steps && selectedRoute.steps[displayStep]) {
+      return selectedRoute.steps[displayStep].maneuver;
     }
     return undefined;
   })();
 
   const nextManeuver = (() => {
-    const nextStepIndex = (currentNavigationStep || 0) + 1;
+    const nextStepIndex = (currentNavigationStep || 0) + 2;
     if (selectedRoute.steps && selectedRoute.steps[nextStepIndex]) {
       return selectedRoute.steps[nextStepIndex].maneuver;
     }
@@ -789,7 +785,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   })();
 
   const nextInstruction = (() => {
-    const nextStepIndex = (currentNavigationStep || 0) + 1;
+    const nextStepIndex = (currentNavigationStep || 0) + 2;
     if (selectedRoute.steps && selectedRoute.steps[nextStepIndex]) {
       return selectedRoute.steps[nextStepIndex].instruction;
     }
@@ -919,7 +915,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               key={i}
               style={[
                 styles.debugText,
-                i === currentNavigationStep && { color: "yellow" },
+                i === (currentNavigationStep || 0) + 1 && { color: "yellow" },
               ]}
             >
               {i}: {step.maneuver || "-"} | {step.distance_meters}m
