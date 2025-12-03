@@ -22,6 +22,7 @@ import {
   endNavigationSession,
   SafetyAlertHandled,
   setNavigationPosition,
+  saveFinalRoute,
 } from "@/store/locationsSlice";
 import { useRealtimeReviews } from "@/hooks/useRealtimeReviews";
 import { theme } from "@/styles/theme";
@@ -32,7 +33,7 @@ import { store } from "@/store";
 import { calculateDistance, formatDistance } from "@/utils/distanceHelpers";
 import { formatDuration, formatArrivalTime } from "@/utils/timeHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 // Only for testing/logging purposes
 import { navLog, navLogEvents } from "@/utils/navigationLogger";
 
@@ -109,6 +110,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const lastAdvancedStep = useRef<number>(-1);
   const lastRerouteTime = useRef<number>(0);
   const appStateRef = useRef(AppState.currentState);
+  const traveledPath = useRef<Array<{ latitude: number; longitude: number }>>(
+    []
+  );
 
   const [showDebug, setShowDebug] = useState(false);
 
@@ -320,6 +324,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       }
       // Start GPS tracking
       startNavigation();
+      activateKeepAwakeAsync();
     };
 
     initNavigation();
@@ -519,6 +524,23 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           };
 
           setCurrentPosition(newPosition);
+          // Record path for final route save (sample every 50m or so)
+          const lastPoint =
+            traveledPath.current[traveledPath.current.length - 1];
+          if (
+            !lastPoint ||
+            calculateDistance(
+              lastPoint.latitude,
+              lastPoint.longitude,
+              newPosition.latitude,
+              newPosition.longitude
+            ) > 50
+          ) {
+            traveledPath.current.push({
+              latitude: newPosition.latitude,
+              longitude: newPosition.longitude,
+            });
+          }
           dispatch(setNavigationPosition(newPosition));
           checkDeviation(newPosition);
           navLogEvents.positionUpdate(
@@ -678,6 +700,16 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const handleEndNavigation = async () => {
     // Update database timestamp
     stopNavigation();
+    deactivateKeepAwake();
+    // Save the actual path traveled
+    if (selectedRoute?.databaseId && traveledPath.current.length > 0) {
+      await dispatch(
+        saveFinalRoute({
+          routeId: selectedRoute.databaseId,
+          actualPath: traveledPath.current,
+        })
+      );
+    }
     if (selectedRoute?.databaseId) {
       await dispatch(endNavigationSession(selectedRoute.databaseId));
     }

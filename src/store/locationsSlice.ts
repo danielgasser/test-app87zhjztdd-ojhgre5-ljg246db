@@ -1749,28 +1749,14 @@ export const checkForReroute = createAsyncThunk(
             result.improvement_summary.danger_zones_avoided > 0;
 
           if (hasImprovement) {
-            // 🆕 Save the new route to database
-            const savedRoute = await dispatch(
-              saveRouteToDatabase({
-                route_coordinates: result.optimized_route.coordinates,
-                steps: result.optimized_route.steps,
-                origin_name: "Current Location",
-                destination_name: routeRequest.destination.latitude + "," + routeRequest.destination.longitude,
-                distance_km: result.optimized_route.distance_kilometers,
-                duration_minutes: result.optimized_route.estimated_duration_minutes,
-                safety_score: result.optimized_route.safety_analysis.overall_route_score,
-                navigation_session_id: selectedRoute.navigationSessionId,
-              })
-            ).unwrap();
-            // 🆕 Attach database ID to the route
+            // Update in-memory route only (no DB save during reroute)
             const routeWithDbId = {
               ...result.optimized_route,
               route_points: result.optimized_route.coordinates,
-              databaseId: savedRoute.id,
-              navigationSessionId: navigationSessionId,
+              databaseId: selectedRoute.databaseId,
+              navigationSessionId: selectedRoute.navigationSessionId,
             };
 
-            // Use the safer route
             dispatch(setSelectedRoute(routeWithDbId));
 
             // @ts-ignore
@@ -1782,23 +1768,11 @@ export const checkForReroute = createAsyncThunk(
               }
             }));
 
-            // 🆕 End old navigation session if exists
-            if (selectedRoute.databaseId) {
-              await dispatch(endNavigationSession(selectedRoute.databaseId));
-            }
-
-            // 🆕 Start new navigation session with new route
-            await dispatch(startNavigationSession(savedRoute.id));
-
-            // 🆕 Clear dismissed alerts - fresh start with new safer route
-
             navLogEvents.rerouteComplete(true, result.optimized_route.distance_kilometers);
-            navLogEvents.routeSaved(savedRoute.id, 'reroute_safer');
             notify.info(
               `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
               "Route Updated"
             );
-
           } else {
             // No actual improvement - treat as no alternative available
             notify.info(
@@ -1846,25 +1820,12 @@ export const checkForReroute = createAsyncThunk(
         ).unwrap();
 
         if (basicResult.route) {
-          // 🆕 Save the fallback route to database
-          const savedRoute = await dispatch(
-            saveRouteToDatabase({
-              route_coordinates: basicResult.route.coordinates,
-              steps: basicResult.route.steps,
-              origin_name: "Current Location",
-              destination_name: routeRequest.destination.latitude + "," + routeRequest.destination.longitude,
-              distance_km: basicResult.route.distance_kilometers,
-              duration_minutes: basicResult.route.estimated_duration_minutes,
-              safety_score: basicResult.route.safety_analysis.overall_route_score,
-              navigation_session_id: selectedRoute.navigationSessionId,
-            })
-          ).unwrap();
-          // 🆕 Attach database ID
+          // Update in-memory route only (no DB save during reroute)
           const routeWithDbId = {
             ...basicResult.route,
             route_points: basicResult.route.coordinates,
-            databaseId: savedRoute.id,
-            navigationSessionId: selectedRoute.navigationSessionId ?? undefined,
+            databaseId: selectedRoute.databaseId,
+            navigationSessionId: selectedRoute.navigationSessionId,
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
@@ -1878,20 +1839,11 @@ export const checkForReroute = createAsyncThunk(
             }
           }));
 
-          // 🆕 End old navigation session
-          if (selectedRoute.databaseId) {
-            await dispatch(endNavigationSession(selectedRoute.databaseId));
-          }
-
-          // 🆕 Start new navigation session
-          await dispatch(startNavigationSession(savedRoute.id));
-
           navLogEvents.rerouteComplete(true, basicResult.route.distance_kilometers);
-          navLogEvents.routeSaved(savedRoute.id, 'reroute_fallback');
 
           // Only notify if route actually changed significantly
           const oldDistance = selectedRoute.distance_kilometers || 0;
-          const newDistance = result.optimized_route.distance_kilometers || 0;
+          const newDistance = basicResult.route.distance_kilometers || 0;
           const distanceDiff = Math.abs(newDistance - oldDistance);
 
           if (distanceDiff >= 0.5) {
@@ -1900,6 +1852,7 @@ export const checkForReroute = createAsyncThunk(
               "Route Updated"
             );
           }
+
           setTimeout(() => {
             // @ts-ignore
             dispatch(setRerouting(false));
@@ -1988,6 +1941,37 @@ export const deleteRouteFromHistory = createAsyncThunk(
 
     if (error) throw error;
     return routeId;
+  }
+);
+
+export const saveFinalRoute = createAsyncThunk(
+  "locations/saveFinalRoute",
+  async (
+    {
+      routeId,
+      actualPath
+    }: {
+      routeId: string;
+      actualPath: Array<{ latitude: number; longitude: number }>;
+    },
+    { getState }
+  ) => {
+    const { data, error } = await supabase
+      .from("routes")
+      .update({
+        actual_path_traveled: actualPath,
+        navigation_ended_at: new Date().toISOString(),
+      })
+      .eq("id", routeId)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error("Error saving final route:", error);
+      throw error;
+    }
+
+    return data;
   }
 );
 // ================================
