@@ -317,6 +317,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   // Start GPS tracking
   useEffect(() => {
     const initNavigation = async () => {
+      lastAdvancedStep.current = -1;
+      currentStepRef.current = 0;
       // Update database timestamp
       await navLog.startSession();
       console.log(
@@ -609,12 +611,23 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                 }
                 return false;
               })();
+              navLog.log("STEP_CHECK", {
+                stepRef: currentStepRef.current,
+                lastAdv: lastAdvancedStep.current,
+                distToEnd: Math.round(distance),
+                passedStep,
+              });
 
               if (passedStep) {
                 const nextStepIndex = currentStepRef.current + 1;
                 if (nextStepIndex < selectedRouteRef.current.steps.length) {
                   // Only advance if we haven't already advanced to this step
                   if (lastAdvancedStep.current !== nextStepIndex) {
+                    navLog.log("ADVANCING_STEP", {
+                      from: currentStepRef.current,
+                      to: nextStepIndex,
+                      lastAdv: lastAdvancedStep.current,
+                    });
                     lastAdvancedStep.current = nextStepIndex;
                     dispatch(updateNavigationProgress(nextStepIndex));
                     navLogEvents.stepAdvanced(
@@ -894,6 +907,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           <Text style={styles.debugText}>
             Segments:{" "}
             {selectedRoute.safety_analysis?.segment_scores?.length || "NONE"}
+            lastAdv: {lastAdvancedStep.current} | stepRef:{" "}
+            {currentStepRef.current}
           </Text>
           <Text style={styles.debugText}>
             Route pts: {selectedRoute.route_points?.length || "NONE"}
