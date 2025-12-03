@@ -229,12 +229,12 @@ export default function EditProfileScreen() {
 
           {/* Full Name Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Full Name</Text>
+            <Text style={styles.sectionTitle}>Name or Nickname</Text>
             <TextInput
               style={styles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder="Enter your full name"
+              placeholder="Enter your name or a nickname"
               placeholderTextColor={theme.colors.textSecondary}
               autoCapitalize="words"
             />

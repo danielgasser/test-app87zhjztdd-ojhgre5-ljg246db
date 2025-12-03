@@ -466,7 +466,7 @@ export default function CommunityScreen() {
                     styles.modeButtonTextActive,
                 ]}
               >
-                Near Me
+                Within my Search Radius
               </Text>
             </TouchableOpacity>
 
@@ -493,7 +493,7 @@ export default function CommunityScreen() {
                     styles.modeButtonTextActive,
                 ]}
               >
-                Map Area
+                Visible Map Area
               </Text>
             </TouchableOpacity>
           </View>

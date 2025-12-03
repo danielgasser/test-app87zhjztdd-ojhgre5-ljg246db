@@ -437,7 +437,7 @@ export default function ProfileScreen() {
               {routeHistoryLoading && routeHistory.length === 0 ? (
                 <ActivityIndicator size="small" color={theme.colors.primary} />
               ) : routeHistory.length === 0 ? (
-                <Text style={styles.noRoutesText}>No routes yet</Text>
+                <Text style={styles.noRoutesText}>No routes</Text>
               ) : (
                 <>
                   {routeHistory.map((route) => (
