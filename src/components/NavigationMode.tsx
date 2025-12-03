@@ -272,6 +272,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   useEffect(() => {
     selectedRouteRef.current = selectedRoute;
+    lastAdvancedStep.current = -1;
   }, [selectedRoute]);
 
   useEffect(() => {
