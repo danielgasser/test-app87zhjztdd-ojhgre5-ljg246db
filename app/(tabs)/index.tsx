@@ -608,27 +608,26 @@ export default function MapScreen() {
           const segmentCoords = segmentChunks[index];
           if (!segmentCoords || segmentCoords.length < 2) return false;
 
-          // Get segment end point (last point of this segment)
-          const segmentEnd = segmentCoords[segmentCoords.length - 1];
+          // Find which segment the user is currently in
+          // by finding the closest point across all segments
+          let minDistance = Infinity;
+          let userSegmentIndex = 0;
 
-          // Get route origin (first point of first segment)
-          const routeStart = segmentChunks[0]?.[0];
-          if (!routeStart) return false;
+          segmentChunks.forEach((chunk, chunkIndex) => {
+            chunk.forEach((point) => {
+              const dist = calculateDistanceBetweenPoints(
+                navigationPosition,
+                point
+              );
+              if (dist < minDistance) {
+                minDistance = dist;
+                userSegmentIndex = chunkIndex;
+              }
+            });
+          });
 
-          // Distance from route start to segment end
-          const segmentEndDistFromStart = calculateDistanceBetweenPoints(
-            routeStart,
-            segmentEnd
-          );
-
-          // Distance from route start to user position
-          const userDistFromStart = calculateDistanceBetweenPoints(
-            routeStart,
-            navigationPosition
-          );
-
-          // Segment is traveled if user has passed the segment end
-          return userDistFromStart > segmentEndDistFromStart;
+          // Segment is traveled if its index is less than user's current segment
+          return index < userSegmentIndex;
         })();
 
         const segmentColor = isTraveled

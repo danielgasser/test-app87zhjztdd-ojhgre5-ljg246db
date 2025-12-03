@@ -1758,7 +1758,7 @@ export const checkForReroute = createAsyncThunk(
             };
 
             dispatch(setSelectedRoute(routeWithDbId));
-
+            dispatch(updateNavigationProgress(0));
             // @ts-ignore
             dispatch(setRouteRequest({
               ...routeRequest,
@@ -1829,7 +1829,7 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
-
+          dispatch(updateNavigationProgress(0));
           // @ts-ignore
           dispatch(setRouteRequest({
             ...routeRequest,
