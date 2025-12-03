@@ -1743,43 +1743,43 @@ export const checkForReroute = createAsyncThunk(
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
 
         if (result.success && result.optimized_route) {
-          // Check if there's actual improvement
+          // Always use the new route when rerouting (starts from current position)
+          const routeWithDbId = {
+            ...result.optimized_route,
+            route_points: result.optimized_route.coordinates,
+            databaseId: selectedRoute.databaseId,
+            navigationSessionId: selectedRoute.navigationSessionId,
+          };
+
+          dispatch(setSelectedRoute(routeWithDbId));
+          dispatch(updateNavigationProgress(0));
+
+          // @ts-ignore
+          dispatch(setRouteRequest({
+            ...routeRequest,
+            origin: {
+              latitude: currentPosition.latitude,
+              longitude: currentPosition.longitude,
+            }
+          }));
+
+          navLogEvents.rerouteComplete(true, result.optimized_route.distance_kilometers);
+
+          // Show appropriate message based on improvement
           const hasImprovement =
             result.improvement_summary.safety_improvement > 0 ||
             result.improvement_summary.danger_zones_avoided > 0;
 
           if (hasImprovement) {
-            // Update in-memory route only (no DB save during reroute)
-            const routeWithDbId = {
-              ...result.optimized_route,
-              route_points: result.optimized_route.coordinates,
-              databaseId: selectedRoute.databaseId,
-              navigationSessionId: selectedRoute.navigationSessionId,
-            };
-
-            dispatch(setSelectedRoute(routeWithDbId));
-            dispatch(updateNavigationProgress(0));
-            // @ts-ignore
-            dispatch(setRouteRequest({
-              ...routeRequest,
-              origin: {
-                latitude: currentPosition.latitude,
-                longitude: currentPosition.longitude,
-              }
-            }));
-
-            navLogEvents.rerouteComplete(true, result.optimized_route.distance_kilometers);
             notify.info(
               `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
               "Route Updated"
             );
           } else {
-            // No actual improvement - treat as no alternative available
             notify.info(
-              "No safer alternative route is available. Continuing with current route.",
-              "Route Status"
+              "Route recalculated from your current position.",
+              "Route Updated"
             );
-            return;
           }
         } else {
           // Smart route generation failed
