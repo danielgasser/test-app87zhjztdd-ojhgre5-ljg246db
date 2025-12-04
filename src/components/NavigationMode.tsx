@@ -286,19 +286,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           // App came to foreground - reset position counter to skip first updates
           positionUpdatesCount.current = 0;
           navLogEvents.appStateChange("resumed");
-          if (selectedRoute) {
-            selectedRouteRef.current = selectedRoute;
-          }
-          if (typeof currentNavigationStep === "number") {
-            currentStepRef.current = currentNavigationStep;
-          }
         }
         appStateRef.current = nextAppState;
       }
     );
 
     return () => subscription.remove();
-  }, []);
+  }, [selectedRoute, currentNavigationStep]);
 
   useEffect(() => {
     if (
