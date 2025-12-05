@@ -292,7 +292,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     );
 
     return () => subscription.remove();
-  }, [selectedRoute, currentNavigationStep]);
+  }, []);
 
   useEffect(() => {
     if (
@@ -607,6 +607,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                     nextStep.start_location.latitude,
                     nextStep.start_location.longitude
                   );
+                  if (distance < 100) {
+                    navLog.log("PASS_CHECK", {
+                      distToEnd: Math.round(distance),
+                      distToNextStart: Math.round(distToNextStart),
+                      nextStepIdx: nextStepIndex,
+                    });
+                  }
                   // If closer to next step's start than current step's end, we passed it
                   return distToNextStart < distance;
                 }
