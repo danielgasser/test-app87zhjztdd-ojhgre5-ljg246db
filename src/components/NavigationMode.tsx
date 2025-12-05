@@ -283,6 +283,12 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           appStateRef.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
+          navLog.log("RESUME_STATE", {
+            reduxRoute: !!selectedRoute,
+            reduxStep: currentNavigationStep,
+            refRoute: !!selectedRouteRef.current,
+            refStep: currentStepRef.current,
+          });
           // App came to foreground - reset position counter to skip first updates
           positionUpdatesCount.current = 0;
           navLogEvents.appStateChange("resumed");
@@ -594,6 +600,12 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               }
               // Check if we reached or passed the turn
               // Either within 20m, OR we're now closer to the NEXT step's start than current step's end
+              navLog.log("ROUTE_STATE", {
+                hasRoute: !!selectedRouteRef.current,
+                stepsLength: selectedRouteRef.current?.steps?.length,
+                currentStep: currentStepRef.current,
+                lastAdv: lastAdvancedStep.current,
+              });
               const passedStep = (() => {
                 if (distance < 30) return true; // Close enough to current step end
 
