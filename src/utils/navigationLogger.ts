@@ -362,4 +362,7 @@ export const navLogEvents = {
     error: (context: string, message: string) => {
         navLog.log('ERROR', { context, message });
     },
+    resumeState: (reduxRoute: boolean, reduxStep: number | null, refRoute: boolean, refStep: number | null) => {
+        navLog.log('RESUME_STATE', { reduxRoute, reduxStep, refRoute, refStep });
+    },
 };
