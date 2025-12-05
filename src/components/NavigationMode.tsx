@@ -285,14 +285,55 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         ) {
           // Get FRESH state directly from Redux store
           const freshState = store.getState().locations;
+          const freshRoute = freshState.selectedRoute;
+          const freshPosition = freshState.userLocation;
 
-          // Sync refs with fresh Redux state
-          if (freshState.selectedRoute) {
-            selectedRouteRef.current = freshState.selectedRoute;
-          }
-          if (typeof freshState.currentNavigationStep === "number") {
-            currentStepRef.current = freshState.currentNavigationStep;
-            lastAdvancedStep.current = freshState.currentNavigationStep;
+          if (freshRoute?.steps && freshPosition) {
+            // Find the correct step by scanning forward
+            let correctStep = freshState.currentNavigationStep || 0;
+
+            for (let i = correctStep; i < freshRoute.steps.length - 1; i++) {
+              const currentStepEnd = freshRoute.steps[i].end_location;
+              const nextStepStart = freshRoute.steps[i + 1].start_location;
+
+              const distToCurrentEnd = calculateDistance(
+                freshPosition.latitude,
+                freshPosition.longitude,
+                currentStepEnd.latitude,
+                currentStepEnd.longitude
+              );
+
+              const distToNextStart = calculateDistance(
+                freshPosition.latitude,
+                freshPosition.longitude,
+                nextStepStart.latitude,
+                nextStepStart.longitude
+              );
+
+              // If we're closer to next step's start, we've passed current step
+              if (distToNextStart < distToCurrentEnd || distToCurrentEnd < 30) {
+                correctStep = i + 1;
+              } else {
+                break; // Found our current step
+              }
+            }
+
+            // Update refs and Redux if we've advanced
+            if (correctStep !== freshState.currentNavigationStep) {
+              navLog.log("RESUME_STEP_CORRECTION", {
+                from: freshState.currentNavigationStep,
+                to: correctStep,
+              });
+              currentStepRef.current = correctStep;
+              lastAdvancedStep.current = correctStep;
+              selectedRouteRef.current = freshRoute;
+              dispatch(updateNavigationProgress(correctStep));
+            } else {
+              // Just sync refs
+              selectedRouteRef.current = freshRoute;
+              currentStepRef.current = correctStep;
+              lastAdvancedStep.current = correctStep;
+            }
           }
 
           positionUpdatesCount.current = 0;
