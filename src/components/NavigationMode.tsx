@@ -310,6 +310,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                 nextStepStart.longitude
               );
 
+              navLog.log("STEP_SCAN", {
+                i,
+                distToEnd: Math.round(distToCurrentEnd),
+                distToNext: Math.round(distToNextStart),
+                wouldAdvance:
+                  distToNextStart < distToCurrentEnd || distToCurrentEnd < 30,
+              });
+
               // If we're closer to next step's start, we've passed current step
               if (distToNextStart < distToCurrentEnd || distToCurrentEnd < 30) {
                 correctStep = i + 1;
