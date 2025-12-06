@@ -1,4 +1,4 @@
-// app/_layout.tsx - CLEAN, SIMPLE LAYOUT
+import "@/tasks/navigationLocationTask";
 import React, { useEffect } from "react";
 import { Stack, useRouter } from "expo-router";
 import { Provider } from "react-redux";

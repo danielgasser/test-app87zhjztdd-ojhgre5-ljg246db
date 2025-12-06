@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Dimensions,
   AppState,
-  AppStateStatus,
 } from "react-native";
 import MapView from "react-native-maps";
 import { Marker } from "react-native-maps";
@@ -34,6 +33,8 @@ import { calculateDistance, formatDistance } from "@/utils/distanceHelpers";
 import { formatDuration, formatArrivalTime } from "@/utils/timeHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import { NAVIGATION_LOCATION_TASK } from "@/tasks/navigationLocationTask";
+
 // Only for testing/logging purposes
 import { navLog, navLogEvents } from "@/utils/navigationLogger";
 
@@ -275,6 +276,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     lastAdvancedStep.current = -1;
   }, [selectedRoute]);
 
+  /*
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -378,6 +380,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
     return () => subscription.remove();
   }, []);
+*/
 
   useEffect(() => {
     if (
@@ -597,10 +600,22 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const startNavigation = async () => {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
+      const { status: foregroundStatus } =
+        await Location.requestForegroundPermissionsAsync();
+      if (foregroundStatus !== "granted") {
         notify.error(
           "Location permission is required for navigation",
+          "Permission needed"
+        );
+        onExit();
+        return;
+      }
+
+      const { status: backgroundStatus } =
+        await Location.requestBackgroundPermissionsAsync();
+      if (backgroundStatus !== "granted") {
+        notify.error(
+          "Background location is required for navigation",
           "Permission needed"
         );
         onExit();
