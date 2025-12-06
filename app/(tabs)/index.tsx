@@ -1266,7 +1266,7 @@ export default function MapScreen() {
             anchor={{ x: 0.5, y: 0.5 }}
             flat={true}
             rotation={navigationPosition.heading || 0}
-            tracksViewChanges={false}
+            tracksViewChanges={true}
           >
             <NavigationArrow size={40} color={theme.colors.primary} />
           </Marker>
