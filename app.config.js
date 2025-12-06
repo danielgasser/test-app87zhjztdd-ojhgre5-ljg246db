@@ -13,7 +13,7 @@ module.exports = () => {
     expo: {
       name: appName,
       slug: "safepath",
-      version: "0.9.47",
+      version: "0.9.48",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -25,7 +25,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "117",
+        buildNumber: "118",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
@@ -34,13 +34,17 @@ module.exports = () => {
         },
         infoPlist: {
           ITSAppUsesNonExemptEncryption: false,
+          UIBackgroundModes: ["location"],
+          NSLocationAlwaysAndWhenInUseUsageDescription:
+            "SafePath needs your location in the background to provide turn-by-turn navigation and safety alerts.",
+          NSLocationWhenInUseUsageDescription:
+            "SafePath needs your location to show your position on the map and provide navigation.",
         },
       },
       android: {
         versionCode: 3,
         minSdkVersion: 24, // Android 7.0
         targetSdkVersion: 34, // Android 14
-        permissions: ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
         config: {
           googleMaps: {
             apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -55,6 +59,13 @@ module.exports = () => {
         useNextNotificationsApi: true,
         googleServiceFile:
           "safepath-e097a-firebase-adminsdk-fbsvc-dfa14a113a.json",
+        permissions: [
+          "ACCESS_FINE_LOCATION",
+          "ACCESS_COARSE_LOCATION",
+          "ACCESS_BACKGROUND_LOCATION",
+          "FOREGROUND_SERVICE",
+          "FOREGROUND_SERVICE_LOCATION",
+        ],
       },
       plugins: [
         "expo-router",
@@ -65,6 +76,15 @@ module.exports = () => {
           {
             icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
             color: "#2A5C99",
+          },
+        ],
+        [
+          "expo-location",
+          {
+            locationAlwaysAndWhenInUsePermission:
+              "SafePath needs your location in the background to provide turn-by-turn navigation and safety alerts.",
+            isAndroidBackgroundLocationEnabled: true,
+            isAndroidForegroundServiceEnabled: true,
           },
         ],
       ],

@@ -8,7 +8,6 @@ import {
   AppState,
 } from "react-native";
 import MapView from "react-native-maps";
-import { Marker } from "react-native-maps";
 
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -92,6 +91,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     userLocation,
     navigationActive,
     isRerouting,
+    navigationPosition,
   } = useAppSelector((state) => state.locations);
   const routeRequest = useAppSelector((state) => state.locations.routeRequest);
 
@@ -102,7 +102,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   } | null>(userLocation);
 
   const [distanceToNextTurn, setDistanceToNextTurn] = useState<number>(0);
-  const [locationSubscription, setLocationSubscription] = useState<any>(null);
   const [showInstructionText, setShowInstructionText] = useState(false);
 
   const alertShownRef = useRef(false);
@@ -431,7 +430,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     initNavigation();
 
     return () => {
-      stopNavigation(); // Stop GPS tracking
+      (async () => {
+        await stopNavigation();
+      })();
     };
   }, []);
 
@@ -598,6 +599,128 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     return () => clearInterval(refreshInterval);
   }, []);
 
+  // Handle position updates from background task
+  useEffect(() => {
+    if (!navigationPosition || !selectedRouteRef.current) return;
+
+    const newPosition = {
+      latitude: navigationPosition.latitude,
+      longitude: navigationPosition.longitude,
+      heading: navigationPosition.heading,
+    };
+
+    setCurrentPosition(newPosition);
+
+    // Record path for final route save
+    const lastPoint = traveledPath.current[traveledPath.current.length - 1];
+    if (
+      !lastPoint ||
+      calculateDistance(
+        lastPoint.latitude,
+        lastPoint.longitude,
+        newPosition.latitude,
+        newPosition.longitude
+      ) > 50
+    ) {
+      traveledPath.current.push({
+        latitude: newPosition.latitude,
+        longitude: newPosition.longitude,
+      });
+    }
+
+    checkDeviation(newPosition);
+    navLogEvents.positionUpdate(
+      newPosition.latitude,
+      newPosition.longitude,
+      newPosition.heading
+    );
+
+    // Update map camera
+    if (mapRef?.current) {
+      mapRef.current.animateCamera(
+        {
+          center: newPosition,
+          heading: navigationPosition.heading || 0,
+          pitch: 60,
+          zoom: 18,
+        },
+        { duration: 500 }
+      );
+    }
+
+    // Calculate distance to next turn
+    if (currentStepRef.current !== null) {
+      if (
+        selectedRouteRef.current.steps &&
+        currentStepRef.current < selectedRouteRef.current.steps.length
+      ) {
+        const currentStep =
+          selectedRouteRef.current.steps[currentStepRef.current];
+        const distance = calculateDistance(
+          newPosition.latitude,
+          newPosition.longitude,
+          currentStep.end_location.latitude,
+          currentStep.end_location.longitude
+        );
+        const roundedDistance = roundDistance(distance);
+        if (roundedDistance !== distanceToNextTurn) {
+          setDistanceToNextTurn(roundedDistance);
+        }
+
+        const passedStep = (() => {
+          if (distance < 30) return true;
+
+          const nextStepIndex = currentStepRef.current! + 1;
+          if (nextStepIndex < selectedRouteRef.current!.steps!.length) {
+            const nextStep = selectedRouteRef.current!.steps![nextStepIndex];
+            const distToNextStart = calculateDistance(
+              newPosition.latitude,
+              newPosition.longitude,
+              nextStep.start_location.latitude,
+              nextStep.start_location.longitude
+            );
+            if (distance < 100) {
+              navLog.log("PASS_CHECK", {
+                distToEnd: Math.round(distance),
+                distToNextStart: Math.round(distToNextStart),
+                nextStepIdx: nextStepIndex,
+              });
+            }
+            return distToNextStart < distance;
+          }
+          return false;
+        })();
+
+        navLog.log("STEP_CHECK", {
+          stepRef: currentStepRef.current,
+          lastAdv: lastAdvancedStep.current,
+          distToEnd: Math.round(distance),
+          passedStep,
+        });
+
+        if (passedStep) {
+          const nextStepIndex = currentStepRef.current + 1;
+          if (nextStepIndex < selectedRouteRef.current.steps.length) {
+            if (lastAdvancedStep.current !== nextStepIndex) {
+              navLog.log("ADVANCING_STEP", {
+                from: currentStepRef.current,
+                to: nextStepIndex,
+                lastAdv: lastAdvancedStep.current,
+              });
+              lastAdvancedStep.current = nextStepIndex;
+              dispatch(updateNavigationProgress(nextStepIndex));
+              navLogEvents.stepAdvanced(
+                currentStepRef.current,
+                nextStepIndex,
+                "passed_turn"
+              );
+            }
+          }
+        }
+      }
+    }
+  }, [navigationPosition]);
+
   const startNavigation = async () => {
     try {
       const { status: foregroundStatus } =
@@ -622,137 +745,21 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         return;
       }
 
-      // Start watching position
-      const subscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 1000, // Update every second
-          distanceInterval: 5, // Or every 5 meters
+      // Start background location updates
+      await Location.startLocationUpdatesAsync(NAVIGATION_LOCATION_TASK, {
+        accuracy: Location.Accuracy.BestForNavigation,
+        timeInterval: 1000,
+        distanceInterval: 5,
+        foregroundService: {
+          notificationTitle: "SafePath Navigation",
+          notificationBody: "Navigation is active",
+          notificationColor: "#4A90D9",
         },
-        (location) => {
-          const newPosition = {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            heading: location.coords.heading || undefined,
-          };
+        pausesUpdatesAutomatically: false,
+        showsBackgroundLocationIndicator: true,
+      });
 
-          setCurrentPosition(newPosition);
-          // Record path for final route save (sample every 50m or so)
-          const lastPoint =
-            traveledPath.current[traveledPath.current.length - 1];
-          if (
-            !lastPoint ||
-            calculateDistance(
-              lastPoint.latitude,
-              lastPoint.longitude,
-              newPosition.latitude,
-              newPosition.longitude
-            ) > 50
-          ) {
-            traveledPath.current.push({
-              latitude: newPosition.latitude,
-              longitude: newPosition.longitude,
-            });
-          }
-          dispatch(setNavigationPosition(newPosition));
-          checkDeviation(newPosition);
-          navLogEvents.positionUpdate(
-            newPosition.latitude,
-            newPosition.longitude,
-            newPosition.heading
-          );
-          // Update map camera to follow user
-          if (mapRef?.current) {
-            mapRef.current.animateCamera(
-              {
-                center: newPosition,
-                heading: location.coords.heading || 0,
-                pitch: 60, // 3D view
-                zoom: 18,
-              },
-              { duration: 500 }
-            );
-          }
-
-          // Calculate distance to next turn
-          if (selectedRouteRef.current && currentStepRef.current !== null) {
-            if (
-              selectedRouteRef.current.steps &&
-              currentStepRef.current < selectedRouteRef.current.steps.length
-            ) {
-              const currentStep =
-                selectedRouteRef.current.steps[currentStepRef.current];
-              const distance = calculateDistance(
-                newPosition.latitude,
-                newPosition.longitude,
-                currentStep.end_location.latitude, // ← Distance to CURRENT step's end
-                currentStep.end_location.longitude
-              );
-              const roundedDistance = roundDistance(distance);
-              if (roundedDistance !== distanceToNextTurn) {
-                setDistanceToNextTurn(roundedDistance);
-              }
-              // Check if we reached or passed the turn
-              // Either within 20m, OR we're now closer to the NEXT step's start than current step's end
-
-              const passedStep = (() => {
-                if (distance < 30) return true; // Close enough to current step end
-
-                const nextStepIndex = currentStepRef.current + 1;
-                if (nextStepIndex < selectedRouteRef.current.steps.length) {
-                  const nextStep =
-                    selectedRouteRef.current.steps[nextStepIndex];
-                  const distToNextStart = calculateDistance(
-                    newPosition.latitude,
-                    newPosition.longitude,
-                    nextStep.start_location.latitude,
-                    nextStep.start_location.longitude
-                  );
-                  if (distance < 100) {
-                    navLog.log("PASS_CHECK", {
-                      distToEnd: Math.round(distance),
-                      distToNextStart: Math.round(distToNextStart),
-                      nextStepIdx: nextStepIndex,
-                    });
-                  }
-                  // If closer to next step's start than current step's end, we passed it
-                  return distToNextStart < distance;
-                }
-                return false;
-              })();
-              navLog.log("STEP_CHECK", {
-                stepRef: currentStepRef.current,
-                lastAdv: lastAdvancedStep.current,
-                distToEnd: Math.round(distance),
-                passedStep,
-              });
-
-              if (passedStep) {
-                const nextStepIndex = currentStepRef.current + 1;
-                if (nextStepIndex < selectedRouteRef.current.steps.length) {
-                  // Only advance if we haven't already advanced to this step
-                  if (lastAdvancedStep.current !== nextStepIndex) {
-                    navLog.log("ADVANCING_STEP", {
-                      from: currentStepRef.current,
-                      to: nextStepIndex,
-                      lastAdv: lastAdvancedStep.current,
-                    });
-                    lastAdvancedStep.current = nextStepIndex;
-                    dispatch(updateNavigationProgress(nextStepIndex));
-                    navLogEvents.stepAdvanced(
-                      currentStepRef.current,
-                      nextStepIndex,
-                      "passed_turn"
-                    );
-                  }
-                }
-              }
-            }
-          }
-        }
-      );
-
-      setLocationSubscription(subscription);
+      console.log("[Navigation] Background location updates started");
     } catch (error) {
       logger.error("Navigation start error:", error);
       notify.error("Could not start navigation");
@@ -760,9 +767,17 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     }
   };
 
-  const stopNavigation = () => {
-    if (locationSubscription) {
-      locationSubscription.remove();
+  const stopNavigation = async () => {
+    try {
+      const isRegistered = await Location.hasStartedLocationUpdatesAsync(
+        NAVIGATION_LOCATION_TASK
+      );
+      if (isRegistered) {
+        await Location.stopLocationUpdatesAsync(NAVIGATION_LOCATION_TASK);
+        console.log("[Navigation] Background location updates stopped");
+      }
+    } catch (error) {
+      console.error("[Navigation] Error stopping location updates:", error);
     }
   };
 
@@ -832,7 +847,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const handleEndNavigation = async () => {
     // Update database timestamp
-    stopNavigation();
+    await stopNavigation();
     deactivateKeepAwake();
     // Save the actual path traveled
     if (selectedRoute?.databaseId && traveledPath.current.length > 0) {
@@ -902,19 +917,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   return (
     <>
-      {/* Navigation Arrow Marker 
-      {currentPosition && mapRef?.current && (
-        <Marker
-          coordinate={currentPosition}
-          anchor={{ x: 0.5, y: 0.5 }}
-          flat={true}
-          rotation={currentPosition.heading || 0}
-        >
-          <View style={styles.navigationArrow}>
-            <Ionicons name="navigate" size={32} color={theme.colors.primary} />
-          </View>
-        </Marker>
-      )}*/}
       {/* Navigation instruction container */}
       <View style={styles.navigationInstructionContainer}>
         <View
