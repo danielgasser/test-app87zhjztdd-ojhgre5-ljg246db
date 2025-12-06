@@ -278,70 +278,89 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
-      (nextAppState: AppStateStatus) => {
+      async (nextAppState: AppStateStatus) => {
         if (
           appStateRef.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
-          // Get FRESH state directly from Redux store
-          const freshState = store.getState().locations;
-          const freshRoute = freshState.selectedRoute;
-          const freshPosition = freshState.userLocation;
+          try {
+            // Get fresh GPS position directly, not from Redux
+            const currentLocation = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.High,
+            });
 
-          if (freshRoute?.steps && freshPosition) {
-            // Find the correct step by scanning forward
-            let correctStep = freshState.currentNavigationStep || 0;
+            const freshPosition = {
+              latitude: currentLocation.coords.latitude,
+              longitude: currentLocation.coords.longitude,
+            };
 
-            for (let i = correctStep; i < freshRoute.steps.length - 1; i++) {
-              const currentStepEnd = freshRoute.steps[i].end_location;
-              const nextStepStart = freshRoute.steps[i + 1].start_location;
+            const freshState = store.getState().locations;
+            const freshRoute = freshState.selectedRoute;
 
-              const distToCurrentEnd = calculateDistance(
-                freshPosition.latitude,
-                freshPosition.longitude,
-                currentStepEnd.latitude,
-                currentStepEnd.longitude
-              );
+            navLog.log("RESUME_DEBUG", {
+              hasRoute: !!freshRoute,
+              stepsLen: freshRoute?.steps?.length,
+              lat: freshPosition.latitude.toFixed(5),
+              lng: freshPosition.longitude.toFixed(5),
+              currentStep: freshState.currentNavigationStep,
+            });
 
-              const distToNextStart = calculateDistance(
-                freshPosition.latitude,
-                freshPosition.longitude,
-                nextStepStart.latitude,
-                nextStepStart.longitude
-              );
+            if (freshRoute?.steps) {
+              let correctStep = freshState.currentNavigationStep || 0;
 
-              navLog.log("STEP_SCAN", {
-                i,
-                distToEnd: Math.round(distToCurrentEnd),
-                distToNext: Math.round(distToNextStart),
-                wouldAdvance:
-                  distToNextStart < distToCurrentEnd || distToCurrentEnd < 30,
-              });
+              for (let i = correctStep; i < freshRoute.steps.length - 1; i++) {
+                const currentStepEnd = freshRoute.steps[i].end_location;
+                const nextStepStart = freshRoute.steps[i + 1].start_location;
 
-              // If we're closer to next step's start, we've passed current step
-              if (distToNextStart < distToCurrentEnd || distToCurrentEnd < 30) {
-                correctStep = i + 1;
+                const distToCurrentEnd = calculateDistance(
+                  freshPosition.latitude,
+                  freshPosition.longitude,
+                  currentStepEnd.latitude,
+                  currentStepEnd.longitude
+                );
+
+                const distToNextStart = calculateDistance(
+                  freshPosition.latitude,
+                  freshPosition.longitude,
+                  nextStepStart.latitude,
+                  nextStepStart.longitude
+                );
+
+                navLog.log("STEP_SCAN", {
+                  i,
+                  distToEnd: Math.round(distToCurrentEnd),
+                  distToNext: Math.round(distToNextStart),
+                  wouldAdvance:
+                    distToNextStart < distToCurrentEnd || distToCurrentEnd < 30,
+                });
+
+                if (
+                  distToNextStart < distToCurrentEnd ||
+                  distToCurrentEnd < 30
+                ) {
+                  correctStep = i + 1;
+                } else {
+                  break;
+                }
+              }
+
+              if (correctStep !== freshState.currentNavigationStep) {
+                navLog.log("RESUME_STEP_CORRECTION", {
+                  from: freshState.currentNavigationStep,
+                  to: correctStep,
+                });
+                currentStepRef.current = correctStep;
+                lastAdvancedStep.current = correctStep;
+                selectedRouteRef.current = freshRoute;
+                dispatch(updateNavigationProgress(correctStep));
               } else {
-                break; // Found our current step
+                selectedRouteRef.current = freshRoute;
+                currentStepRef.current = correctStep;
+                lastAdvancedStep.current = correctStep;
               }
             }
-
-            // Update refs and Redux if we've advanced
-            if (correctStep !== freshState.currentNavigationStep) {
-              navLog.log("RESUME_STEP_CORRECTION", {
-                from: freshState.currentNavigationStep,
-                to: correctStep,
-              });
-              currentStepRef.current = correctStep;
-              lastAdvancedStep.current = correctStep;
-              selectedRouteRef.current = freshRoute;
-              dispatch(updateNavigationProgress(correctStep));
-            } else {
-              // Just sync refs
-              selectedRouteRef.current = freshRoute;
-              currentStepRef.current = correctStep;
-              lastAdvancedStep.current = correctStep;
-            }
+          } catch (error) {
+            navLog.log("RESUME_ERROR", { error: String(error) });
           }
 
           positionUpdatesCount.current = 0;
