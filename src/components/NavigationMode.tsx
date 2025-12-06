@@ -789,6 +789,11 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     latitude: number;
     longitude: number;
   }) => {
+    navLog.log("DEV_ENTRY", {
+      isRerouting,
+      posCount: positionUpdatesCount.current,
+      routePointsLen: selectedRoute?.route_points?.length || 0,
+    });
     // Skip if already rerouting
     if (isRerouting) {
       return;
