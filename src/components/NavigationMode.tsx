@@ -278,90 +278,96 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
-      async (nextAppState: AppStateStatus) => {
+      (nextAppState: AppStateStatus) => {
         if (
           appStateRef.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
-          try {
-            // Get fresh GPS position directly, not from Redux
-            const currentLocation = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.High,
-            });
+          (async () => {
+            try {
+              const currentLocation = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High,
+              });
 
-            const freshPosition = {
-              latitude: currentLocation.coords.latitude,
-              longitude: currentLocation.coords.longitude,
-            };
+              const freshPosition = {
+                latitude: currentLocation.coords.latitude,
+                longitude: currentLocation.coords.longitude,
+              };
 
-            const freshState = store.getState().locations;
-            const freshRoute = freshState.selectedRoute;
+              const freshState = store.getState().locations;
+              const freshRoute = freshState.selectedRoute;
 
-            navLog.log("RESUME_DEBUG", {
-              hasRoute: !!freshRoute,
-              stepsLen: freshRoute?.steps?.length,
-              lat: freshPosition.latitude.toFixed(5),
-              lng: freshPosition.longitude.toFixed(5),
-              currentStep: freshState.currentNavigationStep,
-            });
+              navLog.log("RESUME_DEBUG", {
+                hasRoute: !!freshRoute,
+                stepsLen: freshRoute?.steps?.length,
+                lat: freshPosition.latitude.toFixed(5),
+                lng: freshPosition.longitude.toFixed(5),
+                currentStep: freshState.currentNavigationStep,
+              });
 
-            if (freshRoute?.steps) {
-              let correctStep = freshState.currentNavigationStep || 0;
+              if (freshRoute?.steps) {
+                let correctStep = freshState.currentNavigationStep || 0;
 
-              for (let i = correctStep; i < freshRoute.steps.length - 1; i++) {
-                const currentStepEnd = freshRoute.steps[i].end_location;
-                const nextStepStart = freshRoute.steps[i + 1].start_location;
-
-                const distToCurrentEnd = calculateDistance(
-                  freshPosition.latitude,
-                  freshPosition.longitude,
-                  currentStepEnd.latitude,
-                  currentStepEnd.longitude
-                );
-
-                const distToNextStart = calculateDistance(
-                  freshPosition.latitude,
-                  freshPosition.longitude,
-                  nextStepStart.latitude,
-                  nextStepStart.longitude
-                );
-
-                navLog.log("STEP_SCAN", {
-                  i,
-                  distToEnd: Math.round(distToCurrentEnd),
-                  distToNext: Math.round(distToNextStart),
-                  wouldAdvance:
-                    distToNextStart < distToCurrentEnd || distToCurrentEnd < 30,
-                });
-
-                if (
-                  distToNextStart < distToCurrentEnd ||
-                  distToCurrentEnd < 30
+                for (
+                  let i = correctStep;
+                  i < freshRoute.steps.length - 1;
+                  i++
                 ) {
-                  correctStep = i + 1;
+                  const currentStepEnd = freshRoute.steps[i].end_location;
+                  const nextStepStart = freshRoute.steps[i + 1].start_location;
+
+                  const distToCurrentEnd = calculateDistance(
+                    freshPosition.latitude,
+                    freshPosition.longitude,
+                    currentStepEnd.latitude,
+                    currentStepEnd.longitude
+                  );
+
+                  const distToNextStart = calculateDistance(
+                    freshPosition.latitude,
+                    freshPosition.longitude,
+                    nextStepStart.latitude,
+                    nextStepStart.longitude
+                  );
+
+                  navLog.log("STEP_SCAN", {
+                    i,
+                    distToEnd: Math.round(distToCurrentEnd),
+                    distToNext: Math.round(distToNextStart),
+                    wouldAdvance:
+                      distToNextStart < distToCurrentEnd ||
+                      distToCurrentEnd < 30,
+                  });
+
+                  if (
+                    distToNextStart < distToCurrentEnd ||
+                    distToCurrentEnd < 30
+                  ) {
+                    correctStep = i + 1;
+                  } else {
+                    break;
+                  }
+                }
+
+                if (correctStep !== freshState.currentNavigationStep) {
+                  navLog.log("RESUME_STEP_CORRECTION", {
+                    from: freshState.currentNavigationStep,
+                    to: correctStep,
+                  });
+                  currentStepRef.current = correctStep;
+                  lastAdvancedStep.current = correctStep;
+                  selectedRouteRef.current = freshRoute;
+                  dispatch(updateNavigationProgress(correctStep));
                 } else {
-                  break;
+                  selectedRouteRef.current = freshRoute;
+                  currentStepRef.current = correctStep;
+                  lastAdvancedStep.current = correctStep;
                 }
               }
-
-              if (correctStep !== freshState.currentNavigationStep) {
-                navLog.log("RESUME_STEP_CORRECTION", {
-                  from: freshState.currentNavigationStep,
-                  to: correctStep,
-                });
-                currentStepRef.current = correctStep;
-                lastAdvancedStep.current = correctStep;
-                selectedRouteRef.current = freshRoute;
-                dispatch(updateNavigationProgress(correctStep));
-              } else {
-                selectedRouteRef.current = freshRoute;
-                currentStepRef.current = correctStep;
-                lastAdvancedStep.current = correctStep;
-              }
+            } catch (error) {
+              navLog.log("RESUME_ERROR", { error: String(error) });
             }
-          } catch (error) {
-            navLog.log("RESUME_ERROR", { error: String(error) });
-          }
+          })();
 
           positionUpdatesCount.current = 0;
           navLogEvents.appStateChange("resumed");

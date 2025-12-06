@@ -428,16 +428,30 @@ export default function MapScreen() {
     }
   };
 
-  const handleRecenterToUserLocation = () => {
-    if (userLocation && mapRef.current) {
-      const newRegion = {
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+  const handleRecenterToUserLocation = async () => {
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      const newLocation = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
       };
 
-      mapRef.current.animateToRegion(newRegion, 1000);
+      dispatch(setUserLocation(newLocation));
+
+      if (mapRef.current) {
+        const newRegion = {
+          ...newLocation,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+        mapRef.current.animateToRegion(newRegion, 1000);
+      }
+    } catch (error) {
+      logger.error("Failed to get current location:", error);
+      notify.error("Could not get your location");
     }
   };
 
@@ -715,6 +729,42 @@ export default function MapScreen() {
   useEffect(() => {
     requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    let locationSubscription: Location.LocationSubscription | null = null;
+
+    const startLocationUpdates = async () => {
+      if (!locationPermission) return;
+
+      try {
+        locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Balanced,
+            timeInterval: 5000,
+            distanceInterval: 10,
+          },
+          (location) => {
+            dispatch(
+              setUserLocation({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+              })
+            );
+          }
+        );
+      } catch (error) {
+        logger.error("Location watcher error:", error);
+      }
+    };
+
+    startLocationUpdates();
+
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
+  }, [locationPermission, dispatch]);
 
   const params = useLocalSearchParams();
 
