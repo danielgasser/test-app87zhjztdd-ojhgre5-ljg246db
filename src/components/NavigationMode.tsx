@@ -628,7 +628,11 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       });
     }
 
-    checkDeviation(newPosition);
+    try {
+      checkDeviation(newPosition);
+    } catch (e) {
+      navLog.log("DEVIATION_ERROR", { error: String(e) });
+    }
     navLogEvents.positionUpdate(
       newPosition.latitude,
       newPosition.longitude,
