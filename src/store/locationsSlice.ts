@@ -1706,6 +1706,57 @@ export const generateSmartRoute = createAsyncThunk(
   }
 );
 
+// Simple distance calculation (meters)
+function calculateDistanceSimple(
+  lat1: number, lon1: number,
+  lat2: number, lon2: number
+): number {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Helper: Find correct step based on current position
+function findCorrectStepForPosition(
+  position: { latitude: number; longitude: number },
+  steps: NavigationStep[]
+): number {
+  let correctStep = 0;
+
+  for (let i = 0; i < steps.length - 1; i++) {
+    const currentStepEnd = steps[i].end_location;
+    const nextStepStart = steps[i + 1].start_location;
+
+    const distToCurrentEnd = calculateDistanceSimple(
+      position.latitude,
+      position.longitude,
+      currentStepEnd.latitude,
+      currentStepEnd.longitude
+    );
+
+    const distToNextStart = calculateDistanceSimple(
+      position.latitude,
+      position.longitude,
+      nextStepStart.latitude,
+      nextStepStart.longitude
+    );
+
+    // If closer to next step start OR within 50m of current step end, advance
+    if (distToNextStart < distToCurrentEnd || distToCurrentEnd < 50) {
+      correctStep = i + 1;
+    } else {
+      break;
+    }
+  }
+
+  return correctStep;
+}
+
 export const checkForReroute = createAsyncThunk(
   "locations/checkForReroute",
   async (
@@ -1752,9 +1803,11 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
-          dispatch(updateNavigationProgress(0));
+          const correctStep = result.optimized_route.steps
+            ? findCorrectStepForPosition(currentPosition, result.optimized_route.steps)
+            : 0;
+          dispatch(updateNavigationProgress(correctStep));
 
-          // @ts-ignore
           dispatch(setRouteRequest({
             ...routeRequest,
             origin: {
@@ -1829,8 +1882,11 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
-          dispatch(updateNavigationProgress(0));
-          // @ts-ignore
+          const correctStep = basicResult.route.steps
+            ? findCorrectStepForPosition(currentPosition, basicResult.route.steps)
+            : 0;
+          dispatch(updateNavigationProgress(correctStep));
+
           dispatch(setRouteRequest({
             ...routeRequest,
             origin: {
