@@ -275,6 +275,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       hasRoute: !!selectedRoute,
       stepsLength: selectedRoute?.steps?.length,
       step0End: selectedRoute?.steps?.[0]?.end_location,
+      step0Instruction: selectedRoute?.steps?.[0]?.instruction,
+      step1Instruction: selectedRoute?.steps?.[1]?.instruction,
       routeId: selectedRoute?.id,
       databaseId: selectedRoute?.databaseId,
     });
@@ -904,6 +906,14 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const currentInstruction = (() => {
     const displayStep = (currentNavigationStep || 0) + 1;
+    navLog.log("INSTRUCTION_DEBUG:", {
+      displayStep,
+      step0Instruction: selectedRoute?.steps?.[0]?.instruction,
+      step1Instruction: selectedRoute?.steps?.[1]?.instruction,
+      instruction: selectedRoute?.steps?.[displayStep]?.instruction,
+      routeId: selectedRoute?.id,
+      totalSteps: selectedRoute?.steps?.length,
+    });
     if (selectedRoute.steps && selectedRoute.steps[displayStep]) {
       return selectedRoute.steps[displayStep].instruction;
     }

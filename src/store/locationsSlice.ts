@@ -1906,6 +1906,8 @@ export const checkForReroute = createAsyncThunk(
           navLog.log('NEW_ROUTE_STEPS', {
             step0Start: routeWithDbId.steps?.[0]?.start_location,
             step0End: routeWithDbId.steps?.[0]?.end_location,
+            step0Instruction: routeWithDbId.steps?.[0]?.instruction,
+            step1Instruction: routeWithDbId.steps?.[1]?.instruction,
             totalSteps: routeWithDbId.steps?.length
           });
           const correctStep = basicResult.route.steps
