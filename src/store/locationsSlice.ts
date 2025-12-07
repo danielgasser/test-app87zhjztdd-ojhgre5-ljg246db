@@ -2531,10 +2531,12 @@ const locationsSlice = createSlice({
         // Check if we have a valid smart route result
         if (result && result.optimized_route && result.original_route) {
 
-          // Store the optimized route as the selected route
-          state.selectedRoute = result.optimized_route;
-          state.routes = [result.optimized_route];
-
+          // Only auto-set route if NOT actively navigating
+          // During navigation, checkForReroute handles route setting
+          if (!state.navigationActive) {
+            state.selectedRoute = result.optimized_route;
+            state.routes = [result.optimized_route];
+          }
           // Store the full comparison data
           state.smartRouteComparison = {
             original_route: result.original_route,
