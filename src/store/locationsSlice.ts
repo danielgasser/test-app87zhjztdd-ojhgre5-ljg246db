@@ -119,6 +119,7 @@ export interface RouteCoordinate {
 export interface RouteRequest {
   origin: RouteCoordinate;
   destination: RouteCoordinate;
+  heading?: number;
   user_demographics: {
     race_ethnicity: string;
     gender: string;
@@ -1585,11 +1586,11 @@ export const generateSmartRoute = createAsyncThunk(
   "locations/generateSmartRoute",
   async (routeRequest: RouteRequest, { rejectWithValue }) => {
     try {
-      // Call the NEW smart-route-generator edge function
       const { data, error } = await supabase.functions.invoke("smart-route-generator", {
         body: {
           origin: routeRequest.origin,
           destination: routeRequest.destination,
+          heading: routeRequest.heading,
           user_demographics: routeRequest.user_demographics,
           route_preferences: routeRequest.route_preferences
         }
@@ -1793,6 +1794,7 @@ export const checkForReroute = createAsyncThunk(
           latitude: currentPosition.latitude,
           longitude: currentPosition.longitude,
         },
+        heading: state.locations.navigationPosition?.heading,
         // Keep the same destination
       };
 

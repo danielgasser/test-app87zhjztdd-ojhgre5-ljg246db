@@ -28,6 +28,7 @@ interface UserDemographics {
 interface SmartRouteRequest {
   origin: RouteCoordinate;
   destination: RouteCoordinate;
+  heading?: number;
   user_demographics: UserDemographics;
   route_preferences: {
     prioritize_safety: boolean;
@@ -83,89 +84,190 @@ const CONFIG = {
 // ================================
 // HELPER FUNCTIONS
 // ================================
+/**
+ * Parse duration string like "120s" to seconds number
+ */
+function parseDuration(duration: string | undefined): number {
+  if (!duration) return 0;
+  const match = duration.match(/^(\d+)s$/);
+  return match ? parseInt(match[1], 10) : 0;
+}
 
 /**
+ * Convert Routes API maneuver to legacy Directions API format
+ */
+function maneuverToLegacy(maneuver: string | undefined): string | undefined {
+  if (!maneuver) return undefined;
+
+  // Routes API uses UPPER_SNAKE_CASE, legacy uses kebab-case
+  const mapping: Record<string, string> = {
+    'TURN_LEFT': 'turn-left',
+    'TURN_RIGHT': 'turn-right',
+    'TURN_SLIGHT_LEFT': 'turn-slight-left',
+    'TURN_SLIGHT_RIGHT': 'turn-slight-right',
+    'TURN_SHARP_LEFT': 'turn-sharp-left',
+    'TURN_SHARP_RIGHT': 'turn-sharp-right',
+    'U_TURN_LEFT': 'uturn-left',
+    'U_TURN_RIGHT': 'uturn-right',
+    'STRAIGHT': 'straight',
+    'RAMP_LEFT': 'ramp-left',
+    'RAMP_RIGHT': 'ramp-right',
+    'MERGE': 'merge',
+    'FORK_LEFT': 'fork-left',
+    'FORK_RIGHT': 'fork-right',
+    'FERRY': 'ferry',
+    'ROUNDABOUT_LEFT': 'roundabout-left',
+    'ROUNDABOUT_RIGHT': 'roundabout-right',
+    'DEPART': 'depart',
+    'NAME_CHANGE': 'straight',
+  };
+
+  return mapping[maneuver] || maneuver.toLowerCase().replace(/_/g, '-');
+}
+/**
  * Call Mapbox Directions API to get route
+ */
+/**
+ * Call Google Routes API to get route (with optional heading for rerouting)
  */
 async function getGoogleRoute(
   origin: RouteCoordinate,
   destination: RouteCoordinate,
-  waypoints: RouteCoordinate[] = []
+  waypoints: RouteCoordinate[] = [],
+  heading?: number
 ): Promise<any> {
   const googleApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
   if (!googleApiKey) {
     throw new Error('Google Maps API key not configured');
   }
 
-  // Build waypoints string if provided
-  let waypointsParam = '';
-  if (waypoints.length > 0) {
-    const waypointCoords = waypoints
-      .map(wp => `${wp.latitude},${wp.longitude}`)
-      .join('|');
-    waypointsParam = `&waypoints=${waypointCoords}`;
+  // Build origin with optional heading
+  const originWaypoint: any = {
+    location: {
+      latLng: {
+        latitude: origin.latitude,
+        longitude: origin.longitude,
+      }
+    }
+  };
+
+  // Add heading if provided (for rerouting scenarios)
+  if (heading !== undefined && heading !== null) {
+    originWaypoint.vehicleHeading = Math.round(heading);
+    console.log(`📍 Using vehicle heading: ${Math.round(heading)}°`);
   }
 
-  const url = `https://maps.googleapis.com/maps/api/directions/json?` +
-    `origin=${origin.latitude},${origin.longitude}` +
-    `&destination=${destination.latitude},${destination.longitude}` +
-    waypointsParam +
-    `&key=${googleApiKey}`;
+  // Build request body
+  const requestBody: any = {
+    origin: originWaypoint,
+    destination: {
+      location: {
+        latLng: {
+          latitude: destination.latitude,
+          longitude: destination.longitude,
+        }
+      }
+    },
+    travelMode: 'DRIVE',
+    routingPreference: 'TRAFFIC_AWARE',
+    computeAlternativeRoutes: false,
+    languageCode: 'en-US',
+    units: 'METRIC',
+  };
 
-  const response = await fetch(url);
+  // Add intermediates (waypoints) if provided
+  if (waypoints.length > 0) {
+    requestBody.intermediates = waypoints.map(wp => ({
+      location: {
+        latLng: {
+          latitude: wp.latitude,
+          longitude: wp.longitude,
+        }
+      }
+    }));
+  }
+
+  const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': googleApiKey,
+      'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.steps.navigationInstruction,routes.legs.steps.startLocation,routes.legs.steps.endLocation,routes.legs.steps.distanceMeters,routes.legs.steps.staticDuration,routes.legs.steps.polyline'
+    },
+    body: JSON.stringify(requestBody)
+  });
 
   if (!response.ok) {
-    throw new Error(`Google API error: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Routes API error:', errorText);
+    throw new Error(`Google Routes API error: ${response.status}`);
   }
 
   const data = await response.json();
 
-  if (data.status !== 'OK' || !data.routes || data.routes.length === 0) {
-    throw new Error(`No routes found: ${data.status}`);
+  if (!data.routes || data.routes.length === 0) {
+    throw new Error('No routes found');
   }
 
-  // Transform to match expected format
+  // Transform Routes API response to match our expected format
   const route = data.routes[0];
 
   const steps: any[] = [];
-  route.legs.forEach((leg: any) => {
-    leg.steps.forEach((step: any) => {
-      steps.push({
-        instruction: step.html_instructions.replace(/<[^>]*>/g, ""), // Strip HTML tags
-        distance_meters: step.distance.value,
-        duration_seconds: step.duration.value,
-        start_location: {
-          latitude: step.start_location.lat,
-          longitude: step.start_location.lng,
-        },
-        end_location: {
-          latitude: step.end_location.lat,
-          longitude: step.end_location.lng,
-        },
-        maneuver: step.maneuver || undefined,
-      });
-    });
-  });
-  return {
-    duration: route.legs.reduce((sum: number, leg: any) => sum + leg.duration.value, 0),
-    distance: route.legs.reduce((sum: number, leg: any) => sum + leg.distance.value, 0),
-    geometry: {
-      coordinates: (() => {
-        const detailedCoords: [number, number][] = [];
-        route.legs.forEach((leg: any) => {
-          leg.steps.forEach((step: any) => {
-            if (step.polyline?.points) {
-              detailedCoords.push(...decodePolyline(step.polyline.points));
-            }
+  if (route.legs) {
+    route.legs.forEach((leg: any) => {
+      if (leg.steps) {
+        leg.steps.forEach((step: any) => {
+          const instruction = step.navigationInstruction?.instructions || 'Continue';
+          const maneuver = step.navigationInstruction?.maneuver || undefined;
+
+          steps.push({
+            instruction: instruction,
+            distance_meters: step.distanceMeters || 0,
+            duration_seconds: parseDuration(step.staticDuration),
+            start_location: {
+              latitude: step.startLocation?.latLng?.latitude,
+              longitude: step.startLocation?.latLng?.longitude,
+            },
+            end_location: {
+              latitude: step.endLocation?.latLng?.latitude,
+              longitude: step.endLocation?.latLng?.longitude,
+            },
+            maneuver: maneuverToLegacy(maneuver),
           });
         });
-        return detailedCoords.length > 0 ? detailedCoords : decodePolyline(route.overview_polyline.points);
-      })(),
+      }
+    });
+  }
+
+  // Decode polyline - collect from steps if available, fallback to route-level
+  let coordinates: [number, number][] = [];
+  if (route.legs) {
+    route.legs.forEach((leg: any) => {
+      if (leg.steps) {
+        leg.steps.forEach((step: any) => {
+          if (step.polyline?.encodedPolyline) {
+            coordinates.push(...decodePolyline(step.polyline.encodedPolyline));
+          }
+        });
+      }
+    });
+  }
+  if (coordinates.length === 0 && route.polyline?.encodedPolyline) {
+    coordinates = decodePolyline(route.polyline.encodedPolyline);
+  }
+
+  return {
+    duration: parseDuration(route.duration),
+    distance: route.distanceMeters || 0,
+    geometry: {
+      coordinates: coordinates,
       type: 'LineString'
     },
     steps: steps
   };
 }
+
+
 
 /**
  * Score a route using the route-safety-scorer function
@@ -311,10 +413,12 @@ async function generateOptimizedRoute(
 ): Promise<SmartRouteResponse> {
 
   console.log('🚀 Starting smart route generation...');
+  console.log(`📍 Request heading: ${request.heading ?? 'not provided'}`);
+
 
   // Step 1: Get original route from Mapbox
   console.log('📍 Step 1: Getting original route...');
-  const originalRoute = await getGoogleRoute(request.origin, request.destination);
+  const originalRoute = await getGoogleRoute(request.origin, request.destination, [], request.heading);
   console.log('ORIGIN:', JSON.stringify(request.origin));
   console.log('STEP_0:', JSON.stringify(originalRoute.steps?.[0]));
   const originalCoords = geometryToCoordinates(originalRoute.geometry);
@@ -421,7 +525,7 @@ async function generateOptimizedRoute(
   // Step 6: Generate new route with waypoints
   console.log('🗺️ Step 5: Generating optimized route with waypoints...');
   const waypointCoords = safeWaypoints.map(wp => wp.coordinate);
-  const optimizedRoute = await getGoogleRoute(request.origin, request.destination, waypointCoords);
+  const optimizedRoute = await getGoogleRoute(request.origin, request.destination, waypointCoords, request.heading);
   const optimizedCoords = geometryToCoordinates(optimizedRoute.geometry);
 
   // Step 7: Score the optimized route
