@@ -315,6 +315,8 @@ async function generateOptimizedRoute(
   // Step 1: Get original route from Mapbox
   console.log('📍 Step 1: Getting original route...');
   const originalRoute = await getGoogleRoute(request.origin, request.destination);
+  console.log('ORIGIN:', JSON.stringify(request.origin));
+  console.log('STEP_0:', JSON.stringify(originalRoute.steps?.[0]));
   const originalCoords = geometryToCoordinates(originalRoute.geometry);
 
   // Step 2: Score the original route

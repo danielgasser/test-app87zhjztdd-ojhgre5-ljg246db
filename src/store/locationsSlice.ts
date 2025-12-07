@@ -2498,9 +2498,11 @@ const locationsSlice = createSlice({
       })
       .addCase(generateSafeRoute.fulfilled, (state, action) => {
         state.routeLoading = false;
-        state.selectedRoute = action.payload.route;
+        if (!state.navigationActive) {
+          state.selectedRoute = action.payload.route;
+          state.routes = [action.payload.route];
+        }
         state.routeSafetyAnalysis = action.payload.route.safety_analysis;
-        state.routes = [action.payload.route];
       })
       .addCase(generateSafeRoute.rejected, (state, action) => {
         state.routeLoading = false;
@@ -2556,8 +2558,10 @@ const locationsSlice = createSlice({
 
           // If we have an original route, use it as the selected route
           if (result && result.original_route) {
-            state.selectedRoute = result.original_route;
-            state.routes = [result.original_route];
+            if (!state.navigationActive) {
+              state.selectedRoute = result.original_route;
+              state.routes = [result.original_route];
+            }
           }
         }
       })
