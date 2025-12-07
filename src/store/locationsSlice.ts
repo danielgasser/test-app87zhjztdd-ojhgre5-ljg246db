@@ -1763,11 +1763,18 @@ export const checkForReroute = createAsyncThunk(
     currentPosition: { latitude: number; longitude: number },
     { getState, dispatch }
   ) => {
+    navLog.log('REROUTE_CALLED', { lat: currentPosition.latitude, lng: currentPosition.longitude });
 
     const state = getState() as RootState;
     const { selectedRoute, routeRequest, navigationSessionId } = state.locations;
 
+    navLog.log('REROUTE_STATE', {
+      hasSelectedRoute: !!selectedRoute,
+      hasRouteRequest: !!routeRequest,
+      currentStepsLength: selectedRoute?.steps?.length
+    });
     if (!selectedRoute || !routeRequest) {
+      navLog.log('REROUTE_ABORTED', { reason: 'missing route or request' });
       return;
     }
     dispatch(setRerouting(true));
@@ -1850,6 +1857,10 @@ export const checkForReroute = createAsyncThunk(
         }
       } catch (smartRouteError) {
         // Fallback to basic route generation
+        navLog.log('SMART_ROUTE_FAILED', {
+          error: smartRouteError instanceof Error ? smartRouteError.message : String(smartRouteError)
+        });
+
         const errorMessage =
           smartRouteError instanceof Error
             ? smartRouteError.message

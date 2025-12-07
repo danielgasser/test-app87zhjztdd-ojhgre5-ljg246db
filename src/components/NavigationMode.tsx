@@ -275,6 +275,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       hasRoute: !!selectedRoute,
       stepsLength: selectedRoute?.steps?.length,
       step0End: selectedRoute?.steps?.[0]?.end_location,
+      routeId: selectedRoute?.id,
+      databaseId: selectedRoute?.databaseId,
     });
     selectedRouteRef.current = selectedRoute;
     lastAdvancedStep.current = -1;
@@ -794,13 +796,15 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     latitude: number;
     longitude: number;
   }) => {
-    navLog.log("DEV_ENTRY", {
+    navLog.log("CHECK_DEVIATION_CALLED", {
       isRerouting,
       posCount: positionUpdatesCount.current,
-      routePointsLen: selectedRoute?.route_points?.length || 0,
+      hasRoutePoints: !!selectedRoute?.route_points?.length,
     });
     // Skip if already rerouting
     if (isRerouting) {
+      navLog.log("CHECK_DEVIATION_SKIP", { reason: "isRerouting" });
+
       return;
     }
     // Skip deviation check for first 5 position updates (let GPS settle)
@@ -830,6 +834,11 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         // Only reroute if at least 60 seconds since last reroute
         if (timeSinceLastReroute > 60000) {
           lastRerouteTime.current = now;
+          navLog.log("TRIGGERING_REROUTE", {
+            distanceFromRoute: distance,
+            threshold: 50,
+            position,
+          });
           dispatch(checkForReroute(position));
         }
       }
