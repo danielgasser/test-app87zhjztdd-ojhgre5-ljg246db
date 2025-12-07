@@ -1792,7 +1792,12 @@ export const checkForReroute = createAsyncThunk(
       // Try smart route first (safer route)
       try {
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
-
+        navLog.log('REROUTE_API_RESPONSE', {
+          success: result.success,
+          hasOptimizedRoute: !!result.optimized_route,
+          optimizedSteps: result.optimized_route?.steps?.length,
+          step0Instruction: result.optimized_route?.steps?.[0]?.instructions
+        });
         if (result.success && result.optimized_route) {
           // Always use the new route when rerouting (starts from current position)
           const routeWithDbId = {
@@ -1803,6 +1808,11 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
+          navLog.log('NEW_ROUTE_STEPS', {
+            step0Start: routeWithDbId.steps?.[0]?.start_location,
+            step0End: routeWithDbId.steps?.[0]?.end_location,
+            totalSteps: routeWithDbId.steps?.length
+          });
           const correctStep = result.optimized_route.steps
             ? findCorrectStepForPosition(currentPosition, result.optimized_route.steps)
             : 0;
@@ -1882,6 +1892,11 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
+          navLog.log('NEW_ROUTE_STEPS', {
+            step0Start: routeWithDbId.steps?.[0]?.start_location,
+            step0End: routeWithDbId.steps?.[0]?.end_location,
+            totalSteps: routeWithDbId.steps?.length
+          });
           const correctStep = basicResult.route.steps
             ? findCorrectStepForPosition(currentPosition, basicResult.route.steps)
             : 0;

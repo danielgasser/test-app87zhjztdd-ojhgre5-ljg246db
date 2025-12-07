@@ -271,6 +271,11 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   }, [currentNavigationStep]);
 
   useEffect(() => {
+    navLog.log("ROUTE_REF_UPDATE", {
+      hasRoute: !!selectedRoute,
+      stepsLength: selectedRoute?.steps?.length,
+      step0End: selectedRoute?.steps?.[0]?.end_location,
+    });
     selectedRouteRef.current = selectedRoute;
     lastAdvancedStep.current = -1;
   }, [selectedRoute]);
