@@ -9,13 +9,16 @@ import {
   ActivityIndicator,
   Linking,
   GestureResponderEvent,
-  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
+import {
+  updateUserProfile,
+  fetchUserProfile,
+  fetchUserVoteStats,
+} from "src/store/userSlice";
 import { supabase } from "src/services/supabase";
 import { theme } from "src/styles/theme";
 import { router } from "expo-router";
@@ -27,7 +30,6 @@ import { useAuth } from "@/providers/AuthProvider";
 import {
   fetchUserRouteHistory,
   deleteRouteFromHistory,
-  setSelectedRoute,
   setNavigationIntent,
   RouteHistoryItem,
 } from "@/store/locationsSlice";
@@ -37,7 +39,7 @@ const appConfig = require("../../app.config.js");
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const { user, signOut } = useAuth();
-  const { profile, loading } = useAppSelector((state) => state.user);
+  const { profile, loading, voteStats } = useAppSelector((state) => state.user);
   const {
     routeHistory,
     routeHistoryLoading,
@@ -54,49 +56,30 @@ export default function ProfileScreen() {
     account: false,
   });
 
-  const [voteStats, setVoteStats] = useState<{
-    helpful_votes_given: number;
-    unhelpful_votes_given: number;
-    total_votes_given: number;
-  } | null>(null);
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserVoteStats(user.id));
+    }
+  }, [user?.id, dispatch]);
 
   useEffect(() => {
-    const fetchVoteStats = async () => {
-      if (!user?.id) return;
-
-      try {
-        const { data, error } = await supabase.rpc("get_user_vote_stats", {
-          p_user_id: user.id,
-        });
-
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setVoteStats(data[0]);
-        }
-      } catch (error) {
-        logger.error("Error fetching vote stats:", error);
-      }
-    };
-
-    fetchVoteStats();
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (
-      expandedSections.routeHistory &&
-      user?.id &&
-      routeHistory.length === 0
-    ) {
+    if (expandedSections.routeHistory && user?.id) {
       dispatch(fetchUserRouteHistory({ userId: user.id, page: 0 }));
     }
   }, [expandedSections.routeHistory, user?.id]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
-      ...prev,
+      activity: false,
+      routeHistory: false,
+      demographics: false,
+      mapSettings: false,
+      settings: false,
+      account: false,
       [section]: !prev[section],
     }));
   };
+
   const isLoggedIn = !!user;
   const hasCompletedOnboarding = useAppSelector(
     (state) => state.user.onboardingComplete
@@ -252,7 +235,12 @@ export default function ProfileScreen() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => dispatch(deleteRouteFromHistory(routeId)),
+          onPress: () => {
+            dispatch(deleteRouteFromHistory(routeId));
+            if (user?.id && routeHistory.length <= 1) {
+              dispatch(fetchUserRouteHistory({ userId: user.id, page: 0 }));
+            }
+          },
         },
       ],
       "warning"
@@ -554,8 +542,8 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Settings Section */}
             <CollapsibleSection
-              title="Settings"
-              icon="settings"
+              title="Navigation Alerts"
+              icon="notifications"
               isExpanded={expandedSections.settings}
               onToggle={() => toggleSection("settings")}
             >

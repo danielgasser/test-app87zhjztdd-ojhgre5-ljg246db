@@ -9,9 +9,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
-import { useAppSelector } from "@/store/hooks";
 import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers";
+import { fetchUserVoteStats } from "@/store/userSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 interface VoteButtonsProps {
   reviewId: string;
@@ -36,6 +37,7 @@ export default function VoteButtons({
     currentUserVote || null
   );
   const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
 
   // Update local state when props change
   useEffect(() => {
@@ -116,6 +118,10 @@ export default function VoteButtons({
         }
 
         onVoteChange?.();
+        // Refresh vote stats in Redux
+        if (userId) {
+          dispatch(fetchUserVoteStats(userId));
+        }
       }
     } catch (error) {
       console.error("Vote error:", error);

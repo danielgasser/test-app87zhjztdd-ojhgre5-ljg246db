@@ -21,7 +21,6 @@ import {
   updateRoutePreferences,
   searchLocations,
   RouteRequest,
-  setSmartRouteComparison,
   startNavigation,
   saveRouteToDatabase,
   startNavigationSession,
@@ -168,6 +167,31 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     }
   }, [visible]);
 
+  const reverseGeocodeLocation = async (
+    latitude: number,
+    longitude: number
+  ): Promise<string> => {
+    try {
+      const results = await googlePlacesService.reverseGeocode({
+        latitude,
+        longitude,
+      });
+      if (results && results.length > 0) {
+        // Return a short name like "Winterthur" or "Main Street 5, Winterthur"
+        return (
+          results[0].formatted_address
+            ?.split(",")
+            .slice(0, 2)
+            .join(",")
+            .trim() || "Unknown Location"
+        );
+      }
+    } catch (error) {
+      logger.error("Reverse geocode failed:", error);
+    }
+    return "Unknown Location";
+  };
+
   // Mapbox search function
   // Google Places Autocomplete search
   const searchGoogle = async (query: string): Promise<LocationResult[]> => {
@@ -275,12 +299,19 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     };
 
     dispatch(setRouteRequest(routeRequestData));
+    const resolvedOriginName =
+      fromLocation.source === "current_location"
+        ? await reverseGeocodeLocation(
+            fromLocation.latitude,
+            fromLocation.longitude
+          )
+        : fromLocation.name;
 
     const savedRoute = await dispatch(
       saveRouteToDatabase({
         route_coordinates: selectedRoute.coordinates,
         steps: selectedRoute.steps,
-        origin_name: fromLocation.name,
+        origin_name: resolvedOriginName,
         destination_name: toLocation.name,
         distance_km: selectedRoute.distance_kilometers,
         duration_minutes: selectedRoute.estimated_duration_minutes,
@@ -288,6 +319,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         navigation_session_id: navigationSessionId,
       })
     ).unwrap();
+
     const optimizedRoute = {
       ...smartRouteComparison.optimized_route,
       route_points: smartRouteComparison.optimized_route.coordinates,

@@ -47,6 +47,12 @@ interface UserState {
   publicReviews: PublicUserReview[];
   publicReviewsLoading: boolean;
   searchRadiusKm: number;
+  voteStats: {
+    helpful_votes_given: number;
+    unhelpful_votes_given: number;
+    total_votes_given: number;
+  } | null;
+  voteStatsLoading: boolean;
 }
 
 const initialState: UserState = {
@@ -60,6 +66,8 @@ const initialState: UserState = {
   publicReviews: [],
   publicReviewsLoading: false,
   searchRadiusKm: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000,
+  voteStats: null,
+  voteStatsLoading: false,
 };
 
 // Fetch user profile
@@ -183,6 +191,21 @@ export const updateSearchRadius = createAsyncThunk<
   }
 );
 
+export const fetchUserVoteStats = createAsyncThunk(
+  'user/fetchVoteStats',
+  async (userId: string) => {
+    const { data, error } = await supabase.rpc('get_user_vote_stats', {
+      p_user_id: userId,
+    });
+
+    if (error) throw error;
+    if (data && data.length > 0) {
+      return data[0];
+    }
+    return { helpful_votes_given: 0, unhelpful_votes_given: 0, total_votes_given: 0 };
+  }
+);
+
 // Fetch public user profile (for viewing other users' profiles)
 export const fetchPublicUserProfile = createAsyncThunk<PublicUserProfile, string>(
   'user/fetchPublicProfile',
@@ -281,6 +304,35 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to update profile';
       })
+      // Update search radius
+      .addCase(updateSearchRadius.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateSearchRadius.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+
+        // Update cached radius
+        const preferences = action.payload.preferences as any;
+        if (preferences?.search?.radius_km) {
+          state.searchRadiusKm = preferences.search.radius_km;
+        }
+      })
+      .addCase(updateSearchRadius.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update search radius';
+      })
+      .addCase(fetchUserVoteStats.pending, (state) => {
+        state.voteStatsLoading = true;
+      })
+      .addCase(fetchUserVoteStats.fulfilled, (state, action) => {
+        state.voteStats = action.payload;
+        state.voteStatsLoading = false;
+      })
+      .addCase(fetchUserVoteStats.rejected, (state) => {
+        state.voteStatsLoading = false;
+      })
       // Fetch public user profile
       .addCase(fetchPublicUserProfile.pending, (state) => {
         state.publicProfileLoading = true;
@@ -306,26 +358,8 @@ const userSlice = createSlice({
       .addCase(fetchPublicUserReviews.rejected, (state) => {
         state.publicReviewsLoading = false;
         state.publicReviews = [];
-      })
-      // Update search radius
-      .addCase(updateSearchRadius.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateSearchRadius.fulfilled, (state, action) => {
-        state.loading = false;
-        state.profile = action.payload;
-
-        // Update cached radius
-        const preferences = action.payload.preferences as any;
-        if (preferences?.search?.radius_km) {
-          state.searchRadiusKm = preferences.search.radius_km;
-        }
-      })
-      .addCase(updateSearchRadius.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to update search radius';
       });
+
   },
 });
 

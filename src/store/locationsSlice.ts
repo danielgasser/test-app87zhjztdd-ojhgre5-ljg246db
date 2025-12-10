@@ -2002,7 +2002,7 @@ export const checkForReroute = createAsyncThunk(
 
 export const fetchUserRouteHistory = createAsyncThunk(
   "locations/fetchUserRouteHistory",
-  async ({ userId, page = 0, pageSize = 10 }: { userId: string; page?: number; pageSize?: number }) => {
+  async ({ userId, page = 0, pageSize = 5 }: { userId: string; page?: number; pageSize?: number }) => {
     const { data, error } = await supabase
       .from("routes")
       .select("*")

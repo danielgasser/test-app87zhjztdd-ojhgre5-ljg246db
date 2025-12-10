@@ -73,6 +73,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { shallowEqual } from "react-redux";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import NavigationArrow from "@/components/NavigationArrow";
+import { navLog } from "@/utils/navigationLogger";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -608,40 +609,63 @@ export default function MapScreen() {
       route.route_points,
       route.safety_analysis.segment_scores
     );
+
+    // Calculate user's progress along route ONCE (not per segment)
+    const userProgressDistance = (() => {
+      if (!navigationActive || !navigationPosition) return -1;
+
+      const routePoints = route.route_points;
+      if (!routePoints || routePoints.length < 2) return -1;
+
+      // Build cumulative distances
+      let cumulativeDistance = 0;
+      let minDistanceToRoute = Infinity;
+      let progressDistance = 0;
+
+      for (let i = 0; i < routePoints.length; i++) {
+        if (i > 0) {
+          cumulativeDistance += calculateDistanceBetweenPoints(
+            routePoints[i - 1],
+            routePoints[i]
+          );
+        }
+
+        const distToUser = calculateDistanceBetweenPoints(
+          navigationPosition,
+          routePoints[i]
+        );
+
+        if (distToUser < minDistanceToRoute) {
+          minDistanceToRoute = distToUser;
+          progressDistance = cumulativeDistance;
+        }
+      }
+
+      return progressDistance;
+    })();
+
+    // Build segment end distances for comparison
+    const segmentEndDistances: number[] = [];
+    let cumDist = 0;
+    for (const segment of route.safety_analysis.segment_scores) {
+      cumDist += segment.distance_meters;
+      segmentEndDistances.push(cumDist);
+    }
+    navLog.log("[POLYLINE_DEBUG]", {
+      userProgressDistance,
+      segmentEndDistances,
+      navigationActive,
+      hasPosition: !!navigationPosition,
+    });
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         if (!segmentChunks[index] || segmentChunks[index].length < 2) {
           return null;
         }
 
-        // Check if segment is behind user's current position
-        const isTraveled = (() => {
-          if (!navigationActive || !navigationPosition) return false;
-
-          const segmentCoords = segmentChunks[index];
-          if (!segmentCoords || segmentCoords.length < 2) return false;
-
-          // Find which segment the user is currently in
-          // by finding the closest point across all segments
-          let minDistance = Infinity;
-          let userSegmentIndex = 0;
-
-          segmentChunks.forEach((chunk, chunkIndex) => {
-            chunk.forEach((point) => {
-              const dist = calculateDistanceBetweenPoints(
-                navigationPosition,
-                point
-              );
-              if (dist < minDistance) {
-                minDistance = dist;
-                userSegmentIndex = chunkIndex;
-              }
-            });
-          });
-
-          // Segment is traveled if its index is less than user's current segment
-          return index < userSegmentIndex;
-        })();
+        // Segment is traveled if user has passed its END point
+        const segmentEndDistance = segmentEndDistances[index];
+        const isTraveled = userProgressDistance > segmentEndDistance;
 
         const segmentColor = isTraveled
           ? "rgba(150, 150, 150, 0.5)"
@@ -652,7 +676,7 @@ export default function MapScreen() {
             APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
           ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
           : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
-        // Try wrapping in Fragment with timestamp key to force re-render
+
         return (
           <React.Fragment key={`segment-${index}-${Date.now()}`}>
             <Polyline
