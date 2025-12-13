@@ -183,9 +183,9 @@ export const APP_CONFIG = {
 
     // Route Line Styling
     LINE_WIDTH: {
-      SELECTED: 6,                                   // Width of selected route line
-      ALTERNATIVE: 4,                                // Width of alternative route lines
-      SEGMENT_HIGHLIGHT: 8,                          // Width when highlighting specific segment
+      SELECTED: 8,                                   // Width of selected route line
+      ALTERNATIVE: 7,                                // Width of alternative route lines
+      SEGMENT_HIGHLIGHT: 10,                          // Width when highlighting specific segment
     },
 
     // Route Markers

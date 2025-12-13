@@ -136,6 +136,14 @@ export default function MapScreen() {
   >(null);
   const [hasInitiallyRecentered, setHasInitiallyRecentered] = useState(false);
 
+  const [routePolylines, setRoutePolylines] = useState<
+    Array<{
+      key: string;
+      coordinates: Array<{ latitude: number; longitude: number }>;
+      color: string;
+    }>
+  >([]);
+
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -151,7 +159,6 @@ export default function MapScreen() {
     routes,
     showRouteSegments,
     navigationIntent,
-    currentNavigationStep,
   } = useAppSelector((state: any) => state.locations, shallowEqual);
 
   const navigationPosition = useAppSelector(
@@ -191,6 +198,126 @@ export default function MapScreen() {
   );
 
   const { distanceUnit } = useUserPreferences();
+
+  // Update route polylines when navigation position changes
+  useEffect(() => {
+    if (
+      !navigationActive ||
+      !selectedRoute?.safety_analysis?.segment_scores ||
+      !selectedRoute?.route_points
+    ) {
+      setRoutePolylines([]);
+      return;
+    }
+
+    const routePoints = selectedRoute.route_points;
+    const segmentScores = selectedRoute.safety_analysis.segment_scores;
+
+    // Build cumulative distances for each route point
+    const pointDistances: number[] = [0];
+    for (let i = 1; i < routePoints.length; i++) {
+      const dist = calculateDistanceBetweenPoints(
+        routePoints[i - 1],
+        routePoints[i]
+      );
+      pointDistances.push(pointDistances[i - 1] + dist);
+    }
+
+    // Find user's closest point on route
+    let userPointIndex = 0;
+    if (navigationPosition) {
+      let minDist = Infinity;
+      for (let i = 0; i < routePoints.length; i++) {
+        const dist = calculateDistanceBetweenPoints(
+          navigationPosition,
+          routePoints[i]
+        );
+        if (dist < minDist) {
+          minDist = dist;
+          userPointIndex = i;
+        }
+      }
+    }
+
+    // Build segment boundaries
+    const totalDistance = pointDistances[pointDistances.length - 1];
+    const segmentBoundaries: number[] = [0];
+    let cumDist = 0;
+    for (const segment of segmentScores) {
+      cumDist += segment.distance_meters;
+      segmentBoundaries.push(Math.min(cumDist, totalDistance));
+    }
+
+    const greyColor = "rgba(150, 150, 150, 0.5)";
+    const newPolylines: Array<{
+      key: string;
+      coordinates: Array<{ latitude: number; longitude: number }>;
+      color: string;
+    }> = [];
+
+    // Grey polyline: all points from start to user position
+    if (userPointIndex > 0) {
+      newPolylines.push({
+        key: "traveled",
+        coordinates: routePoints.slice(0, userPointIndex + 1),
+        color: greyColor,
+      });
+    }
+
+    // Colored polylines: points ahead of user, split by safety segments
+    const userDistance = pointDistances[userPointIndex];
+
+    for (let segIdx = 0; segIdx < segmentScores.length; segIdx++) {
+      const segmentStart = segmentBoundaries[segIdx];
+      const segmentEnd = segmentBoundaries[segIdx + 1] || totalDistance;
+
+      // Skip segments entirely behind user
+      if (segmentEnd <= userDistance) continue;
+
+      const segment = segmentScores[segIdx];
+      const safetyColor =
+        (segment.safety_score || segment.overall_score) >=
+        APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
+          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
+          : (segment.safety_score || segment.overall_score) >=
+            APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
+          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
+          : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+
+      const segmentCoords: Array<{ latitude: number; longitude: number }> = [];
+
+      for (let i = 0; i < routePoints.length; i++) {
+        const pointDist = pointDistances[i];
+
+        // Only include points ahead of user AND within this segment
+        if (
+          i >= userPointIndex &&
+          pointDist >= segmentStart &&
+          pointDist <= segmentEnd
+        ) {
+          segmentCoords.push(routePoints[i]);
+        }
+
+        if (pointDist > segmentEnd) break;
+      }
+
+      if (segmentCoords.length >= 2) {
+        newPolylines.push({
+          key: `segment-${segIdx}`,
+          coordinates: segmentCoords,
+          color: safetyColor,
+        });
+      }
+    }
+
+    navLog.log("[POLYLINE_UPDATE]", {
+      userPointIndex,
+      userDistance,
+      polylinesCount: newPolylines.length,
+    });
+
+    setRoutePolylines(newPolylines);
+  }, [navigationActive, navigationPosition, selectedRoute]);
 
   // ===== ADD ALL THIS LOGGING HERE =====
   const renderCountRef = useRef(0);
@@ -607,90 +734,50 @@ export default function MapScreen() {
     )
       return null;
 
+    // During navigation, use the state-based polylines
+    if (navigationActive && routePolylines.length > 0) {
+      return routePolylines.map((polyline) => (
+        <Polyline
+          key={polyline.key}
+          coordinates={polyline.coordinates}
+          {...(Platform.OS === "ios"
+            ? { strokeColors: [polyline.color] }
+            : { strokeColor: polyline.color })}
+          strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+        />
+      ));
+    }
+
+    // Non-navigation mode: show static colored segments
     const segmentChunks = splitRouteIntoSegments(
       route.route_points,
       route.safety_analysis.segment_scores
     );
 
-    // Calculate user's progress along route ONCE (not per segment)
-    const userProgressDistance = (() => {
-      if (!navigationActive || !navigationPosition) return -1;
-
-      const routePoints = route.route_points;
-      if (!routePoints || routePoints.length < 2) return -1;
-
-      // Build cumulative distances
-      let cumulativeDistance = 0;
-      let minDistanceToRoute = Infinity;
-      let progressDistance = 0;
-
-      for (let i = 0; i < routePoints.length; i++) {
-        if (i > 0) {
-          cumulativeDistance += calculateDistanceBetweenPoints(
-            routePoints[i - 1],
-            routePoints[i]
-          );
-        }
-
-        const distToUser = calculateDistanceBetweenPoints(
-          navigationPosition,
-          routePoints[i]
-        );
-
-        if (distToUser < minDistanceToRoute) {
-          minDistanceToRoute = distToUser;
-          progressDistance = cumulativeDistance;
-        }
-      }
-
-      return progressDistance;
-    })();
-
-    // Build segment end distances for comparison
-    const segmentEndDistances: number[] = [];
-    let cumDist = 0;
-    for (const segment of route.safety_analysis.segment_scores) {
-      cumDist += segment.distance_meters;
-      segmentEndDistances.push(cumDist);
-    }
-    navLog.log("[POLYLINE_DEBUG]", {
-      userProgressDistance,
-      segmentEndDistances,
-      navigationActive,
-      hasPosition: !!navigationPosition,
-    });
     return route.safety_analysis.segment_scores.map(
       (segment: any, index: number) => {
         if (!segmentChunks[index] || segmentChunks[index].length < 2) {
           return null;
         }
 
-        // Segment is traveled if user has passed its END point
-        const segmentEndDistance = segmentEndDistances[index];
-        const isTraveled = userProgressDistance > segmentEndDistance;
-
-        const segmentColor = isTraveled
-          ? "rgba(150, 150, 150, 0.5)"
-          : (segment.safety_score || segment.overall_score) >=
-            APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
-          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
-          : (segment.safety_score || segment.overall_score) >=
-            APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
-          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
-          : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+        const safetyColor =
+          (segment.safety_score || segment.overall_score) >=
+          APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
+            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
+            : (segment.safety_score || segment.overall_score) >=
+              APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
+            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
+            : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
 
         return (
-          <React.Fragment key={`segment-${index}-${Date.now()}`}>
-            <Polyline
-              key={`segment-${index}-${isTraveled ? "traveled" : "active"}`}
-              coordinates={segmentChunks[index]}
-              strokeColors={[segmentColor]}
-              {...(Platform.OS === "ios"
-                ? { strokeColors: [segmentColor] }
-                : { strokeColor: segmentColor })}
-              strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
-            />
-          </React.Fragment>
+          <Polyline
+            key={`segment-${index}`}
+            coordinates={segmentChunks[index]}
+            {...(Platform.OS === "ios"
+              ? { strokeColors: [safetyColor] }
+              : { strokeColor: safetyColor })}
+            strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
+          />
         );
       }
     );
