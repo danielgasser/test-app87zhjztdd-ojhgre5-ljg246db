@@ -37,6 +37,7 @@ import {
   setSelectedRoute,
   RouteHistoryItem,
   SafeRoute,
+  deleteRouteFromHistory,
 } from "../../src/store/locationsSlice";
 import LocationDetailsModal from "src/components/LocationDetailsModal";
 import SearchBar from "src/components/SearchBar";
@@ -1538,20 +1539,9 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
       {selectedRoute && !navigationActive && (
-        <View
-          style={{
-            //flexDirection: "row",
-            // alignItems: "center",
-            paddingLeft: 16,
-            paddingTop: 16,
-            backgroundColor: theme.colors.card,
-          }}
-        >
+        <View style={styles.routeActionButtons}>
           <TouchableOpacity
-            style={[
-              styles.mapControlButton,
-              { backgroundColor: theme.colors.error },
-            ]}
+            style={styles.clearRouteButton}
             onPress={() => {
               dispatch(clearRoutes());
               setRouteOrigin(null);
@@ -1559,19 +1549,49 @@ export default function MapScreen() {
               setMapKey((prev) => prev + 1);
             }}
           >
-            <Ionicons name="close" size={24} color={theme.colors.background} />
+            <Ionicons
+              name="close-circle-outline"
+              size={22}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.clearRouteText}>Clear Route</Text>
           </TouchableOpacity>
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontSize: 18,
-              fontWeight: "600",
-              marginLeft: 14, // Spacing between button and text
-              paddingBottom: 8,
+
+          <TouchableOpacity
+            style={styles.deleteRouteButton}
+            onPress={() => {
+              notify.confirm(
+                "Delete this route from your history?",
+                "This cannot be undone.",
+                [
+                  { text: "Cancel", style: "cancel", onPress: () => {} },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => {
+                      if (selectedRoute.databaseId) {
+                        dispatch(
+                          deleteRouteFromHistory(selectedRoute.databaseId)
+                        );
+                      }
+                      dispatch(clearRoutes());
+                      setRouteOrigin(null);
+                      setRouteDestination(null);
+                      setMapKey((prev) => prev + 1);
+                    },
+                  },
+                ],
+                "warning"
+              );
             }}
           >
-            Delete Route
-          </Text>
+            <Ionicons
+              name="trash-outline"
+              size={22}
+              color={theme.colors.error}
+            />
+            <Text style={styles.deleteRouteText}>Delete from History</Text>
+          </TouchableOpacity>
         </View>
       )}
       {/* ML Loading indicator */}
@@ -1896,7 +1916,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
   },
-
   controlButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -2059,6 +2078,34 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     padding: 4,
+  },
+  routeActionButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.card,
+    gap: 16,
+  },
+  clearRouteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  clearRouteText: {
+    color: theme.colors.textSecondary,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  deleteRouteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  deleteRouteText: {
+    color: theme.colors.error,
+    fontSize: 16,
+    fontWeight: "500",
   },
   routeInfoPanel: {
     position: "absolute",

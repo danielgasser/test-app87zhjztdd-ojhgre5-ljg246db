@@ -1,5 +1,11 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SmartRouteComparison } from "../store/locationsSlice";
 import { theme } from "@/styles/theme";
@@ -14,11 +20,20 @@ interface RouteComparisonCardProps {
   onStartNavigation?: () => void;
 }
 
+interface RouteComparisonCardProps {
+  comparison: SmartRouteComparison;
+  onSelectOriginal: () => void;
+  onSelectOptimized: () => void;
+  onStartNavigation?: () => void;
+  isStartingNavigation?: boolean;
+}
+
 const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
   comparison,
   onSelectOriginal,
   onSelectOptimized,
   onStartNavigation,
+  isStartingNavigation = false,
 }) => {
   const {
     original_route,
@@ -231,20 +246,32 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
       )}
       {onStartNavigation && (
         <TouchableOpacity
-          style={styles.startNavigationButton}
+          style={[
+            styles.startNavigationButton,
+            isStartingNavigation && styles.disabledButton,
+          ]}
           onPress={onStartNavigation}
+          disabled={isStartingNavigation}
         >
-          <Ionicons
-            name="navigate-circle"
-            size={28}
-            color={theme.colors.background}
-          />
-          <Text style={styles.startNavigationText}>Start Navigation</Text>
-          <Ionicons
-            name="arrow-forward"
-            size={20}
-            color={theme.colors.background}
-          />
+          {isStartingNavigation ? (
+            <ActivityIndicator size="small" color={theme.colors.background} />
+          ) : (
+            <Ionicons
+              name="navigate-circle"
+              size={28}
+              color={theme.colors.background}
+            />
+          )}
+          <Text style={styles.startNavigationText}>
+            {isStartingNavigation ? "Starting..." : "Start Navigation"}
+          </Text>
+          {!isStartingNavigation && (
+            <Ionicons
+              name="arrow-forward"
+              size={20}
+              color={theme.colors.background}
+            />
+          )}
         </TouchableOpacity>
       )}
     </View>
@@ -459,6 +486,9 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontSize: 18,
     fontWeight: "700",
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -91,6 +91,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const bannerState = useAppSelector((state) => state.profileBanner);
 
+  const scrollViewRef = useRef<ScrollView>(null);
   // Check profile completeness for safe routing
   const profileCheck = React.useMemo(() => {
     if (!userProfile) return { canUse: true, missingFields: [] };
@@ -101,6 +102,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       missingFields: validation.missingFieldsForFeature,
     };
   }, [userProfile]);
+
+  useEffect(() => {
+    if (smartRouteComparison && scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [smartRouteComparison]);
 
   // Determine if we should show the banner
   const showProfileBanner = React.useMemo(() => {
@@ -114,6 +123,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Location state
   const [fromLocation, setFromLocation] = useState<LocationResult | null>(null);
   const [toLocation, setToLocation] = useState<LocationResult | null>(null);
+  const [isStartingNavigation, setIsStartingNavigation] = useState(false);
   // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
   // Search state
@@ -256,85 +266,90 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle starting navigation
   const handleStartNavigation = async () => {
-    if (!userProfile) {
-      notify.error("Profile not loaded. Please try again.", "Not Ready");
-      return;
+    setIsStartingNavigation(true);
+    try {
+      if (!userProfile) {
+        notify.error("Profile not loaded. Please try again.", "Not Ready");
+        return;
+      }
+      const navigationSessionId = Crypto.randomUUID();
+      dispatch(setNavigationSessionId(navigationSessionId));
+
+      if (
+        !smartRouteComparison?.optimized_route ||
+        !selectedRoute ||
+        !fromLocation ||
+        !toLocation
+      ) {
+        notify.error("No route selected for navigation");
+        return;
+      }
+
+      // Create the route request data object
+      const routeRequestData = {
+        origin: {
+          latitude: fromLocation.latitude,
+          longitude: fromLocation.longitude,
+        },
+        destination: {
+          latitude: toLocation.latitude,
+          longitude: toLocation.longitude,
+        },
+        user_demographics: {
+          race_ethnicity: userProfile?.race_ethnicity?.[0] || "",
+          gender: userProfile?.gender || "",
+          lgbtq_status: String(userProfile?.lgbtq_status ?? ""),
+          religion: userProfile?.religion || "",
+          disability_status: userProfile?.disability_status?.[0] || "",
+          age_range: userProfile?.age_range || "",
+        },
+        route_preferences: {
+          prioritize_safety: true,
+          avoid_evening_danger: routePreferences.avoidEveningDanger,
+          max_detour_minutes: routePreferences.maxDetourMinutes || 30,
+        },
+      };
+
+      dispatch(setRouteRequest(routeRequestData));
+      const resolvedOriginName =
+        fromLocation.source === "current_location"
+          ? await reverseGeocodeLocation(
+              fromLocation.latitude,
+              fromLocation.longitude
+            )
+          : fromLocation.name;
+
+      const savedRoute = await dispatch(
+        saveRouteToDatabase({
+          route_coordinates: selectedRoute.coordinates,
+          steps: selectedRoute.steps,
+          origin_name: resolvedOriginName,
+          destination_name: toLocation.name,
+          distance_km: selectedRoute.distance_kilometers,
+          duration_minutes: selectedRoute.estimated_duration_minutes,
+          safety_score: selectedRoute.safety_analysis.overall_route_score,
+          navigation_session_id: navigationSessionId,
+        })
+      ).unwrap();
+
+      const optimizedRoute = {
+        ...smartRouteComparison.optimized_route,
+        route_points: smartRouteComparison.optimized_route.coordinates,
+        databaseId: savedRoute.id,
+        navigationSessionId: navigationSessionId,
+      };
+      dispatch(setSelectedRoute(optimizedRoute));
+
+      if (optimizedRoute.databaseId) {
+        await dispatch(startNavigationSession(savedRoute.id));
+      }
+
+      // Dispatch start navigation action
+      dispatch(startNavigation());
+      onClose();
+    } finally {
+      setIsStartingNavigation(false);
     }
-    const navigationSessionId = Crypto.randomUUID();
-    dispatch(setNavigationSessionId(navigationSessionId));
-
-    if (
-      !smartRouteComparison?.optimized_route ||
-      !selectedRoute ||
-      !fromLocation ||
-      !toLocation
-    ) {
-      notify.error("No route selected for navigation");
-      return;
-    }
-
-    // Create the route request data object
-    const routeRequestData = {
-      origin: {
-        latitude: fromLocation.latitude,
-        longitude: fromLocation.longitude,
-      },
-      destination: {
-        latitude: toLocation.latitude,
-        longitude: toLocation.longitude,
-      },
-      user_demographics: {
-        race_ethnicity: userProfile?.race_ethnicity?.[0] || "",
-        gender: userProfile?.gender || "",
-        lgbtq_status: String(userProfile?.lgbtq_status ?? ""),
-        religion: userProfile?.religion || "",
-        disability_status: userProfile?.disability_status?.[0] || "",
-        age_range: userProfile?.age_range || "",
-      },
-      route_preferences: {
-        prioritize_safety: true,
-        avoid_evening_danger: routePreferences.avoidEveningDanger,
-        max_detour_minutes: routePreferences.maxDetourMinutes || 30,
-      },
-    };
-
-    dispatch(setRouteRequest(routeRequestData));
-    const resolvedOriginName =
-      fromLocation.source === "current_location"
-        ? await reverseGeocodeLocation(
-            fromLocation.latitude,
-            fromLocation.longitude
-          )
-        : fromLocation.name;
-
-    const savedRoute = await dispatch(
-      saveRouteToDatabase({
-        route_coordinates: selectedRoute.coordinates,
-        steps: selectedRoute.steps,
-        origin_name: resolvedOriginName,
-        destination_name: toLocation.name,
-        distance_km: selectedRoute.distance_kilometers,
-        duration_minutes: selectedRoute.estimated_duration_minutes,
-        safety_score: selectedRoute.safety_analysis.overall_route_score,
-        navigation_session_id: navigationSessionId,
-      })
-    ).unwrap();
-
-    const optimizedRoute = {
-      ...smartRouteComparison.optimized_route,
-      route_points: smartRouteComparison.optimized_route.coordinates,
-      databaseId: savedRoute.id,
-      navigationSessionId: navigationSessionId,
-    };
-    dispatch(setSelectedRoute(optimizedRoute));
-
-    if (optimizedRoute.databaseId) {
-      await dispatch(startNavigationSession(savedRoute.id));
-    }
-
-    // Dispatch start navigation action
-    dispatch(startNavigation());
-    onClose();
   };
 
   useEffect(() => {
@@ -712,6 +727,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         ) : (
           /* Route Planning Mode */
           <ScrollView
+            ref={scrollViewRef}
             style={styles.content}
             keyboardShouldPersistTaps="handled"
           >
@@ -813,6 +829,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     onSelectOriginal={handleSelectOriginalRoute}
                     onSelectOptimized={handleSelectOptimizedRoute}
                     onStartNavigation={handleStartNavigation}
+                    isStartingNavigation={isStartingNavigation}
                   />
                 )}
 
