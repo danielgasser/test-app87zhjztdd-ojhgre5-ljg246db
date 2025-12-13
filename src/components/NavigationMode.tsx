@@ -34,9 +34,6 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { NAVIGATION_LOCATION_TASK } from "@/tasks/navigationLocationTask";
 
-// Only for testing/logging purposes
-import { navLog, navLogEvents } from "@/utils/navigationLogger";
-
 const { width, height } = Dimensions.get("window");
 
 interface NavigationModeProps {
@@ -271,124 +268,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   }, [currentNavigationStep]);
 
   useEffect(() => {
-    navLog.log("ROUTE_REF_UPDATE", {
-      hasRoute: !!selectedRoute,
-      stepsLength: selectedRoute?.steps?.length,
-      step0End: selectedRoute?.steps?.[0]?.end_location,
-      step0Instruction: selectedRoute?.steps?.[0]?.instruction,
-      step1Instruction: selectedRoute?.steps?.[1]?.instruction,
-      routeId: selectedRoute?.id,
-      databaseId: selectedRoute?.databaseId,
-    });
     selectedRouteRef.current = selectedRoute;
     lastAdvancedStep.current = -1;
   }, [selectedRoute]);
-
-  /*
-  useEffect(() => {
-    const subscription = AppState.addEventListener(
-      "change",
-      (nextAppState: AppStateStatus) => {
-        if (
-          appStateRef.current.match(/inactive|background/) &&
-          nextAppState === "active"
-        ) {
-          (async () => {
-            try {
-              const currentLocation = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.High,
-              });
-
-              const freshPosition = {
-                latitude: currentLocation.coords.latitude,
-                longitude: currentLocation.coords.longitude,
-              };
-
-              const freshState = store.getState().locations;
-              const freshRoute = freshState.selectedRoute;
-
-              navLog.log("RESUME_DEBUG", {
-                hasRoute: !!freshRoute,
-                stepsLen: freshRoute?.steps?.length,
-                lat: freshPosition.latitude.toFixed(5),
-                lng: freshPosition.longitude.toFixed(5),
-                currentStep: freshState.currentNavigationStep,
-              });
-
-              if (freshRoute?.steps) {
-                let correctStep = freshState.currentNavigationStep || 0;
-
-                for (
-                  let i = correctStep;
-                  i < freshRoute.steps.length - 1;
-                  i++
-                ) {
-                  const currentStepEnd = freshRoute.steps[i].end_location;
-                  const nextStepStart = freshRoute.steps[i + 1].start_location;
-
-                  const distToCurrentEnd = calculateDistance(
-                    freshPosition.latitude,
-                    freshPosition.longitude,
-                    currentStepEnd.latitude,
-                    currentStepEnd.longitude
-                  );
-
-                  const distToNextStart = calculateDistance(
-                    freshPosition.latitude,
-                    freshPosition.longitude,
-                    nextStepStart.latitude,
-                    nextStepStart.longitude
-                  );
-
-                  navLog.log("STEP_SCAN", {
-                    i,
-                    distToEnd: Math.round(distToCurrentEnd),
-                    distToNext: Math.round(distToNextStart),
-                    wouldAdvance:
-                      distToNextStart < distToCurrentEnd ||
-                      distToCurrentEnd < 30,
-                  });
-
-                  if (
-                    distToNextStart < distToCurrentEnd ||
-                    distToCurrentEnd < 30
-                  ) {
-                    correctStep = i + 1;
-                  } else {
-                    break;
-                  }
-                }
-
-                if (correctStep !== freshState.currentNavigationStep) {
-                  navLog.log("RESUME_STEP_CORRECTION", {
-                    from: freshState.currentNavigationStep,
-                    to: correctStep,
-                  });
-                  currentStepRef.current = correctStep;
-                  lastAdvancedStep.current = correctStep;
-                  selectedRouteRef.current = freshRoute;
-                  dispatch(updateNavigationProgress(correctStep));
-                } else {
-                  selectedRouteRef.current = freshRoute;
-                  currentStepRef.current = correctStep;
-                  lastAdvancedStep.current = correctStep;
-                }
-              }
-            } catch (error) {
-              navLog.log("RESUME_ERROR", { error: String(error) });
-            }
-          })();
-
-          positionUpdatesCount.current = 0;
-          navLogEvents.appStateChange("resumed");
-        }
-        appStateRef.current = nextAppState;
-      }
-    );
-
-    return () => subscription.remove();
-  }, []);
-*/
 
   useEffect(() => {
     if (
@@ -417,17 +299,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       lastAdvancedStep.current = -1;
       currentStepRef.current = 0;
       // Update database timestamp
-      await navLog.startSession();
-      console.log(
-        "[NavLog] selectedRoute:",
-        selectedRoute?.name,
-        selectedRoute?.distance_kilometers
-      );
 
-      navLogEvents.navigationStarted(
-        selectedRoute?.name || "Route",
-        selectedRoute?.distance_kilometers || 0
-      );
       if (selectedRoute?.databaseId) {
         await dispatch(startNavigationSession(selectedRoute.databaseId));
       }
@@ -640,13 +512,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     try {
       checkDeviation(newPosition);
     } catch (e) {
-      navLog.log("DEVIATION_ERROR", { error: String(e) });
+      logger.error("DEVIATION_ERROR", { error: String(e) });
     }
-    navLogEvents.positionUpdate(
-      newPosition.latitude,
-      newPosition.longitude,
-      newPosition.heading
-    );
 
     // Update map camera
     if (mapRef?.current) {
@@ -692,41 +559,17 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               nextStep.start_location.latitude,
               nextStep.start_location.longitude
             );
-            if (distance < 100) {
-              navLog.log("PASS_CHECK", {
-                distToEnd: Math.round(distance),
-                distToNextStart: Math.round(distToNextStart),
-                nextStepIdx: nextStepIndex,
-              });
-            }
             return distToNextStart < distance;
           }
           return false;
         })();
 
-        navLog.log("STEP_CHECK", {
-          stepRef: currentStepRef.current,
-          lastAdv: lastAdvancedStep.current,
-          distToEnd: Math.round(distance),
-          passedStep,
-        });
-
         if (passedStep) {
           const nextStepIndex = currentStepRef.current + 1;
           if (nextStepIndex < selectedRouteRef.current.steps.length) {
             if (lastAdvancedStep.current !== nextStepIndex) {
-              navLog.log("ADVANCING_STEP", {
-                from: currentStepRef.current,
-                to: nextStepIndex,
-                lastAdv: lastAdvancedStep.current,
-              });
               lastAdvancedStep.current = nextStepIndex;
               dispatch(updateNavigationProgress(nextStepIndex));
-              navLogEvents.stepAdvanced(
-                currentStepRef.current,
-                nextStepIndex,
-                "passed_turn"
-              );
             }
           }
         }
@@ -798,15 +641,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     latitude: number;
     longitude: number;
   }) => {
-    navLog.log("CHECK_DEVIATION_CALLED", {
-      isRerouting,
-      posCount: positionUpdatesCount.current,
-      hasRoutePoints: !!selectedRoute?.route_points?.length,
-    });
     // Skip if already rerouting
     if (isRerouting) {
-      navLog.log("CHECK_DEVIATION_SKIP", { reason: "isRerouting" });
-
+      logger.info("CHECK_DEVIATION_SKIP", { reason: "isRerouting" });
       return;
     }
     // Skip deviation check for first 5 position updates (let GPS settle)
@@ -826,7 +663,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         closestPoint.latitude,
         closestPoint.longitude
       );
-      navLogEvents.deviationCheck(distance, 100, distance > 100);
 
       // If more than 50m off route, trigger reroute
       if (distance > 100) {
@@ -836,7 +672,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         // Only reroute if at least 60 seconds since last reroute
         if (timeSinceLastReroute > 60000) {
           lastRerouteTime.current = now;
-          navLog.log("TRIGGERING_REROUTE", {
+          logger.info("TRIGGERING_REROUTE", {
             distanceFromRoute: distance,
             threshold: 50,
             position,
@@ -887,10 +723,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       await dispatch(endNavigationSession(selectedRoute.databaseId));
     }
     dispatch(setNavigationPosition(null));
-    navLogEvents.navigationEnded("user_ended", false);
-    await navLog.endSession();
-    // Offer to export logs
-    await navLog.share();
     dispatch(endNavigation());
     // Component cleanup
     onExit();
@@ -906,14 +738,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const currentInstruction = (() => {
     const displayStep = (currentNavigationStep || 0) + 1;
-    navLog.log("INSTRUCTION_DEBUG:", {
-      displayStep,
-      step0Instruction: selectedRoute?.steps?.[0]?.instruction,
-      step1Instruction: selectedRoute?.steps?.[1]?.instruction,
-      instruction: selectedRoute?.steps?.[displayStep]?.instruction,
-      routeId: selectedRoute?.id,
-      totalSteps: selectedRoute?.steps?.length,
-    });
     if (selectedRoute.steps && selectedRoute.steps[displayStep]) {
       return selectedRoute.steps[displayStep].instruction;
     }
@@ -964,8 +788,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             color={theme.colors.card}
           />
           <Text style={styles.distanceText}>
-            {formatDistance(distanceToNextTurn, distanceUnit)}
+            In {formatDistance(distanceToNextTurn, distanceUnit)}{" "}
+            {showInstructionText && currentInstruction}
           </Text>
+
           <TouchableOpacity
             style={styles.infoButton}
             onPress={() => setShowInstructionText(!showInstructionText)}
@@ -976,11 +802,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               color={theme.colors.card}
             />
           </TouchableOpacity>
-          {showInstructionText && (
-            <View style={styles.instructionTextContainer}>
-              <Text style={styles.instructionText}>{currentInstruction}</Text>
-            </View>
-          )}
         </View>
 
         {nextInstruction && (
@@ -1172,11 +993,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  instructionTextContainer: {
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.3)",
-    paddingTop: 6,
-  },
+  instructionTextContainer: {},
   instructionText: {
     fontSize: 14,
     fontWeight: "600",

@@ -73,7 +73,6 @@ import { useAuth } from "@/providers/AuthProvider";
 import { shallowEqual } from "react-redux";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import NavigationArrow from "@/components/NavigationArrow";
-import { navLog } from "@/utils/navigationLogger";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -223,20 +222,60 @@ export default function MapScreen() {
       pointDistances.push(pointDistances[i - 1] + dist);
     }
 
-    // Find user's closest point on route
+    // Find user's position projected onto route (interpolated between points)
     let userPointIndex = 0;
+    let interpolatedDistance = 0;
+
     if (navigationPosition) {
       let minDist = Infinity;
-      for (let i = 0; i < routePoints.length; i++) {
-        const dist = calculateDistanceBetweenPoints(
-          navigationPosition,
-          routePoints[i]
+      let bestSegmentIndex = 0;
+      let bestProjectionRatio = 0;
+
+      // Find closest segment (not just point)
+      for (let i = 0; i < routePoints.length - 1; i++) {
+        const segStart = routePoints[i];
+        const segEnd = routePoints[i + 1];
+
+        // Project user position onto segment
+        const dx = segEnd.longitude - segStart.longitude;
+        const dy = segEnd.latitude - segStart.latitude;
+        const segLengthSq = dx * dx + dy * dy;
+
+        if (segLengthSq === 0) continue;
+
+        // Calculate projection ratio (0 = at start, 1 = at end)
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            ((navigationPosition.longitude - segStart.longitude) * dx +
+              (navigationPosition.latitude - segStart.latitude) * dy) /
+              segLengthSq
+          )
         );
+
+        // Find projected point
+        const projLon = segStart.longitude + t * dx;
+        const projLat = segStart.latitude + t * dy;
+
+        const dist = calculateDistanceBetweenPoints(navigationPosition, {
+          latitude: projLat,
+          longitude: projLon,
+        });
+
         if (dist < minDist) {
           minDist = dist;
-          userPointIndex = i;
+          bestSegmentIndex = i;
+          bestProjectionRatio = t;
         }
       }
+
+      // Calculate the interpolated distance along route
+      userPointIndex = bestSegmentIndex;
+      const segmentLength =
+        pointDistances[bestSegmentIndex + 1] - pointDistances[bestSegmentIndex];
+      interpolatedDistance =
+        pointDistances[bestSegmentIndex] + segmentLength * bestProjectionRatio;
     }
 
     // Build segment boundaries
@@ -265,7 +304,10 @@ export default function MapScreen() {
     }
 
     // Colored polylines: points ahead of user, split by safety segments
-    const userDistance = pointDistances[userPointIndex];
+    const userDistance =
+      interpolatedDistance > 0
+        ? interpolatedDistance
+        : pointDistances[userPointIndex];
 
     for (let segIdx = 0; segIdx < segmentScores.length; segIdx++) {
       const segmentStart = segmentBoundaries[segIdx];
@@ -309,12 +351,6 @@ export default function MapScreen() {
         });
       }
     }
-
-    navLog.log("[POLYLINE_UPDATE]", {
-      userPointIndex,
-      userDistance,
-      polylinesCount: newPolylines.length,
-    });
 
     setRoutePolylines(newPolylines);
   }, [navigationActive, navigationPosition, selectedRoute]);
@@ -1381,7 +1417,7 @@ export default function MapScreen() {
             rotation={navigationPosition.heading || 0}
             tracksViewChanges={true}
           >
-            <NavigationArrow size={40} color={theme.colors.primary} />
+            <NavigationArrow size={60} color={theme.colors.primary} />
           </Marker>
         )}
         {selectedRoute && (

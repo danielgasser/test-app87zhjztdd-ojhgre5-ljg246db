@@ -22,10 +22,6 @@ import { shouldShowBanner, incrementShowCount, BannerType } from "./profileBanne
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 
-// Only for testing/logging purposes
-import { navLog, navLogEvents } from '@/utils/navigationLogger';
-
-
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
 // Helper function to get the current auth token
@@ -1764,18 +1760,12 @@ export const checkForReroute = createAsyncThunk(
     currentPosition: { latitude: number; longitude: number },
     { getState, dispatch }
   ) => {
-    navLog.log('REROUTE_CALLED', { lat: currentPosition.latitude, lng: currentPosition.longitude });
 
     const state = getState() as RootState;
     const { selectedRoute, routeRequest, navigationSessionId } = state.locations;
 
-    navLog.log('REROUTE_STATE', {
-      hasSelectedRoute: !!selectedRoute,
-      hasRouteRequest: !!routeRequest,
-      currentStepsLength: selectedRoute?.steps?.length
-    });
     if (!selectedRoute || !routeRequest) {
-      navLog.log('REROUTE_ABORTED', { reason: 'missing route or request' });
+      logger.info('REROUTE_ABORTED', { reason: 'missing route or request' });
       return;
     }
     dispatch(setRerouting(true));
@@ -1785,7 +1775,6 @@ export const checkForReroute = createAsyncThunk(
       "Finding a new & safer route...",
       "Recalculating Route"
     );
-    navLogEvents.rerouteTriggered('deviation', currentPosition.latitude, currentPosition.longitude);
     try {
       // Create new route request from current position to original destination
       const newRouteRequest: RouteRequest = {
@@ -1801,12 +1790,6 @@ export const checkForReroute = createAsyncThunk(
       // Try smart route first (safer route)
       try {
         const result = await dispatch(generateSmartRoute(newRouteRequest)).unwrap();
-        navLog.log('REROUTE_API_RESPONSE', {
-          success: result.success,
-          hasOptimizedRoute: !!result.optimized_route,
-          optimizedSteps: result.optimized_route?.steps?.length,
-          step0Instruction: result.optimized_route?.steps?.[0]?.instructions
-        });
         if (result.success && result.optimized_route) {
           // Always use the new route when rerouting (starts from current position)
           const routeWithDbId = {
@@ -1817,11 +1800,6 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
-          navLog.log('NEW_ROUTE_STEPS', {
-            step0Start: routeWithDbId.steps?.[0]?.start_location,
-            step0End: routeWithDbId.steps?.[0]?.end_location,
-            totalSteps: routeWithDbId.steps?.length
-          });
           const correctStep = result.optimized_route.steps
             ? findCorrectStepForPosition(currentPosition, result.optimized_route.steps)
             : 0;
@@ -1834,8 +1812,6 @@ export const checkForReroute = createAsyncThunk(
               longitude: currentPosition.longitude,
             }
           }));
-
-          navLogEvents.rerouteComplete(true, result.optimized_route.distance_kilometers);
 
           // Show appropriate message based on improvement
           const hasImprovement =
@@ -1859,7 +1835,7 @@ export const checkForReroute = createAsyncThunk(
         }
       } catch (smartRouteError) {
         // Fallback to basic route generation
-        navLog.log('SMART_ROUTE_FAILED', {
+        logger.error('SMART_ROUTE_FAILED', {
           error: smartRouteError instanceof Error ? smartRouteError.message : String(smartRouteError)
         });
 
@@ -1905,13 +1881,6 @@ export const checkForReroute = createAsyncThunk(
           };
 
           dispatch(setSelectedRoute(routeWithDbId));
-          navLog.log('NEW_ROUTE_STEPS', {
-            step0Start: routeWithDbId.steps?.[0]?.start_location,
-            step0End: routeWithDbId.steps?.[0]?.end_location,
-            step0Instruction: routeWithDbId.steps?.[0]?.instruction,
-            step1Instruction: routeWithDbId.steps?.[1]?.instruction,
-            totalSteps: routeWithDbId.steps?.length
-          });
           const correctStep = basicResult.route.steps
             ? findCorrectStepForPosition(currentPosition, basicResult.route.steps)
             : 0;
@@ -1924,8 +1893,6 @@ export const checkForReroute = createAsyncThunk(
               longitude: currentPosition.longitude,
             }
           }));
-
-          navLogEvents.rerouteComplete(true, basicResult.route.distance_kilometers);
 
           // Only notify if route actually changed significantly
           const oldDistance = selectedRoute.distance_kilometers || 0;
@@ -1952,8 +1919,6 @@ export const checkForReroute = createAsyncThunk(
     } catch (error) {
       // @ts-ignore
       dispatch(setRerouting(false));
-      navLogEvents.rerouteComplete(false);
-      navLogEvents.error('checkForReroute', error instanceof Error ? error.message : String(error));
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
