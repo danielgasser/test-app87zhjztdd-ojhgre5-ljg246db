@@ -152,16 +152,18 @@ export default function MapScreen() {
     showRouteSegments,
     navigationIntent,
     currentNavigationStep,
-    navigationPosition,
   } = useAppSelector((state: any) => state.locations, shallowEqual);
-  // ADD THIS RIGHT HERE:
+
+  const navigationPosition = useAppSelector(
+    (state: any) => state.locations.navigationPosition
+  );
+
   const locationsStateRef = useRef(null);
   const locationsState = useAppSelector((state: any) => state.locations);
 
   if (locationsStateRef.current !== locationsState) {
     locationsStateRef.current = locationsState;
   }
-  // END OF ADDITION
 
   const { user } = useAuth();
   const userId = user?.id;
