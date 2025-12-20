@@ -28,6 +28,10 @@ type AuthState = {
 
   // Deep link state (queued for after auth)
   pendingDeepLink: string | null;
+
+  // Add these two fields
+  termsAccepted: boolean;
+  locationDisclosureAccepted: boolean;
 };
 
 type AuthAction =
@@ -36,6 +40,11 @@ type AuthAction =
   | { type: "SET_RECOVERY_SESSION"; session: Session | null }
   | { type: "SET_ONBOARDING_STATUS"; needsOnboarding: boolean }
   | { type: "SET_PENDING_LINK"; url: string | null }
+  | {
+      type: "SET_LEGAL_STATUS";
+      termsAccepted: boolean;
+      locationDisclosureAccepted: boolean;
+    }
   | { type: "SIGN_OUT" };
 
 // ============================================================================
@@ -75,6 +84,12 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     case "SET_PENDING_LINK":
       return { ...state, pendingDeepLink: action.url };
 
+    case "SET_LEGAL_STATUS":
+      return {
+        ...state,
+        termsAccepted: action.termsAccepted,
+        locationDisclosureAccepted: action.locationDisclosureAccepted,
+      };
     case "SIGN_OUT":
       return {
         isLoading: false,
@@ -84,6 +99,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         needsOnboarding: false,
         onboardingChecked: false,
         pendingDeepLink: null,
+        termsAccepted: false,
+        locationDisclosureAccepted: false,
       };
 
     default:
@@ -118,6 +135,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     needsOnboarding: false,
     onboardingChecked: false,
     pendingDeepLink: null,
+    termsAccepted: false,
+    locationDisclosureAccepted: false,
   });
 
   const mounted = useRef(true);
@@ -234,21 +253,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.session?.user?.id, state.onboardingChecked, state.isAuthenticated]);
 
-  // ============================================================================
-  // CHECK ONBOARDING STATUS
-  // ============================================================================
   const checkOnboardingStatus = async (userId: string) => {
     try {
-      const testResult = await supabase
-        .from("profiles")
-        .select("onboarding_complete")
-        .eq("user_id", userId)
-        .maybeSingle();
-    } catch (err) {
-      logger.error(`🔐 Direct query error:`, err);
-    }
-    try {
-      // Add 5 second timeout
+      // Add 3 second timeout
       const timeoutPromise = new Promise<{ data: null; error: any }>(
         (resolve) =>
           setTimeout(
@@ -258,7 +265,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
       const queryPromise = supabase
         .from("profiles")
-        .select("onboarding_complete")
+        .select(
+          "onboarding_complete, terms_accepted_at, location_disclosure_accepted_at"
+        )
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -275,15 +284,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         logger.error("🔐 Query error:", error);
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
+        dispatch({
+          type: "SET_LEGAL_STATUS",
+          termsAccepted: false,
+          locationDisclosureAccepted: false,
+        });
         return;
       }
 
       const needsOnboarding = !profile?.onboarding_complete;
+      const termsAccepted = !!profile?.terms_accepted_at;
+      const locationDisclosureAccepted =
+        !!profile?.location_disclosure_accepted_at;
+
       dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding });
+      dispatch({
+        type: "SET_LEGAL_STATUS",
+        termsAccepted,
+        locationDisclosureAccepted,
+      });
     } catch (error) {
       logger.error("🔐 CATCH block error:", error);
       if (mounted.current) {
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
+        dispatch({
+          type: "SET_LEGAL_STATUS",
+          termsAccepted: false,
+          locationDisclosureAccepted: false,
+        });
       }
     }
   };
