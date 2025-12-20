@@ -55,6 +55,14 @@ function AppNavigator() {
       <Stack.Screen name="welcome" options={{ gestureEnabled: false }} />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen
+        name="legal-acceptance"
+        options={{ gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="location-disclosure"
+        options={{ gestureEnabled: false }}
+      />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="review" />
       <Stack.Screen name="edit-profile" />

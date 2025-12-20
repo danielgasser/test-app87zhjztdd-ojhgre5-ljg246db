@@ -85,6 +85,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return { ...state, pendingDeepLink: action.url };
 
     case "SET_LEGAL_STATUS":
+      console.log("SET_LEGAL_STATUS dispatched:", action);
+
       return {
         ...state,
         termsAccepted: action.termsAccepted,
@@ -296,7 +298,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const termsAccepted = !!profile?.terms_accepted_at;
       const locationDisclosureAccepted =
         !!profile?.location_disclosure_accepted_at;
-
+      console.log("Auth status check:", {
+        needsOnboarding,
+        termsAccepted,
+        locationDisclosureAccepted,
+        profile,
+      });
       dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding });
       dispatch({
         type: "SET_LEGAL_STATUS",

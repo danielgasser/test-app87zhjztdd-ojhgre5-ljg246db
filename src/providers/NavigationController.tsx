@@ -20,6 +20,8 @@ export function NavigationController({
     onboardingChecked,
     pendingDeepLink,
     clearPendingDeepLink,
+    termsAccepted,
+    locationDisclosureAccepted,
     signOut,
   } = useAuth();
 
@@ -30,11 +32,17 @@ export function NavigationController({
   const hasNavigated = useRef(false);
   // Track if we've checked profile existence
   const profileChecked = useRef(false);
-
+  console.log("NavigationController render:", {
+    termsAccepted,
+    locationDisclosureAccepted,
+    needsOnboarding,
+  });
   // ============================================================================
   // CHECK PROFILE EXISTS IN DB
   // ============================================================================
   useEffect(() => {
+    console.log("NavigationController useEffect triggered");
+
     // Only check once when authenticated and onboarding status is known
     if (!isAuthenticated || !onboardingChecked || profileChecked.current) {
       return;
@@ -92,6 +100,15 @@ export function NavigationController({
   // ============================================================================
   useEffect(() => {
     // Don't navigate while loading
+    console.log("NavigationController:", {
+      isLoading,
+      isAuthenticated,
+      termsAccepted,
+      locationDisclosureAccepted,
+      needsOnboarding,
+      onboardingChecked,
+      currentSegment: segments[0],
+    });
     if (isLoading) {
       return;
     }
@@ -129,40 +146,66 @@ export function NavigationController({
       // -------- AUTHENTICATED --------
 
       // Check if we have a pending deep link and we're ready to process it
-      if (pendingDeepLink && !needsOnboarding) {
+      if (
+        pendingDeepLink &&
+        !needsOnboarding &&
+        termsAccepted &&
+        locationDisclosureAccepted
+      ) {
         router.push(pendingDeepLink as any);
         clearPendingDeepLink();
         hasNavigated.current = true;
         return;
       }
 
+      // Step 1: Terms acceptance
+      if (!termsAccepted) {
+        if (currentSegment !== "legal-acceptance") {
+          router.replace("/legal-acceptance");
+          hasNavigated.current = true;
+        }
+        return;
+      }
+
+      // Step 2: Location disclosure
+      if (!locationDisclosureAccepted) {
+        if (currentSegment !== "location-disclosure") {
+          router.replace("/location-disclosure");
+          hasNavigated.current = true;
+        }
+        return;
+      }
+
+      // Step 3: Onboarding
       if (needsOnboarding) {
-        // -------- NEEDS ONBOARDING --------
         if (currentSegment !== "onboarding") {
           router.replace("/onboarding");
           hasNavigated.current = true;
         }
-      } else {
-        // -------- READY TO USE APP --------
-        const protectedRoutes = [
-          "(tabs)",
-          "review",
-          "edit-profile",
-          "privacy-settings",
-          "notification-settings",
-          "display-settings",
-          "edit-review",
-          "reset-password",
-          "onboarding",
-        ];
-        const isOnProtectedRoute = protectedRoutes.some(
-          (route) => currentSegment === route || pathname?.includes(route)
-        );
+        return;
+      }
 
-        if (!isOnProtectedRoute) {
-          router.replace("/(tabs)");
-          hasNavigated.current = true;
-        }
+      // Step 4: Ready to use app
+      const protectedRoutes = [
+        "(tabs)",
+        "review",
+        "edit-profile",
+        "privacy-settings",
+        "notification-settings",
+        "display-settings",
+        "edit-review",
+        "reset-password",
+        "onboarding",
+        //  "legal-acceptance",
+        // "location-disclosure",
+      ];
+      const isOnProtectedRoute = protectedRoutes.some(
+        (route) => currentSegment === route || pathname?.includes(route)
+      );
+
+      if (!isOnProtectedRoute) {
+        router.replace("/(tabs)");
+        hasNavigated.current = true;
       }
     }
   }, [
@@ -173,6 +216,8 @@ export function NavigationController({
     segments,
     pathname,
     pendingDeepLink,
+    termsAccepted,
+    locationDisclosureAccepted,
   ]);
 
   // ============================================================================
