@@ -500,6 +500,14 @@ export default function OnboardingScreen() {
 
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
+      <TouchableOpacity
+        onPress={nukeEverything}
+        style={{ padding: 10, backgroundColor: "red", margin: 10 }}
+      >
+        <Text style={{ color: "white", textAlign: "center" }}>
+          NUKE SESSION
+        </Text>
+      </TouchableOpacity>
       <Text style={styles.stepTitle}>Welcome to SafePath!</Text>
       <Text style={styles.stepDescription}>
         To provide personalized safety information, we need to understand your

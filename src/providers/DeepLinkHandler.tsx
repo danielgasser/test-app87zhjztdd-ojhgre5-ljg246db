@@ -47,6 +47,15 @@ export function DeepLinkHandler({ children }: { children: React.ReactNode }) {
         };
       }
 
+      // Email confirmation / Signup (check BEFORE oauth-callback)
+      if (params.type === "signup") {
+        return {
+          action: "welcome",
+          params,
+          targetRoute: "/welcome",
+        };
+      }
+
       // Email change confirmation
       if (url.includes("type=email_change") || params.type === "email_change") {
         return {

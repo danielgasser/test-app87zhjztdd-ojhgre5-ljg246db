@@ -15,6 +15,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { IubendaDocument } from "@/components/IubendaDocument";
+import { recordLegalAcceptance } from "@/services/consentService";
 
 const IUBENDA_PUBLIC_ID = "69238085";
 
@@ -40,6 +41,9 @@ export default function LegalAcceptanceScreen() {
 
       if (error) throw error;
 
+      recordLegalAcceptance().catch((err) =>
+        logger.error("=== IUBENDA ERROR ===", err)
+      );
       await refreshOnboardingStatus();
     } catch (error) {
       logger.error("Failed to save terms acceptance:", error);

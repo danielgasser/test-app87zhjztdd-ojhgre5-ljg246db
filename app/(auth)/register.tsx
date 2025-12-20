@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
@@ -29,6 +30,7 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { refreshOnboardingStatus } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
     const trimmedEmail = email.trim();
@@ -48,6 +50,7 @@ export default function RegisterScreen() {
     if (!passwordChecker(trimmedPassword)) {
       return;
     }
+    setIsLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -58,10 +61,7 @@ export default function RegisterScreen() {
       if (error) throw error;
 
       // Check if email confirmation is required
-      const emailConfirmationRequired =
-        data?.user &&
-        !data.user.confirmed_at &&
-        data.user.identities?.length === 0;
+      const emailConfirmationRequired = data?.user && !data.session;
 
       if (emailConfirmationRequired) {
         // User needs to confirm email
@@ -89,6 +89,8 @@ export default function RegisterScreen() {
     } catch (err: any) {
       logger.error(`🔐 Registration error:`, err);
       notify.error(err.message || "Please try again", "Registration Failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -162,8 +164,15 @@ export default function RegisterScreen() {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                <Text style={styles.buttonText}>Create Account</Text>
+              <TouchableOpacity
+                style={[styles.button, isLoading && styles.buttonDisabled]}
+                onPress={handleRegister}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={theme.colors.textOnPrimary} />
+                ) : (
+                  <Text style={styles.buttonText}>Create Account</Text>
+                )}
               </TouchableOpacity>
 
               <View style={styles.footer}>
@@ -247,6 +256,9 @@ const styles = StyleSheet.create({
     color: theme.colors.textOnPrimary,
     fontSize: 18,
     fontWeight: "600",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   footer: {
     flexDirection: "row",

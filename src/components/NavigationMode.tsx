@@ -468,9 +468,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       try {
         const { error } = await supabase.auth.refreshSession();
         if (error) {
-          console.warn("[Navigation] Token refresh failed:", error.message);
-        } else {
-          console.log("[Navigation] Token refreshed");
+          logger.error("[Navigation] Token refresh failed:", error?.message);
         }
       } catch (e) {
         console.warn("[Navigation] Token refresh error:", e);
@@ -614,8 +612,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         pausesUpdatesAutomatically: false,
         showsBackgroundLocationIndicator: true,
       });
-
-      console.log("[Navigation] Background location updates started");
     } catch (error) {
       logger.error("Navigation start error:", error);
       notify.error("Could not start navigation");
@@ -630,7 +626,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       );
       if (isRegistered) {
         await Location.stopLocationUpdatesAsync(NAVIGATION_LOCATION_TASK);
-        console.log("[Navigation] Background location updates stopped");
       }
     } catch (error) {
       console.error("[Navigation] Error stopping location updates:", error);

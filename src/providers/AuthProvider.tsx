@@ -29,7 +29,6 @@ type AuthState = {
   // Deep link state (queued for after auth)
   pendingDeepLink: string | null;
 
-  // Add these two fields
   termsAccepted: boolean;
   locationDisclosureAccepted: boolean;
 };
@@ -85,13 +84,12 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return { ...state, pendingDeepLink: action.url };
 
     case "SET_LEGAL_STATUS":
-      console.log("SET_LEGAL_STATUS dispatched:", action);
-
       return {
         ...state,
         termsAccepted: action.termsAccepted,
         locationDisclosureAccepted: action.locationDisclosureAccepted,
       };
+
     case "SIGN_OUT":
       return {
         isLoading: false,
@@ -286,6 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         logger.error("🔐 Query error:", error);
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
+
         dispatch({
           type: "SET_LEGAL_STATUS",
           termsAccepted: false,
@@ -298,13 +297,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const termsAccepted = !!profile?.terms_accepted_at;
       const locationDisclosureAccepted =
         !!profile?.location_disclosure_accepted_at;
-      console.log("Auth status check:", {
-        needsOnboarding,
-        termsAccepted,
-        locationDisclosureAccepted,
-        profile,
-      });
       dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding });
+
       dispatch({
         type: "SET_LEGAL_STATUS",
         termsAccepted,
@@ -314,6 +308,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logger.error("🔐 CATCH block error:", error);
       if (mounted.current) {
         dispatch({ type: "SET_ONBOARDING_STATUS", needsOnboarding: true });
+
         dispatch({
           type: "SET_LEGAL_STATUS",
           termsAccepted: false,

@@ -23,6 +23,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { fetchRecentReviews } from "@/store/locationsSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { IubendaDocument } from "@/components/IubendaDocument";
 
 export default function PrivacySettings() {
   const { user, signOut } = useAuth();
@@ -34,6 +35,9 @@ export default function PrivacySettings() {
   const [loading, setLoading] = useState(true);
   const [viewDataModalVisible, setViewDataModalVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const IUBENDA_PUBLIC_ID = "69238085";
   const [activityStats, setActivityStats] = useState<{
     review_count: number;
     route_count: number;
@@ -356,26 +360,54 @@ export default function PrivacySettings() {
             );
           }}
         />
-        {/*}
+        {/* Legal Documents Section */}
         <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
-          Location & History
+          Legal Documents
         </Text>
 
-        <View style={styles.infoCard}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => setShowTerms(true)}
+        >
+          <MaterialIcons
+            name="description"
+            size={24}
+            color={theme.colors.text}
+          />
+          <View style={styles.actionTextContainer}>
+            <Text style={styles.actionTitle}>Terms of Service</Text>
+            <Text style={styles.actionDescription}>
+              View our terms and conditions
+            </Text>
+          </View>
+          <MaterialIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.text}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => setShowPrivacy(true)}
+        >
           <MaterialIcons
             name="privacy-tip"
             size={24}
-            color={theme.colors.primary}
+            color={theme.colors.text}
           />
-         
-          <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Your Privacy Matters</Text>
-            <Text style={styles.infoDescription}>
-              SafePath does not track or store your location history. We only
-              save locations when you explicitly leave a review.
+          <View style={styles.actionTextContainer}>
+            <Text style={styles.actionTitle}>Privacy Policy</Text>
+            <Text style={styles.actionDescription}>
+              View how we handle your data
             </Text>
           </View>
-        </View>{*/}
+          <MaterialIcons
+            name="chevron-right"
+            size={24}
+            color={theme.colors.text}
+          />
+        </TouchableOpacity>
 
         {/* Account Management Section */}
         <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
@@ -554,6 +586,21 @@ export default function PrivacySettings() {
           </View>
         </View>
       </Modal>
+      <IubendaDocument
+        type="privacy-policy"
+        publicId={IUBENDA_PUBLIC_ID}
+        visible={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
+        title="Privacy Policy"
+      />
+
+      <IubendaDocument
+        type="terms-and-conditions"
+        publicId={IUBENDA_PUBLIC_ID}
+        visible={showTerms}
+        onClose={() => setShowTerms(false)}
+        title="Terms of Service"
+      />
     </SafeAreaView>
   );
 }

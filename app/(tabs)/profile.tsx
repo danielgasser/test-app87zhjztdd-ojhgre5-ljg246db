@@ -542,7 +542,7 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Settings Section */}
             <CollapsibleSection
-              title="Navigation Alerts"
+              title="Alerts & Privacy Settings"
               icon="notifications"
               isExpanded={expandedSections.settings}
               onToggle={() => toggleSection("settings")}

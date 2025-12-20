@@ -17,6 +17,7 @@ import { supabase } from "@/services/supabase";
 import { useAuth } from "@/providers/AuthProvider";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { recordLocationDisclosureAcceptance } from "@/services/consentService";
 
 export default function LocationDisclosureScreen() {
   const { user, refreshOnboardingStatus } = useAuth();
@@ -51,14 +52,10 @@ export default function LocationDisclosureScreen() {
         .eq("user_id", user.id);
 
       if (error) throw error;
-      const { data: checkData } = await supabase
-        .from("profiles")
-        .select("location_disclosure_accepted_at, terms_accepted_at")
-        .eq("user_id", user.id)
-        .single();
-console.log("Profile after update:", JSON.stringify(checkData));
+      recordLocationDisclosureAcceptance().catch((err) => {
+        logger.warn("Failed to record location disclosure to iubenda:", err);
+      });
       await refreshOnboardingStatus();
-      console.log("refreshOnboardingStatus completed");
 
       // NavigationController will handle routing to onboarding
     } catch (error) {
