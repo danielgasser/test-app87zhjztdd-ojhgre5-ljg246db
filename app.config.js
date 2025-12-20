@@ -13,7 +13,7 @@ module.exports = () => {
     expo: {
       name: appName,
       slug: "safepath",
-      version: "0.9.53",
+      version: "0.9.54",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -25,7 +25,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "132",
+        buildNumber: "133",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
@@ -71,6 +71,13 @@ module.exports = () => {
         "expo-router",
         "expo-secure-store",
         "expo-web-browser",
+        [
+          "react-native-google-mobile-ads",
+          {
+            androidAppId: "ca-app-pub-3940256099942544~3347511713",
+            iosAppId: "ca-app-pub-3940256099942544~1458002511",
+          },
+        ],
         [
           "expo-notifications",
           {

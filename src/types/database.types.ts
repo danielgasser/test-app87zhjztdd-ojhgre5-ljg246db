@@ -609,6 +609,7 @@ export type Database = {
           religion: string | null
           role: string | null
           show_demographics: boolean | null
+          subscription_tier: string | null
           total_reviews: number | null
           updated_at: string | null
           username: string | null
@@ -631,6 +632,7 @@ export type Database = {
           religion?: string | null
           role?: string | null
           show_demographics?: boolean | null
+          subscription_tier?: string | null
           total_reviews?: number | null
           updated_at?: string | null
           username?: string | null
@@ -653,6 +655,7 @@ export type Database = {
           religion?: string | null
           role?: string | null
           show_demographics?: boolean | null
+          subscription_tier?: string | null
           total_reviews?: number | null
           updated_at?: string | null
           username?: string | null

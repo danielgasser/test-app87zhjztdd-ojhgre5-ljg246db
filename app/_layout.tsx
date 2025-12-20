@@ -15,6 +15,12 @@ import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
 import { notificationService } from "@/services/notificationService";
 import * as Notifications from "expo-notifications";
 import { logger } from "@/utils/logger";
+import {
+  initializeAdMob,
+  loadInterstitialAd,
+  loadRewardedAd,
+} from "@/services/adMobService";
+import { initializeRevenueCat } from "@/services/revenueCatService";
 
 // Initialize Sentry
 Sentry.init({
@@ -44,6 +50,18 @@ function AppNavigator() {
         logger.info("📬 Notification received:", notification);
       }
     );
+    // Initialize AdMob
+    const initAds = async () => {
+      await initializeAdMob();
+      loadInterstitialAd();
+      loadRewardedAd();
+    };
+    initAds();
+    // Initialize RevenueCat
+    initializeRevenueCat();
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   if (isLoading) {
@@ -70,6 +88,7 @@ function AppNavigator() {
       <Stack.Screen name="notification-settings" />
       <Stack.Screen name="display-settings" />
       <Stack.Screen name="edit-review" />
+      <Stack.Screen name="subscription" options={{ headerShown: false }} />
     </Stack>
   );
 }
