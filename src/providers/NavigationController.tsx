@@ -181,8 +181,7 @@ export function NavigationController({
         "edit-review",
         "reset-password",
         "onboarding",
-        //  "legal-acceptance",
-        // "location-disclosure",
+        "subscription",
       ];
       const isOnProtectedRoute = protectedRoutes.some(
         (route) => currentSegment === route || pathname?.includes(route)

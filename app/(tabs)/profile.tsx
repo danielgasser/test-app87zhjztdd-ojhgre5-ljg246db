@@ -33,6 +33,7 @@ import {
   setNavigationIntent,
   RouteHistoryItem,
 } from "@/store/locationsSlice";
+import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 
 const appConfig = require("../../app.config.js");
 
@@ -55,6 +56,7 @@ export default function ProfileScreen() {
     settings: false,
     account: false,
   });
+  const subscriptionTier = useSubscriptionTier();
 
   useEffect(() => {
     if (user?.id) {
@@ -386,6 +388,32 @@ export default function ProfileScreen() {
             style={styles.sectionsContainer}
             showsVerticalScrollIndicator={false}
           >
+            {/* Upgrade Banner - only show for free users */}
+            {subscriptionTier === "free" && (
+              <TouchableOpacity
+                style={styles.upgradeBanner}
+                onPress={() => {
+                  console.log("Navigating to subscription");
+                  router.push("/subscription");
+                }}
+              >
+                <View style={styles.upgradeBannerContent}>
+                  <Ionicons
+                    name="star"
+                    size={24}
+                    color={theme.colors.mixedYellow}
+                  />
+                  <View style={styles.upgradeBannerText}>
+                    <Text style={styles.upgradeBannerTitle}>
+                      Upgrade to Premium
+                    </Text>
+                    <Text style={styles.upgradeBannerSubtitle}>
+                      Unlock all features & go ad-free
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
             {/* Activity Section */}
             <CollapsibleSection
               title="My Activity"
@@ -682,6 +710,34 @@ function CollapsibleSection({
 }
 
 const styles = StyleSheet.create({
+  upgradeBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: theme.colors.primary,
+    padding: theme.spacing.md,
+    marginHorizontal: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+  },
+  upgradeBannerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.md,
+  },
+  upgradeBannerText: {
+    flex: 1,
+  },
+  upgradeBannerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: theme.colors.textOnPrimary,
+  },
+  upgradeBannerSubtitle: {
+    fontSize: 12,
+    color: theme.colors.textOnPrimary,
+    opacity: 0.9,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

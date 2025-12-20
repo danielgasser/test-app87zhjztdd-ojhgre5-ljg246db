@@ -10,11 +10,11 @@ import { Platform } from 'react-native';
 // ============================================================================
 
 const API_KEYS = {
-    ios: 'appl_xxxxxxxxxxxxxxxxxx',      // Replace with your iOS key
-    android: 'goog_xxxxxxxxxxxxxxxxxx',  // Replace with your Android key
+    ios: 'test_lPoLbFyowpJiuiMThnesLPYifqI',      // Replace with your iOS key
+    android: 'test_lPoLbFyowpJiuiMThnesLPYifqI',  // Replace with your Android key
 };
 
-const ENTITLEMENT_ID = 'premium';
+const ENTITLEMENT_ID = 'SafePath Pro';
 
 // ============================================================================
 // INITIALIZATION
