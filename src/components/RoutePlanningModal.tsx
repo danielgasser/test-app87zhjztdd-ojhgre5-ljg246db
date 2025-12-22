@@ -410,7 +410,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Handle location selection
   const handleLocationSelect = async (location: LocationResult) => {
     // Check search limit for free users
+    console.log("📍 handleLocationSelect called, userTier:", userTier);
     const allowed = await canSearch(userTier);
+    console.log("📍 allowed:", allowed);
+
     if (!allowed) {
       notify.confirm(
         "Search Limit Reached",

@@ -21,6 +21,7 @@ import {
   loadRewardedAd,
 } from "@/services/adMobService";
 import { initializeRevenueCat } from "@/services/revenueCatService";
+import { PortalProvider } from "@gorhom/portal";
 
 // Initialize Sentry
 Sentry.init({
@@ -97,15 +98,17 @@ function AppNavigator() {
 function RootLayout() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <NavigationController>
-          <DeepLinkHandler>
-            <NotificationProvider>
-              <AppNavigator />
-            </NotificationProvider>
-          </DeepLinkHandler>
-        </NavigationController>
-      </AuthProvider>
+      <PortalProvider>
+        <AuthProvider>
+          <NavigationController>
+            <DeepLinkHandler>
+              <NotificationProvider>
+                <AppNavigator />
+              </NotificationProvider>
+            </DeepLinkHandler>
+          </NavigationController>
+        </AuthProvider>
+      </PortalProvider>
     </Provider>
   );
 }

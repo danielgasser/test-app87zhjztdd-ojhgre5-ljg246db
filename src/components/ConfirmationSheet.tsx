@@ -14,6 +14,7 @@ import {
   getConfirmationIcon,
   getConfirmationIconColor,
 } from "@/styles/notificationStyles";
+import { Portal } from "@gorhom/portal";
 
 const { height } = Dimensions.get("window");
 
@@ -110,52 +111,56 @@ const ConfirmationSheet: React.FC<ConfirmationSheetProps> = ({
   if (!visible) return null;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onDismiss}
-    >
-      <TouchableWithoutFeedback onPress={onDismiss}>
-        <View style={styles.confirmationOverlay}>
-          <TouchableWithoutFeedback>
-            <Animated.View
-              style={[
-                styles.confirmationContainer,
-                { transform: [{ translateY: slideAnim }] },
-              ]}
-            >
-              {icon && (
-                <View style={styles.confirmationIconContainer}>
-                  <Ionicons
-                    name={getIconName()}
-                    size={48}
-                    color={getIconColor()}
-                  />
+    <Portal>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={onDismiss}
+        statusBarTranslucent={true}
+        presentationStyle="overFullScreen"
+      >
+        <TouchableWithoutFeedback onPress={onDismiss}>
+          <View style={styles.confirmationOverlay}>
+            <TouchableWithoutFeedback>
+              <Animated.View
+                style={[
+                  styles.confirmationContainer,
+                  { transform: [{ translateY: slideAnim }] },
+                ]}
+              >
+                {icon && (
+                  <View style={styles.confirmationIconContainer}>
+                    <Ionicons
+                      name={getIconName()}
+                      size={48}
+                      color={getIconColor()}
+                    />
+                  </View>
+                )}
+
+                <Text style={styles.confirmationTitle}>{title}</Text>
+                <Text style={styles.confirmationMessage}>{message}</Text>
+
+                <View style={styles.confirmationButtonsContainer}>
+                  {buttons.map((button, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={getButtonStyle(button.style)}
+                      onPress={() => handleButtonPress(button)}
+                    >
+                      <Text style={getButtonTextStyle(button.style)}>
+                        {button.text}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-              )}
-
-              <Text style={styles.confirmationTitle}>{title}</Text>
-              <Text style={styles.confirmationMessage}>{message}</Text>
-
-              <View style={styles.confirmationButtonsContainer}>
-                {buttons.map((button, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={getButtonStyle(button.style)}
-                    onPress={() => handleButtonPress(button)}
-                  >
-                    <Text style={getButtonTextStyle(button.style)}>
-                      {button.text}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </Animated.View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </Portal>
   );
 };
 
