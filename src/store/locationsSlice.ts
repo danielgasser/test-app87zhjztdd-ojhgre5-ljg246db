@@ -14,7 +14,7 @@ import {
 import { mapMapboxPlaceType } from "../utils/placeTypeMappers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { ReactNode } from "react";
 import { RootState } from ".";
 import { checkProfileCompleteness } from "@/utils/profileValidation";

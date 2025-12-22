@@ -33,12 +33,20 @@ import ProfileBanner from "./ProfileBanner";
 import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { theme } from "@/styles/theme";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import * as Crypto from "expo-crypto";
 import { useAuth } from "@/providers/AuthProvider";
-
+import {
+  canSearch,
+  incrementSearchCount,
+  getRemainingSearches,
+  DAILY_LIMIT,
+  getSearchCount,
+} from "@/utils/searchLimitService";
+import { SubscriptionTier } from "@/config/features";
+import { router } from "expo-router";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -88,6 +96,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const { user: currentUser } = useAuth();
   const userProfile = useAppSelector((state) => state.user.profile);
+  const userTier = (userProfile?.subscription_tier ||
+    "free") as SubscriptionTier;
 
   const bannerState = useAppSelector((state) => state.profileBanner);
 
@@ -261,7 +271,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
     },
-    [dispatch, userLocation]
+    [dispatch, userLocation, userTier]
   );
 
   // Handle starting navigation
@@ -399,7 +409,27 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle location selection
   const handleLocationSelect = async (location: LocationResult) => {
+    // Check search limit for free users
+    const allowed = await canSearch(userTier);
+    if (!allowed) {
+      notify.confirm(
+        "Search Limit Reached",
+        `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
+        [
+          { text: "Maybe Later", style: "cancel", onPress: () => {} },
+          {
+            text: "Upgrade",
+            style: "default",
+            onPress: () => router.push("/subscription"),
+          },
+        ]
+      );
+      return;
+    }
+    await incrementSearchCount();
+
     // If location already has coordinates (database result), use it directly
+
     if (location.latitude !== 0 && location.longitude !== 0) {
       if (activeInput === "from") {
         setFromLocation(location);

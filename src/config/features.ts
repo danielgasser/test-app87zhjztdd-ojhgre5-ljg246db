@@ -7,13 +7,32 @@ export const SUBSCRIPTION_TIERS = {
 export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
 
 export const FEATURES = {
+    // Navigation
     routeHistory: { minTier: 'premium', label: 'Route History' },
+    unlimitedSearches: { minTier: 'premium', label: 'Unlimited Searches' },
+    saveLocations: { minTier: 'premium', label: 'Save Locations' },
+    searchHistory: { minTier: 'premium', label: 'Search History' },
+    recentlyViewed: { minTier: 'premium', label: 'Recently Viewed' },
     offlineRoutes: { minTier: 'premium', label: 'Offline Routes' },
+
+    // Safety Insights
+    statisticalInsights: { minTier: 'premium', label: 'Safety Insights' },
+    routeSafetyBreakdown: { minTier: 'premium', label: 'Route Safety Breakdown' },
+    neighborhoodStats: { minTier: 'premium', label: 'Neighborhood Statistics' },
+    proactiveWarnings: { minTier: 'premium', label: 'Detailed Route Warnings' },
+
+    // Filters
     advancedFilters: { minTier: 'premium', label: 'Advanced Filters' },
-    unlimitedRoutes: { minTier: 'premium', label: 'Unlimited Routes' },
+    demographicFilter: { minTier: 'premium', label: 'Filter by Demographic' },
+    timeFilter: { minTier: 'premium', label: 'Time-based Filtering' },
+
+    // Experience
     adFree: { minTier: 'premium', label: 'Ad-Free Experience' },
+
+    // Enterprise
     exportData: { minTier: 'enterprise', label: 'Data Export' },
     apiAccess: { minTier: 'enterprise', label: 'API Access' },
+    teamManagement: { minTier: 'enterprise', label: 'Team Management' },
 } as const;
 
 export type FeatureName = keyof typeof FEATURES;

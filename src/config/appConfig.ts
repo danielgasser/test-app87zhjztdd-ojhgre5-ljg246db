@@ -18,7 +18,6 @@ export const APP_CONFIG = {
 
     MIN_SEARCH_RADIUS_KM: 1,
     MAX_SEARCH_RADIUS_KM: 999999,
-
   },
 
   // Safety Score Thresholds
@@ -168,6 +167,7 @@ export const APP_CONFIG = {
     LOW_CONFIDENCE_THRESHOLD: 0.6,        // Show warning banner when confidence < 0.6
     FALLBACK_CONFIDENCE: 0.3,             // Default confidence when no data available
     MIN_CONFIDENCE_BASELINE: 0.15,      // Minimum confidence floor
+    DAILY_SEARCH_LIMIT: 10,                     // Free tier daily search limit
   },
 
   // Route Display & UI Configuration

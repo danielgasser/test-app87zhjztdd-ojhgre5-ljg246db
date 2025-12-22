@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Polygon, Callout, Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { DangerZone } from "../types/supabase";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
 interface DangerZoneOverlayProps {

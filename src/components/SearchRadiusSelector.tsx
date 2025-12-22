@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateSearchRadius } from "@/store/userSlice";
 import { useUserPreferences } from "@/hooks/useUserPreferences";

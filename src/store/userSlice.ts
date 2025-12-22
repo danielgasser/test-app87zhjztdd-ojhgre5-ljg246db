@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction, Draft } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
 import { Database } from '../types/database.types';
-import { APP_CONFIG } from '@/utils/appConfig';
+import { APP_CONFIG } from '@/config/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
 import { logger } from '@/utils/logger';

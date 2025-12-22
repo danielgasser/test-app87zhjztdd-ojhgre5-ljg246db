@@ -1,4 +1,4 @@
-import { APP_CONFIG } from '@/utils/appConfig';
+import { APP_CONFIG } from '@/config/appConfig';
 
 /**
  * Profile field requirements for different features

@@ -17,10 +17,17 @@ import { searchLocations } from "src/store/locationsSlice";
 import { googlePlacesService } from "@/services/googlePlaces";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { APP_CONFIG } from "@/utils/appConfig";
-import * as Sentry from "@sentry/react-native";
+import { APP_CONFIG } from "@/config/appConfig";
 import { useAuth } from "@/providers/AuthProvider";
 import { store } from "@/store";
+import {
+  canSearch,
+  incrementSearchCount,
+  getRemainingSearches,
+  DAILY_LIMIT,
+} from "@/utils/searchLimitService";
+import { SubscriptionTier } from "@/config/features";
+import { router } from "expo-router";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -58,6 +65,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const { user } = useAuth();
   const userId = user?.id;
   const userProfile = useAppSelector((state: any) => state.user.profile);
+  const userTier = (userProfile?.subscription_tier ||
+    "free") as SubscriptionTier;
 
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
@@ -118,13 +127,28 @@ const SearchBar: React.FC<SearchBarProps> = ({
       const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
     },
-    [dispatch, userLocation]
+    [dispatch, userLocation, userTier]
   );
 
   const handleSelectLocation = async (location: SearchResult) => {
+    // Check search limit for free users
+    const allowed = await canSearch(userTier);
+    if (!allowed) {
+      const remaining = await getRemainingSearches();
+      notify.confirm(
+        "Search Limit Reached",
+        `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
+        [
+          { text: "Maybe Later", style: "cancel", onPress: () => {} },
+          { text: "Upgrade", onPress: () => router.push("/subscription") },
+        ]
+      );
+      return;
+    }
     Keyboard.dismiss();
     setSearchText(location.name);
     setShowResults(false);
+    await incrementSearchCount();
     // GUARD: Wait for profile to be ready
     if (!userProfile && userId) {
       notify.info("Loading profile...");

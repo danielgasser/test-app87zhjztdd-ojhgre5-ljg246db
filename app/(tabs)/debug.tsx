@@ -27,7 +27,7 @@ import { useRouter } from "expo-router";
 import { useAppSelector } from "@/store/hooks";
 import { locationCache } from "@/services/locationCache";
 import { theme } from "@/styles/theme";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import * as Device from "expo-device";
 import * as Application from "expo-application";
 import { notify } from "@/utils/notificationService";

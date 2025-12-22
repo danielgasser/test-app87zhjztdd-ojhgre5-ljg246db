@@ -25,7 +25,7 @@ import { CreateReviewForm } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { validateVisitDateTime } from "@/utils/dateValidation";
 import { useAuth } from "@/providers/AuthProvider";
 

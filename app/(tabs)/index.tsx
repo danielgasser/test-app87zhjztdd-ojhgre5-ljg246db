@@ -51,7 +51,7 @@ import {
   getUserCountry,
 } from "src/utils/locationHelpers";
 
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
 import { supabase } from "@/services/supabase";
 import NavigationMode from "src/components/NavigationMode";

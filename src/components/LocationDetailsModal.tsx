@@ -20,7 +20,7 @@ import { ReviewWithUser } from "src/types/supabase";
 import PredictionBadge from "./PredictionBadge";
 import { googlePlacesService, PlaceDetails } from "@/services/googlePlaces";
 import { theme } from "@/styles/theme";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { logger } from "@/utils/logger";
 import UserProfileModal from "./UserProfileModal";
 import VoteButtons from "./VoteButtons";

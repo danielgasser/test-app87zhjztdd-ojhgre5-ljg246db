@@ -23,7 +23,7 @@ import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
-import { APP_CONFIG } from "@/utils/appConfig";
+import { APP_CONFIG } from "@/config/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";

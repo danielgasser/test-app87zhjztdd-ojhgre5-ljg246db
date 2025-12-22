@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { APP_CONFIG } from '@/utils/appConfig';
+import { APP_CONFIG } from '@/config/appConfig';
 import { logger } from '@/utils/logger';
 const BANNER_STORAGE_KEY = '@safepath_banner_dismissals';
 

@@ -7,7 +7,7 @@ import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { supabase } from './supabase';
 import { calculateDistance } from '../utils/distanceHelpers';
-import { APP_CONFIG } from '@/utils/appConfig';
+import { APP_CONFIG } from '@/config/appConfig';
 import { logger } from "@/utils/logger";
 import { NotificationPreferences } from '@/store/userSlice';
 

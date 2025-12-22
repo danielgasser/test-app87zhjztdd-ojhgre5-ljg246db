@@ -8,7 +8,7 @@
  * - src/components/LocationDetailsModal.tsx
  */
 
-import { APP_CONFIG } from "./appConfig";
+import { APP_CONFIG } from "../config/appConfig";
 
 /**
  * Get color for a safety score (1-5 rating)

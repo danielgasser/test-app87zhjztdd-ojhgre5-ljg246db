@@ -312,6 +312,53 @@ export type Database = {
         }
         Relationships: []
       }
+      recently_viewed: {
+        Row: {
+          address: string | null
+          google_place_id: string | null
+          id: string
+          latitude: number | null
+          location_id: string | null
+          longitude: number | null
+          name: string
+          user_id: string
+          view_count: number | null
+          viewed_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          google_place_id?: string | null
+          id?: string
+          latitude?: number | null
+          location_id?: string | null
+          longitude?: number | null
+          name: string
+          user_id: string
+          view_count?: number | null
+          viewed_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          google_place_id?: string | null
+          id?: string
+          latitude?: number | null
+          location_id?: string | null
+          longitude?: number | null
+          name?: string
+          user_id?: string
+          view_count?: number | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recently_viewed_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_votes: {
         Row: {
           created_at: string | null
@@ -560,6 +607,106 @@ export type Database = {
           {
             foreignKeyName: "safety_scores_location_id_fkey"
             columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_locations: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          google_place_id: string | null
+          id: string
+          latitude: number
+          location_id: string | null
+          longitude: number
+          name: string
+          nickname: string | null
+          notes: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          google_place_id?: string | null
+          id?: string
+          latitude: number
+          location_id?: string | null
+          longitude: number
+          name: string
+          nickname?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          google_place_id?: string | null
+          id?: string
+          latitude?: number
+          location_id?: string | null
+          longitude?: number
+          name?: string
+          nickname?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_history: {
+        Row: {
+          id: string
+          query: string
+          search_context: string | null
+          searched_at: string | null
+          selected_latitude: number | null
+          selected_location_id: string | null
+          selected_longitude: number | null
+          selected_name: string | null
+          selected_place_id: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          query: string
+          search_context?: string | null
+          searched_at?: string | null
+          selected_latitude?: number | null
+          selected_location_id?: string | null
+          selected_longitude?: number | null
+          selected_name?: string | null
+          selected_place_id?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          query?: string
+          search_context?: string | null
+          searched_at?: string | null
+          selected_latitude?: number | null
+          selected_location_id?: string | null
+          selected_longitude?: number | null
+          selected_name?: string | null
+          selected_place_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_history_selected_location_id_fkey"
+            columns: ["selected_location_id"]
             isOneToOne: false
             referencedRelation: "locations"
             referencedColumns: ["id"]
@@ -863,6 +1010,8 @@ export type Database = {
       }
       cleanup_old_notification_logs: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      cleanup_recently_viewed: { Args: never; Returns: undefined }
+      cleanup_search_history: { Args: never; Returns: undefined }
       decrement_prediction_vote_count: {
         Args: {
           p_count_field: string
@@ -1939,6 +2088,18 @@ export type Database = {
           new_srid_in: number
           schema_name: string
           table_name: string
+        }
+        Returns: string
+      }
+      upsert_recently_viewed: {
+        Args: {
+          p_address?: string
+          p_google_place_id?: string
+          p_latitude?: number
+          p_location_id?: string
+          p_longitude?: number
+          p_name?: string
+          p_user_id: string
         }
         Returns: string
       }
