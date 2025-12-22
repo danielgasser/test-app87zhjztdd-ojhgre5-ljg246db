@@ -11,6 +11,7 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
@@ -410,12 +411,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   // Handle location selection
   const handleLocationSelect = async (location: LocationResult) => {
     // Check search limit for free users
-    console.log("📍 handleLocationSelect called, userTier:", userTier);
     const allowed = await canSearch(userTier);
-    console.log("📍 allowed:", allowed);
 
     if (!allowed) {
-      notify.confirm(
+      Alert.alert(
         "Search Limit Reached",
         `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
         [
@@ -423,7 +422,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           {
             text: "Upgrade",
             style: "default",
-            onPress: () => router.push("/subscription"),
+            onPress: () => {
+              router.push("/subscription");
+            },
           },
         ]
       );

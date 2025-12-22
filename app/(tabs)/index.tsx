@@ -44,7 +44,6 @@ import SearchBar from "src/components/SearchBar";
 import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import RoutePlanningModal from "src/components/RoutePlanningModal";
 import { setMapCenter } from "src/store/locationsSlice";
 import {
   getCompleteAddressFromCoordinates,
@@ -125,7 +124,6 @@ export default function MapScreen() {
   const [routeMode, setRouteMode] = useState<
     "select_origin" | "select_destination" | "none"
   >("none");
-  const [showRoutePlanningModal, setShowRoutePlanningModal] = useState(false);
   const [mapKey, setMapKey] = useState(0);
   const userSearchRadiusKm = useAppSelector(
     (state) => state.user.searchRadiusKm,
@@ -694,10 +692,19 @@ export default function MapScreen() {
   const handleStartRouteSelection = () => {
     if (!requireAuth(userId, "plan a route")) return;
 
-    setShowRoutePlanningModal(true);
-  };
-  const handleCloseRoutePlanning = () => {
-    setShowRoutePlanningModal(false);
+    router.push({
+      pathname: "/route-planning",
+      params: searchMarker
+        ? {
+            destinationId: searchMarker.id,
+            destinationName: searchMarker.name,
+            destinationAddress: searchMarker.address,
+            destinationLat: String(searchMarker.latitude),
+            destinationLng: String(searchMarker.longitude),
+            destinationSource: searchMarker.source,
+          }
+        : {},
+    });
   };
 
   /**
@@ -827,7 +834,7 @@ export default function MapScreen() {
     }
 
     dispatch(startNavigation());
-    setShowRoutePlanningModal(false);
+    router.back();
   };
 
   const handleExitNavigation = () => {
@@ -1677,7 +1684,7 @@ export default function MapScreen() {
             </Text>
             <TouchableOpacity
               style={styles.cancelButton}
-              onPress={handleCloseRoutePlanning}
+              onPress={() => setRouteMode("none")}
             >
               <Ionicons
                 name="close"
@@ -1687,11 +1694,6 @@ export default function MapScreen() {
             </TouchableOpacity>
           </View>
         )}
-        <RoutePlanningModal
-          visible={showRoutePlanningModal}
-          onClose={handleCloseRoutePlanning}
-          initialDestination={searchMarker}
-        />
       </View>
       {selectedRoute && !navigationActive && (
         <View style={styles.routeInfoPanel}>
@@ -1751,7 +1753,21 @@ export default function MapScreen() {
 
           <TouchableOpacity
             style={styles.routeDetailsButton}
-            onPress={() => setShowRoutePlanningModal(true)}
+            onPress={() =>
+              router.push({
+                pathname: "/route-planning",
+                params: searchMarker
+                  ? {
+                      destinationId: searchMarker.id,
+                      destinationName: searchMarker.name,
+                      destinationAddress: searchMarker.address,
+                      destinationLat: String(searchMarker.latitude),
+                      destinationLng: String(searchMarker.longitude),
+                      destinationSource: searchMarker.source,
+                    }
+                  : {},
+              })
+            }
           >
             <Text style={styles.routeDetailsButtonText}>View Details</Text>
           </TouchableOpacity>

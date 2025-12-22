@@ -21,7 +21,6 @@ import {
   loadRewardedAd,
 } from "@/services/adMobService";
 import { initializeRevenueCat } from "@/services/revenueCatService";
-import { PortalProvider } from "@gorhom/portal";
 
 // Initialize Sentry
 Sentry.init({
@@ -89,7 +88,17 @@ function AppNavigator() {
       <Stack.Screen name="notification-settings" />
       <Stack.Screen name="display-settings" />
       <Stack.Screen name="edit-review" />
-      <Stack.Screen name="subscription" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="subscription"
+        options={{ headerShown: false, presentation: "modal" }}
+      />
+      <Stack.Screen
+        name="route-planning"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 }
@@ -98,7 +107,6 @@ function AppNavigator() {
 function RootLayout() {
   return (
     <Provider store={store}>
-      <PortalProvider>
         <AuthProvider>
           <NavigationController>
             <DeepLinkHandler>
@@ -108,7 +116,6 @@ function RootLayout() {
             </DeepLinkHandler>
           </NavigationController>
         </AuthProvider>
-      </PortalProvider>
     </Provider>
   );
 }
