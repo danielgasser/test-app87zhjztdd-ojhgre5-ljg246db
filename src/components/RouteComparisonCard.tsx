@@ -12,7 +12,8 @@ import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/config/appConfig";
 import { useAppSelector } from "@/store/hooks";
 import { formatDuration } from "@/utils/timeHelpers";
-
+import { ProactiveWarnings } from "./ProactiveWarnings";
+import { RouteSafetyBreakdown } from "./RouteSafetyBreakdown";
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
   onSelectOriginal: () => void;
@@ -69,7 +70,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           color={theme.colors.secondary}
         />
         <Text style={styles.improvementText}>
-          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}
+          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
           points
         </Text>
       </View>
@@ -128,7 +129,14 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               </Text>
             </View>
           </View>
-
+          <ProactiveWarnings
+            safetyAnalysis={original_route.safety_analysis}
+            routeType="original"
+          />
+          <RouteSafetyBreakdown
+            segmentScores={original_route.safety_analysis?.segment_scores}
+            routeType="original"
+          />
           <Text style={styles.selectButtonText}>Use Fastest</Text>
         </TouchableOpacity>
 
@@ -194,6 +202,14 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               </Text>
             </View>
           </View>
+          <ProactiveWarnings
+            safetyAnalysis={optimized_route.safety_analysis}
+            routeType="optimized"
+          />
+          <RouteSafetyBreakdown
+            segmentScores={optimized_route.safety_analysis?.segment_scores}
+            routeType="optimized"
+          />
           <Text style={styles.selectButtonText}>Use Safer Route</Text>
         </TouchableOpacity>
       </View>
@@ -316,12 +332,11 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   routesContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     gap: 12,
     marginBottom: 16,
   },
   routeCard: {
-    flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 8,
     padding: 12,

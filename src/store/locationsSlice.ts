@@ -86,6 +86,37 @@ interface CommunityReview {
   };
 }
 
+
+interface RouteSegment {
+  start_lat: number;
+  start_lng: number;
+  end_lat: number;
+  end_lng: number;
+  safety_score: number;
+  distance_meters: number;
+  duration_seconds: number;
+}
+
+interface RouteSafetyAnalysis {
+  confidence_score: ReactNode;
+  overall_route_score: number;
+  overall_confidence?: number;
+  segment_scores?: RouteSegment[];
+  danger_zones_intersected?: number;
+  high_risk_segments?: number;
+  total_segments?: number;
+  safety_summary?: {
+    safe_segments: number;
+    mixed_segments: number;
+    unsafe_segments: number;
+  };
+  safety_notes: string[];
+  analysis_timestamp?: string;
+  route_summary?: string;
+  confidence?: number;
+  risk_factors?: string[];
+}
+
 export interface MLPrediction {
   predicted_safety_score: number;
   confidence: number;
@@ -131,37 +162,6 @@ export interface RouteRequest {
     required_waypoint_types?: string[];
   };
 }
-
-interface RouteSegment {
-  start_lat: number;
-  start_lng: number;
-  end_lat: number;
-  end_lng: number;
-  safety_score: number;
-  distance_meters: number;
-  duration_seconds: number;
-}
-
-interface RouteSafetyAnalysis {
-  confidence_score: ReactNode;
-  overall_route_score: number;
-  overall_confidence?: number;
-  segment_scores?: RouteSegment[];
-  danger_zones_intersected?: number;
-  high_risk_segments?: number;
-  total_segments?: number;
-  safety_summary?: {
-    safe_segments: number;
-    mixed_segments: number;
-    unsafe_segments: number;
-  };
-  safety_notes: string[];
-  analysis_timestamp?: string;
-  route_summary?: string;
-  confidence?: number;
-  risk_factors?: string[];
-}
-
 export interface NavigationStep {
   instruction: string;
   distance_meters: number;
@@ -205,6 +205,21 @@ export interface SafeRoute {
     steps?: any[];
   };
   waypoints_added?: any; // NEW: track why route was modified
+}
+
+export interface DemographicScore {
+  id: string;
+  location_id: string;
+  demographic_type: string;
+  demographic_value: string | null;
+  avg_safety_score: number | null;
+  avg_comfort_score: number | null;
+  avg_overall_score: number | null;
+  review_count: number | null;
+  last_review_date: string | null;
+  calculated_at: string | null;
+  accurate_count?: number | null;
+  inaccurate_count?: number | null;
 }
 // ================================
 // STATE INTERFACE
@@ -287,6 +302,8 @@ interface LocationsState {
   routeHistoryPage: number;
   routeHistoryHasMore: boolean;
   navigationPosition: { latitude: number; longitude: number; heading?: number } | null;
+  demographicScores: { [locationId: string]: DemographicScore[] };
+  demographicScoresLoading: { [locationId: string]: boolean };
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -389,6 +406,8 @@ const initialState: LocationsState = {
   routeHistoryPage: 0,
   routeHistoryHasMore: true,
   navigationPosition: null,
+  demographicScores: {},
+  demographicScoresLoading: {},
 };
 
 
@@ -2025,6 +2044,25 @@ export const saveFinalRoute = createAsyncThunk(
     return data;
   }
 );
+
+export const fetchDemographicScores = createAsyncThunk(
+  "locations/fetchDemographicScores",
+  async (locationId: string) => {
+    const { data, error } = await supabase
+      .from("safety_scores")
+      .select("*")
+      .eq("location_id", locationId)
+      .order("demographic_type");
+
+    if (error) {
+      logger.error("Error fetching demographic scores:", error);
+      throw error;
+    }
+
+    return { locationId, scores: data || [] };
+  }
+);
+
 // ================================
 // HELPER FUNCTIONS
 // ================================
@@ -2557,6 +2595,17 @@ const locationsSlice = createSlice({
       })
       .addCase(deleteRouteFromHistory.fulfilled, (state, action) => {
         state.routeHistory = state.routeHistory.filter(r => r.id !== action.payload);
+      })
+      // Demographic Scores
+      .addCase(fetchDemographicScores.pending, (state, action) => {
+        state.demographicScoresLoading[action.meta.arg] = true;
+      })
+      .addCase(fetchDemographicScores.fulfilled, (state, action) => {
+        state.demographicScoresLoading[action.payload.locationId] = false;
+        state.demographicScores[action.payload.locationId] = action.payload.scores;
+      })
+      .addCase(fetchDemographicScores.rejected, (state, action) => {
+        state.demographicScoresLoading[action.meta.arg] = false;
       })
   },
 });

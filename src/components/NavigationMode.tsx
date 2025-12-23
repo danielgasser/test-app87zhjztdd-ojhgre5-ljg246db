@@ -113,8 +113,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const currentStepRef = useRef<number | null>(currentNavigationStep);
   const selectedRouteRef = useRef(selectedRoute);
 
-  const [showDebug, setShowDebug] = useState(false);
-
   // Round distance based on proximity
   const roundDistance = (meters: number): number => {
     if (meters > 1000) return Math.round(meters / 100) * 100; // Round to 100m
@@ -846,15 +844,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           <Text style={styles.endButtonText}>End Navigation</Text>
         </TouchableOpacity>
       </View>
-      {/* Temporary debug overlay */}
-      <TouchableOpacity
-        style={styles.debugButton}
-        onPress={() => setShowDebug(!showDebug)}
-      >
-        <Text style={{ color: "white", fontSize: 10 }}>DBG</Text>
-      </TouchableOpacity>
 
-      {showDebug && selectedRoute && (
+      {selectedRoute && (
         <View style={styles.debugOverlay}>
           <Text style={styles.debugTitle}>
             Steps: {selectedRoute.steps?.length || 0} | Current:{" "}

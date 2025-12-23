@@ -3,8 +3,6 @@ import { useLocalSearchParams, router } from "expo-router";
 import RoutePlanningModal from "@/components/RoutePlanningModal";
 
 export default function RoutePlanningScreen() {
-  console.log("🛣️ RoutePlanningScreen rendered");
-
   const params = useLocalSearchParams<{
     destinationId?: string;
     destinationName?: string;

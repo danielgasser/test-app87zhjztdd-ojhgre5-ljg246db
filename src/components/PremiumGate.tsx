@@ -46,10 +46,10 @@ export function PremiumGate({
               color={theme.colors.primary}
             />
             <Text style={styles.blurText}>
-              {requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)}{" "}
+              ⭐{requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)}{" "}
               Feature
             </Text>
-            <Text style={styles.tapToUpgrade}>Tap to upgrade</Text>
+            <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>
           </View>
         </TouchableOpacity>
       );
@@ -106,8 +106,13 @@ const styles = StyleSheet.create({
   },
   tapToUpgrade: {
     marginTop: 4,
-    fontSize: 18,
-    color: theme.colors.textSecondary,
+    fontSize: 14,
+    color: theme.colors.textOnPrimary,
+    padding: 12,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   promptContainer: {
     backgroundColor: theme.colors.background,

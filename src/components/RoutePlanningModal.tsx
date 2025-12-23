@@ -79,8 +79,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   onClose,
   initialDestination,
 }) => {
-  console.log("🗺️ RoutePlanningModal rendered, visible:", visible);
-
   const dispatch = useAppDispatch();
   const {
     selectedRoute,

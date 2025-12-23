@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
+  DemographicScore,
   fetchLocationDetails,
   fetchMLPredictions,
 } from "src/store/locationsSlice";
@@ -26,6 +27,8 @@ import UserProfileModal from "./UserProfileModal";
 import VoteButtons from "./VoteButtons";
 import PredictionVoteButtons from "./PredictionVoteButtons";
 import { useAuth } from "@/providers";
+import { DemographicBreakdown } from "./DemographicBreakdown";
+import { fetchDemographicScores } from "@/store/locationsSlice";
 
 interface SearchResult {
   id: string;
@@ -43,6 +46,8 @@ interface LocationDetailsModalProps {
   searchMarker?: SearchResult | null;
   onClose: () => void;
 }
+
+const EMPTY_DEMOGRAPHIC_SCORES: DemographicScore[] = [];
 
 const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   visible,
@@ -67,6 +72,15 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   );
   const mlPredictionsLoading = useAppSelector(
     (state) => state.locations.mlPredictionsLoading
+  );
+  const demographicScores = useAppSelector(
+    (state) =>
+      state.locations.demographicScores[locationId || ""] ??
+      EMPTY_DEMOGRAPHIC_SCORES
+  );
+  const demographicScoresLoading = useAppSelector(
+    (state) =>
+      state.locations.demographicScoresLoading[locationId || ""] || false
   );
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -473,6 +487,14 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                       {selectedLocation.review_count !== 1 ? "s" : ""}
                     </Text>
                   </View>
+                )}
+                {/* Demographic Safety Breakdown - Premium Feature */}
+                {locationId && (
+                  <DemographicBreakdown
+                    scores={demographicScores}
+                    loading={demographicScoresLoading}
+                    onFetch={() => dispatch(fetchDemographicScores(locationId))}
+                  />
                 )}
               </View>
               {/* ML Prediction Badge - Always show when available */}
