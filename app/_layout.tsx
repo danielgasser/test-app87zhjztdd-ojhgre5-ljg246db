@@ -107,15 +107,15 @@ function AppNavigator() {
 function RootLayout() {
   return (
     <Provider store={store}>
-        <AuthProvider>
-          <NavigationController>
-            <DeepLinkHandler>
-              <NotificationProvider>
-                <AppNavigator />
-              </NotificationProvider>
-            </DeepLinkHandler>
-          </NavigationController>
-        </AuthProvider>
+      <AuthProvider>
+        <NavigationController>
+          <DeepLinkHandler>
+            <NotificationProvider>
+              <AppNavigator />
+            </NotificationProvider>
+          </DeepLinkHandler>
+        </NavigationController>
+      </AuthProvider>
     </Provider>
   );
 }

@@ -34,6 +34,7 @@ import {
   RouteHistoryItem,
 } from "@/store/locationsSlice";
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
+import { PremiumGate } from "@/components/PremiumGate";
 
 const appConfig = require("../../app.config.js");
 
@@ -450,91 +451,96 @@ export default function ProfileScreen() {
               isExpanded={expandedSections.routeHistory}
               onToggle={() => toggleSection("routeHistory")}
             >
-              {routeHistoryLoading && routeHistory.length === 0 ? (
-                <ActivityIndicator size="small" color={theme.colors.primary} />
-              ) : routeHistory.length === 0 ? (
-                <Text style={styles.noRoutesText}>No routes</Text>
-              ) : (
-                <>
-                  {routeHistory.map((route) => (
-                    <View key={route.id} style={styles.routeHistoryItem}>
-                      <TouchableOpacity
-                        style={styles.routeHistoryContent}
-                        onPress={() => handleNavigateToRoute(route)}
-                      >
-                        <View style={styles.routeHistoryHeader}>
-                          <Ionicons
-                            name="location"
-                            size={16}
-                            color={theme.colors.primary}
-                          />
-                          <Text
-                            style={styles.routeHistoryOrigin}
-                            numberOfLines={1}
-                          >
-                            {route.origin_name}
+              <PremiumGate feature="routeHistory" fallback="blur">
+                {routeHistoryLoading && routeHistory.length === 0 ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.primary}
+                  />
+                ) : routeHistory.length === 0 ? (
+                  <Text style={styles.noRoutesText}>No routes</Text>
+                ) : (
+                  <>
+                    {routeHistory.map((route) => (
+                      <View key={route.id} style={styles.routeHistoryItem}>
+                        <TouchableOpacity
+                          style={styles.routeHistoryContent}
+                          onPress={() => handleNavigateToRoute(route)}
+                        >
+                          <View style={styles.routeHistoryHeader}>
+                            <Ionicons
+                              name="location"
+                              size={16}
+                              color={theme.colors.primary}
+                            />
+                            <Text
+                              style={styles.routeHistoryOrigin}
+                              numberOfLines={1}
+                            >
+                              {route.origin_name}
+                            </Text>
+                          </View>
+                          <View style={styles.routeHistoryHeader}>
+                            <Ionicons
+                              name="flag"
+                              size={16}
+                              color={theme.colors.error}
+                            />
+                            <Text
+                              style={styles.routeHistoryDestination}
+                              numberOfLines={1}
+                            >
+                              {route.destination_name}
+                            </Text>
+                          </View>
+                          <View style={styles.routeHistoryMeta}>
+                            <Text style={styles.routeHistoryMetaText}>
+                              {route.distance_km.toFixed(1)} km
+                            </Text>
+                            <Text style={styles.routeHistoryMetaText}>•</Text>
+                            <Text style={styles.routeHistoryMetaText}>
+                              {route.duration_minutes} min
+                            </Text>
+                            <Text style={styles.routeHistoryMetaText}>•</Text>
+                            <Text style={styles.routeHistoryMetaText}>
+                              Safety: {route.safety_score?.toFixed(1) || "N/A"}
+                            </Text>
+                          </View>
+                          <Text style={styles.routeHistoryDate}>
+                            {new Date(route.created_at).toLocaleDateString()}
                           </Text>
-                        </View>
-                        <View style={styles.routeHistoryHeader}>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.routeHistoryDelete}
+                          onPress={() => handleDeleteRoute(route.id)}
+                        >
                           <Ionicons
-                            name="flag"
-                            size={16}
+                            name="trash-outline"
+                            size={20}
                             color={theme.colors.error}
                           />
-                          <Text
-                            style={styles.routeHistoryDestination}
-                            numberOfLines={1}
-                          >
-                            {route.destination_name}
-                          </Text>
-                        </View>
-                        <View style={styles.routeHistoryMeta}>
-                          <Text style={styles.routeHistoryMetaText}>
-                            {route.distance_km.toFixed(1)} km
-                          </Text>
-                          <Text style={styles.routeHistoryMetaText}>•</Text>
-                          <Text style={styles.routeHistoryMetaText}>
-                            {route.duration_minutes} min
-                          </Text>
-                          <Text style={styles.routeHistoryMetaText}>•</Text>
-                          <Text style={styles.routeHistoryMetaText}>
-                            Safety: {route.safety_score?.toFixed(1) || "N/A"}
-                          </Text>
-                        </View>
-                        <Text style={styles.routeHistoryDate}>
-                          {new Date(route.created_at).toLocaleDateString()}
-                        </Text>
-                      </TouchableOpacity>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                    {routeHistoryHasMore && (
                       <TouchableOpacity
-                        style={styles.routeHistoryDelete}
-                        onPress={() => handleDeleteRoute(route.id)}
+                        style={styles.loadMoreButton}
+                        onPress={handleLoadMoreRoutes}
+                        disabled={routeHistoryLoading}
                       >
-                        <Ionicons
-                          name="trash-outline"
-                          size={20}
-                          color={theme.colors.error}
-                        />
+                        {routeHistoryLoading ? (
+                          <ActivityIndicator
+                            size="small"
+                            color={theme.colors.primary}
+                          />
+                        ) : (
+                          <Text style={styles.loadMoreText}>Load More</Text>
+                        )}
                       </TouchableOpacity>
-                    </View>
-                  ))}
-                  {routeHistoryHasMore && (
-                    <TouchableOpacity
-                      style={styles.loadMoreButton}
-                      onPress={handleLoadMoreRoutes}
-                      disabled={routeHistoryLoading}
-                    >
-                      {routeHistoryLoading ? (
-                        <ActivityIndicator
-                          size="small"
-                          color={theme.colors.primary}
-                        />
-                      ) : (
-                        <Text style={styles.loadMoreText}>Load More</Text>
-                      )}
-                    </TouchableOpacity>
-                  )}
-                </>
-              )}
+                    )}
+                  </>
+                )}
+              </PremiumGate>
             </CollapsibleSection>
             {/* Demographics Section */}
             <CollapsibleSection
