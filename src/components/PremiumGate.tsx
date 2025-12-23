@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureName } from "@/config/features";
 import { theme } from "@/styles/theme";
 import { router } from "expo-router";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { hidePremiumPrompt } from "@/store/premiumPromptSlice";
 
 type FallbackBehavior = "hide" | "blur" | "prompt";
 
@@ -46,7 +48,9 @@ export function PremiumGate({
               color={theme.colors.primary}
             />
             <Text style={styles.blurText}>
-              ⭐{requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)}{" "}
+              <Ionicons name="star" size={24} color={theme.colors.accent} />
+              {requiredTier.charAt(0).toUpperCase() +
+                requiredTier.slice(1)}{" "}
               Feature
             </Text>
             <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>
@@ -83,11 +87,79 @@ export function PremiumGate({
   }
 }
 
+// Global Premium Prompt Modal - mount once in _layout.tsx
+export function GlobalPremiumPromptModal() {
+  const dispatch = useAppDispatch();
+  const { visible, feature, description } = useAppSelector(
+    (state) => state.premiumPrompt
+  );
+  const { featureLabel, requiredTier } = useFeatureAccess(
+    feature || "saveLocations"
+  );
+
+  const handleClose = () => {
+    dispatch(hidePremiumPrompt());
+  };
+
+  const handleUpgrade = () => {
+    dispatch(hidePremiumPrompt());
+    setTimeout(() => {
+      router.push("/subscription");
+    }, 150);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <View style={globalStyles.absoluteOverlay} pointerEvents="box-none">
+      <TouchableOpacity
+        style={globalStyles.overlay}
+        activeOpacity={1}
+        onPress={handleClose}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={globalStyles.container}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <View style={globalStyles.iconContainer}>
+            <Ionicons name="star" size={32} color={theme.colors.accent} />
+          </View>
+
+          <Text style={globalStyles.title}>Premium Feature</Text>
+          <Text style={globalStyles.featureName}>{featureLabel}</Text>
+          <Text style={globalStyles.description}>
+            {description ||
+              `Upgrade to ${requiredTier} to unlock this feature.`}
+          </Text>
+
+          <View style={globalStyles.buttons}>
+            <TouchableOpacity
+              style={globalStyles.cancelButton}
+              onPress={handleClose}
+            >
+              <Text style={globalStyles.cancelButtonText}>Not Now</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={globalStyles.upgradeButton}
+              onPress={handleUpgrade}
+            >
+              <Ionicons name="star" size={16} color={theme.colors.background} />
+              <Text style={globalStyles.upgradeButtonText}>Upgrade</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
+  );
+}
 const styles = StyleSheet.create({
   blurContainer: {
     position: "relative",
     overflow: "hidden",
     borderRadius: 12,
+    minHeight: 120,
   },
   blurredContent: {
     opacity: 0.3,
@@ -106,7 +178,7 @@ const styles = StyleSheet.create({
   },
   tapToUpgrade: {
     marginTop: 4,
-    fontSize: 14,
+    fontSize: 12,
     color: theme.colors.textOnPrimary,
     padding: 12,
     backgroundColor: theme.colors.primary,
@@ -140,6 +212,90 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.textSecondary,
     marginTop: 2,
+  },
+});
+
+const globalStyles = StyleSheet.create({
+  absoluteOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 99999,
+    elevation: 99999,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  container: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 320,
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${theme.colors.accent}20`,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: theme.colors.text,
+    marginBottom: 8,
+  },
+  featureName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: theme.colors.primary,
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  buttons: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.textSecondary,
+  },
+  upgradeButton: {
+    flex: 1,
+    flexDirection: "row",
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  upgradeButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.background,
   },
 });
 

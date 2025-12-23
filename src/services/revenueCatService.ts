@@ -36,9 +36,9 @@ export const initializeRevenueCat = async (userId?: string): Promise<void> => {
             appUserID: userId,
         });
 
-        console.log('✅ RevenueCat initialized');
+        //console.log('✅ RevenueCat initialized');
     } catch (error) {
-        console.error('❌ RevenueCat initialization failed:', error);
+        //console.error('❌ RevenueCat initialization failed:', error);
     }
 };
 
@@ -49,7 +49,7 @@ export const initializeRevenueCat = async (userId?: string): Promise<void> => {
 export const identifyUser = async (userId: string): Promise<void> => {
     try {
         await Purchases.logIn(userId);
-        console.log('✅ User identified with RevenueCat:', userId);
+        //console.log('✅ User identified with RevenueCat:', userId);
     } catch (error) {
         console.error('❌ Failed to identify user:', error);
     }
@@ -58,7 +58,7 @@ export const identifyUser = async (userId: string): Promise<void> => {
 export const logoutUser = async (): Promise<void> => {
     try {
         await Purchases.logOut();
-        console.log('✅ User logged out from RevenueCat');
+        //console.log('✅ User logged out from RevenueCat');
     } catch (error) {
         console.error('❌ Failed to logout user:', error);
     }
@@ -113,7 +113,7 @@ export const purchasePackage = async (
         const isPremium = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
 
         if (isPremium) {
-            console.log('✅ Purchase successful');
+            //console.log('✅ Purchase successful');
             return { success: true, customerInfo };
         } else {
             return { success: false, error: 'Purchase completed but entitlement not active' };
@@ -140,7 +140,7 @@ export const restorePurchases = async (): Promise<{
         const customerInfo = await Purchases.restorePurchases();
         const isPremium = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
 
-        console.log('✅ Purchases restored, premium:', isPremium);
+        //console.log('✅ Purchases restored, premium:', isPremium);
         return { success: true, isPremium };
     } catch (error: any) {
         console.error('❌ Restore failed:', error);

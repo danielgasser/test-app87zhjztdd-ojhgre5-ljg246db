@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
-  Modal,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -27,6 +26,8 @@ import {
   startNavigationSession,
   setRouteRequest,
   setNavigationSessionId,
+  fetchSearchHistory,
+  addToSearchHistory,
 } from "../store/locationsSlice";
 import RouteComparisonCard from "./RouteComparisonCard";
 import { googlePlacesService } from "@/services/googlePlaces";
@@ -48,6 +49,9 @@ import {
 } from "@/utils/searchLimitService";
 import { SubscriptionTier } from "@/config/features";
 import { router } from "expo-router";
+import { showPremiumPrompt } from "@/store/premiumPromptSlice";
+import { GlobalPremiumPromptModal } from "./PremiumGate";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -101,6 +105,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     "free") as SubscriptionTier;
 
   const bannerState = useAppSelector((state) => state.profileBanner);
+
+  const searchHistory = useAppSelector(
+    (state) => state.locations.searchHistory
+  );
+  const { hasAccess: hasSearchHistoryAccess } =
+    useFeatureAccess("searchHistory");
 
   const scrollViewRef = useRef<ScrollView>(null);
   // Check profile completeness for safe routing
@@ -401,6 +411,18 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     }
   }, [selectedRoute]);
 
+  useEffect(() => {
+    if (currentUser?.id && hasSearchHistoryAccess && visible) {
+      dispatch(
+        fetchSearchHistory({
+          userId: currentUser.id,
+          context: "route",
+          limit: 10,
+        })
+      );
+    }
+  }, [currentUser?.id, hasSearchHistoryAccess, visible, dispatch]);
+
   // Handle input focus
   const handleInputFocus = (inputType: "from" | "to") => {
     setActiveInput(inputType);
@@ -414,19 +436,13 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     const allowed = await canSearch(userTier);
 
     if (!allowed) {
-      Alert.alert(
-        "Search Limit Reached",
-        `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
-        [
-          { text: "Maybe Later", style: "cancel", onPress: () => {} },
-          {
-            text: "Upgrade",
-            style: "default",
-            onPress: () => {
-              router.push("/subscription");
-            },
-          },
-        ]
+      Keyboard.dismiss();
+
+      dispatch(
+        showPremiumPrompt({
+          feature: "unlimitedSearches",
+          description: `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
+        })
       );
       return;
     }
@@ -440,7 +456,20 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       } else if (activeInput === "to") {
         setToLocation(location);
       }
-
+      if (currentUser?.id) {
+        dispatch(
+          addToSearchHistory({
+            userId: currentUser.id,
+            query: searchQuery,
+            selectedLocationId:
+              location.source === "database" ? location.id : undefined,
+            selectedName: location.name,
+            selectedLatitude: location.latitude,
+            selectedLongitude: location.longitude,
+            searchContext: "route",
+          })
+        );
+      }
       setActiveInput(null);
       setSearchQuery("");
       setMapboxResults([]);
@@ -470,7 +499,20 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         } else if (activeInput === "to") {
           setToLocation(completeLocation);
         }
-
+        if (currentUser?.id) {
+          dispatch(
+            addToSearchHistory({
+              userId: currentUser.id,
+              query: searchQuery,
+              selectedLocationId:
+                location.source === "database" ? location.id : undefined,
+              selectedName: location.name,
+              selectedLatitude: location.latitude,
+              selectedLongitude: location.longitude,
+              searchContext: "route",
+            })
+          );
+        }
         setActiveInput(null);
         setSearchQuery("");
         setMapboxResults([]);
@@ -737,20 +779,86 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             )}
           </View>
 
-          <FlatList
-            style={styles.searchResults}
-            data={allResults}
-            renderItem={renderSearchResult}
-            keyExtractor={(item) => item.id}
-            keyboardShouldPersistTaps="handled"
-            ListEmptyComponent={
-              searchQuery.length > 0 && !searchLoading ? (
-                <View style={styles.noResults}>
-                  <Text style={styles.noResultsText}>No results found</Text>
-                </View>
-              ) : null
-            }
-          />
+          {/* Recent Searches (Premium) - show when no search query */}
+          {searchQuery.length === 0 &&
+          hasSearchHistoryAccess &&
+          searchHistory.length > 0 ? (
+            <View style={styles.searchResults}>
+              <View style={styles.recentHeader}>
+                <Ionicons
+                  name="time-outline"
+                  size={16}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.recentHeaderText}>Recent Searches</Text>
+              </View>
+              <FlatList
+                data={searchHistory}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.searchResultItem}
+                    onPress={() => {
+                      if (item.selected_latitude && item.selected_longitude) {
+                        const location: LocationResult = {
+                          id:
+                            item.selected_location_id ||
+                            item.selected_place_id ||
+                            item.id,
+                          name: item.selected_name || item.query,
+                          address: "",
+                          latitude: Number(item.selected_latitude),
+                          longitude: Number(item.selected_longitude),
+                          source: item.selected_location_id
+                            ? "database"
+                            : "mapbox",
+                        };
+                        if (activeInput === "from") {
+                          setFromLocation(location);
+                        } else if (activeInput === "to") {
+                          setToLocation(location);
+                        }
+                        setActiveInput(null);
+                        setSearchQuery("");
+                      } else {
+                        setSearchQuery(item.query);
+                        performSearch(item.query);
+                      }
+                    }}
+                  >
+                    <View style={styles.searchResultIcon}>
+                      <Ionicons
+                        name="time-outline"
+                        size={20}
+                        color={theme.colors.textSecondary}
+                      />
+                    </View>
+                    <View style={styles.searchResultContent}>
+                      <Text style={styles.searchResultName}>
+                        {item.selected_name || item.query}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id}
+                keyboardShouldPersistTaps="handled"
+              />
+            </View>
+          ) : (
+            <FlatList
+              style={styles.searchResults}
+              data={allResults}
+              renderItem={renderSearchResult}
+              keyExtractor={(item) => item.id}
+              keyboardShouldPersistTaps="handled"
+              ListEmptyComponent={
+                searchQuery.length > 0 && !searchLoading ? (
+                  <View style={styles.noResults}>
+                    <Text style={styles.noResultsText}>No results found</Text>
+                  </View>
+                ) : null
+              }
+            />
+          )}
         </View>
       ) : (
         /* Route Planning Mode */
@@ -917,6 +1025,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           </TouchableWithoutFeedback>
         </ScrollView>
       )}
+      <GlobalPremiumPromptModal />
     </View>
   );
 };
@@ -1002,6 +1111,20 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 16,
+    color: theme.colors.textSecondary,
+  },
+  recentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    gap: 8,
+  },
+  recentHeaderText: {
+    fontSize: 13,
+    fontWeight: "600",
     color: theme.colors.textSecondary,
   },
   content: {

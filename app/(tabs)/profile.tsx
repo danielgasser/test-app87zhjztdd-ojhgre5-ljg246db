@@ -32,6 +32,9 @@ import {
   deleteRouteFromHistory,
   setNavigationIntent,
   RouteHistoryItem,
+  fetchSavedLocations,
+  SavedLocation,
+  unsaveLocation,
 } from "@/store/locationsSlice";
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 import { PremiumGate } from "@/components/PremiumGate";
@@ -52,6 +55,7 @@ export default function ProfileScreen() {
   const [expandedSections, setExpandedSections] = useState({
     activity: false,
     routeHistory: false,
+    savedLocations: false,
     demographics: false,
     mapSettings: false,
     settings: false,
@@ -66,6 +70,12 @@ export default function ProfileScreen() {
   }, [user?.id, dispatch]);
 
   useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchSavedLocations(user.id));
+    }
+  }, [user?.id, dispatch]);
+
+  useEffect(() => {
     if (expandedSections.routeHistory && user?.id) {
       dispatch(fetchUserRouteHistory({ userId: user.id, page: 0 }));
     }
@@ -75,6 +85,7 @@ export default function ProfileScreen() {
     setExpandedSections((prev) => ({
       activity: false,
       routeHistory: false,
+      savedLocations: false,
       demographics: false,
       mapSettings: false,
       settings: false,
@@ -86,6 +97,12 @@ export default function ProfileScreen() {
   const isLoggedIn = !!user;
   const hasCompletedOnboarding = useAppSelector(
     (state) => state.user.onboardingComplete
+  );
+  const savedLocations = useAppSelector(
+    (state) => state.locations.savedLocations
+  );
+  const savedLocationsLoading = useAppSelector(
+    (state) => state.locations.savedLocationsLoading
   );
   const handleLogout = async () => {
     try {
@@ -304,9 +321,25 @@ export default function ProfileScreen() {
     );
   };
 
-  function handleDeleteAccount(event: GestureResponderEvent): void {
-    throw new Error("Function not implemented.");
-  }
+  const handleDeleteSavedLocation = async (savedLocationId: string) => {
+    try {
+      await dispatch(unsaveLocation({ savedLocationId })).unwrap();
+      notify.success("Location removed");
+    } catch (error) {
+      notify.error("Failed to remove location");
+    }
+  };
+
+  const handleNavigateToSavedLocation = (location: SavedLocation) => {
+    router.push({
+      pathname: "/(tabs)",
+      params: {
+        latitude: location.latitude.toString(),
+        longitude: location.longitude.toString(),
+        locationName: location.name,
+      },
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -394,7 +427,6 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 style={styles.upgradeBanner}
                 onPress={() => {
-                  console.log("Navigating to subscription");
                   router.push("/subscription");
                 }}
               >
@@ -538,6 +570,71 @@ export default function ProfileScreen() {
                         )}
                       </TouchableOpacity>
                     )}
+                  </>
+                )}
+              </PremiumGate>
+            </CollapsibleSection>
+            {/* Saved Locations Section */}
+            <CollapsibleSection
+              title="Saved Locations"
+              icon="bookmark"
+              isExpanded={expandedSections.savedLocations}
+              onToggle={() => toggleSection("savedLocations")}
+            >
+              <PremiumGate feature="saveLocations" fallback="blur">
+                {savedLocationsLoading && savedLocations.length === 0 ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.primary}
+                  />
+                ) : savedLocations.length === 0 ? (
+                  <Text style={styles.noRoutesText}>No saved locations</Text>
+                ) : (
+                  <>
+                    {savedLocations.map((location) => (
+                      <View key={location.id} style={styles.savedLocationItem}>
+                        <TouchableOpacity
+                          style={styles.savedLocationContent}
+                          onPress={() =>
+                            handleNavigateToSavedLocation(location)
+                          }
+                        >
+                          <View style={styles.savedLocationHeader}>
+                            <Ionicons
+                              name="bookmark"
+                              size={16}
+                              color={theme.colors.primary}
+                            />
+                            <Text
+                              style={styles.savedLocationName}
+                              numberOfLines={1}
+                            >
+                              {location.nickname || location.name}
+                            </Text>
+                          </View>
+                          <Text
+                            style={styles.savedLocationAddress}
+                            numberOfLines={1}
+                          >
+                            {location.address || "No address"}
+                          </Text>
+                          <Text style={styles.savedLocationDate}>
+                            Saved{" "}
+                            {new Date(location.created_at).toLocaleDateString()}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.savedLocationDelete}
+                          onPress={() => handleDeleteSavedLocation(location.id)}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={20}
+                            color={theme.colors.error}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                   </>
                 )}
               </PremiumGate>
@@ -1024,6 +1121,46 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.xs,
   },
   routeHistoryDelete: {
+    padding: theme.spacing.md,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  savedLocationItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+    overflow: "hidden",
+  },
+  savedLocationContent: {
+    flex: 1,
+    padding: theme.spacing.md,
+  },
+  savedLocationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.xs,
+  },
+  savedLocationName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    flex: 1,
+  },
+  savedLocationAddress: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    marginLeft: 24,
+  },
+  savedLocationDate: {
+    fontSize: 11,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.xs,
+    marginLeft: 24,
+  },
+  savedLocationDelete: {
     padding: theme.spacing.md,
     justifyContent: "center",
     alignItems: "center",

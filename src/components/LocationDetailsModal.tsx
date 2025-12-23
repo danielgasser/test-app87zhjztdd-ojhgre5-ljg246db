@@ -29,7 +29,8 @@ import PredictionVoteButtons from "./PredictionVoteButtons";
 import { useAuth } from "@/providers";
 import { DemographicBreakdown } from "./DemographicBreakdown";
 import { fetchDemographicScores } from "@/store/locationsSlice";
-
+import { SaveLocationButton } from "./SaveLocationButton";
+import { GlobalPremiumPromptModal } from "./PremiumGate";
 interface SearchResult {
   id: string;
   name: string;
@@ -366,9 +367,33 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Location Details</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <SaveLocationButton
+                locationId={locationId}
+                googlePlaceId={googlePlaceId}
+                name={
+                  selectedLocation?.name ||
+                  placeDetails?.name ||
+                  searchMarker?.name ||
+                  "Unknown"
+                }
+                address={
+                  selectedLocation?.address ||
+                  placeDetails?.formatted_address ||
+                  searchMarker?.address
+                }
+                latitude={
+                  selectedLocation?.latitude || searchMarker?.latitude || 0
+                }
+                longitude={
+                  selectedLocation?.longitude || searchMarker?.longitude || 0
+                }
+                compact
+              />
+              <TouchableOpacity onPress={onClose}>
+                <Ionicons name="close" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {loading ? (
@@ -735,11 +760,17 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           }}
         />
       </View>
+      <GlobalPremiumPromptModal />
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   alreadyReviewedBadge: {
     flexDirection: "row",
     backgroundColor: theme.colors.backgroundSecondary,

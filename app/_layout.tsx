@@ -21,6 +21,7 @@ import {
   loadRewardedAd,
 } from "@/services/adMobService";
 import { initializeRevenueCat } from "@/services/revenueCatService";
+import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
 
 // Initialize Sentry
 Sentry.init({
@@ -116,6 +117,7 @@ function RootLayout() {
           </DeepLinkHandler>
         </NavigationController>
       </AuthProvider>
+      <GlobalPremiumPromptModal />
     </Provider>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { theme } from "src/styles/theme";
 import { TouchableWithoutFeedback, Keyboard } from "react-native";
 
@@ -13,7 +13,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { searchLocations } from "src/store/locationsSlice";
+import {
+  addToSearchHistory,
+  fetchSearchHistory,
+  searchLocations,
+} from "src/store/locationsSlice";
 import { googlePlacesService } from "@/services/googlePlaces";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
@@ -28,6 +32,7 @@ import {
 } from "@/utils/searchLimitService";
 import { SubscriptionTier } from "@/config/features";
 import { router } from "expo-router";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -67,6 +72,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const userProfile = useAppSelector((state: any) => state.user.profile);
   const userTier = (userProfile?.subscription_tier ||
     "free") as SubscriptionTier;
+  const searchHistory = useAppSelector(
+    (state) => state.locations.searchHistory
+  );
+  const { hasAccess: hasSearchHistoryAccess } =
+    useFeatureAccess("searchHistory");
+
+  useEffect(() => {
+    if (userId && hasSearchHistoryAccess) {
+      dispatch(fetchSearchHistory({ userId, context: "map", limit: 10 }));
+    }
+  }, [userId, hasSearchHistoryAccess, dispatch]);
 
   const searchGoogle = async (query: string): Promise<SearchResult[]> => {
     try {
@@ -165,6 +181,23 @@ const SearchBar: React.FC<SearchBarProps> = ({
     // If location already has coordinates (database result), use it directly
     if (location.latitude !== 0 && location.longitude !== 0) {
       onLocationSelect(location);
+      if (userId) {
+        dispatch(
+          addToSearchHistory({
+            userId,
+            query: searchText,
+            selectedPlaceId: location.id.startsWith("google_")
+              ? location.id.replace("google_", "")
+              : undefined,
+            selectedLocationId:
+              location.source === "database" ? location.id : undefined,
+            selectedName: location.name,
+            selectedLatitude: location.latitude,
+            selectedLongitude: location.longitude,
+            searchContext: "map",
+          })
+        );
+      }
       onSearchToggle?.(false);
       return;
     }
@@ -188,6 +221,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
         };
 
         onLocationSelect(completeLocation);
+
+        if (userId) {
+          dispatch(
+            addToSearchHistory({
+              userId,
+              query: searchText,
+              selectedPlaceId: details.place_id,
+              selectedName: details.name,
+              selectedLatitude: details.geometry.location.lat,
+              selectedLongitude: details.geometry.location.lng,
+              searchContext: "map",
+            })
+          );
+        }
         onSearchToggle?.(false);
       } else {
         notify.error("Unable to get location details. Please try again.");
@@ -264,7 +311,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 setSearchText(text);
                 performSearch(text);
               }}
-              onFocus={() => onSearchToggle?.(true)}
+              onFocus={() => {
+                setShowResults(true);
+                onSearchToggle?.(true);
+              }}
               autoCorrect={false}
               autoCapitalize="none"
               returnKeyType="search"
@@ -291,6 +341,68 @@ const SearchBar: React.FC<SearchBarProps> = ({
             )}
           </View>
         </View>
+        {/* Recent Searches (Premium) */}
+        {showResults &&
+          searchText.length === 0 &&
+          hasSearchHistoryAccess &&
+          searchHistory.length > 0 && (
+            <View style={styles.resultsContainer}>
+              <View style={styles.recentHeader}>
+                <Ionicons
+                  name="time-outline"
+                  size={16}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.recentHeaderText}>Recent Searches</Text>
+              </View>
+              <FlatList
+                data={searchHistory}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.resultItem}
+                    onPress={() => {
+                      if (item.selected_latitude && item.selected_longitude) {
+                        onLocationSelect({
+                          id:
+                            item.selected_location_id ||
+                            item.selected_place_id ||
+                            item.id,
+                          name: item.selected_name || item.query,
+                          address: "",
+                          latitude: Number(item.selected_latitude),
+                          longitude: Number(item.selected_longitude),
+                          source: item.selected_location_id
+                            ? "database"
+                            : "mapbox",
+                        });
+                        setShowResults(false);
+                        onSearchToggle?.(false);
+                      } else {
+                        setSearchText(item.query);
+                        performSearch(item.query);
+                      }
+                    }}
+                  >
+                    <View style={styles.resultIconContainer}>
+                      <Ionicons
+                        name="time-outline"
+                        size={20}
+                        color={theme.colors.textSecondary}
+                      />
+                    </View>
+                    <View style={styles.resultTextContainer}>
+                      <Text style={styles.resultName}>
+                        {item.selected_name || item.query}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id}
+                style={styles.resultsList}
+                keyboardShouldPersistTaps="handled"
+              />
+            </View>
+          )}
         {showResults && allResults.length > 0 && (
           <View style={styles.resultsContainer}>
             <FlatList
@@ -323,6 +435,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
 };
 
 const styles = StyleSheet.create({
+  recentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    gap: 8,
+  },
+  recentHeaderText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: theme.colors.textSecondary,
+  },
   container: {
     position: "absolute",
     top: 60,

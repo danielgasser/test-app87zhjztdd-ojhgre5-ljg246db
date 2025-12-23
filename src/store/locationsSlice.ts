@@ -304,6 +304,10 @@ interface LocationsState {
   navigationPosition: { latitude: number; longitude: number; heading?: number } | null;
   demographicScores: { [locationId: string]: DemographicScore[] };
   demographicScoresLoading: { [locationId: string]: boolean };
+  savedLocations: SavedLocation[];
+  savedLocationsLoading: boolean;
+  searchHistory: SearchHistoryItem[];
+  searchHistoryLoading: boolean;
 }
 export interface RouteImprovementSummary {
   original_safety_score: number;
@@ -343,6 +347,36 @@ export interface RouteHistoryItem {
   route_coordinates: RouteCoordinate[];
   steps: NavigationStep[] | null;
   safety_alerts_handled: SafetyAlertHandled[] | null;
+}
+
+export interface SavedLocation {
+  id: string;
+  user_id: string;
+  location_id: string | null;
+  google_place_id: string | null;
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  nickname: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  savedLocations: SavedLocation[];
+  savedLocationsLoading: boolean;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  user_id: string;
+  query: string;
+  selected_place_id: string | null;
+  selected_location_id: string | null;
+  selected_name: string | null;
+  selected_latitude: number | null;
+  selected_longitude: number | null;
+  search_context: "map" | "route";
+  searched_at: string;
 }
 // ================================
 // INITIAL STATE
@@ -408,6 +442,10 @@ const initialState: LocationsState = {
   navigationPosition: null,
   demographicScores: {},
   demographicScoresLoading: {},
+  savedLocations: [],
+  savedLocationsLoading: false,
+  searchHistory: [],
+  searchHistoryLoading: false,
 };
 
 
@@ -2064,6 +2102,197 @@ export const fetchDemographicScores = createAsyncThunk(
 );
 
 // ================================
+// SAVED LOCATIONS THUNKS
+// ================================
+
+export const fetchSavedLocations = createAsyncThunk(
+  "locations/fetchSavedLocations",
+  async (userId: string) => {
+    const { data, error } = await supabase
+      .from("saved_locations")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data as SavedLocation[];
+  }
+);
+
+export const saveLocation = createAsyncThunk(
+  "locations/saveLocation",
+  async (params: {
+    userId: string;
+    locationId?: string;
+    googlePlaceId?: string;
+    name: string;
+    address?: string;
+    latitude: number;
+    longitude: number;
+    nickname?: string;
+  }) => {
+    const { userId, locationId, googlePlaceId, name, address, latitude, longitude, nickname } = params;
+
+    const { data, error } = await supabase
+      .from("saved_locations")
+      .insert({
+        user_id: userId,
+        location_id: locationId || null,
+        google_place_id: googlePlaceId || null,
+        name,
+        address: address || null,
+        latitude,
+        longitude,
+        nickname: nickname || null,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as SavedLocation;
+  }
+);
+
+export const unsaveLocation = createAsyncThunk(
+  "locations/unsaveLocation",
+  async (params: { savedLocationId: string }) => {
+    const { error } = await supabase
+      .from("saved_locations")
+      .delete()
+      .eq("id", params.savedLocationId);
+
+    if (error) throw error;
+    return params.savedLocationId;
+  }
+);
+
+export const checkIfLocationSaved = createAsyncThunk(
+  "locations/checkIfLocationSaved",
+  async (params: { userId: string; locationId?: string; googlePlaceId?: string }) => {
+    const { userId, locationId, googlePlaceId } = params;
+
+    let query = supabase
+      .from("saved_locations")
+      .select("id")
+      .eq("user_id", userId);
+
+    if (locationId) {
+      query = query.eq("location_id", locationId);
+    } else if (googlePlaceId) {
+      query = query.eq("google_place_id", googlePlaceId);
+    } else {
+      return null;
+    }
+
+    const { data, error } = await query.single();
+
+    if (error && error.code !== "PGRST116") throw error; // PGRST116 = no rows
+    return data?.id || null;
+  }
+);
+
+// ================================
+// SEARCH HISTORY THUNKS
+// ================================
+
+export const fetchSearchHistory = createAsyncThunk(
+  "locations/fetchSearchHistory",
+  async (params: { userId: string; context?: "map" | "route"; limit?: number }) => {
+    const { userId, context, limit = 10 } = params;
+
+    let query = supabase
+      .from("search_history")
+      .select("*")
+      .eq("user_id", userId)
+      .order("searched_at", { ascending: false })
+      .limit(limit);
+
+    if (context) {
+      query = query.eq("search_context", context);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data as SearchHistoryItem[];
+  }
+);
+
+export const addToSearchHistory = createAsyncThunk(
+  "locations/addToSearchHistory",
+  async (params: {
+    userId: string;
+    query: string;
+    selectedPlaceId?: string;
+    selectedLocationId?: string;
+    selectedName?: string;
+    selectedLatitude?: number;
+    selectedLongitude?: number;
+    searchContext?: "map" | "route";
+  }) => {
+    const {
+      userId,
+      query,
+      selectedPlaceId,
+      selectedLocationId,
+      selectedName,
+      selectedLatitude,
+      selectedLongitude,
+      searchContext = "map",
+    } = params;
+
+    // Upsert - if same query exists, update timestamp
+    const { data, error } = await supabase
+      .from("search_history")
+      .upsert(
+        {
+          user_id: userId,
+          query,
+          selected_place_id: selectedPlaceId || null,
+          selected_location_id: selectedLocationId || null,
+          selected_name: selectedName || null,
+          selected_latitude: selectedLatitude || null,
+          selected_longitude: selectedLongitude || null,
+          search_context: searchContext,
+          searched_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,query", ignoreDuplicates: false }
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as SearchHistoryItem;
+  }
+);
+
+export const clearSearchHistory = createAsyncThunk(
+  "locations/clearSearchHistory",
+  async (userId: string) => {
+    const { error } = await supabase
+      .from("search_history")
+      .delete()
+      .eq("user_id", userId);
+
+    if (error) throw error;
+    return true;
+  }
+);
+
+export const deleteSearchHistoryItem = createAsyncThunk(
+  "locations/deleteSearchHistoryItem",
+  async (itemId: string) => {
+    const { error } = await supabase
+      .from("search_history")
+      .delete()
+      .eq("id", itemId);
+
+    if (error) throw error;
+    return itemId;
+  }
+);
+
+// ================================
 // HELPER FUNCTIONS
 // ================================
 
@@ -2606,6 +2835,51 @@ const locationsSlice = createSlice({
       })
       .addCase(fetchDemographicScores.rejected, (state, action) => {
         state.demographicScoresLoading[action.meta.arg] = false;
+      })
+      // Saved Locations
+      .addCase(fetchSavedLocations.pending, (state) => {
+        state.savedLocationsLoading = true;
+      })
+      .addCase(fetchSavedLocations.fulfilled, (state, action) => {
+        state.savedLocationsLoading = false;
+        state.savedLocations = action.payload;
+      })
+      .addCase(fetchSavedLocations.rejected, (state) => {
+        state.savedLocationsLoading = false;
+      })
+      .addCase(saveLocation.fulfilled, (state, action) => {
+        state.savedLocations.unshift(action.payload);
+      })
+      .addCase(unsaveLocation.fulfilled, (state, action) => {
+        state.savedLocations = state.savedLocations.filter(
+          (loc) => loc.id !== action.payload
+        );
+      })
+      // Search History
+      .addCase(fetchSearchHistory.pending, (state) => {
+        state.searchHistoryLoading = true;
+      })
+      .addCase(fetchSearchHistory.fulfilled, (state, action) => {
+        state.searchHistoryLoading = false;
+        state.searchHistory = action.payload;
+      })
+      .addCase(fetchSearchHistory.rejected, (state) => {
+        state.searchHistoryLoading = false;
+      })
+      .addCase(addToSearchHistory.fulfilled, (state, action) => {
+        // Remove existing entry with same query, add new one at top
+        state.searchHistory = [
+          action.payload,
+          ...state.searchHistory.filter((item) => item.query !== action.payload.query),
+        ].slice(0, 20); // Keep max 20
+      })
+      .addCase(clearSearchHistory.fulfilled, (state) => {
+        state.searchHistory = [];
+      })
+      .addCase(deleteSearchHistoryItem.fulfilled, (state, action) => {
+        state.searchHistory = state.searchHistory.filter(
+          (item) => item.id !== action.payload
+        );
       })
   },
 });
