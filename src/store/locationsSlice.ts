@@ -41,28 +41,6 @@ interface SearchLocation {
   source?: "database" | "mapbox";
 }
 
-interface NearbyReviewResponse {
-  id: string;
-  user_id: string;
-  location_id: string;
-  title: string;
-  content: string;
-  safety_rating: number;
-  overall_rating: number;
-  created_at: string;
-  location_name: string;
-  location_address: string;
-  location_latitude: number;
-  location_longitude: number;
-  distance_meters: number;
-  user_full_name: string;
-  user_show_demographics: boolean;
-  user_race_ethnicity: string[];
-  user_gender: string;
-  user_lgbtq_status: boolean;
-  user_disability_status: string[];
-}
-
 interface CommunityReview {
   id: string;
   user_id: string;
@@ -359,11 +337,11 @@ interface LocationsState {
   dangerZones: DangerZone[];
   dangerZonesVisible: boolean;
   dangerZonesLoading: boolean;
-  similarUsers: Array<{
+  similarUsers: {
     user_id: string;
     similarity_score: number;
     shared_demographics: string[];
-  }>;
+  }[];
   similarUsersLoading: boolean;
   mlPredictions: { [locationId: string]: MLPrediction };
   mlPredictionsLoading: { [locationId: string]: boolean };
@@ -688,31 +666,6 @@ export const checkForActiveNavigation = createAsyncThunk(
   }
 );
 
-// ================================
-// HELPER: Convert DB Route to SafeRoute
-// ================================
-
-function dbRouteToSafeRoute(dbRoute: any): SafeRoute {
-  return {
-    id: `db_route_${dbRoute.id}`,
-    name: `${dbRoute.origin_name} → ${dbRoute.destination_name}`,
-    route_type: "balanced",
-    coordinates: dbRoute.route_coordinates as RouteCoordinate[],
-    route_points: dbRoute.route_coordinates as RouteCoordinate[],
-    steps: dbRoute.steps as NavigationStep[] || undefined,
-    estimated_duration_minutes: dbRoute.duration_minutes,
-    distance_kilometers: dbRoute.distance_km,
-    safety_analysis: {
-      confidence_score: null,
-      overall_route_score: dbRoute.safety_score || 3.0,
-      overall_confidence: 0.5,
-      safety_notes: ["Route restored from previous session"],
-    },
-    created_at: dbRoute.created_at,
-    databaseId: dbRoute.id,
-  };
-}
-
 function dbRowToRouteHistoryItem(row: any): RouteHistoryItem {
   return {
     id: row.id,
@@ -741,7 +694,6 @@ export const startNavigationSession = createAsyncThunk(
   async (routeId: string, { rejectWithValue }) => {
 
     try {
-      const timestamp = new Date().toISOString();
       const { data, error } = await supabase
         .from("routes")
         .update({
@@ -899,7 +851,7 @@ export const fetchUserReviews = createAsyncThunk(
 
 export const searchLocations = createAsyncThunk(
   "locations/searchLocations",
-  async ({ query, latitude, longitude }: { query: string; latitude?: number; longitude?: number }, { getState }) => {
+  async ({ query }: { query: string; latitude?: number; longitude?: number }) => {
     if (query.trim().length < 2) {
       return [];
     }
@@ -1869,7 +1821,7 @@ export const checkForReroute = createAsyncThunk(
   ) => {
 
     const state = getState() as RootState;
-    const { selectedRoute, routeRequest, navigationSessionId } = state.locations;
+    const { selectedRoute, routeRequest } = state.locations;
 
     if (!selectedRoute || !routeRequest) {
       logger.info('REROUTE_ABORTED', { reason: 'missing route or request' });
@@ -2110,9 +2062,8 @@ export const saveFinalRoute = createAsyncThunk(
       actualPath
     }: {
       routeId: string;
-      actualPath: Array<{ latitude: number; longitude: number }>;
-    },
-    { getState }
+      actualPath: { latitude: number; longitude: number }[];
+    }
   ) => {
     const { data, error } = await supabase
       .from("routes")
@@ -2213,31 +2164,6 @@ export const unsaveLocation = createAsyncThunk(
 
     if (error) throw error;
     return params.savedLocationId;
-  }
-);
-
-export const checkIfLocationSaved = createAsyncThunk(
-  "locations/checkIfLocationSaved",
-  async (params: { userId: string; locationId?: string; googlePlaceId?: string }) => {
-    const { userId, locationId, googlePlaceId } = params;
-
-    let query = supabase
-      .from("saved_locations")
-      .select("id")
-      .eq("user_id", userId);
-
-    if (locationId) {
-      query = query.eq("location_id", locationId);
-    } else if (googlePlaceId) {
-      query = query.eq("google_place_id", googlePlaceId);
-    } else {
-      return null;
-    }
-
-    const { data, error } = await query.single();
-
-    if (error && error.code !== "PGRST116") throw error; // PGRST116 = no rows
-    return data?.id || null;
   }
 );
 
@@ -2747,10 +2673,10 @@ const locationsSlice = createSlice({
         }
         console.info("✅ Route saved to database:", action.payload.id);
       })
-      .addCase(saveRouteToDatabase.pending, (state) => {
+      .addCase(saveRouteToDatabase.pending, () => {
         console.info("⏳ Saving route to database...");
       })
-      .addCase(saveRouteToDatabase.rejected, (state, action) => {
+      .addCase(saveRouteToDatabase.rejected, (_state, action) => {
         console.error("❌ Failed to save route to database:", action.payload);
         notify.error("Failed to save route: " + action.payload);
       })
@@ -2820,7 +2746,7 @@ const locationsSlice = createSlice({
       .addCase(createLocationFromSearch.pending, (state) => {
         state.loading = true;
       })
-      .addCase(createLocationFromSearch.fulfilled, (state, action) => {
+      .addCase(createLocationFromSearch.fulfilled, (state, _action) => {
         state.loading = false;
       })
       .addCase(createLocationFromSearch.rejected, (state, action) => {
@@ -2874,7 +2800,7 @@ const locationsSlice = createSlice({
         state.dangerZonesLoading = false;
         state.dangerZones = action.payload;
       })
-      .addCase(fetchDangerZones.rejected, (state, action) => {
+      .addCase(fetchDangerZones.rejected, (state, _action) => {
         state.dangerZonesLoading = false;
         state.dangerZones = [];
       })
@@ -2959,13 +2885,13 @@ const locationsSlice = createSlice({
       })
 
       // Generate Route Alternatives
-      .addCase(generateRouteAlternatives.pending, (state) => {
+      .addCase(generateRouteAlternatives.pending, (_state) => {
         // Don"t show loading for alternatives
       })
       .addCase(generateRouteAlternatives.fulfilled, (state, action) => {
         state.routeAlternatives = action.payload;
       })
-      .addCase(generateRouteAlternatives.rejected, (state, action) => {
+      .addCase(generateRouteAlternatives.rejected, (_state, action) => {
         logger.error("Failed to generate alternatives:", action.payload);
       })
 

@@ -587,7 +587,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       ];
 
       let messageIndex = 0;
-      const messageInterval = setInterval(() => {
+      setInterval(() => {
         if (messageIndex < messages.length) {
           setRouteLoadingMessage(messages[messageIndex]);
           messageIndex++;

@@ -12,7 +12,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { saveLocation, unsaveLocation } from "@/store/locationsSlice";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { useAuth } from "@/providers/AuthProvider";
-import { useRouter } from "expo-router";
 import { notify } from "@/utils/notificationService";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 
@@ -36,7 +35,6 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
   compact = false,
 }) => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const { user } = useAuth();
   const { hasAccess } = useFeatureAccess("saveLocations");
   const savedLocations = useAppSelector(

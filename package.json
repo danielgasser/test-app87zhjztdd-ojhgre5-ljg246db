@@ -8,7 +8,8 @@
     "dev": "expo start --clear --reset-cache",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "expo lint"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -59,8 +60,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@eslint/eslintrc": "^3.3.3",
     "@types/react": "~19.1.10",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
     "babel-plugin-module-resolver": "^5.0.2",
+    "eslint-config-expo": "^10.0.0",
     "react-native-svg-transformer": "^1.5.2",
     "typescript": "~5.9.2"
   },

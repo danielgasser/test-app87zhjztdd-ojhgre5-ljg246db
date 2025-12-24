@@ -39,7 +39,6 @@ const getWarningColor = (note: string): string => {
 
 export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
   safetyAnalysis,
-  routeType,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 

@@ -1,12 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  AppState,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import MapView from "react-native-maps";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -27,7 +20,6 @@ import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { supabase } from "@/services/supabase";
-import { store } from "@/store";
 import { calculateDistance, formatDistance } from "@/utils/distanceHelpers";
 import { formatDuration, formatArrivalTime } from "@/utils/timeHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -88,7 +80,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     isRerouting,
     navigationPosition,
   } = useAppSelector((state) => state.locations);
-  const routeRequest = useAppSelector((state) => state.locations.routeRequest);
 
   const [currentPosition, setCurrentPosition] = useState<{
     latitude: number;
@@ -104,8 +95,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const positionUpdatesCount = useRef(0);
   const lastAdvancedStep = useRef<number>(-1);
   const lastRerouteTime = useRef<number>(0);
-  const appStateRef = useRef(AppState.currentState);
-  const traveledPath = useRef<Array<{ latitude: number; longitude: number }>>(
+  const traveledPath = useRef<{ latitude: number; longitude: number }[]>(
     []
   );
   const currentStepRef = useRef<number | null>(currentNavigationStep);
@@ -380,9 +370,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           .map((r) => r.location_name)
           .join(", ");
 
-        // Store review IDs for dismissal tracking
-        const reviewIds = unhandledDangers.map((r) => r.id);
-
         notify.confirm(
           "⚠️ SAFETY ALERT ON YOUR ROUTE",
           `Your route passes through areas with safety concerns: ${locationNames}\n\nWould you like to find a safer route?`,
@@ -390,8 +377,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             {
               text: "Find Safer Route",
               onPress: async () => {
-                const fullState = store.getState();
-
                 alertShownRef.current = false;
                 const currentRouteId = selectedRoute?.databaseId;
                 // Record the action for all dangerous reviews
@@ -676,7 +661,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const findClosestPointOnRoute = (
     position: { latitude: number; longitude: number },
-    routePoints: Array<{ latitude: number; longitude: number }>
+    routePoints: { latitude: number; longitude: number }[]
   ) => {
     let closestPoint = routePoints[0];
     let minDistance = Infinity;

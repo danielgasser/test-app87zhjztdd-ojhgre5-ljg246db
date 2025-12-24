@@ -67,22 +67,22 @@ class NotificationService {
 
     // Show success snackbar
     success(message: string, title: string = 'Success', duration?: number) {
-        this.show(message, 'success', duration);
+        this.show(message, 'success', duration, title);
     }
 
     // Show error snackbar
     warning(message: string, title: string = 'Warning', duration?: number) {
-        this.show(message, 'warning', duration);
+        this.show(message, 'warning', duration, title);
     }
 
     // Show error snackbar
     error(message: string, title: string = 'Error', duration?: number) {
-        this.show(message, 'error', duration);
+        this.show(message, 'error', duration, title);
     }
 
     // Show info snackbar
     info(message: string, title?: string, duration?: number) {
-        this.show(message, 'info', duration);
+        this.show(message, 'info', duration, title);
     }
 
     // Show snackbar with action button

@@ -84,41 +84,10 @@ export const BANNER_KEYS = {
     SIMILARITY_FAILED: 'SIMILARITY_FAILED' as BannerType,
 };
 
-// Save dismissals to AsyncStorage
-export const saveDismissalsToStorage = async (
-    dismissals: { [key in BannerType]?: BannerDismissal }
-) => {
-    try {
-        await AsyncStorage.setItem(BANNER_STORAGE_KEY, JSON.stringify(dismissals));
-    } catch (error) {
-        logger.error('Failed to save banner dismissals:', error);
-    }
-};
-
 export const { dismissBanner, incrementShowCount, resetBanner, loadDismissals, resetAll } =
     profileBannerSlice.actions;
 
 export default profileBannerSlice.reducer;
-
-// Load dismissals from AsyncStorage
-export const loadDismissalsFromStorage = async () => {
-    try {
-        const stored = await AsyncStorage.getItem(BANNER_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : {};
-    } catch (error) {
-        logger.error('Failed to load banner dismissals:', error);
-        return {};
-    }
-};
-
-// Clear all dismissals (on logout)
-export const clearDismissalsFromStorage = async () => {
-    try {
-        await AsyncStorage.removeItem(BANNER_STORAGE_KEY);
-    } catch (error) {
-        logger.error('Failed to clear banner dismissals:', error);
-    }
-};
 
 // Check if a banner should be shown
 export const shouldShowBanner = (

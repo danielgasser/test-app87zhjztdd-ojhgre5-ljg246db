@@ -22,6 +22,7 @@ import {
 } from "@/services/adMobService";
 import { initializeRevenueCat } from "@/services/revenueCatService";
 import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
+import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 
 // Initialize Sentry
 Sentry.init({
@@ -64,6 +65,7 @@ function AppNavigator() {
       subscription.remove();
     };
   }, []);
+  useLocationTriggers();
 
   if (isLoading) {
     return <SplashScreen />;

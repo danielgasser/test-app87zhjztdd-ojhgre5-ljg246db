@@ -19,6 +19,7 @@ import { logger } from "@/utils/logger";
 import { NotificationPreferences } from "../src/store/userSlice";
 import { useAuth } from "@/providers/AuthProvider";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 
 export default function NotificationSettings() {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ export default function NotificationSettings() {
   const dispatch = useAppDispatch();
   const { hasAccess: hasLocationTriggersAccess } =
     useFeatureAccess("locationTriggers");
+
   // Load settings from profile when available
   useEffect(() => {
     if (profile) {
@@ -128,22 +130,25 @@ export default function NotificationSettings() {
 
         <SettingToggle
           label="Proactive Safety Alerts"
-          description={
-            hasLocationTriggersAccess
-              ? "Get notified when you're near a highly-rated spot"
-              : "Premium feature - Get notified when you're near a highly-rated spot"
-          }
-          value={hasLocationTriggersAccess && locationTriggers}
+          description="Get notified when you're near a highly-rated spot"
+          value={locationTriggers}
           onToggle={async () => {
-            if (!hasLocationTriggersAccess) {
-              router.push("/subscription");
+            // If free user tries to enable, show premium prompt
+            if (!hasLocationTriggersAccess && !locationTriggers) {
+              dispatch(
+                showPremiumPrompt({
+                  feature: "locationTriggers",
+                  description:
+                    "Get notified when you're near highly-rated safe spots for your demographics.",
+                })
+              );
               return;
             }
+
             const newValue = !locationTriggers;
             setLocationTriggers(newValue);
             await saveNotificationPreference("location_triggers", newValue);
           }}
-          disabled={!hasLocationTriggersAccess}
         />
       </ScrollView>
     </SafeAreaView>

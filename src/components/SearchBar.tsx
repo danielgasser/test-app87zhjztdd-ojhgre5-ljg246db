@@ -27,7 +27,6 @@ import { store } from "@/store";
 import {
   canSearch,
   incrementSearchCount,
-  getRemainingSearches,
   DAILY_LIMIT,
 } from "@/utils/searchLimitService";
 import { SubscriptionTier } from "@/config/features";
@@ -150,7 +149,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     // Check search limit for free users
     const allowed = await canSearch(userTier);
     if (!allowed) {
-      const remaining = await getRemainingSearches();
       notify.confirm(
         "Search Limit Reached",
         `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,

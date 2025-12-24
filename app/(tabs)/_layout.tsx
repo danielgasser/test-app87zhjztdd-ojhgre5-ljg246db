@@ -94,7 +94,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Map",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <MaterialIcons name="map" size={32} color={color} />
           ),
         }}
@@ -103,7 +103,7 @@ export default function TabLayout() {
         name="community"
         options={{
           title: "Community",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <MaterialIcons name="people" size={32} color={color} />
           ),
         }}
@@ -112,7 +112,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <MaterialIcons name="person" size={32} color={color} />
           ),
         }}

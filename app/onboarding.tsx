@@ -23,7 +23,6 @@ import { fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
-import { APP_CONFIG } from "@/config/appConfig";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
@@ -53,14 +52,12 @@ const FIELD_TO_STEP_MAP: { [key: string]: number } = {
   privacy_level: 8,
 };
 
-const MANDATORY_FIELDS = APP_CONFIG.PROFILE_COMPLETION.MANDATORY_FIELDS;
-
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
   const { user, refreshOnboardingStatus } = useAuth();
-  const { profile, error } = useAppSelector((state) => state.user);
+  const { profile } = useAppSelector((state) => state.user);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -380,7 +377,7 @@ export default function OnboardingScreen() {
       }
 
       // 3. Mark onboarding complete in profiles
-      const { data: profileUpdateData, error: profilesError } = await supabase
+      const { error: profilesError } = await supabase
         .from("profiles")
         .update({ onboarding_complete: true })
         .eq("user_id", user.id)
@@ -446,17 +443,6 @@ export default function OnboardingScreen() {
         ...formData,
         race_ethnicity: [...formData.race_ethnicity, race],
       });
-    }
-  };
-
-  const emergencyClear = async () => {
-    try {
-      await SecureStore.deleteItemAsync("supabase.auth.token");
-      await AsyncStorage.clear();
-      await supabase.auth.signOut({ scope: "local" });
-      notify.success("Cleared! Close and reopen app.");
-    } catch (error) {
-      console.error(error);
     }
   };
 

@@ -35,7 +35,7 @@ export const offlineQueue = {
 
         for (const item of queue) {
             try {
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from('reviews')
                     .insert({ ...item.reviewData, user_id: item.userId })
                     .select()

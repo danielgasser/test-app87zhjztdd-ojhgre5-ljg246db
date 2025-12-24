@@ -20,15 +20,6 @@ export function formatTimeAgo(date: Date | string): string {
 }
 
 /**
- * Check if a date/time is in the future
- * @param date - Date to check
- * @returns true if date is in the future
- */
-export function isInFuture(date: Date): boolean {
-    return date > new Date();
-}
-
-/**
  * Calculate hours between a past date and now
  * @param pastDate - Past date to calculate from
  * @returns Number of hours elapsed

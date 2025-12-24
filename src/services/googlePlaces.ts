@@ -44,17 +44,17 @@ export interface PlaceDetails {
         open_now: boolean;
         weekday_text: string[];
     };
-    photos?: Array<{
+    photos?: {
         photo_reference: string;
         height: number;
         width: number;
-    }>;
-    reviews?: Array<{
+    }[];
+    reviews?: {
         author_name: string;
         rating: number;
         text: string;
         time: number;
-    }>;
+    }[];
 }
 
 export interface NearbySearchResult {
@@ -78,11 +78,11 @@ export interface NearbySearchResult {
 export interface GeocodingResult {
     place_id: string;
     formatted_address: string;
-    address_components: Array<{
+    address_components: {
         long_name: string;
         short_name: string;
         types: string[];
-    }>;
+    }[];
     geometry: {
         location: {
             lat: number;

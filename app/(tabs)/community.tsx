@@ -30,7 +30,10 @@ import { shouldShowBanner } from "@/store/profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import UserProfileModal from "@/components/UserProfileModal";
-import { getSafetyColor as getRatingColor } from "@/utils/safetyHelpers";
+import {
+  getSafetyColor as getRatingColor,
+  getSeverityColor,
+} from "@/utils/safetyHelpers";
 import { formatTimeAgo } from "@/utils/timeHelpers";
 import VoteButtons from "@/components/VoteButtons";
 
@@ -209,20 +212,6 @@ export default function CommunityScreen() {
 
   const renderSafetyInsight = (insight: SafetyInsight) => {
     const timeAgo = formatTimeAgo(insight.created_at);
-
-    const getSeverityColor = () => {
-      switch (insight.severity) {
-        case "high":
-          return theme.colors.error;
-        case "medium":
-          return theme.colors.mixedYellow;
-        case "low":
-          return theme.colors.secondary;
-        default:
-          return theme.colors.textSecondary;
-      }
-    };
-
     const getSeverityBg = () => {
       switch (insight.severity) {
         case "high":
@@ -241,12 +230,20 @@ export default function CommunityScreen() {
         key={`${insight.insight_type}-${insight.location_id}`}
         style={[
           styles.insightCard,
-          { backgroundColor: getSeverityBg(), borderColor: getSeverityColor() },
+          {
+            backgroundColor: getSeverityBg(),
+            borderColor: getSeverityColor(insight.severity),
+          },
         ]}
         onPress={() => handleInsightPress(insight)}
       >
         <View style={styles.insightContent}>
-          <Text style={[styles.insightMessage, { color: getSeverityColor() }]}>
+          <Text
+            style={[
+              styles.insightMessage,
+              { color: getSeverityColor(insight.severity) },
+            ]}
+          >
             {insight.message}
           </Text>
           <Text style={styles.insightAddress} numberOfLines={1}>
@@ -347,22 +344,6 @@ export default function CommunityScreen() {
       </TouchableOpacity>
     );
   };
-
-  const renderSafetyUpdateItem = () => (
-    <View style={styles.safetyUpdateCard}>
-      <View style={styles.updateIcon}>
-        <Ionicons name="alert-circle" size={24} color={theme.colors.accent} />
-      </View>
-      <View style={styles.updateContent}>
-        <Text style={styles.updateTitle}>Construction on Main St</Text>
-        <Text style={styles.updateDescription}>
-          Reduced visibility and narrow sidewalks. Use caution when traveling
-          through this area.
-        </Text>
-        <Text style={styles.updateTime}>2 hours ago</Text>
-      </View>
-    </View>
-  );
 
   const renderTrendingLocation = (
     id: string,

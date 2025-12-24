@@ -23,7 +23,6 @@ import {
   createLocationFromSearch,
   setUserLocation,
 } from "src/store/locationsSlice";
-import { LocationWithScores } from "@/types/supabase";
 import { requireAuth } from "@/utils/authHelpers";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
@@ -36,13 +35,7 @@ interface RatingProps {
   onChange: (value: number) => void;
   required?: boolean;
 }
-// Update your existing interface
-interface ReviewParams {
-  locationId?: string;
-  locationName?: string;
-  locationData?: string; // Add these new fields
-  isNewLocation?: string;
-}
+
 const RatingInput: React.FC<RatingProps> = ({
   label,
   value,
@@ -86,9 +79,6 @@ export default function ReviewScreen() {
   useEffect(() => {
     requireAuth(user?.id, "write reviews");
   }, [user]);
-  const navigationActive = useAppSelector(
-    (state) => state.locations.navigationActive
-  );
 
   const [visitDateTime, setVisitDateTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -201,45 +191,6 @@ export default function ReviewScreen() {
         notify.success("Review saved - will sync when online");
       } else {
         notify.success("Review submitted successfully!");
-      }
-      if (isCreatingNew && parsedLocationData && !navigationActive) {
-        const newLocationWithScores: LocationWithScores = {
-          id: finalLocationId,
-          name: parsedLocationData.name,
-          address: parsedLocationData.address,
-          city: parsedLocationData.address.split(", ")[1] || "Unknown",
-          state_province:
-            parsedLocationData.address.split(", ")[2] || "Unknown",
-          country: parsedLocationData.address.includes("Canada")
-            ? "Canada"
-            : "United States",
-          coordinates: `POINT(${parsedLocationData.longitude} ${parsedLocationData.latitude})`,
-          latitude: parsedLocationData.latitude,
-          longitude: parsedLocationData.longitude,
-          avg_safety_score: null,
-          review_count: 0,
-          safety_scores: [],
-          place_type: parsedLocationData.place_type,
-          created_by: user?.id || "",
-          verified: false,
-          active: true,
-          description: null,
-          postal_code: null,
-          tags: null,
-          google_place_id: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          demographic_safety_score: undefined,
-        };
-        /*
-        dispatch(addLocationToNearby(newLocationWithScores));
-        dispatch(
-          fetchNearbyLocations({
-            latitude: parsedLocationData.latitude,
-            longitude: parsedLocationData.longitude,
-            radius: 10000,
-          })
-        );*/
       }
       notify.confirm("Success", "Review submitted successfully!", [
         {

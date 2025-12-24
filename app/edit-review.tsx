@@ -389,7 +389,29 @@ export default function EditReviewScreen() {
                   />
                 </TouchableOpacity>
               </View>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={visitDateTime}
+                  mode="date"
+                  display="default"
+                  maximumDate={new Date()}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(Platform.OS === "ios");
+                    if (selectedDate) {
+                      const newDateTime = new Date(visitDateTime);
+                      newDateTime.setHours(selectedDate.getHours());
+                      newDateTime.setMinutes(selectedDate.getMinutes());
 
+                      // Check if the combined date+time is in the future
+                      const result = validateVisitDateTime(newDateTime);
+                      if (!result.isValid) {
+                        notify.error(result.errorMessage || "Invalid date");
+                      }
+                      setVisitDateTime(result.validatedDate);
+                    }
+                  }}
+                />
+              )}
               {showTimePicker && (
                 <DateTimePicker
                   value={visitDateTime}

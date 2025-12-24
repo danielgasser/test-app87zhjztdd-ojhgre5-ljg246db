@@ -37,11 +37,6 @@ interface NearbyLocation {
     place_type: string;
 }
 
-interface NotificationLog {
-    location_id: string;
-    notified_at: Date;
-}
-
 // ============================================
 // STATE MANAGEMENT
 // ============================================
@@ -57,6 +52,7 @@ class LocationTriggerService {
      * Start monitoring user location for nearby highly-rated spots
      */
     async start(userId: string, userProfile: UserProfile): Promise<void> {
+        console.log("✅ Location trigger service started");
         if (this.isMonitoring) {
             return;
         }

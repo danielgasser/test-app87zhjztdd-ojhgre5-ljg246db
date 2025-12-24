@@ -11,6 +11,8 @@
       "@types/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"]
     },
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "target": "esnext",
     "module": "esnext",
     "lib": ["esnext"],

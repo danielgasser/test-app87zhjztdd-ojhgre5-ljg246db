@@ -43,7 +43,7 @@ import { PremiumGate } from "@/components/PremiumGate";
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const { user, signOut } = useAuth();
-  const { profile, loading, voteStats } = useAppSelector((state) => state.user);
+  const { profile, voteStats } = useAppSelector((state) => state.user);
   const {
     routeHistory,
     routeHistoryLoading,
@@ -184,7 +184,7 @@ export default function ProfileScreen() {
       });
 
       // Decode base64 string
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("user-avatars")
         .upload(filePath, decode(base64data as string), {
           contentType: "image/jpeg",

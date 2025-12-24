@@ -22,7 +22,6 @@ export function NavigationController({
     clearPendingDeepLink,
     termsAccepted,
     locationDisclosureAccepted,
-    signOut,
   } = useAuth();
 
   const segments = useSegments();
@@ -52,7 +51,7 @@ export function NavigationController({
           return;
         }
 
-        const { data: profile, error } = await supabase
+        const { error } = await supabase
           .from("profiles")
           .select("id")
           .eq("user_id", user.id)

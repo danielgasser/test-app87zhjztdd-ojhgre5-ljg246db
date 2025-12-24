@@ -64,7 +64,7 @@ export default function ResetPasswordScreen() {
     checkSession();
   }, []);
 
-  const validatePassword = (password: string): boolean => {
+  const validatePassword = (_password: string): boolean => {
     if (!passwordChecker(newPassword)) {
       return false;
     }

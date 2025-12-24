@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import {
   View,
   StyleSheet,
@@ -76,7 +82,6 @@ import MapFiltersModal, {
   MapFilters,
   DEFAULT_FILTERS,
 } from "@/components/MapFiltersModal";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -103,9 +108,6 @@ interface SearchResult {
 }
 
 export default function MapScreen() {
-  useEffect(() => {
-    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-  }, []);
   // ============= STATE VARIABLES =============
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState({
@@ -139,16 +141,15 @@ export default function MapScreen() {
   const [hasInitiallyRecentered, setHasInitiallyRecentered] = useState(false);
 
   const [routePolylines, setRoutePolylines] = useState<
-    Array<{
+    {
       key: string;
-      coordinates: Array<{ latitude: number; longitude: number }>;
+      coordinates: { latitude: number; longitude: number }[];
       color: string;
-    }>
+    }[]
   >([]);
 
   const [filtersModalVisible, setFiltersModalVisible] = useState(false);
   const [mapFilters, setMapFilters] = useState<MapFilters>(DEFAULT_FILTERS);
-  const { hasAccess: hasFilterAccess } = useFeatureAccess("advancedFilters");
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -324,11 +325,11 @@ export default function MapScreen() {
     }
 
     const greyColor = "rgba(150, 150, 150, 0.5)";
-    const newPolylines: Array<{
+    const newPolylines: {
       key: string;
-      coordinates: Array<{ latitude: number; longitude: number }>;
+      coordinates: { latitude: number; longitude: number }[];
       color: string;
-    }> = [];
+    }[] = [];
 
     // Grey polyline: all points from start to user position
     if (userPointIndex > 0) {
@@ -362,7 +363,7 @@ export default function MapScreen() {
           ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
           : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
 
-      const segmentCoords: Array<{ latitude: number; longitude: number }> = [];
+      const segmentCoords: { latitude: number; longitude: number }[] = [];
 
       for (let i = 0; i < routePoints.length; i++) {
         const pointDist = pointDistances[i];
@@ -454,8 +455,6 @@ export default function MapScreen() {
         }/5`,
       };
     } else if (prediction) {
-      const confidencePercent = Math.round(prediction.confidence * 100);
-
       return {
         type: "predicted",
         score: prediction.predicted_safety_score,
@@ -748,9 +747,9 @@ export default function MapScreen() {
    * Split route_points into chunks matching segment boundaries
    */
   const splitRouteIntoSegments = (
-    routePoints: Array<{ latitude: number; longitude: number }>,
-    segmentScores: Array<any>
-  ): Array<Array<{ latitude: number; longitude: number }>> => {
+    routePoints: { latitude: number; longitude: number }[],
+    segmentScores: any[]
+  ): { latitude: number; longitude: number }[][] => {
     if (
       !routePoints ||
       routePoints.length === 0 ||
@@ -781,13 +780,13 @@ export default function MapScreen() {
     }
 
     // Split route points into chunks based on boundaries
-    const chunks: Array<Array<{ latitude: number; longitude: number }>> = [];
+    const chunks: { latitude: number; longitude: number }[][] = [];
 
     for (let segIdx = 0; segIdx < segmentScores.length; segIdx++) {
       const segmentStart = segmentBoundaries[segIdx];
       const segmentEnd = segmentBoundaries[segIdx + 1] || totalDistance;
 
-      const chunk: Array<{ latitude: number; longitude: number }> = [];
+      const chunk: { latitude: number; longitude: number }[] = [];
 
       for (let i = 0; i < routePoints.length; i++) {
         const pointDist = pointDistances[i];
@@ -879,7 +878,7 @@ export default function MapScreen() {
   };
 
   const handlePoiClick = async (event: any) => {
-    const { placeId, name, coordinate } = event.nativeEvent;
+    const { placeId } = event.nativeEvent;
 
     // Check if this place already exists in database
     const { data: existingLocation } = await supabase

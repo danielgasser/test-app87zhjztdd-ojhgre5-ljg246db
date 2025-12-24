@@ -8,6 +8,7 @@
  * - src/components/LocationDetailsModal.tsx
  */
 
+import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "../config/appConfig";
 
 /**
@@ -45,8 +46,7 @@ export function getRouteLineColor(route: any): string {
  * @returns Color string
  */
 export function getSeverityColor(
-    severity: 'high' | 'medium' | 'low',
-    theme: any
+    severity: 'high' | 'medium' | 'low'
 ): string {
     switch (severity) {
         case 'high':
@@ -57,34 +57,5 @@ export function getSeverityColor(
             return theme.colors.secondary;
         default:
             return theme.colors.textSecondary;
-    }
-}
-
-/**
- * Get severity background color (lighter shade)
- * @param severity - 'high' | 'medium' | 'low'
- * @param theme - Theme object containing color values
- * @returns Background color string
- */
-export function getSeverityBgColor(
-    severity: 'high' | 'medium' | 'low',
-    theme: any
-): string {
-    // All use the same background for consistency
-    return theme.colors.backgroundSecondary;
-}
-
-/**
- * Classify safety score into category
- * @param score - Safety score from 1-5
- * @returns 'safe' | 'mixed' | 'unsafe'
- */
-export function classifySafetyScore(score: number): 'safe' | 'mixed' | 'unsafe' {
-    if (score >= APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD) {
-        return 'safe';
-    } else if (score >= APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD) {
-        return 'mixed';
-    } else {
-        return 'unsafe';
     }
 }

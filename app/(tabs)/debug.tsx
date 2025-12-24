@@ -24,7 +24,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useAppSelector } from "@/store/hooks";
 import { locationCache } from "@/services/locationCache";
 import { theme } from "@/styles/theme";
 import { APP_CONFIG } from "@/config/appConfig";
@@ -38,7 +37,6 @@ const appConfig = require("../../app.config.js");
 export default function DebugScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const profile = useAppSelector((state) => state.user.profile);
 
   const [cacheStats, setCacheStats] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);

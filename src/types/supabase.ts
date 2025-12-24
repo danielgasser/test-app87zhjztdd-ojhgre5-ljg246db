@@ -480,7 +480,7 @@ export interface DangerZone {
     center_lng: number
     danger_level: 'high' | 'medium' | 'low'
     affected_demographics: string[]
-    polygon_points: Array<{ lat: number, lng: number }>
+    polygon_points: { lat: number, lng: number }[]
     reasons: string[]
     time_based: boolean
     active_times?: string[]

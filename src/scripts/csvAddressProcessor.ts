@@ -86,39 +86,3 @@ export async function processCSVRows(rows: any[]): Promise<any[]> {
 
     return processedRows;
 }
-
-/**
- * Example: Process your CSV data before inserting into database
- */
-export async function exampleUsage() {
-    // Your CSV data loaded as array of objects
-    const csvData = [
-        {
-            location_id: 'LOC006',
-            name: 'Frenchies',
-            address: '', // Empty address
-            city: 'Clearwater',
-            state_province: 'FL',
-            latitude: null,
-            longitude: null,
-        },
-        {
-            location_id: 'LOC_SUNDOWN_001',
-            name: 'Sundown Town',
-            address: '', // Empty address
-            city: 'Anna',
-            state_province: 'Illinois',
-            postal_code: '62906',
-            latitude: 37.46033,
-            longitude: -89.24619,
-        },
-    ];
-
-    // Process the data
-    const processedData = await processCSVRows(csvData);
-
-    console.log('Processed data:', processedData);
-
-    // Now processedData has filled-in addresses and can be inserted into database
-    return processedData;
-}

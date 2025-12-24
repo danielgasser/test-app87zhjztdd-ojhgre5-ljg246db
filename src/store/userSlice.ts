@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction, Draft } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '../services/supabase';
 import { Database } from '../types/database.types';
 import { APP_CONFIG } from '@/config/appConfig';
@@ -161,7 +161,6 @@ export const updateSearchRadius = createAsyncThunk<
 
       // Merge with existing preferences
       const currentPreferences = (currentProfile?.preferences as any) || {};
-      const currentSearch = (currentPreferences?.search as any) || {};
       const updatedPreferences = {
         ...currentPreferences,
         search: {

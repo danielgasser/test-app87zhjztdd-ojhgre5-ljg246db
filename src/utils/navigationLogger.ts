@@ -20,7 +20,6 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 
 // Configuration
-const LOG_DIR = `${FileSystem.documentDirectory}nav_logs/`;
 const getLogDir = () => `${FileSystem.documentDirectory}nav_logs/`;
 
 const MAX_LOG_FILES = 5; // Keep last 5 sessions

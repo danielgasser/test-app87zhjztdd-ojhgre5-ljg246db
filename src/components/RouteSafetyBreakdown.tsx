@@ -9,7 +9,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { PremiumGate } from "./PremiumGate";
-import { useAppSelector } from "@/store/hooks";
 import { formatDistance } from "@/utils/distanceHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 interface RouteSafetyBreakdownProps {
@@ -23,21 +22,11 @@ const getSafetyColor = (score: number): string => {
   return theme.colors.error;
 };
 
-const getSafetyLabel = (score: number): string => {
-  if (score >= 4.0) return "Safe";
-  if (score >= 3.0) return "Mixed";
-  return "Caution";
-};
-
 export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
   segmentScores,
-  routeType,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { distanceUnit } = useUserPreferences();
-  const showRouteSegments = useAppSelector(
-    (state) => state.locations.showRouteSegments
-  );
 
   if (!segmentScores || segmentScores.length === 0) return null;
 
