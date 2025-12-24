@@ -312,46 +312,43 @@ export type Database = {
         }
         Relationships: []
       }
-      recently_viewed: {
+      recently_viewed_locations: {
         Row: {
           address: string | null
           google_place_id: string | null
           id: string
-          latitude: number | null
+          latitude: number
           location_id: string | null
-          longitude: number | null
+          longitude: number
           name: string
           user_id: string
-          view_count: number | null
           viewed_at: string | null
         }
         Insert: {
           address?: string | null
           google_place_id?: string | null
           id?: string
-          latitude?: number | null
+          latitude: number
           location_id?: string | null
-          longitude?: number | null
+          longitude: number
           name: string
           user_id: string
-          view_count?: number | null
           viewed_at?: string | null
         }
         Update: {
           address?: string | null
           google_place_id?: string | null
           id?: string
-          latitude?: number | null
+          latitude?: number
           location_id?: string | null
-          longitude?: number | null
+          longitude?: number
           name?: string
           user_id?: string
-          view_count?: number | null
           viewed_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "recently_viewed_location_id_fkey"
+            foreignKeyName: "recently_viewed_locations_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
@@ -406,6 +403,7 @@ export type Database = {
           safety_rating: number
           service_rating: number | null
           status: string | null
+          time_of_day: string | null
           title: string
           unhelpful_count: number | null
           updated_at: string | null
@@ -427,6 +425,7 @@ export type Database = {
           safety_rating: number
           service_rating?: number | null
           status?: string | null
+          time_of_day?: string | null
           title: string
           unhelpful_count?: number | null
           updated_at?: string | null
@@ -448,6 +447,7 @@ export type Database = {
           safety_rating?: number
           service_rating?: number | null
           status?: string | null
+          time_of_day?: string | null
           title?: string
           unhelpful_count?: number | null
           updated_at?: string | null
@@ -1008,9 +1008,9 @@ export type Database = {
         Args: { p_location_id: string }
         Returns: undefined
       }
+      calculate_time_of_day: { Args: { visit_time: string }; Returns: string }
       cleanup_old_notification_logs: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
-      cleanup_recently_viewed: { Args: never; Returns: undefined }
       cleanup_search_history: { Args: never; Returns: undefined }
       decrement_prediction_vote_count: {
         Args: {
@@ -1206,6 +1206,10 @@ export type Database = {
           severity: string
         }[]
       }
+      get_location_time_safety: {
+        Args: { p_location_id: string }
+        Returns: Json
+      }
       get_location_with_coords: {
         Args: { location_id: string }
         Returns: {
@@ -1309,6 +1313,14 @@ export type Database = {
           user_race_ethnicity: string[]
           user_show_demographics: boolean
         }[]
+      }
+      get_neighborhood_stats: {
+        Args: {
+          p_latitude: number
+          p_longitude: number
+          p_radius_meters?: number
+        }
+        Returns: Json
       }
       get_neighborhood_stats_for_point: {
         Args: { lat: number; lng: number }
@@ -2088,18 +2100,6 @@ export type Database = {
           new_srid_in: number
           schema_name: string
           table_name: string
-        }
-        Returns: string
-      }
-      upsert_recently_viewed: {
-        Args: {
-          p_address?: string
-          p_google_place_id?: string
-          p_latitude?: number
-          p_location_id?: string
-          p_longitude?: number
-          p_name?: string
-          p_user_id: string
         }
         Returns: string
       }

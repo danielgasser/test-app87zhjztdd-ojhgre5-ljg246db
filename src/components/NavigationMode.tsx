@@ -34,8 +34,6 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { NAVIGATION_LOCATION_TASK } from "@/tasks/navigationLocationTask";
 
-const { width, height } = Dimensions.get("window");
-
 interface NavigationModeProps {
   onExit: () => void;
   mapRef: React.RefObject<MapView | null>;

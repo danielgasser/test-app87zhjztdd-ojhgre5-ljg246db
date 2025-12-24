@@ -15,8 +15,6 @@ import {
 } from "@/styles/notificationStyles";
 const styles = notificationStyles;
 
-const { width } = Dimensions.get("window");
-
 export type SnackbarType = "success" | "warning" | "error" | "info";
 
 interface SnackbarProps {

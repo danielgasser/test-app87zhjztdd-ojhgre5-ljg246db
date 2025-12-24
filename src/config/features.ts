@@ -20,6 +20,7 @@ export const FEATURES = {
     routeSafetyBreakdown: { minTier: 'premium', label: 'Route Safety Breakdown' },
     neighborhoodStats: { minTier: 'premium', label: 'Neighborhood Statistics' },
     proactiveWarnings: { minTier: 'premium', label: 'Detailed Route Warnings' },
+    locationTriggers: { minTier: 'premium', label: 'Proactive Safety Alerts' },
 
     // Filters
     advancedFilters: { minTier: 'premium', label: 'Advanced Filters' },

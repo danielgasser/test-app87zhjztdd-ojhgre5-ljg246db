@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { supabase } from "../services/supabase";
 import { Database } from "../types/database.types";
-
 import {
   LocationWithScores,
   CreateReviewForm,
@@ -13,7 +12,6 @@ import {
 } from "../types/supabase";
 import { mapMapboxPlaceType } from "../utils/placeTypeMappers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { APP_CONFIG } from "@/config/appConfig";
 import { ReactNode } from "react";
 import { RootState } from ".";
@@ -221,6 +219,114 @@ export interface DemographicScore {
   accurate_count?: number | null;
   inaccurate_count?: number | null;
 }
+
+export interface RouteImprovementSummary {
+  original_safety_score: number;
+  optimized_safety_score: number;
+  safety_improvement: number;
+  time_added_minutes: number;
+  distance_added_km: number;
+  danger_zones_avoided: number;
+}
+
+export interface SafeWaypoint {
+  coordinate: RouteCoordinate;
+  reason: string;
+  safety_score: number;
+}
+
+export interface SmartRouteComparison {
+  original_route: SafeRoute;
+  optimized_route: SafeRoute;
+  improvement_summary: RouteImprovementSummary;
+  waypoints_added: SafeWaypoint[];
+  message: string;
+}
+export interface RouteHistoryItem {
+  id: string;
+  user_id: string;
+  origin_name: string;
+  destination_name: string;
+  distance_km: number;
+  duration_minutes: number;
+  safety_score: number | null;
+  navigation_started_at: string | null;
+  navigation_ended_at: string | null;
+  navigation_session_id: string | null;
+  created_at: string;
+  updated_at: string;
+  route_coordinates: RouteCoordinate[];
+  steps: NavigationStep[] | null;
+  safety_alerts_handled: SafetyAlertHandled[] | null;
+}
+
+export interface SavedLocation {
+  id: string;
+  user_id: string;
+  location_id: string | null;
+  google_place_id: string | null;
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  nickname: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  savedLocations: SavedLocation[];
+  savedLocationsLoading: boolean;
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  user_id: string;
+  query: string;
+  selected_place_id: string | null;
+  selected_location_id: string | null;
+  selected_name: string | null;
+  selected_latitude: number | null;
+  selected_longitude: number | null;
+  search_context: "map" | "route";
+  searched_at: string;
+}
+
+export interface RecentlyViewedLocation {
+  id: string;
+  user_id: string;
+  location_id: string | null;
+  google_place_id: string | null;
+  name: string;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  viewed_at: string;
+}
+
+export interface NeighborhoodStats {
+  block_group_fips: string;
+  name: string;
+  city: string;
+  county_name: string;
+  state_code: string;
+  population: number;
+  diversity_index: number;
+  pct_minority: number;
+  crime_rate_per_1000: number;
+  violent_crime_rate: number;
+  property_crime_rate: number;
+  hate_crime_incidents: number;
+  walkability_score: number | null;
+  data_source: string;
+  data_year: number;
+}
+
+export interface TimeSafetyData {
+  morning: { avg_safety: number | null; review_count: number };
+  afternoon: { avg_safety: number | null; review_count: number };
+  evening: { avg_safety: number | null; review_count: number };
+  night: { avg_safety: number | null; review_count: number };
+  total_with_time: number;
+}
 // ================================
 // STATE INTERFACE
 // ================================
@@ -308,76 +414,14 @@ interface LocationsState {
   savedLocationsLoading: boolean;
   searchHistory: SearchHistoryItem[];
   searchHistoryLoading: boolean;
-}
-export interface RouteImprovementSummary {
-  original_safety_score: number;
-  optimized_safety_score: number;
-  safety_improvement: number;
-  time_added_minutes: number;
-  distance_added_km: number;
-  danger_zones_avoided: number;
+  recentlyViewed: RecentlyViewedLocation[];
+  recentlyViewedLoading: boolean;
+  neighborhoodStats: NeighborhoodStats | null;
+  neighborhoodStatsLoading: boolean;
+  timeSafetyData: TimeSafetyData | null;
+  timeSafetyLoading: boolean;
 }
 
-export interface SafeWaypoint {
-  coordinate: RouteCoordinate;
-  reason: string;
-  safety_score: number;
-}
-
-export interface SmartRouteComparison {
-  original_route: SafeRoute;
-  optimized_route: SafeRoute;
-  improvement_summary: RouteImprovementSummary;
-  waypoints_added: SafeWaypoint[];
-  message: string;
-}
-export interface RouteHistoryItem {
-  id: string;
-  user_id: string;
-  origin_name: string;
-  destination_name: string;
-  distance_km: number;
-  duration_minutes: number;
-  safety_score: number | null;
-  navigation_started_at: string | null;
-  navigation_ended_at: string | null;
-  navigation_session_id: string | null;
-  created_at: string;
-  updated_at: string;
-  route_coordinates: RouteCoordinate[];
-  steps: NavigationStep[] | null;
-  safety_alerts_handled: SafetyAlertHandled[] | null;
-}
-
-export interface SavedLocation {
-  id: string;
-  user_id: string;
-  location_id: string | null;
-  google_place_id: string | null;
-  name: string;
-  address: string | null;
-  latitude: number;
-  longitude: number;
-  nickname: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-  savedLocations: SavedLocation[];
-  savedLocationsLoading: boolean;
-}
-
-export interface SearchHistoryItem {
-  id: string;
-  user_id: string;
-  query: string;
-  selected_place_id: string | null;
-  selected_location_id: string | null;
-  selected_name: string | null;
-  selected_latitude: number | null;
-  selected_longitude: number | null;
-  search_context: "map" | "route";
-  searched_at: string;
-}
 // ================================
 // INITIAL STATE
 // ================================
@@ -446,6 +490,12 @@ const initialState: LocationsState = {
   savedLocationsLoading: false,
   searchHistory: [],
   searchHistoryLoading: false,
+  recentlyViewed: [],
+  recentlyViewedLoading: false,
+  neighborhoodStats: null,
+  neighborhoodStatsLoading: false,
+  timeSafetyData: null,
+  timeSafetyLoading: false,
 };
 
 
@@ -2293,6 +2343,169 @@ export const deleteSearchHistoryItem = createAsyncThunk(
 );
 
 // ================================
+// RECENTLY VIEWED THUNKS
+// ================================
+
+export const fetchRecentlyViewed = createAsyncThunk(
+  "locations/fetchRecentlyViewed",
+  async (params: { userId: string; limit?: number }) => {
+    const { userId, limit = 20 } = params;
+
+    const { data, error } = await supabase
+      .from("recently_viewed_locations")
+      .select("*")
+      .eq("user_id", userId)
+      .order("viewed_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data as RecentlyViewedLocation[];
+  }
+);
+
+export const addToRecentlyViewed = createAsyncThunk(
+  "locations/addToRecentlyViewed",
+  async (params: {
+    userId: string;
+    locationId?: string;
+    googlePlaceId?: string;
+    name: string;
+    address?: string;
+    latitude: number;
+    longitude: number;
+  }) => {
+    console.log("👁️ addToRecentlyViewed thunk called:", params);
+
+    const {
+      userId,
+      locationId,
+      googlePlaceId,
+      name,
+      address,
+      latitude,
+      longitude,
+    } = params;
+
+    // Upsert based on location_id or google_place_id
+    const { data, error } = await supabase
+      .from("recently_viewed_locations")
+      .upsert(
+        {
+          user_id: userId,
+          location_id: locationId || null,
+          google_place_id: googlePlaceId || null,
+          name,
+          address: address || null,
+          latitude,
+          longitude,
+          viewed_at: new Date().toISOString(),
+        },
+        {
+          onConflict: locationId ? "user_id,location_id" : "user_id,google_place_id",
+          ignoreDuplicates: false,
+        }
+      )
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as RecentlyViewedLocation;
+  }
+);
+
+export const clearRecentlyViewed = createAsyncThunk(
+  "locations/clearRecentlyViewed",
+  async (userId: string) => {
+    const { error } = await supabase
+      .from("recently_viewed_locations")
+      .delete()
+      .eq("user_id", userId);
+
+    if (error) throw error;
+    return true;
+  }
+);
+
+// ================================
+// NEIGHBORHOOD STATS THUNK
+// ================================
+
+export const fetchNeighborhoodStats = createAsyncThunk(
+  "locations/fetchNeighborhoodStats",
+  async (params: { latitude: number; longitude: number; radiusMeters?: number }) => {
+    const { latitude, longitude, radiusMeters = 500 } = params;
+
+    const { data, error } = await supabase.rpc("get_neighborhood_stats", {
+      p_latitude: latitude,
+      p_longitude: longitude,
+      p_radius_meters: radiusMeters,
+    });
+
+    if (error) throw error;
+    if (!data) return null;
+
+    // Parse if string, otherwise use directly
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+
+    return {
+      block_group_fips: parsed.block_group_fips ?? "",
+      name: parsed.name ?? "",
+      city: parsed.city ?? "",
+      county_name: parsed.county_name ?? "",
+      state_code: parsed.state_code ?? "",
+      population: parsed.population ?? 0,
+      diversity_index: parsed.diversity_index ?? 0,
+      pct_minority: parsed.pct_minority ?? 0,
+      crime_rate_per_1000: parsed.crime_rate_per_1000 ?? 0,
+      violent_crime_rate: parsed.violent_crime_rate ?? 0,
+      property_crime_rate: parsed.property_crime_rate ?? 0,
+      hate_crime_incidents: parsed.hate_crime_incidents ?? 0,
+      walkability_score: parsed.walkability_score ?? null,
+      data_source: parsed.data_source ?? "",
+      data_year: parsed.data_year ?? 0,
+    } as NeighborhoodStats;
+  }
+);
+
+// ================================
+// TIME SAFETY THUNK
+// ================================
+
+export const fetchTimeSafetyData = createAsyncThunk(
+  "locations/fetchTimeSafetyData",
+  async (locationId: string) => {
+    const { data, error } = await supabase.rpc("get_location_time_safety", {
+      p_location_id: locationId,
+    });
+
+    if (error) throw error;
+    if (!data) return null;
+
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+
+    return {
+      morning: {
+        avg_safety: parsed.morning?.avg_safety ?? null,
+        review_count: parsed.morning?.review_count ?? 0,
+      },
+      afternoon: {
+        avg_safety: parsed.afternoon?.avg_safety ?? null,
+        review_count: parsed.afternoon?.review_count ?? 0,
+      },
+      evening: {
+        avg_safety: parsed.evening?.avg_safety ?? null,
+        review_count: parsed.evening?.review_count ?? 0,
+      },
+      night: {
+        avg_safety: parsed.night?.avg_safety ?? null,
+        review_count: parsed.night?.review_count ?? 0,
+      },
+      total_with_time: parsed.total_with_time ?? 0,
+    } as TimeSafetyData;
+  }
+);
+
+// ================================
 // HELPER FUNCTIONS
 // ================================
 
@@ -2880,6 +3093,51 @@ const locationsSlice = createSlice({
         state.searchHistory = state.searchHistory.filter(
           (item) => item.id !== action.payload
         );
+      })
+      // Recently Viewed
+      .addCase(fetchRecentlyViewed.pending, (state) => {
+        state.recentlyViewedLoading = true;
+      })
+      .addCase(fetchRecentlyViewed.fulfilled, (state, action) => {
+        state.recentlyViewedLoading = false;
+        state.recentlyViewed = action.payload;
+      })
+      .addCase(fetchRecentlyViewed.rejected, (state) => {
+        state.recentlyViewedLoading = false;
+      })
+      .addCase(addToRecentlyViewed.fulfilled, (state, action) => {
+        // Remove existing entry, add new one at top
+        state.recentlyViewed = [
+          action.payload,
+          ...state.recentlyViewed.filter((item) => item.id !== action.payload.id),
+        ].slice(0, 20);
+      })
+      .addCase(clearRecentlyViewed.fulfilled, (state) => {
+        state.recentlyViewed = [];
+      })
+      // Neighborhood Stats
+      .addCase(fetchNeighborhoodStats.pending, (state) => {
+        state.neighborhoodStatsLoading = true;
+      })
+      .addCase(fetchNeighborhoodStats.fulfilled, (state, action) => {
+        state.neighborhoodStatsLoading = false;
+        state.neighborhoodStats = action.payload;
+      })
+      .addCase(fetchNeighborhoodStats.rejected, (state) => {
+        state.neighborhoodStatsLoading = false;
+        state.neighborhoodStats = null;
+      })
+      // Time Safety
+      .addCase(fetchTimeSafetyData.pending, (state) => {
+        state.timeSafetyLoading = true;
+      })
+      .addCase(fetchTimeSafetyData.fulfilled, (state, action) => {
+        state.timeSafetyLoading = false;
+        state.timeSafetyData = action.payload;
+      })
+      .addCase(fetchTimeSafetyData.rejected, (state) => {
+        state.timeSafetyLoading = false;
+        state.timeSafetyData = null;
       })
   },
 });

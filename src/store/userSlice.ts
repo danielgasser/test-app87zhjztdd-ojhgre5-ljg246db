@@ -5,7 +5,6 @@ import { APP_CONFIG } from '@/config/appConfig';
 import { isFieldComplete } from '@/utils/profileValidation';
 import { PublicUserProfile, PublicUserReview } from '@/types/supabase';
 import { logger } from '@/utils/logger';
-import { notify } from '@/utils/notificationService';
 export interface NotificationPreferences {
   safety_alerts?: boolean;
   route_safety_changes?: boolean;

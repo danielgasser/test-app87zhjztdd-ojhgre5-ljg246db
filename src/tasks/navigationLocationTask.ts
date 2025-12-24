@@ -1,5 +1,4 @@
 import * as TaskManager from 'expo-task-manager';
-import * as Location from 'expo-location';
 import { store } from '@/store';
 import { setNavigationPosition } from '@/store/locationsSlice';
 import { logger } from '@/utils/logger';

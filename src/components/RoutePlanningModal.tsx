@@ -10,7 +10,6 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
@@ -43,12 +42,9 @@ import { useAuth } from "@/providers/AuthProvider";
 import {
   canSearch,
   incrementSearchCount,
-  getRemainingSearches,
   DAILY_LIMIT,
-  getSearchCount,
 } from "@/utils/searchLimitService";
 import { SubscriptionTier } from "@/config/features";
-import { router } from "expo-router";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";

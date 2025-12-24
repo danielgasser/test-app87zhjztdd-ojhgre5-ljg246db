@@ -2,7 +2,7 @@ import "@/tasks/navigationLocationTask";
 import React, { useEffect } from "react";
 import { Stack, useRouter } from "expo-router";
 import { Provider } from "react-redux";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { store } from "@/store";
 import { useAuth } from "@/providers/AuthProvider";
 import { DeepLinkHandler } from "@/providers/DeepLinkHandler";

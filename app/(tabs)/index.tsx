@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -11,7 +11,6 @@ import {
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
-  Circle,
   Callout,
   Polyline,
   LatLng,
@@ -73,6 +72,11 @@ import { useAuth } from "@/providers/AuthProvider";
 import { shallowEqual } from "react-redux";
 import { shouldShowBanner } from "@/store/profileBannerSlice";
 import NavigationArrow from "@/components/NavigationArrow";
+import MapFiltersModal, {
+  MapFilters,
+  DEFAULT_FILTERS,
+} from "@/components/MapFiltersModal";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -142,6 +146,9 @@ export default function MapScreen() {
     }>
   >([]);
 
+  const [filtersModalVisible, setFiltersModalVisible] = useState(false);
+  const [mapFilters, setMapFilters] = useState<MapFilters>(DEFAULT_FILTERS);
+  const { hasAccess: hasFilterAccess } = useFeatureAccess("advancedFilters");
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -196,6 +203,36 @@ export default function MapScreen() {
   );
 
   const { distanceUnit } = useUserPreferences();
+
+  const filteredLocations = useMemo(() => {
+    if (!nearbyLocations) return [];
+
+    return nearbyLocations.filter((location: any) => {
+      // Get the appropriate rating based on filter setting
+      const rating = mapFilters.useDemographicScore
+        ? Number(location.demographic_safety_score) ||
+          Number(location.avg_safety_score) ||
+          0
+        : Number(location.avg_safety_score) || 0;
+
+      // Filter by minimum safety rating
+      if (mapFilters.minSafetyRating !== null) {
+        if (rating < mapFilters.minSafetyRating) return false;
+      }
+
+      // Filter by has reviews
+      if (mapFilters.hasReviews) {
+        if (!location.review_count || location.review_count === 0) return false;
+      }
+
+      // Filter by place type
+      if (mapFilters.placeTypes.length > 0) {
+        if (!mapFilters.placeTypes.includes(location.place_type)) return false;
+      }
+
+      return true;
+    });
+  }, [nearbyLocations, mapFilters]);
 
   // Update route polylines when navigation position changes
   useEffect(() => {
@@ -374,7 +411,7 @@ export default function MapScreen() {
   // ===== END OF LOGGING BLOCK =====
 
   // Check profile completeness for GENERAL (danger zones need full profile)
-  const profileCheck = React.useMemo(() => {
+  const profileCheck = useMemo(() => {
     if (!userProfile) return { canUse: true, missingFields: [] };
 
     const validation = checkProfileCompleteness(userProfile, "SAFE_ROUTING");
@@ -387,7 +424,7 @@ export default function MapScreen() {
     profileCheckRef.current = profileCheck;
   }
   // Determine if we should show the banner
-  const showProfileBanner = React.useMemo(() => {
+  const showProfileBanner = useMemo(() => {
     if (profileCheck.canUse) return false;
     return shouldShowBanner(
       bannerState,
@@ -1294,9 +1331,9 @@ export default function MapScreen() {
         />
         {/* Location markers */}
         {mapReady &&
-          nearbyLocations &&
-          nearbyLocations.length > 0 &&
-          nearbyLocations.map(
+          filteredLocations &&
+          filteredLocations.length > 0 &&
+          filteredLocations.map(
             (loc: {
               id: string;
               latitude: any;
@@ -1510,6 +1547,25 @@ export default function MapScreen() {
           <Ionicons name="locate" size={30} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
+      {/* Filter Button */}
+      <TouchableOpacity
+        style={styles.filterButton}
+        onPress={() => setFiltersModalVisible(true)}
+      >
+        <Text style={styles.filterButtonLabel}>Filters</Text>
+        <Ionicons
+          style={styles.filterButtonIcon}
+          name="options"
+          size={30}
+          color={
+            mapFilters.minSafetyRating !== null ||
+            mapFilters.hasReviews ||
+            mapFilters.placeTypes.length > 0
+              ? theme.colors.primary
+              : theme.colors.text
+          }
+        />
+      </TouchableOpacity>
       {/* Danger Zones Control */}
       <View
         style={[
@@ -1786,6 +1842,12 @@ export default function MapScreen() {
       {navigationActive && (
         <NavigationMode onExit={handleExitNavigation} mapRef={mapRef} />
       )}
+      <MapFiltersModal
+        visible={filtersModalVisible}
+        onClose={() => setFiltersModalVisible(false)}
+        filters={mapFilters}
+        onApplyFilters={setMapFilters}
+      />
     </View>
   );
 }
@@ -1962,6 +2024,36 @@ const styles = StyleSheet.create({
   },
   controlButtonTextActive: {
     color: theme.colors.textOnPrimary,
+  },
+  filterButton: {
+    position: "absolute",
+    top: 130,
+    right: 16,
+    backgroundColor: theme.colors.background,
+    borderRadius: 12,
+    padding: 14,
+    shadowColor: theme.colors.overlay,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    width: 120,
+    height: 48,
+    borderColor: theme.colors.primary,
+    borderWidth: 2,
+  },
+  filterButtonLabel: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    fontSize: 18,
+    fontWeight: "600",
+    color: theme.colors.textSecondary,
+  },
+  filterButtonIcon: {
+    position: "absolute",
+    top: 8,
+    left: 12,
   },
   dangerZoneLegend: {
     position: "absolute",

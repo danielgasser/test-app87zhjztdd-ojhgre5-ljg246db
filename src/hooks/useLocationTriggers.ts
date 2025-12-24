@@ -1,8 +1,3 @@
-// ================================================
-// LOCATION TRIGGERS APP INTEGRATION
-// Hook to integrate location trigger service into the app
-// ================================================
-
 import { useEffect } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { useAppSelector } from '../store/hooks';

@@ -8,7 +8,6 @@ import {
   Image,
   ActivityIndicator,
   Linking,
-  GestureResponderEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,11 +34,11 @@ import {
   fetchSavedLocations,
   SavedLocation,
   unsaveLocation,
+  fetchRecentlyViewed,
+  RecentlyViewedLocation,
 } from "@/store/locationsSlice";
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 import { PremiumGate } from "@/components/PremiumGate";
-
-const appConfig = require("../../app.config.js");
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -56,6 +55,7 @@ export default function ProfileScreen() {
     activity: false,
     routeHistory: false,
     savedLocations: false,
+    recentlyViewed: false,
     demographics: false,
     mapSettings: false,
     settings: false,
@@ -81,11 +81,18 @@ export default function ProfileScreen() {
     }
   }, [expandedSections.routeHistory, user?.id]);
 
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchRecentlyViewed({ userId: user.id }));
+    }
+  }, [user?.id, dispatch]);
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
       activity: false,
       routeHistory: false,
       savedLocations: false,
+      recentlyViewed: false,
       demographics: false,
       mapSettings: false,
       settings: false,
@@ -104,6 +111,13 @@ export default function ProfileScreen() {
   const savedLocationsLoading = useAppSelector(
     (state) => state.locations.savedLocationsLoading
   );
+  const recentlyViewed = useAppSelector(
+    (state) => state.locations.recentlyViewed
+  );
+  const recentlyViewedLoading = useAppSelector(
+    (state) => state.locations.recentlyViewedLoading
+  );
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -331,6 +345,17 @@ export default function ProfileScreen() {
   };
 
   const handleNavigateToSavedLocation = (location: SavedLocation) => {
+    router.push({
+      pathname: "/(tabs)",
+      params: {
+        latitude: location.latitude.toString(),
+        longitude: location.longitude.toString(),
+        locationName: location.name,
+      },
+    });
+  };
+
+  const handleNavigateToRecentlyViewed = (location: RecentlyViewedLocation) => {
     router.push({
       pathname: "/(tabs)",
       params: {
@@ -634,6 +659,62 @@ export default function ProfileScreen() {
                           />
                         </TouchableOpacity>
                       </View>
+                    ))}
+                  </>
+                )}
+              </PremiumGate>
+            </CollapsibleSection>
+            {/* Recently Viewed Section */}
+            <CollapsibleSection
+              title="Recently Viewed"
+              icon="eye"
+              isExpanded={expandedSections.recentlyViewed}
+              onToggle={() => toggleSection("recentlyViewed")}
+            >
+              <PremiumGate feature="recentlyViewed" fallback="blur">
+                {recentlyViewedLoading && recentlyViewed.length === 0 ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.primary}
+                  />
+                ) : recentlyViewed.length === 0 ? (
+                  <Text style={styles.noRoutesText}>
+                    No recently viewed locations
+                  </Text>
+                ) : (
+                  <>
+                    {recentlyViewed.slice(0, 10).map((location) => (
+                      <TouchableOpacity
+                        key={location.id}
+                        style={styles.savedLocationItem}
+                        onPress={() => handleNavigateToRecentlyViewed(location)}
+                      >
+                        <View style={styles.savedLocationContent}>
+                          <View style={styles.savedLocationHeader}>
+                            <Ionicons
+                              name="eye"
+                              size={16}
+                              color={theme.colors.primary}
+                            />
+                            <Text
+                              style={styles.savedLocationName}
+                              numberOfLines={1}
+                            >
+                              {location.name}
+                            </Text>
+                          </View>
+                          <Text
+                            style={styles.savedLocationAddress}
+                            numberOfLines={1}
+                          >
+                            {location.address || "No address"}
+                          </Text>
+                          <Text style={styles.savedLocationDate}>
+                            Viewed{" "}
+                            {new Date(location.viewed_at).toLocaleDateString()}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
                     ))}
                   </>
                 )}

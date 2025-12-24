@@ -19,7 +19,7 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
-import { updateUserProfile, fetchUserProfile } from "src/store/userSlice";
+import { fetchUserProfile } from "src/store/userSlice";
 import { DEMOGRAPHIC_OPTIONS } from "src/utils/constants";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";

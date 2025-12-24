@@ -12,9 +12,12 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
+  addToRecentlyViewed,
   DemographicScore,
   fetchLocationDetails,
   fetchMLPredictions,
+  fetchNeighborhoodStats,
+  fetchTimeSafetyData,
 } from "src/store/locationsSlice";
 import { supabase } from "src/services/supabase";
 import { ReviewWithUser } from "src/types/supabase";
@@ -30,7 +33,9 @@ import { useAuth } from "@/providers";
 import { DemographicBreakdown } from "./DemographicBreakdown";
 import { fetchDemographicScores } from "@/store/locationsSlice";
 import { SaveLocationButton } from "./SaveLocationButton";
-import { GlobalPremiumPromptModal } from "./PremiumGate";
+import PremiumGate, { GlobalPremiumPromptModal } from "./PremiumGate";
+import NeighborhoodStats from "./NeighborhoodStats";
+import TimeSafetyChart from "./TimeSafetyChart";
 interface SearchResult {
   id: string;
   name: string;
@@ -83,6 +88,19 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     (state) =>
       state.locations.demographicScoresLoading[locationId || ""] || false
   );
+  const neighborhoodStats = useAppSelector(
+    (state) => state.locations.neighborhoodStats
+  );
+  const neighborhoodStatsLoading = useAppSelector(
+    (state) => state.locations.neighborhoodStatsLoading
+  );
+  const timeSafetyData = useAppSelector(
+    (state) => state.locations.timeSafetyData
+  );
+  const timeSafetyLoading = useAppSelector(
+    (state) => state.locations.timeSafetyLoading
+  );
+
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
@@ -148,6 +166,91 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     mlPredictionsLoading,
     dispatch,
   ]);
+
+  // Track recently viewed (for all users - premium can see history)
+  useEffect(() => {
+    if (!visible || !currentUser?.id) return;
+
+    const name =
+      selectedLocation?.name || placeDetails?.name || searchMarker?.name;
+    const latitude =
+      selectedLocation?.latitude ||
+      searchMarker?.latitude ||
+      placeDetails?.geometry?.location?.lat;
+    const longitude =
+      selectedLocation?.longitude ||
+      searchMarker?.longitude ||
+      placeDetails?.geometry?.location?.lng;
+    console.log("👁️ Recently viewed check:", {
+      visible,
+      userId: currentUser?.id,
+      name,
+      latitude,
+      longitude,
+      locationId,
+      googlePlaceId,
+    });
+    if (!name || !latitude || !longitude) return;
+
+    dispatch(
+      addToRecentlyViewed({
+        userId: currentUser.id,
+        locationId: locationId || undefined,
+        googlePlaceId: googlePlaceId || undefined,
+        name,
+        address:
+          selectedLocation?.address ||
+          placeDetails?.formatted_address ||
+          searchMarker?.address,
+        latitude,
+        longitude,
+      })
+    );
+  }, [
+    visible,
+    locationId,
+    googlePlaceId,
+    selectedLocation,
+    placeDetails,
+    searchMarker,
+    currentUser?.id,
+    dispatch,
+  ]);
+
+  // Fetch neighborhood stats when modal opens
+  useEffect(() => {
+    if (!visible) return;
+
+    const latitude =
+      selectedLocation?.latitude ||
+      searchMarker?.latitude ||
+      placeDetails?.geometry?.location?.lat;
+    const longitude =
+      selectedLocation?.longitude ||
+      searchMarker?.longitude ||
+      placeDetails?.geometry?.location?.lng;
+
+    if (latitude && longitude) {
+      dispatch(
+        fetchNeighborhoodStats({ latitude, longitude, radiusMeters: 500 })
+      );
+    }
+  }, [visible, selectedLocation, searchMarker, placeDetails, dispatch]);
+
+  // Fetch time safety data when modal opens
+  useEffect(() => {
+    if (!visible) return;
+
+    const locationId = selectedLocation?.id || searchMarker?.id;
+
+    if (
+      locationId &&
+      !locationId.startsWith("temp-") &&
+      !locationId.startsWith("longpress-")
+    ) {
+      dispatch(fetchTimeSafetyData(locationId));
+    }
+  }, [visible, selectedLocation?.id, searchMarker?.id, dispatch]);
 
   const fetchReviews = async (locId?: string) => {
     const idToUse = locId || locationId;
@@ -614,6 +717,20 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   </Text>
                 </View>
               )}
+              {/* Neighborhood Stats - Premium */}
+              <PremiumGate feature="neighborhoodStats" fallback="blur">
+                <NeighborhoodStats
+                  stats={neighborhoodStats}
+                  loading={neighborhoodStatsLoading}
+                />
+              </PremiumGate>
+              {/* Time Safety - Premium */}
+              <PremiumGate feature="timeFilter" fallback="blur">
+                <TimeSafetyChart
+                  data={timeSafetyData}
+                  loading={timeSafetyLoading}
+                />
+              </PremiumGate>
               {/* Reviews Section */}
               {(selectedLocation || reviews.length > 0) && (
                 <View style={styles.reviewsSection}>

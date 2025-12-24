@@ -8,7 +8,6 @@ import React, {
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/services/supabase";
 import { logger } from "@/utils/logger";
-import { router } from "expo-router";
 import { notificationService } from "@/services/notificationService";
 
 // ============================================================================

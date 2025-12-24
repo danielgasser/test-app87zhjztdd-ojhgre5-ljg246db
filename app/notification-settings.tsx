@@ -18,6 +18,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { NotificationPreferences } from "../src/store/userSlice";
 import { useAuth } from "@/providers/AuthProvider";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 
 export default function NotificationSettings() {
   const { user } = useAuth();
@@ -29,7 +30,8 @@ export default function NotificationSettings() {
   const [locationTriggers, setLocationTriggers] = useState(false);
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
-
+  const { hasAccess: hasLocationTriggersAccess } =
+    useFeatureAccess("locationTriggers");
   // Load settings from profile when available
   useEffect(() => {
     if (profile) {
@@ -125,14 +127,23 @@ export default function NotificationSettings() {
         />
 
         <SettingToggle
-          label="Location-Based Triggers"
-          description="Get notified when you're near a highly-rated spot"
-          value={locationTriggers}
+          label="Proactive Safety Alerts"
+          description={
+            hasLocationTriggersAccess
+              ? "Get notified when you're near a highly-rated spot"
+              : "Premium feature - Get notified when you're near a highly-rated spot"
+          }
+          value={hasLocationTriggersAccess && locationTriggers}
           onToggle={async () => {
+            if (!hasLocationTriggersAccess) {
+              router.push("/subscription");
+              return;
+            }
             const newValue = !locationTriggers;
             setLocationTriggers(newValue);
             await saveNotificationPreference("location_triggers", newValue);
           }}
+          disabled={!hasLocationTriggersAccess}
         />
       </ScrollView>
     </SafeAreaView>

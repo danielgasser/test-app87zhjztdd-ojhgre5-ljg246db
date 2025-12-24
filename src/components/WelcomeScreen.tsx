@@ -18,7 +18,7 @@ import { theme } from "@/styles/theme";
 import ShieldSvg from "assets/images/shield.svg";
 import MapBgSvg from "assets/images/map-bg.svg";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 const WelcomeScreenNew = () => {
   const router = useRouter();
