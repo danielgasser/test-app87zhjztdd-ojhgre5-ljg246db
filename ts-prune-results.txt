@@ -1,0 +1,151 @@
+app/_layout.tsx:146 - default
+app/display-settings.tsx:25 - default
+app/edit-profile.tsx:25 - default
+app/edit-review.tsx:69 - default
+app/legal-acceptance.tsx:22 - default
+app/location-disclosure.tsx:22 - default
+app/notification-settings.tsx:24 - default
+app/onboarding.tsx:55 - default
+app/privacy-settings.tsx:28 - default
+app/review.tsx:67 - default
+app/route-planning.tsx:5 - default
+app/subscription.tsx:11 - default
+app/welcome.tsx:3 - default
+app/(auth)/_layout.tsx:4 - default
+app/(auth)/callback.tsx:16 - default
+app/(auth)/email-change-confirm.tsx:7 - default
+app/(auth)/forgot-password.tsx:22 - default
+app/(auth)/login.tsx:29 - default
+app/(auth)/register.tsx:26 - default
+app/(auth)/reset-password.tsx:24 - default
+app/(tabs)/_layout.tsx:16 - default
+app/(tabs)/community.tsx:40 - default
+app/(tabs)/debug.tsx:37 - default
+app/(tabs)/index.tsx:110 - default
+app/(tabs)/profile.tsx:43 - default
+src/components/DemographicBreakdown.tsx:244 - default
+src/components/MapFiltersModal.tsx:56 - MapFiltersModal (used in module)
+src/components/ProactiveWarnings.tsx:285 - default
+src/components/ProfileCompletionWidget.tsx:12 - default
+src/components/RouteSafetyBreakdown.tsx:544 - default
+src/components/SaveLocationButton.tsx:215 - default
+src/config/appConfig.ts:253 - AppConfig
+src/config/features.ts:49 - getAvailableFeatures
+src/config/features.ts:55 - getLockedFeatures
+src/config/features.ts:1 - SUBSCRIPTION_TIERS (used in module)
+src/constants/profileRequirements.ts:25 - DemographicField
+src/providers/index.ts:2 - AuthProvider
+src/providers/index.ts:2 - useAuth
+src/providers/index.ts:3 - NavigationController
+src/providers/index.ts:4 - DeepLinkHandler
+src/providers/index.ts:5 - useNavigationManager
+src/services/adMobService.ts:88 - showInterstitialAd (used in module)
+src/services/adMobService.ts:129 - showRewardedAd
+src/services/adMobService.ts:147 - showInterstitialWithCooldown
+src/services/consentService.ts:19 - recordConsent (used in module)
+src/services/consentService.ts:4 - ConsentType (used in module)
+src/services/googlePlaces.ts:176 - getPlaceAutocomplete (used in module)
+src/services/googlePlaces.ts:238 - getPlaceDetails (used in module)
+src/services/googlePlaces.ts:304 - getNearbyPlaces (used in module)
+src/services/googlePlaces.ts:361 - forwardGeocode (used in module)
+src/services/googlePlaces.ts:399 - reverseGeocode (used in module)
+src/services/googlePlaces.ts:436 - getPhotoUrl (used in module)
+src/services/googlePlaces.ts:18 - PlaceAutocompleteResult (used in module)
+src/services/googlePlaces.ts:60 - NearbySearchResult (used in module)
+src/services/googlePlaces.ts:163 - AutocompleteOptions (used in module)
+src/services/googlePlaces.ts:227 - PlaceDetailsOptions (used in module)
+src/services/googlePlaces.ts:289 - NearbySearchOptions (used in module)
+src/services/googlePlaces.ts:349 - ForwardGeocodeOptions (used in module)
+src/services/googlePlaces.ts:389 - ReverseGeocodeOptions (used in module)
+src/services/locationCache.ts:146 - getCachedGeocode (used in module)
+src/services/locationCache.ts:166 - cacheGeocode (used in module)
+src/services/locationCache.ts:183 - getCachedPlaceDetails (used in module)
+src/services/locationCache.ts:202 - cachePlaceDetails (used in module)
+src/services/locationCache.ts:218 - clearLocationCache (used in module)
+src/services/locationCache.ts:232 - getLocationCacheStats (used in module)
+src/services/locationCache.ts:256 - cleanExpiredCache (used in module)
+src/services/revenueCatService.ts:49 - identifyUser
+src/services/revenueCatService.ts:58 - logoutUser
+src/services/revenueCatService.ts:71 - checkPremiumStatus
+src/services/revenueCatService.ts:81 - getCustomerInfo (used in module)
+src/services/revenueCatService.ts:155 - addCustomerInfoListener
+src/store/index.ts:7 - store (used in module)
+src/store/locationsSlice.ts:141 - NavigationStep (used in module)
+src/store/locationsSlice.ts:201 - RouteImprovementSummary (used in module)
+src/store/locationsSlice.ts:210 - SafeWaypoint (used in module)
+src/store/locationsSlice.ts:258 - SearchHistoryItem (used in module)
+src/store/locationsSlice.ts:569 - createLocation (used in module)
+src/store/locationsSlice.ts:824 - fetchUserReviews (used in module)
+src/store/locationsSlice.ts:1125 - fetchSimilarUsers (used in module)
+src/store/locationsSlice.ts:1352 - getGoogleRoute (used in module)
+src/store/locationsSlice.ts:1549 - generateRouteAlternatives (used in module)
+src/store/locationsSlice.ts:2245 - clearSearchHistory (used in module)
+src/store/locationsSlice.ts:2258 - deleteSearchHistoryItem (used in module)
+src/store/locationsSlice.ts:2342 - clearRecentlyViewed (used in module)
+src/store/locationsSlice.ts:3076 - clearSelectedLocation (used in module)
+src/store/locationsSlice.ts:3077 - setSelectedLocation (used in module)
+src/store/locationsSlice.ts:3078 - setFilters (used in module)
+src/store/locationsSlice.ts:3079 - clearError (used in module)
+src/store/locationsSlice.ts:3081 - clearSearchResults (used in module)
+src/store/locationsSlice.ts:3082 - setShowSearchResults (used in module)
+src/store/locationsSlice.ts:3085 - addLocationToNearby (used in module)
+src/store/locationsSlice.ts:3087 - setCommunityFeedMode (used in module)
+src/store/locationsSlice.ts:3093 - setSelectedSegment (used in module)
+src/store/locationsSlice.ts:3096 - setSmartRouteComparison (used in module)
+src/store/locationsSlice.ts:3097 - toggleSmartRouteComparison (used in module)
+src/store/locationsSlice.ts:3103 - setRerouting (used in module)
+src/store/profileBannerSlice.ts:80 - BANNER_KEYS
+src/store/profileBannerSlice.ts:87 - resetBanner (used in module)
+src/store/profileBannerSlice.ts:87 - loadDismissals (used in module)
+src/store/profileBannerSlice.ts:87 - resetAll (used in module)
+src/store/userSlice.ts:364 - setProfile (used in module)
+src/store/userSlice.ts:364 - setOnboardingComplete (used in module)
+src/store/userSlice.ts:364 - clearError (used in module)
+src/store/userSlice.ts:364 - setSearchRadius (used in module)
+src/styles/common.ts:5 - commonStyles
+src/styles/theme.ts:125 - Theme (used in module)
+src/types/database.types.ts:1 - Json (used in module)
+src/types/database.types.ts:2234 - Tables (used in module)
+src/types/database.types.ts:2263 - TablesInsert
+src/types/database.types.ts:2288 - TablesUpdate
+src/types/database.types.ts:2313 - Enums (used in module)
+src/types/database.types.ts:2330 - CompositeTypes (used in module)
+src/types/database.types.ts:2347 - Constants
+src/types/index.ts:1 - Location
+src/types/index.ts:12 - SafetyRating
+src/types/index.ts:25 - User
+src/types/index.ts:31 - Review
+src/types/index.ts:43 - DemographicProfile (used in module)
+src/types/supabase.ts:1 - Json (used in module)
+src/types/supabase.ts:9 - Database (used in module)
+src/types/supabase.ts:371 - Tables (used in module)
+src/types/supabase.ts:374 - InsertTables
+src/types/supabase.ts:377 - UpdateTables
+src/types/supabase.ts:380 - UserProfile (used in module)
+src/types/supabase.ts:381 - Location (used in module)
+src/types/supabase.ts:382 - Review (used in module)
+src/types/supabase.ts:383 - SafetyScore (used in module)
+src/types/supabase.ts:384 - ReviewVote
+src/types/supabase.ts:411 - ReviewWithLocation
+src/types/supabase.ts:428 - UpdateReviewForm
+src/types/supabase.ts:459 - RouteRequest
+src/types/supabase.ts:467 - RouteSegment
+src/utils/constants.ts:44 - PLACE_TYPES
+src/utils/constants.ts:52 - RATING_CATEGORIES
+src/utils/debugUtils.ts:6 - clearAllSessions
+src/utils/locationImportHelper.ts:8 - getUserCountry
+src/utils/locationImportHelper.ts:50 - getAddressFromCoordinates
+src/utils/navigationLogger.ts:45 - navLog (used in module)
+src/utils/navigationLogger.ts:316 - navLogEvents
+src/utils/placeTypeMappers.ts:73 - mapGooglePlaceType
+src/utils/placeTypeMappers.ts:152 - getPlaceTypeDisplayName
+src/utils/placeTypeMappers.ts:1 - DatabasePlaceType (used in module)
+src/utils/preferenceDefaults.ts:11 - DefaultPreferences (used in module)
+src/utils/profileValidation.ts:46 - getFieldDisplayName (used in module)
+src/utils/profileValidation.ts:53 - getMissingFieldsForFeature (used in module)
+src/utils/profileValidation.ts:74 - calculateCompletionPercentage (used in module)
+src/utils/profileValidation.ts:9 - ProfileCompletenessResult (used in module)
+src/utils/searchLimitService.ts:12 - getSearchCount (used in module)
+src/utils/searchLimitService.ts:18 - getRemainingSearches
+src/utils/searchLimitService.ts:41 - cleanupOldSearchCounts
+src/components/ads/AdBanner.tsx:10 - AdBanner

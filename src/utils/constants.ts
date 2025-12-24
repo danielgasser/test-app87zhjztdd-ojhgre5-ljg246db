@@ -40,18 +40,3 @@ export const DEMOGRAPHIC_OPTIONS = {
     'Prefer not to say',
   ],
 };
-
-export const PLACE_TYPES = {
-  restaurant: { label: 'Restaurant', icon: 'restaurant' },
-  hotel: { label: 'Hotel', icon: 'hotel' },
-  gas_station: { label: 'Gas Station', icon: 'local-gas-station' },
-  attraction: { label: 'Attraction', icon: 'attractions' },
-  other: { label: 'Other', icon: 'place' },
-};
-
-export const RATING_CATEGORIES = {
-  safety: { label: 'Safety', icon: 'security' },
-  accessibility: { label: 'Accessibility', icon: 'accessible' },
-  comfort: { label: 'Comfort', icon: 'weekend' },
-  service: { label: 'Service', icon: 'support-agent' },
-};

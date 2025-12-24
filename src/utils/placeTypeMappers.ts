@@ -70,6 +70,7 @@ export function mapMapboxPlaceType(mapboxType?: string): DatabasePlaceType {
  * Maps Google Places API types to our database enum
  * Google types should mostly match 1:1 since we based our schema on them
  */
+/*
 export function mapGooglePlaceType(googleTypes?: string[]): DatabasePlaceType {
   if (!googleTypes || googleTypes.length === 0) return 'other';
 
@@ -145,10 +146,10 @@ export function mapGooglePlaceType(googleTypes?: string[]): DatabasePlaceType {
 
   return allValidTypes.includes(firstType) ? firstType : 'other';
 }
-
+*/
 /**
  * Gets a human-readable display name for a place type
- */
+ 
 export function getPlaceTypeDisplayName(placeType: DatabasePlaceType): string {
   const displayNames: { [key in DatabasePlaceType]: string } = {
     'accounting': 'Accounting',
@@ -260,4 +261,4 @@ export function getPlaceTypeDisplayName(placeType: DatabasePlaceType): string {
   };
 
   return displayNames[placeType] || 'Other';
-}
+}*/

@@ -22,5 +22,5 @@ export const FIELD_DISPLAY_NAMES: Record<string, string> = {
     age_range: 'Age Range',
 };
 
-export type DemographicField = typeof ALL_DEMOGRAPHIC_FIELDS[number];
+//export type DemographicField = typeof ALL_DEMOGRAPHIC_FIELDS[number];
 export type FeatureName = keyof typeof FEATURE_REQUIREMENTS;

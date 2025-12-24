@@ -57,4 +57,5 @@ credentials.json
 google-services.json
 *.aab
 eslint.config.js
+.ts-prunerc
 src/scripts/neighborhood_stats_data.json
