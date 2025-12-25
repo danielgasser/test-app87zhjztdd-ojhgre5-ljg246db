@@ -826,35 +826,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           <Text style={styles.endButtonText}>End Navigation</Text>
         </TouchableOpacity>
       </View>
-
-      {selectedRoute && (
-        <View style={styles.debugOverlay}>
-          <Text style={styles.debugTitle}>
-            Steps: {selectedRoute.steps?.length || 0} | Current:{" "}
-            {currentNavigationStep}
-          </Text>
-          <Text style={styles.debugText}>
-            Segments:{" "}
-            {selectedRoute.safety_analysis?.segment_scores?.length || "NONE"}
-            lastAdv: {lastAdvancedStep.current} | stepRef:{" "}
-            {currentStepRef.current}
-          </Text>
-          <Text style={styles.debugText}>
-            Route pts: {selectedRoute.route_points?.length || "NONE"}
-          </Text>
-          {selectedRoute.steps?.slice(0, 4).map((step, i) => (
-            <Text
-              key={i}
-              style={[
-                styles.debugText,
-                i === (currentNavigationStep || 0) + 1 && { color: "yellow" },
-              ]}
-            >
-              {i}: {step.maneuver || "-"} | {step.distance_meters}m
-            </Text>
-          ))}
-        </View>
-      )}
     </>
   );
 };

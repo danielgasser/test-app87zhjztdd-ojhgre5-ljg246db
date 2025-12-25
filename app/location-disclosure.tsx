@@ -149,7 +149,7 @@ export default function LocationDisclosureScreen() {
         )}
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={commonStyles.footer}>
         <TouchableOpacity
           style={commonStyles.primaryButton}
           onPress={handleContinue}
@@ -246,10 +246,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.text,
     lineHeight: 20,
-  },
-  footer: {
-    padding: theme.spacing.screenPadding,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.separator,
   },
 });

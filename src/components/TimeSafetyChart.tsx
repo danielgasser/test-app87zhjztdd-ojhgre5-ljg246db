@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { TimeSafetyData } from "@/store/locationsSlice";
+import { commonStyles } from "@/styles/common";
 
 interface TimeSafetyChartProps {
   data: TimeSafetyData | null;
@@ -32,11 +33,11 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   if (loading) {
     return (
       <View style={styles.specContainer}>
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <Ionicons name="time" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Safety by Time of Day</Text>
         </View>
-        <Text style={styles.loadingText}>Loading time data...</Text>
+        <Text style={commonStyles.loadingText}>Loading time data...</Text>
       </View>
     );
   }
@@ -44,7 +45,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   if (!data || data.total_with_time === 0) {
     return (
       <View style={styles.specContainer}>
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <Ionicons name="time" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Safety by Time of Day</Text>
         </View>
@@ -55,7 +56,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
 
   return (
     <View style={styles.specContainer}>
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <Ionicons name="time" size={18} color={theme.colors.primary} />
         <Text style={styles.title}>Safety by Time of Day</Text>
       </View>
@@ -115,21 +116,10 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 12,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    gap: 8,
-  },
   title: {
     fontSize: 16,
     fontWeight: "700",
     color: theme.colors.text,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    fontStyle: "italic",
   },
   emptyText: {
     fontSize: 14,

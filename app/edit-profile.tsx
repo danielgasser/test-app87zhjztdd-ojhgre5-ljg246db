@@ -201,11 +201,11 @@ export default function EditProfileScreen() {
         style={{ flex: 1 }}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Profile</Text>
+          <Text style={commonStyles.headerTitle}>Edit Profile</Text>
           <View style={{ width: 24 }} />
         </View>
 
@@ -230,7 +230,7 @@ export default function EditProfileScreen() {
 
           {/* Full Name Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Name or Nickname</Text>
+            <Text style={commonStyles.sectionTitle}>Name or Nickname</Text>
             <TextInput
               style={commonStyles.input}
               value={fullName}
@@ -258,7 +258,7 @@ export default function EditProfileScreen() {
           {/* Email Section - Only for non-OAuth users */}
           {!isOAuthUser && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Email Address</Text>
+              <Text style={commonStyles.sectionTitle}>Email Address</Text>
               <Text style={styles.helperText}>
                 You'll need to confirm the your new email address.
               </Text>
@@ -294,7 +294,7 @@ export default function EditProfileScreen() {
           {/* OAuth Email Display - Read-only */}
           {isOAuthUser && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Email Address</Text>
+              <Text style={commonStyles.sectionTitle}>Email Address</Text>
               <View style={styles.oauthInfoBox}>
                 <Ionicons
                   name="lock-closed"
@@ -315,7 +315,7 @@ export default function EditProfileScreen() {
           {/* Password Section - Only for non-OAuth users */}
           {!isOAuthUser && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Change Password</Text>
+              <Text style={commonStyles.sectionTitle}>Change Password</Text>
               <Text style={styles.helperText}>
                 Password must be at least 8 characters
               </Text>
@@ -372,7 +372,7 @@ export default function EditProfileScreen() {
           {/* OAuth Password Info */}
           {isOAuthUser && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Password</Text>
+              <Text style={commonStyles.sectionTitle}>Password</Text>
               <View style={styles.oauthInfoBox}>
                 <Ionicons
                   name="lock-closed"
@@ -395,19 +395,6 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
   content: {
     flex: 1,
     padding: theme.spacing.lg,
@@ -428,12 +415,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: theme.spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
   },
   helperText: {
     fontSize: 14,

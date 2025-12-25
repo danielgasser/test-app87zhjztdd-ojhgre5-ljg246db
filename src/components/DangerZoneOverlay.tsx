@@ -6,6 +6,7 @@ import { DangerZone } from "../types/supabase";
 import { APP_CONFIG } from "@/config/appConfig";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
+import { commonStyles } from "@/styles/common";
 interface DangerZoneOverlayProps {
   dangerZones: DangerZone[];
   visible: boolean;
@@ -97,9 +98,11 @@ export default function DangerZoneOverlay({
                     {zone.danger_level.toUpperCase()} RISK AREA
                   </Text>
 
-                  <View style={styles.divider} />
+                  <View style={commonStyles.divider} />
 
-                  <Text style={styles.sectionTitle}>Affected Groups:</Text>
+                  <Text style={commonStyles.sectionTitle}>
+                    Affected Groups:
+                  </Text>
                   {zone.affected_demographics.map((demo, idx) => (
                     <Text key={idx} style={styles.demographicItem}>
                       {demo.charAt(0).toUpperCase() +
@@ -107,9 +110,9 @@ export default function DangerZoneOverlay({
                     </Text>
                   ))}
 
-                  <View style={styles.divider} />
+                  <View style={commonStyles.divider} />
 
-                  <Text style={styles.sectionTitle}>Reasons:</Text>
+                  <Text style={commonStyles.sectionTitle}>Reasons:</Text>
                   {zone.reasons.map((reason, idx) => (
                     <Text key={idx} style={styles.reasonItem}>
                       • {reason}
@@ -118,7 +121,7 @@ export default function DangerZoneOverlay({
 
                   {zone.time_based && (
                     <>
-                      <View style={styles.divider} />
+                      <View style={commonStyles.divider} />
                       <Text style={styles.timeWarning}>
                         ⏰ Higher risk during: {zone.active_times?.join(", ")}
                       </Text>
@@ -167,17 +170,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 12,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-    marginVertical: 12,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.textSecondary,
-    marginBottom: 6,
   },
   demographicItem: {
     fontSize: 13,

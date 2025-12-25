@@ -78,7 +78,7 @@ export default function ForgotPasswordScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.content}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={styles.specHeader}>
               <Ionicons
                 name="lock-closed-outline"
                 size={64}
@@ -197,14 +197,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.xl,
     justifyContent: "center",
   },
-  backButton: {
-    position: "absolute",
-    top: theme.spacing.xl,
-    left: theme.spacing.xl,
-    zIndex: 10,
-    padding: theme.spacing.sm,
-  },
-  header: {
+  specHeader: {
     alignItems: "center",
     marginBottom: theme.spacing.xxl,
   },

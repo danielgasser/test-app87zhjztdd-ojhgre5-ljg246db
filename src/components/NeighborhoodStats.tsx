@@ -23,11 +23,11 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
   if (loading) {
     return (
       <View style={commonStyles.container}>
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Neighborhood Stats</Text>
         </View>
-        <Text style={styles.loadingText}>Loading census data...</Text>
+        <Text style={commonStyles.loadingText}>Loading census data...</Text>
       </View>
     );
   }
@@ -35,7 +35,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
   if (!stats) {
     return (
       <View style={commonStyles.container}>
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Neighborhood Stats</Text>
         </View>
@@ -50,7 +50,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 
   return (
     <View style={commonStyles.container}>
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
         <Text style={styles.title}>Neighborhood Stats</Text>
       </View>
@@ -83,7 +83,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 
       {/* Crime Breakdown */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Crime Rates (per 1,000)</Text>
+        <Text style={commonStyles.sectionTitle}>Crime Rates (per 1,000)</Text>
         <View style={styles.crimeRow}>
           <View style={styles.crimeItem}>
             <Ionicons
@@ -127,12 +127,6 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 };
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
-  },
   title: {
     fontSize: 16,
     fontWeight: "700",
@@ -142,11 +136,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     marginBottom: 12,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    fontStyle: "italic",
   },
   emptyText: {
     fontSize: 14,
@@ -178,12 +167,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: theme.colors.textSecondary,
-    marginBottom: 8,
   },
   crimeRow: {
     flexDirection: "row",

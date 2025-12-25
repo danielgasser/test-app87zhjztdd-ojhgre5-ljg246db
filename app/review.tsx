@@ -236,7 +236,9 @@ export default function ReviewScreen() {
     return (
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
-          <Text style={styles.errorText}>Please log in to submit a review</Text>
+          <Text style={commonStyles.textError}>
+            Please log in to submit a review
+          </Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
@@ -252,14 +254,14 @@ export default function ReviewScreen() {
     <View style={commonStyles.container}>
       <View style={styles.safeTop} />
       <ScrollView
-        style={styles.scrollView}
+        style={commonStyles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View>
-            <View style={styles.header}>
+            <View style={commonStyles.header}>
               <TouchableOpacity onPress={() => router.back()}>
                 <Ionicons
                   name="arrow-back"
@@ -267,7 +269,7 @@ export default function ReviewScreen() {
                   color={theme.colors.text}
                 />
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>Write a Review</Text>
+              <Text style={commonStyles.headerTitle}>Write a Review</Text>
               <View style={{ width: 24 }} />
             </View>
 
@@ -485,19 +487,21 @@ export default function ReviewScreen() {
                 transparent={true}
                 animationType="slide"
               >
-                <View style={styles.modalOverlay}>
+                <View style={commonStyles.modalOverlay}>
                   <TouchableOpacity
                     style={{ flex: 1 }}
                     activeOpacity={1}
                     onPress={() => setShowVisitTypePicker(false)}
                   />
-                  <View style={styles.modalContent}>
-                    <View style={styles.modalHeader}>
-                      <Text style={styles.modalTitle}>Select Visit Type</Text>
+                  <View style={commonStyles.modalContent}>
+                    <View style={commonStyles.modalHeader}>
+                      <Text style={commonStyles.modalTitle}>
+                        Select Visit Type
+                      </Text>
                       <TouchableOpacity
                         onPress={() => setShowVisitTypePicker(false)}
                       >
-                        <Text style={styles.modalDone}>Done</Text>
+                        <Text style={commonStyles.modalDone}>Done</Text>
                       </TouchableOpacity>
                     </View>
                     <Picker
@@ -555,31 +559,8 @@ const styles = StyleSheet.create({
     height: Platform.OS === "ios" ? 44 : 0,
     backgroundColor: theme.colors.textOnPrimary,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
     paddingBottom: 40,
-  },
-  errorText: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: theme.colors.textOnPrimary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
   },
   newLocationSection: {
     backgroundColor: theme.colors.textOnPrimary,
@@ -647,34 +628,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     textAlign: "right",
     marginTop: 4,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: theme.colors.overlay,
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: theme.colors.textOnPrimary,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  modalDone: {
-    fontSize: 16,
-    color: theme.colors.primary,
-    fontWeight: "600",
   },
   pickerContainer: {
     backgroundColor: theme.colors.textOnPrimary,

@@ -81,7 +81,7 @@ export default function NotificationSettings() {
   if (loading) {
     return (
       <SafeAreaView style={commonStyles.container}>
-        <View style={styles.loadingContainer}>
+        <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       </SafeAreaView>
@@ -91,10 +91,10 @@ export default function NotificationSettings() {
   return (
     <SafeAreaView style={commonStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={[commonStyles.primaryButton, commonStyles.backButton]}
         >
           <MaterialIcons
             name="arrow-back"
@@ -102,8 +102,8 @@ export default function NotificationSettings() {
             color={theme.colors.text}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notifications</Text>
-        <View style={styles.placeholder} />
+        <Text style={commonStyles.headerTitle}>Notifications</Text>
+        <View style={commonStyles.headerPlaceholder} />
       </View>
 
       <ScrollView style={styles.content}>
@@ -157,22 +157,6 @@ export default function NotificationSettings() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  backButton: {
-    padding: theme.spacing.sm,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: theme.colors.text,
-  },
   placeholder: {
     width: 40,
   },
@@ -180,18 +164,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: theme.spacing.lg,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-  },
   sectionTitleSpaced: {
     marginTop: theme.spacing.xl,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

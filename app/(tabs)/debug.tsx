@@ -91,14 +91,14 @@ export default function DebugScreen() {
 
   return (
     <SafeAreaView style={commonStyles.container} edges={["top"]}>
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={[commonStyles.primaryButton, commonStyles.backButton]}
         >
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>🐛 Debug Console</Text>
+        <Text style={commonStyles.headerTitle}>🐛 Debug Console</Text>
         <TouchableOpacity onPress={handleRefresh}>
           <Ionicons name="refresh" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
@@ -112,9 +112,9 @@ export default function DebugScreen() {
       >
         {/* Cache Statistics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📦 Cache Statistics</Text>
+          <Text style={commonStyles.sectionTitle}>📦 Cache Statistics</Text>
           {cacheStats ? (
-            <View style={styles.card}>
+            <View style={commonStyles.cardBordered}>
               <InfoRow
                 label="Hit Rate"
                 value={`${cacheStats.hitRate}%`}
@@ -138,14 +138,14 @@ export default function DebugScreen() {
               />
             </View>
           ) : (
-            <Text style={styles.loadingText}>Loading...</Text>
+            <Text style={commonStyles.loadingText}>Loading...</Text>
           )}
         </View>
 
         {/* System Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📱 System Information</Text>
-          <View style={styles.card}>
+          <Text style={commonStyles.sectionTitle}>📱 System Information</Text>
+          <View style={commonStyles.cardBordered}>
             <InfoRow
               label="App Version"
               value={appConfig.expo?.version || "1.3.2"}
@@ -166,8 +166,8 @@ export default function DebugScreen() {
 
         {/* Environment */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⚙️ Environment</Text>
-          <View style={styles.card}>
+          <Text style={commonStyles.sectionTitle}>⚙️ Environment</Text>
+          <View style={commonStyles.cardBordered}>
             <InfoRow
               label="Supabase URL"
               value={
@@ -192,8 +192,8 @@ export default function DebugScreen() {
 
         {/* App Configuration */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔧 App Configuration</Text>
-          <View style={styles.card}>
+          <Text style={commonStyles.sectionTitle}>🔧 App Configuration</Text>
+          <View style={commonStyles.cardBordered}>
             <InfoRow
               label="Default Search Radius"
               value={`${
@@ -210,7 +210,7 @@ export default function DebugScreen() {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⚡ Quick Actions</Text>
+          <Text style={commonStyles.sectionTitle}>⚡ Quick Actions</Text>
           <View style={styles.actionsContainer}>
             <TouchableOpacity
               style={styles.actionButton}
@@ -285,36 +285,12 @@ function InfoRow({
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: theme.colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: theme.colors.text,
-  },
   content: {
     flex: 1,
   },
   section: {
     marginTop: 20,
     paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: theme.colors.text,
-    marginBottom: 12,
   },
   card: {
     backgroundColor: theme.colors.card,
@@ -342,12 +318,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     flex: 1,
     textAlign: "right",
-  },
-  loadingText: {
-    fontSize: 14,
-    color: theme.colors.textLight,
-    textAlign: "center",
-    padding: 20,
   },
   actionsContainer: {
     gap: 12,

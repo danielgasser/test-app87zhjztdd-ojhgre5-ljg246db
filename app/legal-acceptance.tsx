@@ -89,7 +89,10 @@ export default function LegalAcceptanceScreen() {
             </View>
             <Text style={styles.checkboxLabel}>
               I agree to the{" "}
-              <Text style={styles.link} onPress={() => setShowTerms(true)}>
+              <Text
+                style={commonStyles.textPrimaryLink}
+                onPress={() => setShowTerms(true)}
+              >
                 Terms of Service
               </Text>
             </Text>
@@ -116,7 +119,10 @@ export default function LegalAcceptanceScreen() {
             </View>
             <Text style={styles.checkboxLabel}>
               I have read the{" "}
-              <Text style={styles.link} onPress={() => setShowPrivacy(true)}>
+              <Text
+                style={commonStyles.textPrimaryLink}
+                onPress={() => setShowPrivacy(true)}
+              >
                 Privacy Policy
               </Text>
             </Text>
@@ -137,7 +143,7 @@ export default function LegalAcceptanceScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={commonStyles.footer}>
         <TouchableOpacity
           style={[
             commonStyles.primaryButton,
@@ -226,10 +232,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text,
   },
-  link: {
-    color: theme.colors.primary,
-    textDecorationLine: "underline",
-  },
   infoBox: {
     flexDirection: "row",
     backgroundColor: theme.colors.backgroundSecondary,
@@ -242,10 +244,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     lineHeight: 20,
-  },
-  footer: {
-    padding: theme.spacing.screenPadding,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.separator,
   },
 });

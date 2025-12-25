@@ -235,7 +235,9 @@ export default function EditReviewScreen() {
     return (
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
-          <Text style={styles.errorText}>Please log in to edit reviews</Text>
+          <Text style={commonStyles.textError}>
+            Please log in to edit reviews
+          </Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
@@ -251,7 +253,7 @@ export default function EditReviewScreen() {
     return (
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
-          <Text style={styles.loadingText}>Loading review...</Text>
+          <Text style={commonStyles.loadingText}>Loading review...</Text>
         </View>
       </View>
     );
@@ -261,7 +263,7 @@ export default function EditReviewScreen() {
     return (
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
-          <Text style={styles.errorText}>
+          <Text style={commonStyles.textError}>
             Review not found or you don't have permission to edit it
           </Text>
           <TouchableOpacity
@@ -279,18 +281,18 @@ export default function EditReviewScreen() {
     <View style={commonStyles.container}>
       <View style={styles.safeTop} />
       <ScrollView
-        style={styles.scrollView}
+        style={commonStyles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View>
-            <View style={styles.header}>
+            <View style={commonStyles.header}>
               <TouchableOpacity onPress={handleCancel}>
                 <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>Edit Review</Text>
+              <Text style={commonStyles.headerTitle}>Edit Review</Text>
               <View style={{ width: 24 }} />
             </View>
 
@@ -513,14 +515,14 @@ export default function EditReviewScreen() {
                 animationType="slide"
                 onRequestClose={() => setShowVisitTypePicker(false)}
               >
-                <View style={styles.modalOverlay}>
-                  <View style={styles.modalContent}>
-                    <View style={styles.modalHeader}>
-                      <Text style={styles.modalTitle}>Visit Type</Text>
+                <View style={commonStyles.modalOverlay}>
+                  <View style={commonStyles.modalContent}>
+                    <View style={commonStyles.modalHeader}>
+                      <Text style={commonStyles.modalTitle}>Visit Type</Text>
                       <TouchableOpacity
                         onPress={() => setShowVisitTypePicker(false)}
                       >
-                        <Text style={styles.modalDone}>Done</Text>
+                        <Text style={commonStyles.modalDone}>Done</Text>
                       </TouchableOpacity>
                     </View>
                     <Picker
@@ -579,36 +581,8 @@ const styles = StyleSheet.create({
     height: Platform.OS === "ios" ? 44 : 0,
     backgroundColor: theme.colors.card,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
     paddingBottom: 40,
-  },
-  errorText: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  loadingText: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    textAlign: "center",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: theme.colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
   },
   form: {
     padding: 16,
@@ -670,34 +644,6 @@ const styles = StyleSheet.create({
   stars: {
     flexDirection: "row",
     gap: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: theme.colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  modalDone: {
-    fontSize: 16,
-    color: theme.colors.primary,
-    fontWeight: "600",
   },
   picker: {
     height: 200,

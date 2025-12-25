@@ -13,6 +13,7 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { useAppDispatch } from "@/store/hooks";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
+import { commonStyles } from "@/styles/common";
 
 export interface MapFilters {
   minSafetyRating: number | null; // null = show all, 2/3/4 = minimum rating
@@ -155,8 +156,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.specContainer}>
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Filter Locations</Text>
+          <View style={commonStyles.header}>
+            <Text style={commonStyles.headerTitle}>Filter Locations</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
@@ -168,7 +169,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
           >
             {/* Safety Rating Filter */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Minimum Safety Rating</Text>
+              <Text style={styles.specSectionTitle}>Minimum Safety Rating</Text>
               <View style={styles.optionsRow}>
                 {RATING_OPTIONS.map((option) => (
                   <TouchableOpacity
@@ -204,7 +205,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
             {/* Review Filters */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Reviews</Text>
+              <Text style={styles.specSectionTitle}>Reviews</Text>
 
               <TouchableOpacity
                 style={styles.toggleRow}
@@ -302,7 +303,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
             {/* Place Type Filter */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Place Type</Text>
+              <Text style={commonStyles.sectionTitle}>Place Type</Text>
               <View style={styles.placeTypesGrid}>
                 {PLACE_TYPE_OPTIONS.map((option) => (
                   <TouchableOpacity
@@ -347,7 +348,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
           </ScrollView>
 
           {/* Footer Buttons */}
-          <View style={styles.footer}>
+          <View style={commonStyles.footer}>
             <TouchableOpacity
               style={styles.resetButton}
               onPress={handleReset}
@@ -386,26 +387,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     maxHeight: "80%",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: theme.colors.text,
-  },
   content: {
     padding: 16,
   },
   section: {
     marginBottom: 24,
   },
-  sectionTitle: {
+  specSectionTitle: {
     fontSize: 14,
     fontWeight: "600",
     color: theme.colors.textSecondary,
@@ -500,13 +488,6 @@ const styles = StyleSheet.create({
   placeTypeTextActive: {
     color: theme.colors.background,
     fontWeight: "600",
-  },
-  footer: {
-    flexDirection: "row",
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    gap: 12,
   },
   resetButton: {
     flex: 1,

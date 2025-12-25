@@ -306,7 +306,7 @@ export default function PrivacySettings() {
   if (loading) {
     return (
       <SafeAreaView style={commonStyles.container}>
-        <View style={styles.loadingContainer}>
+        <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       </SafeAreaView>
@@ -315,10 +315,10 @@ export default function PrivacySettings() {
   return (
     <SafeAreaView style={commonStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={[commonStyles.primaryButton, commonStyles.backButton]}
         >
           <MaterialIcons
             name="arrow-back"
@@ -326,12 +326,12 @@ export default function PrivacySettings() {
             color={theme.colors.text}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Privacy Settings</Text>
-        <View style={styles.placeholder} />
+        <Text style={commonStyles.headerTitle}>Privacy Settings</Text>
+        <View style={commonStyles.headerPlaceholder} />
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>Demographic Privacy</Text>
+        <Text style={commonStyles.sectionTitle}>Demographic Privacy</Text>
 
         <SettingToggle
           label="Show demographics on reviews"
@@ -344,7 +344,7 @@ export default function PrivacySettings() {
           }}
         />
 
-        <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
+        <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
           Profile Privacy
         </Text>
 
@@ -362,7 +362,7 @@ export default function PrivacySettings() {
           }}
         />
         {/* Legal Documents Section */}
-        <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
+        <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
           Legal Documents
         </Text>
 
@@ -411,7 +411,7 @@ export default function PrivacySettings() {
         </TouchableOpacity>
 
         {/* Account Management Section */}
-        <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
+        <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
           Account Management
         </Text>
 
@@ -488,14 +488,14 @@ export default function PrivacySettings() {
         presentationStyle="pageSheet"
       >
         <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>My Data</Text>
+          <View style={commonStyles.modalHeader}>
+            <Text style={commonStyles.modalTitle}>My Data</Text>
             <TouchableOpacity onPress={() => setViewDataModalVisible(false)}>
               <MaterialIcons name="close" size={28} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalContent}>
+          <ScrollView style={commonStyles.modalContent}>
             <Text style={styles.dataSection}>Profile Information</Text>
             <Text style={styles.dataText}>Email: {user?.email}</Text>
             <Text style={styles.dataText}>
@@ -555,7 +555,7 @@ export default function PrivacySettings() {
       </Modal>
       {/* Delete Confirmation Modal */}
       <Modal visible={deleteConfirmVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
+        <View style={commonStyles.modalOverlay}>
           <View style={styles.deleteModal}>
             <MaterialIcons
               name="warning"
@@ -607,13 +607,6 @@ export default function PrivacySettings() {
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.spacing.lg,
-  },
   deleteModal: {
     backgroundColor: theme.colors.card,
     borderRadius: 12,
@@ -669,23 +662,6 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: theme.colors.text,
-  },
-  modalContent: {
-    flex: 1,
-    padding: theme.spacing.lg,
   },
   dataSection: {
     fontSize: 18,
@@ -760,39 +736,12 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     lineHeight: 20,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  backButton: {
-    padding: theme.spacing.sm,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: theme.colors.text,
-  },
   placeholder: {
     width: 40,
   },
   content: {
     flex: 1,
     padding: theme.spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.lg,
   },
   sectionTitleSpaced: {
     marginTop: theme.spacing.xl,

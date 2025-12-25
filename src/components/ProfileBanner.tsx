@@ -90,7 +90,7 @@ export default function ProfileBanner({
     <View style={styles.specContainer}>
       <View style={styles.content}>
         {/* Icon and Title */}
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <Ionicons
             name={bannerContent.icon}
             size={24}
@@ -151,12 +151,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
   },
   title: {
     fontSize: 16,

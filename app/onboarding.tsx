@@ -1024,7 +1024,7 @@ export default function OnboardingScreen() {
         <View style={styles.navButtonsRight}>
           {currentStep > 0 && (
             <TouchableOpacity
-              style={[styles.navButton, styles.backButton]}
+              style={[styles.navButton, commonStyles.backButton]}
               onPress={handleBack}
             >
               <Text style={styles.backButtonText}>Back</Text>
@@ -1330,10 +1330,6 @@ const styles = StyleSheet.create({
   skipButtonText: {
     color: theme.colors.textSecondary,
     fontSize: 16,
-  },
-  backButton: {
-    backgroundColor: "transparent",
-    marginRight: 10,
   },
   backButtonText: {
     color: theme.colors.textSecondary,

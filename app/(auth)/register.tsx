@@ -107,7 +107,7 @@ export default function RegisterScreen() {
             keyboardShouldPersistTaps="handled"
             bounces={false}
           >
-            <View style={styles.header}>
+            <View style={commonStyles.subHeader}>
               <Text style={styles.title}>Join SafePath</Text>
               <Text style={styles.subtitle}>Create your account</Text>
             </View>
@@ -181,11 +181,13 @@ export default function RegisterScreen() {
                 )}
               </TouchableOpacity>
 
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Already have an account? </Text>
+              <View style={commonStyles.footer}>
+                <Text style={commonStyles.footerText}>
+                  Already have an account?{" "}
+                </Text>
                 <Link href="/(auth)/login" asChild>
                   <TouchableOpacity>
-                    <Text style={styles.link}>Sign In</Text>
+                    <Text style={commonStyles.textPrimaryLink}>Sign In</Text>
                   </TouchableOpacity>
                 </Link>
               </View>
@@ -202,10 +204,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 20,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 50,
   },
   title: {
     fontSize: 42,
@@ -234,19 +232,5 @@ const styles = StyleSheet.create({
   },
   eyeButton: {
     padding: theme.spacing.md,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 30,
-  },
-  footerText: {
-    color: theme.colors.textSecondary,
-    fontSize: 16,
-  },
-  link: {
-    color: theme.colors.primary,
-    fontSize: 16,
-    fontWeight: "600",
   },
 });

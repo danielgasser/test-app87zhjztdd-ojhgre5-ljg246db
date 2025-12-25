@@ -81,7 +81,7 @@ export const Paywall: React.FC<PaywallProps> = ({
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={commonStyles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
@@ -109,7 +109,7 @@ export const Paywall: React.FC<PaywallProps> = ({
       contentContainerStyle={styles.content}
     >
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles.specHeader}>
         {onClose && (
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Ionicons name="close" size={24} color={theme.colors.text} />
@@ -212,12 +212,7 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
+  specHeader: {
     alignItems: "center",
     marginBottom: theme.spacing.xl,
   },

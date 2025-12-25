@@ -77,7 +77,7 @@ export default function DisplaySettings() {
   if (loading) {
     return (
       <SafeAreaView style={commonStyles.container}>
-        <View style={styles.loadingContainer}>
+        <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       </SafeAreaView>
@@ -87,10 +87,10 @@ export default function DisplaySettings() {
   return (
     <SafeAreaView style={commonStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={[commonStyles.primaryButton, commonStyles.backButton]}
         >
           <MaterialIcons
             name="arrow-back"
@@ -98,8 +98,8 @@ export default function DisplaySettings() {
             color={theme.colors.text}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Display Preferences</Text>
-        <View style={styles.placeholder} />
+        <Text style={commonStyles.headerTitle}>Display Preferences</Text>
+        <View style={commonStyles.headerPlaceholder} />
       </View>
 
       <ScrollView style={styles.content}>
@@ -140,21 +140,8 @@ export default function DisplaySettings() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
   backButton: {
     padding: theme.spacing.sm,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: theme.colors.text,
   },
   placeholder: {
     width: 40,
@@ -168,10 +155,5 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.lg,
     lineHeight: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

@@ -58,9 +58,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
   return (
     <View style={styles.specContainer}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <Ionicons name="analytics" size={24} color={theme.colors.primary} />
-        <Text style={styles.headerTitle}>Safer Route Found!</Text>
+        <Text style={commonStyles.headerTitle}>Safer Route Found!</Text>
       </View>
 
       {/* Improvement Summary */}
@@ -306,17 +306,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.backdrop,
-    marginLeft: 8,
   },
   improvementBanner: {
     flexDirection: "row",

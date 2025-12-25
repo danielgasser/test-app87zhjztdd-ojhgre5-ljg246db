@@ -11,6 +11,7 @@ import { theme } from "@/styles/theme";
 import { PremiumGate } from "./PremiumGate";
 import { formatDistance } from "@/utils/distanceHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { commonStyles } from "@/styles/common";
 interface RouteSafetyBreakdownProps {
   segmentScores: any[] | undefined;
   routeType: "original" | "optimized";
@@ -40,13 +41,15 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
   return (
     <View style={styles.specContainer}>
       <TouchableOpacity
-        style={styles.header}
+        style={styles.specHeader}
         onPress={() => setIsExpanded(!isExpanded)}
         activeOpacity={0.7}
       >
         <View style={styles.headerLeft}>
           <Ionicons name="map" size={18} color={theme.colors.primary} />
-          <Text style={styles.headerTitle}>Route Breakdown</Text>
+          <Text style={[commonStyles.textBold, { fontSize: 16 }]}>
+            Route Breakdown
+          </Text>
           <View style={styles.segmentCount}>
             <Text style={styles.segmentCountText}>
               {segmentScores.length} segments
@@ -125,7 +128,9 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
 
             {/* Distance by Safety Level */}
             <View style={styles.distanceBreakdown}>
-              <Text style={styles.sectionTitle}>Distance by Safety Level</Text>
+              <Text style={commonStyles.sectionTitle}>
+                Distance by Safety Level
+              </Text>
               {(() => {
                 const safeDistance = segmentScores
                   .filter((s: any) => s.safety_score >= 4.0)
@@ -215,7 +220,10 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
             {unsafeSeg > 0 && (
               <View style={styles.problemAreas}>
                 <Text
-                  style={[styles.sectionTitle, { color: theme.colors.error }]}
+                  style={[
+                    commonStyles.sectionTitle,
+                    { color: theme.colors.error },
+                  ]}
                 >
                   ⚠️ Areas Requiring Caution
                 </Text>
@@ -318,7 +326,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     overflow: "hidden",
   },
-  header: {
+  specHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -334,11 +342,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  headerTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
   segmentCount: {
     backgroundColor: theme.colors.primary,
     borderRadius: 10,
@@ -347,7 +350,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   segmentCountText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "700",
     color: theme.colors.background,
   },
@@ -384,7 +387,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   timelineLabel: {
-    fontSize: 10,
+    fontSize: 14,
     color: theme.colors.textSecondary,
     fontWeight: "600",
   },
@@ -431,12 +434,6 @@ const styles = StyleSheet.create({
   },
   distanceBreakdown: {
     marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: 8,
   },
   distanceRows: {
     gap: 8,

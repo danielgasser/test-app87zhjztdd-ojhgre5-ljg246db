@@ -405,7 +405,7 @@ export default function ProfileScreen() {
       ) : (
         <View style={styles.profileContainer}>
           {/* Fixed Header */}
-          <View style={styles.header}>
+          <View style={commonStyles.subHeader}>
             <TouchableOpacity
               onPress={pickImage}
               style={styles.avatarContainer}
@@ -881,7 +881,7 @@ function CollapsibleSection({
       <TouchableOpacity style={styles.sectionHeader} onPress={onToggle}>
         <View style={styles.sectionHeaderLeft}>
           <Ionicons name={icon as any} size={24} color={theme.colors.primary} />
-          <Text style={styles.sectionTitle}>{title}</Text>
+          <Text style={commonStyles.collapsibleTitle}>{title}</Text>
         </View>
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
@@ -979,13 +979,6 @@ const styles = StyleSheet.create({
   profileContainer: {
     flex: 1,
   },
-  header: {
-    alignItems: "center",
-    paddingVertical: theme.spacing.xl,
-    backgroundColor: theme.colors.backgroundSecondary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
   avatarContainer: {
     position: "relative",
     marginBottom: theme.spacing.md,
@@ -1047,12 +1040,6 @@ const styles = StyleSheet.create({
   sectionHeaderLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.spacing.md,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
   },
   sectionContent: {
     padding: theme.spacing.lg,

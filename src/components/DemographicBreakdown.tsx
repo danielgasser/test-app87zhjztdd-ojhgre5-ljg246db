@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { DemographicScore } from "@/store/locationsSlice";
 import { PremiumGate } from "./PremiumGate";
+import { commonStyles } from "@/styles/common";
 
 interface DemographicBreakdownProps {
   scores: DemographicScore[];
@@ -107,10 +108,10 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
 
   return (
     <View style={styles.specContainer}>
-      <TouchableOpacity style={styles.header} onPress={handleToggle}>
+      <TouchableOpacity style={styles.specHeader} onPress={handleToggle}>
         <View style={styles.headerLeft}>
           <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
-          <Text style={styles.headerTitle}>Safety by Demographics</Text>
+          <Text style={commonStyles.textBold}>Safety by Demographics</Text>
         </View>
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
@@ -123,9 +124,11 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
         <PremiumGate feature="statisticalInsights" fallback="blur">
           <View style={styles.content}>
             {loading ? (
-              <View style={styles.loadingContainer}>
+              <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="small" color={theme.colors.primary} />
-                <Text style={styles.loadingText}>Loading insights...</Text>
+                <Text style={commonStyles.loadingText}>
+                  Loading insights...
+                </Text>
               </View>
             ) : Object.keys(groupedScores).length === 0 ? (
               <Text style={styles.noDataText}>
@@ -156,7 +159,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     overflow: "hidden",
   },
-  header: {
+  specHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -167,25 +170,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  headerTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
   content: {
     paddingHorizontal: 14,
     paddingBottom: 14,
-  },
-  loadingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    gap: 8,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
   },
   noDataText: {
     fontSize: 14,

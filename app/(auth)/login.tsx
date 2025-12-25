@@ -142,7 +142,7 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
             bounces={false}
           >
-            <View style={styles.header}>
+            <View style={commonStyles.subHeader}>
               <Text style={styles.title}>SafePath</Text>
               <Text style={styles.subtitle}>Travel with confidence</Text>
             </View>
@@ -198,9 +198,9 @@ export default function LoginScreen() {
 
               {/* Social Login Divider */}
               <View style={styles.dividerContainer}>
-                <View style={styles.divider} />
+                <View style={commonStyles.divider} />
                 <Text style={styles.dividerText}>OR</Text>
-                <View style={styles.divider} />
+                <View style={commonStyles.divider} />
               </View>
 
               {/* Apple Sign In Button */}
@@ -222,9 +222,9 @@ export default function LoginScreen() {
                   </TouchableOpacity>
 
                   <View style={styles.dividerContainer}>
-                    <View style={styles.divider} />
+                    <View style={commonStyles.divider} />
                     <Text style={styles.dividerText}>OR</Text>
-                    <View style={styles.divider} />
+                    <View style={commonStyles.divider} />
                   </View>
                 </>
               )}
@@ -243,11 +243,13 @@ export default function LoginScreen() {
                 <Text style={styles.googleButtonText}>Sign in with Google</Text>
               </TouchableOpacity>
 
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Don't have an account? </Text>
+              <View style={commonStyles.footer}>
+                <Text style={commonStyles.footerText}>
+                  Don't have an account?{" "}
+                </Text>
                 <Link href="/(auth)/register" asChild>
                   <TouchableOpacity>
-                    <Text style={styles.link}>Sign Up</Text>
+                    <Text style={commonStyles.textPrimaryLink}>Sign Up</Text>
                   </TouchableOpacity>
                 </Link>
               </View>
@@ -264,10 +266,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 20,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 50,
   },
   title: {
     fontSize: 42,
@@ -312,11 +310,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
   },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: theme.colors.border,
-  },
   dividerText: {
     marginHorizontal: 10,
     color: theme.colors.textSecondary,
@@ -347,20 +340,6 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: theme.colors.background,
     fontSize: 18,
-    fontWeight: "600",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 30,
-  },
-  footerText: {
-    color: theme.colors.textSecondary,
-    fontSize: 16,
-  },
-  link: {
-    color: theme.colors.primary,
-    fontSize: 16,
     fontWeight: "600",
   },
 });

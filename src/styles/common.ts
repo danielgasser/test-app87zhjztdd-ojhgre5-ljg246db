@@ -22,7 +22,9 @@ export const commonStyles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: theme.spacing.xl,
   },
-
+  scrollView: {
+    flex: 1,
+  },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -67,6 +69,9 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...theme.shadows.sm,
+  },
+  backButton: {
+    padding: theme.spacing.sm,
   },
   cancelButton: {
     flex: 1,
@@ -139,7 +144,6 @@ export const commonStyles = StyleSheet.create({
     paddingVertical: theme.spacing.lg,
     paddingHorizontal: theme.spacing.xl,
   },
-
   // ==================== BUTTON TEXT STYLES ====================
   primaryButtonText: {
     color: theme.colors.textOnPrimary,
@@ -181,6 +185,11 @@ export const commonStyles = StyleSheet.create({
     paddingHorizontal: theme.spacing.screenPadding,
     marginBottom: theme.spacing.md,
   },
+  collapsibleTitle: {
+    ...theme.typography.h3,
+    color: theme.colors.text,
+    paddingHorizontal: theme.spacing.screenPadding,
+  },
 
   subtitle: {
     ...theme.typography.subtitle,
@@ -217,13 +226,20 @@ export const commonStyles = StyleSheet.create({
   textPrimary: {
     color: theme.colors.primary,
   },
+  textPrimaryLink: {
+    color: theme.colors.primary,
+    textDecorationLine: 'underline',
+  },
 
   textSecondary: {
     color: theme.colors.secondary,
   },
 
   textError: {
+    ...theme.typography.body,
     color: theme.colors.error,
+    textAlign: "center",
+    marginBottom: 20,
   },
 
   textSuccess: {
@@ -346,6 +362,11 @@ export const commonStyles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: theme.colors.separator,
   },
+  modalDone: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    fontWeight: "600",
+  },
 
   // ==================== LIST STYLES ====================
   listItem: {
@@ -372,16 +393,24 @@ export const commonStyles = StyleSheet.create({
 
   // ==================== HEADER STYLES ====================
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.screenPadding,
-    paddingVertical: theme.spacing.md,
-    backgroundColor: theme.colors.card,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: theme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
+    borderBottomColor: theme.colors.border,
   },
-
+  headerPlaceholder: {
+    width: 40,
+  },
+  subHeader: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
   headerTitle: {
     ...theme.typography.h3,
     color: theme.colors.text,
@@ -391,6 +420,18 @@ export const commonStyles = StyleSheet.create({
     ...theme.typography.subtitle,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.xs,
+  },
+
+  // ==================== FOOTER STYLES ====================
+
+  footer: {
+    padding: theme.spacing.screenPadding,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.separator,
+  },
+  footerText: {
+    color: theme.colors.textSecondary,
+    fontSize: 16,
   },
 
   // ==================== SAFETY MARKER STYLES ====================
@@ -530,5 +571,45 @@ export const commonStyles = StyleSheet.create({
   stars: {
     flexDirection: 'row',
     gap: theme.spacing.sm,
+  },
+
+  // ==================== MISCELANOUS STYLES ====================
+  loadingText: {
+    fontSize: 16,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    marginTop: theme.spacing.md,
+  },
+  placeholder: {
+    width: 40,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.separator,
+  },
+
+  emptyContainer: {
+    padding: theme.spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme.colors.text,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+  },
+
+  emptyText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

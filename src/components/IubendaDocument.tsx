@@ -107,7 +107,7 @@ export function IubendaDocument({
       presentationStyle="pageSheet"
     >
       <SafeAreaView style={commonStyles.container} edges={["top"]}>
-        <View style={styles.header}>
+        <View style={commonStyles.header}>
           <Text style={styles.title}>{displayTitle}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={28} color={theme.colors.text} />
@@ -117,7 +117,7 @@ export function IubendaDocument({
         {loading && (
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={styles.loadingText}>Loading...</Text>
+            <Text style={commonStyles.loadingText}>Loading...</Text>
           </View>
         )}
 
@@ -128,12 +128,12 @@ export function IubendaDocument({
               size={48}
               color={theme.colors.error}
             />
-            <Text style={styles.errorText}>{error}</Text>
+            <Text style={commonStyles.textError}>{error}</Text>
             <TouchableOpacity
-              style={styles.retryButton}
+              style={commonStyles.primaryButton}
               onPress={fetchDocument}
             >
-              <Text style={styles.retryText}>Retry</Text>
+              <Text style={commonStyles.primaryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -152,15 +152,6 @@ export function IubendaDocument({
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
   title: {
     fontSize: 18,
     fontWeight: "600",
@@ -174,29 +165,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: theme.spacing.xl,
-  },
-  loadingText: {
-    marginTop: theme.spacing.md,
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
-  errorText: {
-    marginTop: theme.spacing.md,
-    fontSize: 16,
-    color: theme.colors.error,
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg,
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-  },
-  retryText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 16,
-    fontWeight: "600",
   },
   webview: {
     flex: 1,

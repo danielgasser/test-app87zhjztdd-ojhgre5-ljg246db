@@ -17,6 +17,7 @@ import {
   fetchPublicUserProfile,
   fetchPublicUserReviews,
 } from "../store/userSlice";
+import { commonStyles } from "@/styles/common";
 
 interface UserProfileModalProps {
   visible: boolean;
@@ -81,7 +82,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Demographics</Text>
+        <Text style={commonStyles.sectionTitle}>Demographics</Text>
         <View style={styles.demographicsContainer}>
           {demographics.map((demo, index) => (
             <View key={index} style={styles.demographicChip}>
@@ -96,7 +97,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const renderReviews = () => {
     if (publicReviewsLoading) {
       return (
-        <View style={styles.loadingContainer}>
+        <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="small" color={theme.colors.primary} />
         </View>
       );
@@ -138,22 +139,22 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <SafeAreaView style={styles.modalContent}>
+      <View style={commonStyles.modalOverlay}>
+        <SafeAreaView style={commonStyles.modalContent}>
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>User Profile</Text>
+          <View style={styles.specHeader}>
+            <Text style={commonStyles.headerTitle}>User Profile</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
           {/* Content */}
-          <ScrollView style={styles.scrollView}>
+          <ScrollView style={commonStyles.scrollView}>
             {publicProfileLoading ? (
-              <View style={styles.loadingContainer}>
+              <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={styles.loadingText}>Loading profile...</Text>
+                <Text style={commonStyles.loadingText}>Loading profile...</Text>
               </View>
             ) : publicProfileError ? (
               <View style={styles.errorContainer}>
@@ -162,9 +163,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   size={48}
                   color={theme.colors.error}
                 />
-                <Text style={styles.errorText}>{publicProfileError}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={onClose}>
-                  <Text style={styles.retryButtonText}>Close</Text>
+                <Text style={commonStyles.textError}>{publicProfileError}</Text>
+                <TouchableOpacity
+                  style={commonStyles.primaryButton}
+                  onPress={onClose}
+                >
+                  <Text style={commonStyles.primaryButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
             ) : publicProfile && !publicProfile.is_public ? (
@@ -222,7 +226,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                 {/* Reviews section will be added in next step */}
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Recent Reviews</Text>
+                  <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
                   {renderReviews()}
                 </View>
               </>
@@ -235,19 +239,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: theme.colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "90%",
-    height: "90%",
-  },
-  header: {
+  specHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -255,48 +247,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.separator,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 40,
-  },
-  errorText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: theme.colors.error,
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: theme.colors.primary,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: theme.colors.card,
-    fontSize: 16,
-    fontWeight: "600",
   },
   privateContainer: {
     flex: 1,
@@ -369,12 +324,6 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: 12,
   },
   demographicsContainer: {
     flexDirection: "row",

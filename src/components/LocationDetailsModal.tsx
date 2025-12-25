@@ -466,11 +466,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+      <View style={commonStyles.modalOverlay}>
+        <View style={commonStyles.modalContent}>
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Location Details</Text>
+          <View style={commonStyles.header}>
+            <Text style={commonStyles.headerTitle}>Location Details</Text>
             <View style={styles.headerActions}>
               <SaveLocationButton
                 locationId={locationId}
@@ -501,12 +501,12 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           </View>
 
           {loading ? (
-            <View style={styles.loadingContainer}>
+            <View style={commonStyles.centerContainer}>
               <ActivityIndicator size="large" color={theme.colors.secondary} />
             </View>
           ) : selectedLocation || googlePlaceId ? (
             <ScrollView
-              style={styles.scrollView}
+              style={commonStyles.scrollView}
               showsVerticalScrollIndicator={false}
             >
               {/* Location Info */}
@@ -735,7 +735,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               {/* Reviews Section */}
               {(selectedLocation || reviews.length > 0) && (
                 <View style={styles.reviewsSection}>
-                  <Text style={styles.sectionTitle}>Recent Reviews</Text>
+                  <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
 
                   {loadingReviews ? (
                     <ActivityIndicator
@@ -937,38 +937,6 @@ const styles = StyleSheet.create({
     color: theme.colors.card,
     fontWeight: "600",
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: theme.colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "90%",
-    minHeight: "50%",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.backgroundSecondary,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  loadingContainer: {
-    padding: 40,
-    alignItems: "center",
-  },
-  scrollView: {
-    flex: 1,
-  },
   locationSection: {
     padding: 16,
     borderBottomWidth: 1,
@@ -1029,12 +997,6 @@ const styles = StyleSheet.create({
   },
   reviewsSection: {
     padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: 16,
   },
   reviewCard: {
     backgroundColor: theme.colors.backgroundSecondary,

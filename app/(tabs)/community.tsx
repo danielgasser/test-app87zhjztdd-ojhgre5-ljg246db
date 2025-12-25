@@ -389,9 +389,11 @@ export default function CommunityScreen() {
   if (communityLoading && communityReviews.length === 0) {
     return (
       <SafeAreaView style={commonStyles.container}>
-        <View style={styles.loadingContainer}>
+        <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={styles.loadingText}>Loading community updates...</Text>
+          <Text style={commonStyles.loadingText}>
+            Loading community updates...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -411,14 +413,14 @@ export default function CommunityScreen() {
         />
       )}
       <ScrollView
-        style={styles.scrollView}
+        style={commonStyles.scrollView}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={commonStyles.subHeader}>
           <Text style={styles.screenTitle}>Community</Text>
           <Text style={styles.screenSubtitle}>
             Recent reviews and safety updates from travelers like you
@@ -519,7 +521,7 @@ export default function CommunityScreen() {
         {/* Safety Updates Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Safety Insights</Text>
+            <Text style={commonStyles.sectionTitle}>Safety Insights</Text>
             {safetyInsights.length > 0 && (
               <TouchableOpacity
                 onPress={() =>
@@ -542,7 +544,7 @@ export default function CommunityScreen() {
         {/* Trending Locations Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
+            <Text style={commonStyles.sectionTitle}>
               Community Awareness This Week
             </Text>
             {/* Only show "See all" if there are trending locations */}
@@ -577,7 +579,7 @@ export default function CommunityScreen() {
         {/* Recent Reviews Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Reviews</Text>
+            <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
           </View>
           {communityReviews.length > 0 ? (
             communityReviews.map(renderReviewItem)
@@ -605,25 +607,6 @@ export default function CommunityScreen() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: theme.colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.separator,
-  },
   insightCard: {
     borderRadius: 12,
     padding: 16,
@@ -731,11 +714,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: theme.colors.text,
   },
   seeAllText: {
     fontSize: 14,

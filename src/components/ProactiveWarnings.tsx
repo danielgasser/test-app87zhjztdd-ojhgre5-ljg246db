@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { PremiumGate } from "./PremiumGate";
+import { commonStyles } from "@/styles/common";
 
 interface ProactiveWarningsProps {
   safetyAnalysis: any;
@@ -72,12 +73,12 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
   return (
     <View style={styles.specContainer}>
       <TouchableOpacity
-        style={styles.header}
+        style={styles.specHeader}
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <View style={styles.headerLeft}>
           <Ionicons name="alert-circle" size={18} color={theme.colors.accent} />
-          <Text style={styles.headerTitle}>Route Warnings</Text>
+          <Text style={commonStyles.primaryButtonText}>Route Warnings</Text>
           {warningCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{warningCount}</Text>
@@ -87,7 +88,7 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
           size={18}
-          color={theme.colors.textSecondary}
+          color={theme.colors.textOnPrimary}
         />
       </TouchableOpacity>
 
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     overflow: "hidden",
   },
-  header: {
+  specHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -198,11 +199,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-  },
-  headerTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: theme.colors.textOnPrimary,
   },
   badge: {
     backgroundColor: theme.colors.accent,
@@ -239,7 +235,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   summaryText: {
-    fontSize: 12,
+    fontSize: 14,
     color: theme.colors.textSecondary,
   },
   notesSection: {

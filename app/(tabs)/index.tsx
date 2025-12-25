@@ -1214,7 +1214,7 @@ export default function MapScreen() {
   if (!locationPermission) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>
+        <Text style={commonStyles.textError}>
           Location permission is required to use this feature
         </Text>
       </View>
@@ -1225,7 +1225,9 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={styles.loadingText}>Loading nearby locations...</Text>
+        <Text style={commonStyles.loadingText}>
+          Loading nearby locations...
+        </Text>
       </View>
     );
   }
@@ -1233,7 +1235,7 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={styles.loadingText}>Getting your location...</Text>
+        <Text style={commonStyles.loadingText}>Getting your location...</Text>
       </View>
     );
   }
@@ -1548,24 +1550,26 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
       {/* Filter Button */}
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setFiltersModalVisible(true)}
-      >
-        <Text style={styles.filterButtonLabel}>Filters</Text>
-        <Ionicons
-          style={styles.filterButtonIcon}
-          name="options"
-          size={30}
-          color={
-            mapFilters.minSafetyRating !== null ||
-            mapFilters.hasReviews ||
-            mapFilters.placeTypes.length > 0
-              ? theme.colors.primary
-              : theme.colors.text
-          }
-        />
-      </TouchableOpacity>
+      {!navigationActive && (
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setFiltersModalVisible(true)}
+        >
+          <Text style={styles.filterButtonLabel}>Filters</Text>
+          <Ionicons
+            style={styles.filterButtonIcon}
+            name="options"
+            size={30}
+            color={
+              mapFilters.minSafetyRating !== null ||
+              mapFilters.hasReviews ||
+              mapFilters.placeTypes.length > 0
+                ? theme.colors.primary
+                : theme.colors.text
+            }
+          />
+        </TouchableOpacity>
+      )}
       {/* Danger Zones Control */}
       <View
         style={[
@@ -1869,17 +1873,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
-  errorText: {
-    fontSize: 18,
-    color: theme.colors.error,
-    textAlign: "center",
-    paddingHorizontal: 20,
   },
   addLocationContainer: {
     position: "absolute",

@@ -44,7 +44,7 @@ export default function ProfileCompletionWidget({
   return (
     <View style={styles.specContainer}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <Ionicons name="person-circle" size={24} color={theme.colors.primary} />
         <Text style={styles.title}>Profile Completion</Text>
         <Text style={styles.percentage}>{completionPercentage}%</Text>
@@ -111,12 +111,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: theme.colors.success,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    gap: 8,
   },
   title: {
     fontSize: 16,

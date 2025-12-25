@@ -732,7 +732,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         />
       )}
       {/* Header */}
-      <View style={styles.header}>
+      <View style={styles.specHeader}>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
@@ -868,7 +868,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             <View>
               {/* Location Inputs */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Route Details</Text>
+                <Text style={commonStyles.sectionTitle}>Route Details</Text>
                 <View style={styles.locationInputs}>
                   {renderLocationInput(
                     "from",
@@ -881,7 +881,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
               {/* Safety Preferences */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Safety Preferences</Text>
+                <Text style={commonStyles.sectionTitle}>
+                  Safety Preferences
+                </Text>
 
                 <View style={styles.toggleRow}>
                   <Text style={styles.toggleLabel}>Avoid evening dangers</Text>
@@ -945,7 +947,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     size={20}
                     color={theme.colors.error}
                   />
-                  <Text style={styles.errorText}>{routeError}</Text>
+                  <Text style={commonStyles.textError}>{routeError}</Text>
                 </View>
               )}
 
@@ -963,7 +965,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               {/* Selected Route Display */}
               {selectedRoute && !showSmartRouteComparison && (
                 <View style={styles.routesSection}>
-                  <Text style={styles.sectionTitle}>Your Route</Text>
+                  <Text style={commonStyles.sectionTitle}>Your Route</Text>
                   <View style={[styles.routeCard, styles.selectedRouteCard]}>
                     <View style={styles.routeHeader}>
                       <View style={styles.routeInfo}>
@@ -1028,7 +1030,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  header: {
+  specHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1128,12 +1130,6 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: 16,
-  },
   locationInputs: {
     backgroundColor: theme.colors.background,
     borderRadius: 12,
@@ -1221,12 +1217,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
-  },
-  errorText: {
-    color: theme.colors.error,
-    fontSize: 14,
-    marginLeft: 8,
-    flex: 1,
   },
   dangerWarningBanner: {
     flexDirection: "row",

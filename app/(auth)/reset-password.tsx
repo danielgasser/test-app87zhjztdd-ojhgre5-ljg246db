@@ -127,14 +127,16 @@ export default function ResetPasswordScreen() {
           <View style={styles.content}>
             {isValidatingToken ? (
               // Show loading while validating token
-              <View style={styles.loadingContainer}>
+              <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={styles.loadingText}>Validating reset link...</Text>
+                <Text style={commonStyles.loadingText}>
+                  Validating reset link...
+                </Text>
               </View>
             ) : (
               <>
                 {/* Header */}
-                <View style={styles.header}>
+                <View style={commonStyles.header}>
                   <Ionicons
                     name="key-outline"
                     size={64}
@@ -273,19 +275,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: theme.spacing.xl,
     justifyContent: "center",
-  },
-  loadingContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingText: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.md,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: theme.spacing.xxl,
   },
   icon: {
     marginBottom: theme.spacing.lg,

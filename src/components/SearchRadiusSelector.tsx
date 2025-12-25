@@ -84,7 +84,7 @@ export default function SearchRadiusSelector() {
   return (
     <View style={styles.specContainer}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={commonStyles.header}>
         <Text style={styles.title}>Search Radius</Text>
         {showSaved && (
           <Animated.View style={[styles.savedIndicator, { opacity: fadeAnim }]}>
@@ -171,12 +171,6 @@ export default function SearchRadiusSelector() {
 const styles = StyleSheet.create({
   specContainer: {
     padding: 16,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
   },
   title: {
     fontSize: 16,

@@ -22,7 +22,7 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
           size={16}
           color={theme.colors.textSecondary}
         />
-        <Text style={styles.loadingText}>Getting prediction...</Text>
+        <Text style={commonStyles.loadingText}>Getting prediction...</Text>
       </View>
     );
   }
@@ -159,10 +159,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textSecondary,
     marginTop: 4,
-  },
-  loadingText: {
-    color: theme.colors.textSecondary,
-    fontSize: 14,
   },
   voteText: {
     fontSize: 11,
