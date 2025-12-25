@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { NeighborhoodStats as NeighborhoodStatsType } from "@/store/locationsSlice";
+import { commonStyles } from "@/styles/common";
 
 interface NeighborhoodStatsProps {
   stats: NeighborhoodStatsType | null;
@@ -21,7 +22,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 }) => {
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={commonStyles.container}>
         <View style={styles.header}>
           <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Neighborhood Stats</Text>
@@ -33,7 +34,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 
   if (!stats) {
     return (
-      <View style={styles.container}>
+      <View style={commonStyles.container}>
         <View style={styles.header}>
           <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Neighborhood Stats</Text>
@@ -48,7 +49,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
   const crimeLevel = getCrimeLevel(stats.crime_rate_per_1000);
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       <View style={styles.header}>
         <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
         <Text style={styles.title}>Neighborhood Stats</Text>
@@ -126,12 +127,6 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.backgroundSecondary,
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 12,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

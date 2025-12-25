@@ -8,6 +8,7 @@ import { APP_CONFIG } from "@/config/appConfig";
 import { FIELD_DISPLAY_NAMES } from "@/constants/profileRequirements";
 import { theme } from "@/styles/theme";
 import type { BannerType } from "@/store/profileBannerSlice";
+import { commonStyles } from "@/styles/common";
 
 interface ProfileBannerProps {
   bannerType: string;
@@ -86,7 +87,7 @@ export default function ProfileBanner({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <View style={styles.content}>
         {/* Icon and Title */}
         <View style={styles.header}>
@@ -116,17 +117,17 @@ export default function ProfileBanner({
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
+            style={[commonStyles.primaryButton]}
             onPress={handleCompleteProfile}
           >
-            <Text style={styles.primaryButtonText}>Complete Profile</Text>
+            <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[commonStyles.primaryButton, commonStyles.secondaryButton]}
             onPress={() => handleDismiss(isLastShow)}
           >
-            <Text style={styles.secondaryButtonText}>
+            <Text style={commonStyles.secondaryButtonText}>
               {isLastShow ? "Don't Show Again" : "Maybe Later"}
             </Text>
           </TouchableOpacity>
@@ -136,7 +137,7 @@ export default function ProfileBanner({
   );
 }
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     margin: 16,
     backgroundColor: theme.colors.card,
     borderRadius: 12,
@@ -188,30 +189,5 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     gap: 8,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  primaryButton: {
-    backgroundColor: theme.colors.primary,
-  },
-  primaryButtonText: {
-    color: theme.colors.card,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    backgroundColor: theme.colors.background,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  secondaryButtonText: {
-    color: theme.colors.textSecondary,
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

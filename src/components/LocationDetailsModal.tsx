@@ -36,6 +36,7 @@ import { SaveLocationButton } from "./SaveLocationButton";
 import PremiumGate, { GlobalPremiumPromptModal } from "./PremiumGate";
 import NeighborhoodStats from "./NeighborhoodStats";
 import TimeSafetyChart from "./TimeSafetyChart";
+import { commonStyles } from "@/styles/common";
 interface SearchResult {
   id: string;
   name: string;
@@ -803,7 +804,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
                         <View style={styles.reviewRatings}>
                           <View style={styles.ratingItem}>
-                            <Text style={styles.ratingLabel}>Safety:</Text>
+                            <Text style={commonStyles.ratingLabel}>
+                              Safety:
+                            </Text>
                             <Text
                               style={[
                                 styles.ratingValue,
@@ -814,7 +817,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                             </Text>
                           </View>
                           <View style={styles.ratingItem}>
-                            <Text style={styles.ratingLabel}>Comfort:</Text>
+                            <Text style={commonStyles.ratingLabel}>
+                              Comfort:
+                            </Text>
                             <Text
                               style={[
                                 styles.ratingValue,
@@ -828,7 +833,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           </View>
                           {review.accessibility_rating && (
                             <View style={styles.ratingItem}>
-                              <Text style={styles.ratingLabel}>Access:</Text>
+                              <Text style={commonStyles.ratingLabel}>
+                                Access:
+                              </Text>
                               <Text
                                 style={[
                                   styles.ratingValue,

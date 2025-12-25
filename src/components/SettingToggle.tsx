@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { theme } from "../styles/theme";
+import { commonStyles } from "@/styles/common";
 
 interface SettingToggleProps {
   label: string;
@@ -18,9 +19,9 @@ export default function SettingToggle({
   disabled = false,
 }: SettingToggleProps) {
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <View style={styles.textContainer}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={commonStyles.formLabel}>{label}</Text>
         {description && <Text style={styles.description}>{description}</Text>}
       </View>
       <TouchableOpacity
@@ -39,7 +40,7 @@ export default function SettingToggle({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

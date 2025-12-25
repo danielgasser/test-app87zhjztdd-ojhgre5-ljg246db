@@ -106,7 +106,7 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <TouchableOpacity style={styles.header} onPress={handleToggle}>
         <View style={styles.headerLeft}>
           <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
@@ -149,7 +149,7 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     marginHorizontal: 16,

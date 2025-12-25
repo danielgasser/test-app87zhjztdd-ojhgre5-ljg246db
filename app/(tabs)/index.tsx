@@ -82,6 +82,7 @@ import MapFiltersModal, {
   MapFilters,
   DEFAULT_FILTERS,
 } from "@/components/MapFiltersModal";
+import { commonStyles } from "@/styles/common";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -1246,7 +1247,7 @@ export default function MapScreen() {
   }
   // ============= MAIN RENDER =============
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       {/* Profile Completion Banner */}
       {showProfileBanner && (
         <View style={styles.bannerContainer}>
@@ -1859,9 +1860,6 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 10000,
     elevation: 20,
-  },
-  container: {
-    flex: 1,
   },
   centerContainer: {
     flex: 1,

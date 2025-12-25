@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { MLPrediction } from "@/store/locationsSlice";
+import { commonStyles } from "@/styles/common";
 
 interface PredictionBadgeProps {
   prediction: MLPrediction;
@@ -15,7 +16,7 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 }) => {
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={commonStyles.container}>
         <Ionicons
           name="hourglass-outline"
           size={16}
@@ -82,7 +83,7 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
   return (
     <View
       style={[
-        styles.container,
+        commonStyles.container,
         { borderLeftWidth: 4, borderLeftColor: badgeColor },
       ]}
     >
@@ -139,14 +140,6 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.backgroundSecondary,
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 12,
-    marginHorizontal: 14,
-    gap: 6,
-  },
   headerText: {
     fontSize: 14,
     fontWeight: "600",

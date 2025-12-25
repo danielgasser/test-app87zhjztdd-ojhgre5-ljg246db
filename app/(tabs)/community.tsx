@@ -36,6 +36,7 @@ import {
 } from "@/utils/safetyHelpers";
 import { formatTimeAgo } from "@/utils/timeHelpers";
 import VoteButtons from "@/components/VoteButtons";
+import { commonStyles } from "@/styles/common";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -387,7 +388,7 @@ export default function CommunityScreen() {
 
   if (communityLoading && communityReviews.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Loading community updates...</Text>
@@ -397,7 +398,7 @@ export default function CommunityScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       {/* Profile Completion Banner */}
       {showProfileBanner && (
         <ProfileBanner
@@ -604,10 +605,6 @@ export default function CommunityScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
   scrollView: {
     flex: 1,
   },

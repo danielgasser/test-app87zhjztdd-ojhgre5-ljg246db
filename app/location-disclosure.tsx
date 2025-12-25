@@ -18,6 +18,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { recordLocationDisclosureAcceptance } from "@/services/consentService";
+import { commonStyles } from "@/styles/common";
 
 export default function LocationDisclosureScreen() {
   const { user, refreshOnboardingStatus } = useAuth();
@@ -67,7 +68,7 @@ export default function LocationDisclosureScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconContainer}>
           <Ionicons name="location" size={64} color={theme.colors.primary} />
@@ -150,7 +151,7 @@ export default function LocationDisclosureScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={styles.button}
+          style={commonStyles.primaryButton}
           onPress={handleContinue}
           disabled={isLoading}
           activeOpacity={0.8}
@@ -158,7 +159,7 @@ export default function LocationDisclosureScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.colors.textOnPrimary} />
           ) : (
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={commonStyles.primaryButtonText}>Continue</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -167,10 +168,6 @@ export default function LocationDisclosureScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     flexGrow: 1,
     padding: theme.spacing.screenPadding,
@@ -254,16 +251,5 @@ const styles = StyleSheet.create({
     padding: theme.spacing.screenPadding,
     borderTopWidth: 1,
     borderTopColor: theme.colors.separator,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 18,
-    fontWeight: "600",
   },
 });

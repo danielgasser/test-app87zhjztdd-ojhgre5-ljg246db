@@ -18,6 +18,7 @@ import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { commonStyles } from "@/styles/common";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -69,7 +70,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -96,9 +97,9 @@ export default function ForgotPasswordScreen() {
               <>
                 {/* Email Input */}
                 <View style={styles.form}>
-                  <Text style={styles.label}>Email Address</Text>
+                  <Text style={commonStyles.formLabel}>Email Address</Text>
                   <TextInput
-                    style={styles.input}
+                    style={commonStyles.input}
                     placeholder="Enter your email"
                     placeholderTextColor={theme.colors.textSecondary}
                     value={email}
@@ -188,10 +189,6 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   keyboardView: {
     flex: 1,
   },
@@ -230,21 +227,6 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: theme.spacing.xl,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
-  },
-  input: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    fontSize: 16,
-    color: theme.colors.text,
   },
   resetButton: {
     backgroundColor: theme.colors.primary,

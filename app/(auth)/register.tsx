@@ -22,6 +22,7 @@ import { notify } from "@/utils/notificationService";
 import { passwordChecker } from "@/utils/passwordChecker";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
+import { commonStyles } from "@/styles/common";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
@@ -95,7 +96,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
@@ -111,9 +112,9 @@ export default function RegisterScreen() {
               <Text style={styles.subtitle}>Create your account</Text>
             </View>
 
-            <View style={styles.form}>
+            <View style={commonStyles.form}>
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
@@ -165,13 +166,18 @@ export default function RegisterScreen() {
               </View>
 
               <TouchableOpacity
-                style={[styles.button, isLoading && styles.buttonDisabled]}
+                style={[
+                  commonStyles.primaryButton,
+                  isLoading && commonStyles.buttonDisabled,
+                ]}
                 onPress={handleRegister}
               >
                 {isLoading ? (
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
-                  <Text style={styles.buttonText}>Create Account</Text>
+                  <Text style={commonStyles.primaryButtonText}>
+                    Create Account
+                  </Text>
                 )}
               </TouchableOpacity>
 
@@ -192,10 +198,6 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     flex: 1,
     justifyContent: "center",
@@ -215,18 +217,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: theme.colors.textSecondary,
   },
-  form: {
-    width: "100%",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    borderRadius: 8,
-    fontSize: 18,
-    backgroundColor: theme.colors.inputBackground,
-  },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -244,21 +234,6 @@ const styles = StyleSheet.create({
   },
   eyeButton: {
     padding: theme.spacing.md,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.spacing.md,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  buttonDisabled: {
-    opacity: 0.7,
   },
   footer: {
     flexDirection: "row",

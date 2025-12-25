@@ -119,7 +119,7 @@ export function GlobalPremiumPromptModal() {
       >
         <TouchableOpacity
           activeOpacity={1}
-          style={globalStyles.container}
+          style={globalStyles.specContainer}
           onPress={(e) => e.stopPropagation()}
         >
           <View style={globalStyles.iconContainer}>
@@ -228,7 +228,7 @@ const globalStyles = StyleSheet.create({
     alignItems: "center",
     padding: 24,
   },
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 24,

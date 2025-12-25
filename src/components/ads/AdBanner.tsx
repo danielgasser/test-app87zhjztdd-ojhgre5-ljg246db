@@ -18,7 +18,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <BannerAd
         unitId={getAdUnitId("banner")}
         size={size}
@@ -34,7 +34,7 @@ export const AdBanner: React.FC<AdBannerProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     alignItems: "center",
     justifyContent: "center",
   },

@@ -31,7 +31,7 @@ const getSafetyColor = (rating: number | null): string => {
 const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.specContainer}>
         <View style={styles.header}>
           <Ionicons name="time" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Safety by Time of Day</Text>
@@ -43,7 +43,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
 
   if (!data || data.total_with_time === 0) {
     return (
-      <View style={styles.container}>
+      <View style={styles.specContainer}>
         <View style={styles.header}>
           <Ionicons name="time" size={18} color={theme.colors.primary} />
           <Text style={styles.title}>Safety by Time of Day</Text>
@@ -54,7 +54,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <View style={styles.header}>
         <Ionicons name="time" size={18} color={theme.colors.primary} />
         <Text style={styles.title}>Safety by Time of Day</Text>
@@ -109,7 +109,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 16,

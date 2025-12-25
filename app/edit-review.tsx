@@ -28,6 +28,7 @@ import { logger } from "@/utils/logger";
 import { APP_CONFIG } from "@/config/appConfig";
 import { validateVisitDateTime } from "@/utils/dateValidation";
 import { useAuth } from "@/providers/AuthProvider";
+import { commonStyles } from "@/styles/common";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -45,11 +46,12 @@ const RatingInput: React.FC<RatingProps> = ({
   required,
 }) => {
   return (
-    <View style={styles.ratingContainer}>
-      <Text style={styles.ratingLabel}>
-        {label} {required && <Text style={styles.required}>*</Text>}
+    <View style={commonStyles.ratingContainer}>
+      <Text style={commonStyles.ratingLabel}>
+        {label}{" "}
+        {required && <Text style={commonStyles.requiredAsterisk}>*</Text>}
       </Text>
-      <View style={styles.stars}>
+      <View style={commonStyles.stars}>
         {[1, 2, 3, 4, 5].map((star) => (
           <TouchableOpacity key={star} onPress={() => onChange(star)}>
             <Ionicons
@@ -231,14 +233,14 @@ export default function EditReviewScreen() {
 
   if (!user) {
     return (
-      <View style={styles.container}>
-        <View style={styles.centerContent}>
+      <View style={commonStyles.container}>
+        <View style={commonStyles.centerContainer}>
           <Text style={styles.errorText}>Please log in to edit reviews</Text>
           <TouchableOpacity
-            style={styles.button}
+            style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
           >
-            <Text style={styles.buttonText}>Go to Login</Text>
+            <Text style={commonStyles.primaryButtonText}>Go to Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -247,8 +249,8 @@ export default function EditReviewScreen() {
 
   if (loadingReview) {
     return (
-      <View style={styles.container}>
-        <View style={styles.centerContent}>
+      <View style={commonStyles.container}>
+        <View style={commonStyles.centerContainer}>
           <Text style={styles.loadingText}>Loading review...</Text>
         </View>
       </View>
@@ -257,13 +259,16 @@ export default function EditReviewScreen() {
 
   if (!originalReview) {
     return (
-      <View style={styles.container}>
-        <View style={styles.centerContent}>
+      <View style={commonStyles.container}>
+        <View style={commonStyles.centerContainer}>
           <Text style={styles.errorText}>
             Review not found or you don't have permission to edit it
           </Text>
-          <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-            <Text style={styles.buttonText}>Go Back</Text>
+          <TouchableOpacity
+            style={commonStyles.primaryButton}
+            onPress={() => router.back()}
+          >
+            <Text style={commonStyles.primaryButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -271,7 +276,7 @@ export default function EditReviewScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       <View style={styles.safeTop} />
       <ScrollView
         style={styles.scrollView}
@@ -291,12 +296,13 @@ export default function EditReviewScreen() {
 
             <View style={styles.form}>
               {/* Title */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                  Review Title <Text style={styles.required}>*</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>
+                  Review Title{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
                 </Text>
                 <TextInput
-                  style={styles.input}
+                  style={commonStyles.input}
                   placeholder="Summarize your experience"
                   value={formData.title}
                   onChangeText={(text) =>
@@ -351,12 +357,13 @@ export default function EditReviewScreen() {
               />
 
               {/* Review Content */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                  Your Review <Text style={styles.required}>*</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>
+                  Your Review{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.input, styles.textArea]}
+                  style={[commonStyles.input, commonStyles.textArea]}
                   placeholder="Share your experience at this location..."
                   value={formData.content}
                   onChangeText={(text) =>
@@ -367,14 +374,14 @@ export default function EditReviewScreen() {
                   textAlignVertical="top"
                   maxLength={1000}
                 />
-                <Text style={styles.charCount}>
+                <Text style={commonStyles.captionText}>
                   {formData.content.length}/1000
                 </Text>
               </View>
 
               {/* Visit Details */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Visit Date</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>Visit Date</Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowDatePicker(true)}
@@ -435,8 +442,8 @@ export default function EditReviewScreen() {
                 />
               )}
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Visit Time</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>Visit Time</Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowTimePicker(true)}
@@ -481,8 +488,8 @@ export default function EditReviewScreen() {
                 />
               )}
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Visit Type</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>Visit Type</Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowVisitTypePicker(true)}
@@ -537,22 +544,24 @@ export default function EditReviewScreen() {
               {/* Action Buttons */}
               <View style={styles.buttonGroup}>
                 <TouchableOpacity
-                  style={[styles.button, styles.cancelButton]}
+                  style={[
+                    commonStyles.primaryButton,
+                    commonStyles.cancelButton,
+                  ]}
                   onPress={handleCancel}
                 >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                  <Text style={commonStyles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[
-                    styles.button,
-                    styles.submitButton,
-                    loading && styles.buttonDisabled,
+                    commonStyles.primaryButton,
+                    loading && commonStyles.buttonDisabled,
                   ]}
                   onPress={handleSubmit}
                   disabled={loading}
                 >
-                  <Text style={styles.buttonText}>
+                  <Text style={commonStyles.primaryButtonText}>
                     {loading ? "Updating..." : "Update Review"}
                   </Text>
                 </TouchableOpacity>
@@ -566,10 +575,6 @@ export default function EditReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
   safeTop: {
     height: Platform.OS === "ios" ? 44 : 0,
     backgroundColor: theme.colors.card,
@@ -579,12 +584,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.spacing.lg,
   },
   errorText: {
     fontSize: 18,
@@ -711,37 +710,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    color: theme.colors.card,
-  },
-  cancelButton: {
-    backgroundColor: theme.colors.inputBackground,
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-  },
-  submitButton: {
-    backgroundColor: theme.colors.primary,
-    color: theme.colors.card,
-  },
-  buttonDisabled: {
-    backgroundColor: theme.colors.border,
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.card,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.textSecondary,
   },
 });

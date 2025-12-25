@@ -25,6 +25,7 @@ import { formatDuration, formatArrivalTime } from "@/utils/timeHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { NAVIGATION_LOCATION_TASK } from "@/tasks/navigationLocationTask";
+import { commonStyles } from "@/styles/common";
 
 interface NavigationModeProps {
   onExit: () => void;
@@ -95,9 +96,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const positionUpdatesCount = useRef(0);
   const lastAdvancedStep = useRef<number>(-1);
   const lastRerouteTime = useRef<number>(0);
-  const traveledPath = useRef<{ latitude: number; longitude: number }[]>(
-    []
-  );
+  const traveledPath = useRef<{ latitude: number; longitude: number }[]>([]);
   const currentStepRef = useRef<number | null>(currentNavigationStep);
   const selectedRouteRef = useRef(selectedRoute);
 
@@ -706,7 +705,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   if (!selectedRoute || !currentPosition) {
     return (
-      <View style={styles.container}>
+      <View style={commonStyles.container}>
         <Text>Loading navigation...</Text>
       </View>
     );
@@ -889,9 +888,6 @@ const styles = StyleSheet.create({
   debugText: {
     color: "white",
     fontSize: 10,
-  },
-  container: {
-    flex: 1,
   },
   navigationInstructionContainer: {
     position: "absolute",

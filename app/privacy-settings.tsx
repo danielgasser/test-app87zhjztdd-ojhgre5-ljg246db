@@ -24,6 +24,7 @@ import { fetchRecentReviews } from "@/store/locationsSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { IubendaDocument } from "@/components/IubendaDocument";
+import { commonStyles } from "@/styles/common";
 
 export default function PrivacySettings() {
   const { user, signOut } = useAuth();
@@ -304,7 +305,7 @@ export default function PrivacySettings() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
@@ -312,7 +313,7 @@ export default function PrivacySettings() {
     );
   }
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -763,10 +764,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: "row",

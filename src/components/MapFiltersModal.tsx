@@ -153,7 +153,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View style={styles.specContainer}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Filter Locations</Text>
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,

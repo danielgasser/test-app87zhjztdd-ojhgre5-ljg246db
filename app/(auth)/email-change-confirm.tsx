@@ -3,6 +3,7 @@ import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { theme } from "@/styles/theme";
+import { commonStyles } from "@/styles/common";
 
 export default function EmailChangeConfirmScreen() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function EmailChangeConfirmScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <View style={styles.content}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.text}>Confirming email change...</Text>
@@ -29,10 +30,6 @@ export default function EmailChangeConfirmScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     flex: 1,
     justifyContent: "center",

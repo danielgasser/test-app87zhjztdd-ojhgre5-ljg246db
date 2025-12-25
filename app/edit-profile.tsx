@@ -21,6 +21,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { passwordChecker } from "@/utils/passwordChecker";
 import { useAuth } from "@/providers/AuthProvider";
+import { commonStyles } from "@/styles/common";
 
 export default function EditProfileScreen() {
   const dispatch = useAppDispatch();
@@ -194,7 +195,7 @@ export default function EditProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
@@ -231,7 +232,7 @@ export default function EditProfileScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Name or Nickname</Text>
             <TextInput
-              style={styles.input}
+              style={commonStyles.input}
               value={fullName}
               onChangeText={setFullName}
               placeholder="Enter your name or a nickname"
@@ -239,14 +240,17 @@ export default function EditProfileScreen() {
               autoCapitalize="words"
             />
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[
+                commonStyles.primaryButton,
+                loading && commonStyles.buttonDisabled,
+              ]}
               onPress={handleUpdateName}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color={theme.colors.textOnPrimary} />
               ) : (
-                <Text style={styles.buttonText}>Update Name</Text>
+                <Text style={commonStyles.primaryButtonText}>Update Name</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -259,7 +263,7 @@ export default function EditProfileScreen() {
                 You'll need to confirm the your new email address.
               </Text>
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 value={email}
                 onChangeText={setEmail}
                 placeholder="Enter your email"
@@ -269,14 +273,19 @@ export default function EditProfileScreen() {
                 autoComplete="email"
               />
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[
+                  commonStyles.primaryButton,
+                  loading && commonStyles.buttonDisabled,
+                ]}
                 onPress={handleUpdateEmail}
                 disabled={loading}
               >
                 {loading ? (
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
-                  <Text style={styles.buttonText}>Update Email</Text>
+                  <Text style={commonStyles.primaryButtonText}>
+                    Update Email
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -312,7 +321,7 @@ export default function EditProfileScreen() {
               </Text>
 
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
                 placeholder="Current password"
@@ -322,7 +331,7 @@ export default function EditProfileScreen() {
               />
 
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 value={newPassword}
                 onChangeText={setNewPassword}
                 placeholder="New password"
@@ -332,7 +341,7 @@ export default function EditProfileScreen() {
               />
 
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Confirm new password"
@@ -342,14 +351,19 @@ export default function EditProfileScreen() {
               />
 
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[
+                  commonStyles.primaryButton,
+                  loading && commonStyles.buttonDisabled,
+                ]}
                 onPress={handleUpdatePassword}
                 disabled={loading}
               >
                 {loading ? (
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
-                  <Text style={styles.buttonText}>Update Password</Text>
+                  <Text style={commonStyles.primaryButtonText}>
+                    Update Password
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -381,10 +395,6 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -429,30 +439,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
-  },
-  input: {
-    backgroundColor: theme.colors.backgroundSecondary,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    fontSize: 16,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
-    borderWidth: 1,
-    borderColor: theme.colors.separator,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 16,
-    fontWeight: "600",
   },
   oauthInfoBox: {
     flexDirection: "row",

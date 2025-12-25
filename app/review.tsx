@@ -28,6 +28,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { validateVisitDateTime } from "@/utils/dateValidation";
 import { useAuth } from "@/providers/AuthProvider";
+import { commonStyles } from "@/styles/common";
 
 interface RatingProps {
   label: string;
@@ -43,11 +44,12 @@ const RatingInput: React.FC<RatingProps> = ({
   required,
 }) => {
   return (
-    <View style={styles.ratingContainer}>
-      <Text style={styles.ratingLabel}>
-        {label} {required && <Text style={styles.required}>*</Text>}
+    <View style={commonStyles.ratingContainer}>
+      <Text style={commonStyles.ratingLabel}>
+        {label}{" "}
+        {required && <Text style={commonStyles.requiredAsterisk}>*</Text>}
       </Text>
-      <View style={styles.stars}>
+      <View style={commonStyles.stars}>
         {[1, 2, 3, 4, 5].map((star) => (
           <TouchableOpacity key={star} onPress={() => onChange(star)}>
             <Ionicons
@@ -232,14 +234,14 @@ export default function ReviewScreen() {
 
   if (!user) {
     return (
-      <View style={styles.container}>
-        <View style={styles.centerContent}>
+      <View style={commonStyles.container}>
+        <View style={commonStyles.centerContainer}>
           <Text style={styles.errorText}>Please log in to submit a review</Text>
           <TouchableOpacity
-            style={styles.button}
+            style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
           >
-            <Text style={styles.buttonText}>Go to Login</Text>
+            <Text style={commonStyles.primaryButtonText}>Go to Login</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -247,7 +249,7 @@ export default function ReviewScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       <View style={styles.safeTop} />
       <ScrollView
         style={styles.scrollView}
@@ -278,13 +280,13 @@ export default function ReviewScreen() {
             {/* Location Name for New Locations */}
             {isCreatingNew && (
               <View style={styles.newLocationSection}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>
+                <View style={commonStyles.formField}>
+                  <Text style={commonStyles.formLabel}>
                     📍 What is this place called?
-                    <Text style={styles.required}>*</Text>
+                    <Text style={commonStyles.requiredAsterisk}>*</Text>
                   </Text>
                   <TextInput
-                    style={styles.input}
+                    style={commonStyles.input}
                     placeholder='e.g., "Joe&apos;s Pizza" or "Central Park"'
                     value={editableLocationName}
                     onChangeText={setEditableLocationName}
@@ -300,12 +302,13 @@ export default function ReviewScreen() {
 
             <View style={styles.form}>
               {/* Title */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                  Review Title <Text style={styles.required}>*</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>
+                  Review Title{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
                 </Text>
                 <TextInput
-                  style={styles.input}
+                  style={commonStyles.input}
                   placeholder="Summarize your experience"
                   value={formData.title}
                   onChangeText={(text) =>
@@ -354,12 +357,13 @@ export default function ReviewScreen() {
                 }
               />
               {/* Review Content */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                  Your Review <Text style={styles.required}>*</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>
+                  Your Review{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
                 </Text>
                 <TextInput
-                  style={[styles.input, styles.textArea]}
+                  style={[commonStyles.input, commonStyles.textArea]}
                   placeholder="Share your experience at this location..."
                   value={formData.content}
                   onChangeText={(text) =>
@@ -370,13 +374,13 @@ export default function ReviewScreen() {
                   textAlignVertical="top"
                   maxLength={1000}
                 />
-                <Text style={styles.charCount}>
+                <Text style={commonStyles.captionText}>
                   {formData.content.length}/1000
                 </Text>
               </View>
               {/* Visit Details */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Visit Date</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>Visit Date</Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowDatePicker(true)}
@@ -414,8 +418,8 @@ export default function ReviewScreen() {
                   }}
                 />
               )}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Visit Time</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>Visit Time</Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowTimePicker(true)}
@@ -458,8 +462,8 @@ export default function ReviewScreen() {
                   }}
                 />
               )}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Visit Type</Text>
+              <View style={commonStyles.formField}>
+                <Text style={commonStyles.formLabel}>Visit Type</Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowVisitTypePicker(true)}
@@ -527,11 +531,14 @@ export default function ReviewScreen() {
               </View>
               {/* Submit Button */}
               <TouchableOpacity
-                style={[styles.submitButton, loading && styles.disabledButton]}
+                style={[
+                  commonStyles.primaryButton,
+                  loading && commonStyles.buttonDisabled,
+                ]}
                 onPress={handleSubmit}
                 disabled={loading}
               >
-                <Text style={styles.submitButtonText}>
+                <Text style={commonStyles.primaryButtonText}>
                   {loading ? "Submitting..." : "Submit Review"}
                 </Text>
               </TouchableOpacity>
@@ -544,10 +551,6 @@ export default function ReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   safeTop: {
     height: Platform.OS === "ios" ? 44 : 0,
     backgroundColor: theme.colors.textOnPrimary,
@@ -557,12 +560,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.spacing.lg,
   },
   errorText: {
     fontSize: 18,
@@ -612,9 +609,6 @@ const styles = StyleSheet.create({
   form: {
     padding: 16,
   },
-  inputGroup: {
-    marginBottom: 20,
-  },
   label: {
     fontSize: 16,
     fontWeight: "500",
@@ -635,9 +629,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text,
   },
-  required: {
-    color: theme.colors.error,
-  },
   input: {
     backgroundColor: theme.colors.inputBackground,
     borderWidth: 1,
@@ -656,9 +647,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     textAlign: "right",
     marginTop: 4,
-  },
-  ratingContainer: {
-    marginBottom: 20,
   },
   modalOverlay: {
     flex: 1,
@@ -688,16 +676,6 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontWeight: "600",
   },
-  ratingLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: theme.colors.text,
-    marginBottom: 8,
-  },
-  stars: {
-    flexDirection: "row",
-    gap: 8,
-  },
   pickerContainer: {
     backgroundColor: theme.colors.textOnPrimary,
     borderWidth: 1,
@@ -722,30 +700,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textOnPrimary,
     lineHeight: 20,
-  },
-  submitButton: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  submitButtonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 16,
-    fontWeight: "600",
   },
 });

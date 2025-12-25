@@ -101,7 +101,7 @@ export default function AuthCallback() {
   }, [params.access_token, params.refresh_token]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <TouchableOpacity
         onPress={async () => {
           await supabase.auth.signOut();
@@ -125,7 +125,7 @@ export default function AuthCallback() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",

@@ -292,7 +292,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <View style={styles.specContainer}>
         <View style={styles.searchContainer}>
           <View style={styles.searchInputContainer}>
             <Ionicons
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: theme.colors.textSecondary,
   },
-  container: {
+  specContainer: {
     position: "absolute",
     top: 60,
     left: 16,

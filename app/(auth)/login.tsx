@@ -23,6 +23,7 @@ import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/services/supabase";
 import { logger } from "@/utils/logger";
+import { commonStyles } from "@/styles/common";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -130,7 +131,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
@@ -146,9 +147,9 @@ export default function LoginScreen() {
               <Text style={styles.subtitle}>Travel with confidence</Text>
             </View>
 
-            <View style={styles.form}>
+            <View style={commonStyles.form}>
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
@@ -183,11 +184,14 @@ export default function LoginScreen() {
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, isLoading && styles.buttonDisabled]}
+                style={[
+                  commonStyles.primaryButton,
+                  isLoading && commonStyles.buttonDisabled,
+                ]}
                 onPress={handleLogin}
                 disabled={isLoading}
               >
-                <Text style={styles.buttonText}>
+                <Text style={commonStyles.primaryButtonText}>
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Text>
               </TouchableOpacity>
@@ -256,10 +260,6 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     flex: 1,
     justifyContent: "center",
@@ -279,18 +279,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: theme.colors.textSecondary,
   },
-  form: {
-    width: "100%",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.colors.inputBorder,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    borderRadius: 8,
-    fontSize: 18,
-    backgroundColor: theme.colors.inputBackground,
-  },
+
   eyeButton: {
     padding: theme.spacing.md,
   },
@@ -357,21 +346,6 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: theme.colors.background,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.spacing.md,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: theme.colors.textOnPrimary,
     fontSize: 18,
     fontWeight: "600",
   },

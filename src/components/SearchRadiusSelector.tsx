@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateSearchRadius } from "@/store/userSlice";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useAuth } from "@/providers";
+import { commonStyles } from "@/styles/common";
 
 export default function SearchRadiusSelector() {
   const dispatch = useAppDispatch();
@@ -81,7 +82,7 @@ export default function SearchRadiusSelector() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Search Radius</Text>
@@ -137,7 +138,7 @@ export default function SearchRadiusSelector() {
           <Text
             key={option.value}
             style={[
-              styles.label,
+              commonStyles.formLabel,
               selectedRadius === option.value && styles.labelActive,
             ]}
           >
@@ -168,7 +169,7 @@ export default function SearchRadiusSelector() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     padding: 16,
   },
   header: {

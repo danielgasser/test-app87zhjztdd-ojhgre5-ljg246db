@@ -2300,7 +2300,6 @@ export const addToRecentlyViewed = createAsyncThunk(
     latitude: number;
     longitude: number;
   }) => {
-    console.log("👁️ addToRecentlyViewed thunk called:", params);
 
     const {
       userId,

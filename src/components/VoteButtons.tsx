@@ -133,14 +133,14 @@ export default function VoteButtons({
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.specContainer}>
         <ActivityIndicator size="small" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <TouchableOpacity
         style={[
           styles.voteButton,
@@ -201,7 +201,7 @@ export default function VoteButtons({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,

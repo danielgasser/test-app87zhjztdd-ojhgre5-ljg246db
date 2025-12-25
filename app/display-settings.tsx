@@ -21,6 +21,7 @@ import { getDefaultPreferences } from "@/utils/preferenceDefaults";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
+import { commonStyles } from "@/styles/common";
 
 export default function DisplaySettings() {
   const { user } = useAuth();
@@ -75,7 +76,7 @@ export default function DisplaySettings() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
@@ -84,7 +85,7 @@ export default function DisplaySettings() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -139,10 +140,6 @@ export default function DisplaySettings() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

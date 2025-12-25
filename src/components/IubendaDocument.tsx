@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
+import { commonStyles } from "@/styles/common";
 
 const IUBENDA_API_BASE = "https://www.iubenda.com/api";
 
@@ -105,7 +106,7 @@ export function IubendaDocument({
       animationType="slide"
       presentationStyle="pageSheet"
     >
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={commonStyles.container} edges={["top"]}>
         <View style={styles.header}>
           <Text style={styles.title}>{displayTitle}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -151,10 +152,6 @@ export function IubendaDocument({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

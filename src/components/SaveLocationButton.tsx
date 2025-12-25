@@ -14,6 +14,7 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { useAuth } from "@/providers/AuthProvider";
 import { notify } from "@/utils/notificationService";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
+import { commonStyles } from "@/styles/common";
 
 interface SaveLocationButtonProps {
   locationId?: string | null;
@@ -141,7 +142,7 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={[styles.button, isSaved && styles.buttonSaved]}
+      style={[commonStyles.primaryButton, isSaved && styles.buttonSaved]}
       onPress={handlePress}
       disabled={loading}
     >
@@ -154,7 +155,12 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
             size={20}
             color={isSaved ? theme.colors.primary : theme.colors.text}
           />
-          <Text style={[styles.buttonText, isSaved && styles.buttonTextSaved]}>
+          <Text
+            style={[
+              commonStyles.primaryButtonText,
+              isSaved && styles.buttonTextSaved,
+            ]}
+          >
             {isSaved ? "Saved" : "Save"}
           </Text>
         </>
@@ -164,25 +170,9 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
-  },
   buttonSaved: {
     borderColor: theme.colors.primary,
     backgroundColor: `${theme.colors.primary}15`,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.text,
   },
   buttonTextSaved: {
     color: theme.colors.primary,

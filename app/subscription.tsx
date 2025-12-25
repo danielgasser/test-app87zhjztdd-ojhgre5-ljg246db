@@ -1,12 +1,11 @@
 import React from "react";
-import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Paywall } from "@/components/subscription/Paywall";
-import { theme } from "@/styles/theme";
 import { useAuth } from "@/providers/AuthProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { updateUserProfile } from "@/store/userSlice";
+import { commonStyles } from "@/styles/common";
 
 export default function SubscriptionScreen() {
   const { user } = useAuth();
@@ -30,7 +29,7 @@ export default function SubscriptionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <Paywall
         onPurchaseComplete={handlePurchaseComplete}
         onClose={handleClose}
@@ -38,10 +37,3 @@ export default function SubscriptionScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-});

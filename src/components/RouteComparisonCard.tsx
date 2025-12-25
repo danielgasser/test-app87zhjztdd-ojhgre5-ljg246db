@@ -14,6 +14,7 @@ import { useAppSelector } from "@/store/hooks";
 import { formatDuration } from "@/utils/timeHelpers";
 import { ProactiveWarnings } from "./ProactiveWarnings";
 import { RouteSafetyBreakdown } from "./RouteSafetyBreakdown";
+import { commonStyles } from "@/styles/common";
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
   onSelectOriginal: () => void;
@@ -55,7 +56,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
   const isOriginalSelected = selectedRoute?.id === original_route.id;
   const isOptimizedSelected = selectedRoute?.id === optimized_route.id;
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       {/* Header */}
       <View style={styles.header}>
         <Ionicons name="analytics" size={24} color={theme.colors.primary} />
@@ -264,7 +265,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
         <TouchableOpacity
           style={[
             styles.startNavigationButton,
-            isStartingNavigation && styles.disabledButton,
+            isStartingNavigation && commonStyles.buttonDisabled,
           ]}
           onPress={onStartNavigation}
           disabled={isStartingNavigation}
@@ -295,7 +296,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,

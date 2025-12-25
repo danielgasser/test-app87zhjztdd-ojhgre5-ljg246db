@@ -64,7 +64,7 @@ const WelcomeScreenNew = () => {
   const styles = getStyles(isDark);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.specContainer}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor="transparent"
@@ -246,7 +246,7 @@ const getStyles = (isDark: boolean) =>
       marginBottom: 10,
       zIndex: 1,
     },
-    container: {
+    specContainer: {
       flex: 1,
       backgroundColor: isDark ? "#1a1a2e" : theme.colors.primary,
     },

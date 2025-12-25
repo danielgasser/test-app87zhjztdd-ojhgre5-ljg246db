@@ -48,6 +48,7 @@ import { SubscriptionTier } from "@/config/features";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { commonStyles } from "@/styles/common";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -719,7 +720,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   if (!visible || navigationActive) return null;
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       {showProfileBanner && (
         <ProfileBanner
           bannerType={
@@ -914,7 +915,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 style={[
                   styles.generateButton,
                   (routeLoading || !fromLocation || !toLocation) &&
-                    styles.disabledButton,
+                    commonStyles.buttonDisabled,
                 ]}
                 onPress={handleGenerateRoute}
                 disabled={routeLoading || !fromLocation || !toLocation}
@@ -1027,10 +1028,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.backgroundSecondary,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

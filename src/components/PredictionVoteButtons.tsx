@@ -13,6 +13,7 @@ import { useAppSelector } from "@/store/hooks";
 import { logger } from "@/utils/logger";
 import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers";
+import { commonStyles } from "@/styles/common";
 
 interface PredictionVoteButtonsProps {
   locationId: string;
@@ -144,8 +145,8 @@ export default function PredictionVoteButtons({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Was this prediction accurate?</Text>
+    <View style={commonStyles.container}>
+      <Text style={commonStyles.formLabel}>Was this prediction accurate?</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[
@@ -226,12 +227,6 @@ export default function PredictionVoteButtons({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
   label: {
     fontSize: 14,
     fontWeight: "500",

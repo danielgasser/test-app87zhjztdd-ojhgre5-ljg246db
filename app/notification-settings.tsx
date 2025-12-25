@@ -20,6 +20,7 @@ import { NotificationPreferences } from "../src/store/userSlice";
 import { useAuth } from "@/providers/AuthProvider";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
+import { commonStyles } from "@/styles/common";
 
 export default function NotificationSettings() {
   const { user } = useAuth();
@@ -79,7 +80,7 @@ export default function NotificationSettings() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={commonStyles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
@@ -88,7 +89,7 @@ export default function NotificationSettings() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -156,10 +157,6 @@ export default function NotificationSettings() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

@@ -39,6 +39,7 @@ import {
 } from "@/store/locationsSlice";
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 import { PremiumGate } from "@/components/PremiumGate";
+import { commonStyles } from "@/styles/common";
 
 export default function ProfileScreen() {
   const dispatch = useAppDispatch();
@@ -367,7 +368,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       {!isLoggedIn ? (
         <View style={styles.notLoggedInContainer}>
           <Text style={styles.notLoggedInText}>
@@ -921,10 +922,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.textOnPrimary,
     opacity: 0.9,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
   },
   notLoggedInContainer: {
     flex: 1,

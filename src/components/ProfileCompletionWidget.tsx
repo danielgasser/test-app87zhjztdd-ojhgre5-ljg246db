@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { FIELD_DISPLAY_NAMES } from "@/constants/profileRequirements";
 import { theme } from "@/styles/theme";
+import { commonStyles } from "@/styles/common";
 
 interface ProfileCompletionWidgetProps {
   missingFields: string[];
@@ -41,7 +42,7 @@ export default function ProfileCompletionWidget({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       {/* Header */}
       <View style={styles.header}>
         <Ionicons name="person-circle" size={24} color={theme.colors.primary} />
@@ -75,15 +76,18 @@ export default function ProfileCompletionWidget({
       )}
 
       {/* Complete Button */}
-      <TouchableOpacity style={styles.button} onPress={handleCompleteProfile}>
-        <Text style={styles.buttonText}>Complete Profile</Text>
+      <TouchableOpacity
+        style={commonStyles.primaryButton}
+        onPress={handleCompleteProfile}
+      >
+        <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>
         <Ionicons name="arrow-forward" size={16} color={theme.colors.card} />
       </TouchableOpacity>
     </View>
   );
 }
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.card,
     borderRadius: 12,
     padding: 16,
@@ -153,20 +157,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.text,
     lineHeight: 18,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 8,
-  },
-  buttonText: {
-    color: theme.colors.card,
-    fontSize: 14,
-    fontWeight: "600",
   },
 });

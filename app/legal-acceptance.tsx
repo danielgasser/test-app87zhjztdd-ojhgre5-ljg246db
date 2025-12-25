@@ -16,6 +16,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { IubendaDocument } from "@/components/IubendaDocument";
 import { recordLegalAcceptance } from "@/services/consentService";
+import { commonStyles } from "@/styles/common";
 
 const IUBENDA_PUBLIC_ID = "69238085";
 
@@ -54,7 +55,7 @@ export default function LegalAcceptanceScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconContainer}>
           <Ionicons
@@ -138,7 +139,10 @@ export default function LegalAcceptanceScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.button, !canContinue && styles.buttonDisabled]}
+          style={[
+            commonStyles.primaryButton,
+            !canContinue && commonStyles.buttonDisabled,
+          ]}
           onPress={handleAccept}
           disabled={!canContinue || isLoading}
           activeOpacity={0.8}
@@ -146,7 +150,7 @@ export default function LegalAcceptanceScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.colors.textOnPrimary} />
           ) : (
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={commonStyles.primaryButtonText}>Continue</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -171,10 +175,6 @@ export default function LegalAcceptanceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     flexGrow: 1,
     padding: theme.spacing.screenPadding,
@@ -247,19 +247,5 @@ const styles = StyleSheet.create({
     padding: theme.spacing.screenPadding,
     borderTopWidth: 1,
     borderTopColor: theme.colors.separator,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
-    alignItems: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: theme.colors.border,
-  },
-  buttonText: {
-    color: theme.colors.textOnPrimary,
-    fontSize: 18,
-    fontWeight: "600",
   },
 });

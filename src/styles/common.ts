@@ -68,7 +68,14 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'center',
     ...theme.shadows.sm,
   },
-
+  cancelButton: {
+    flex: 1,
+    padding: theme.spacing.md,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    alignItems: "center",
+  },
   secondaryButton: {
     backgroundColor: theme.colors.secondary,
     paddingVertical: theme.spacing.buttonPadding,
@@ -138,7 +145,10 @@ export const commonStyles = StyleSheet.create({
     color: theme.colors.textOnPrimary,
     ...theme.typography.button,
   },
-
+  cancelButtonText: {
+    color: theme.colors.text,
+    ...theme.typography.button,
+  },
   secondaryButtonText: {
     color: theme.colors.textOnSecondary,
     ...theme.typography.button,
@@ -230,6 +240,7 @@ export const commonStyles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     fontSize: 16,
     color: theme.colors.text,
+    marginBottom: theme.spacing.md,
   },
 
   inputFocused: {
@@ -258,13 +269,15 @@ export const commonStyles = StyleSheet.create({
   formContainer: {
     paddingHorizontal: theme.spacing.screenPadding,
   },
-
+  form: {
+    width: "100%",
+  },
   formField: {
     marginBottom: theme.spacing.lg,
   },
 
   formLabel: {
-    ...theme.typography.bodySmall,
+    ...theme.typography.body,
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
     fontWeight: '600',

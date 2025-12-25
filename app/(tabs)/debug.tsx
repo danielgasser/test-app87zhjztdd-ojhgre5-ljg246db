@@ -31,6 +31,7 @@ import * as Device from "expo-device";
 import * as Application from "expo-application";
 import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers/AuthProvider";
+import { commonStyles } from "@/styles/common";
 
 const appConfig = require("../../app.config.js");
 
@@ -89,7 +90,7 @@ export default function DebugScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={commonStyles.container} edges={["top"]}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -284,10 +285,6 @@ function InfoRow({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",

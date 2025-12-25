@@ -38,7 +38,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
   const unsafeSeg = segmentScores.filter((s) => s.safety_score < 3.0).length;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <TouchableOpacity
         style={styles.header}
         onPress={() => setIsExpanded(!isExpanded)}
@@ -312,7 +312,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 8,
     marginTop: 8,

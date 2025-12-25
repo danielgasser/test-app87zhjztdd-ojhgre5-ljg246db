@@ -20,6 +20,7 @@ import { notify } from "@/utils/notificationService";
 import { useLocalSearchParams } from "expo-router";
 import { logger } from "@/utils/logger";
 import { passwordChecker } from "@/utils/passwordChecker";
+import { commonStyles } from "@/styles/common";
 
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();
@@ -117,7 +118,7 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -150,7 +151,7 @@ export default function ResetPasswordScreen() {
                 {/* Form */}
                 <View style={styles.form}>
                   {/* New Password */}
-                  <Text style={styles.label}>New Password</Text>
+                  <Text style={commonStyles.formLabel}>New Password</Text>
                   <View style={styles.passwordContainer}>
                     <TextInput
                       style={styles.passwordInput}
@@ -176,7 +177,7 @@ export default function ResetPasswordScreen() {
                   </View>
 
                   {/* Confirm Password */}
-                  <Text style={styles.label}>Confirm Password</Text>
+                  <Text style={commonStyles.formLabel}>Confirm Password</Text>
                   <View style={styles.passwordContainer}>
                     <TextInput
                       style={styles.passwordInput}
@@ -265,10 +266,6 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   keyboardView: {
     flex: 1,
   },
@@ -309,13 +306,6 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: theme.spacing.xl,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.md,
   },
   passwordContainer: {
     flexDirection: "row",

@@ -28,6 +28,7 @@ import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { commonStyles } from "@/styles/common";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to SafePath" },
@@ -553,7 +554,7 @@ export default function OnboardingScreen() {
   const renderNameStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        What's your name? <Text style={styles.requiredIndicator}>*</Text>
+        What's your name? <Text style={commonStyles.requiredAsterisk}>*</Text>
       </Text>
       <Text style={styles.stepDescription}>
         This helps personalize your experience. You can control who sees this in
@@ -575,7 +576,7 @@ export default function OnboardingScreen() {
   const renderRaceStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Race & Ethnicity <Text style={styles.requiredIndicator}>*</Text>
+        Race & Ethnicity <Text style={commonStyles.requiredAsterisk}>*</Text>
       </Text>
       <Text style={styles.stepDescription}>
         Select all that apply. This helps us show you safety ratings from people
@@ -630,7 +631,7 @@ export default function OnboardingScreen() {
   const renderGenderStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Gender Identity <Text style={styles.requiredIndicator}>*</Text>
+        Gender Identity <Text style={commonStyles.requiredAsterisk}>*</Text>
       </Text>
       <Text style={styles.stepDescription}>
         How do you identify? This helps us provide relevant safety information.
@@ -683,7 +684,7 @@ export default function OnboardingScreen() {
   const renderLGBTQStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        LGBTQ+ Identity <Text style={styles.requiredIndicator}>*</Text>
+        LGBTQ+ Identity <Text style={commonStyles.requiredAsterisk}>*</Text>
       </Text>
       <Text style={styles.stepDescription}>
         Do you identify as LGBTQ+? This helps us show you safety information
@@ -978,7 +979,7 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={commonStyles.container}>
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
@@ -1088,10 +1089,6 @@ const styles = StyleSheet.create({
     color: theme.colors.secondaryDark,
     lineHeight: 20,
   },
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.card,
-  },
   progressContainer: {
     paddingHorizontal: 20,
     paddingVertical: 15,
@@ -1154,10 +1151,6 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     alignSelf: "stretch",
-  },
-  requiredIndicator: {
-    color: theme.colors.error,
-    fontWeight: "bold",
   },
   optionalBadge: {
     color: theme.colors.textSecondary,

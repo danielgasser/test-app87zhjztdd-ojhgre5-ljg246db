@@ -17,6 +17,7 @@ import {
 } from "@/services/revenueCatService";
 import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
+import { commonStyles } from "@/styles/common";
 
 interface PaywallProps {
   onPurchaseComplete?: () => void;
@@ -103,7 +104,10 @@ export const Paywall: React.FC<PaywallProps> = ({
   ].filter((p) => p.pkg);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={commonStyles.container}
+      contentContainerStyle={styles.content}
+    >
       {/* Header */}
       <View style={styles.header}>
         {onClose && (
@@ -205,10 +209,6 @@ export const Paywall: React.FC<PaywallProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
   content: {
     padding: theme.spacing.lg,
   },

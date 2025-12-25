@@ -70,7 +70,7 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
     (danger_zones_intersected || 0) +
     (safety_summary?.unsafe_segments || 0);
   return (
-    <View style={styles.container}>
+    <View style={styles.specContainer}>
       <TouchableOpacity
         style={styles.header}
         onPress={() => setIsExpanded(!isExpanded)}
@@ -175,7 +175,7 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  specContainer: {
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 8,
     marginTop: 8,
