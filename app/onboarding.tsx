@@ -20,7 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { fetchUserProfile } from "src/store/userSlice";
-import { DEMOGRAPHIC_OPTIONS } from "@/utils/demographic_options";
+import { DEMOGRAPHIC_OPTIONS } from "@/constants/demographicOptions";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
