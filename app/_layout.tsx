@@ -19,6 +19,7 @@ import {
   initializeAdMob,
   loadInterstitialAd,
   loadRewardedAd,
+  requestAdConsentIfNeeded,
 } from "@/services/adMobService";
 import { initializeRevenueCat } from "@/services/revenueCatService";
 import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
@@ -55,6 +56,7 @@ function AppNavigator() {
     // Initialize AdMob
     const initAds = async () => {
       await initializeAdMob();
+      await requestAdConsentIfNeeded();
       loadInterstitialAd();
       loadRewardedAd();
     };

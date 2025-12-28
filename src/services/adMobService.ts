@@ -7,6 +7,8 @@ import mobileAds, {
     RewardedAd,
     AdEventType,
     RewardedAdEventType,
+    AdsConsent,
+    AdsConsentStatus,
 } from 'react-native-google-mobile-ads';
 
 // ============================================================================
@@ -91,6 +93,24 @@ export const showInterstitialAd = (): boolean => {
         return true;
     }
     return false;
+};
+
+export const requestAdConsentIfNeeded = async (): Promise<boolean> => {
+    try {
+        const consentInfo = await AdsConsent.requestInfoUpdate();
+
+        if (consentInfo.isConsentFormAvailable &&
+            consentInfo.status === AdsConsentStatus.REQUIRED) {
+            await AdsConsent.showForm();
+        }
+
+        // Return true if user consented to personalized ads
+        const updatedInfo = await AdsConsent.requestInfoUpdate();
+        return updatedInfo.status === AdsConsentStatus.OBTAINED;
+    } catch (error) {
+        console.error('Ad consent error:', error);
+        return false;
+    }
 };
 
 // ============================================================================

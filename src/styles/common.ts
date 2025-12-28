@@ -66,6 +66,7 @@ export const commonStyles = StyleSheet.create({
     paddingVertical: theme.spacing.buttonPadding,
     paddingHorizontal: theme.spacing.lg,
     borderRadius: theme.borderRadius.md,
+    color: theme.colors.textOnPrimary,
     alignItems: 'center',
     justifyContent: 'center',
     ...theme.shadows.sm,
@@ -183,7 +184,7 @@ export const commonStyles = StyleSheet.create({
     ...theme.typography.h3,
     color: theme.colors.text,
     paddingHorizontal: theme.spacing.screenPadding,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
   },
   collapsibleTitle: {
     ...theme.typography.h3,
@@ -425,6 +426,8 @@ export const commonStyles = StyleSheet.create({
   // ==================== FOOTER STYLES ====================
 
   footer: {
+    flexDirection: 'row',
+    gap: theme.spacing.md,
     padding: theme.spacing.screenPadding,
     borderTopWidth: 1,
     borderTopColor: theme.colors.separator,

@@ -37,6 +37,12 @@ import {
 import { formatTimeAgo } from "@/utils/timeHelpers";
 import VoteButtons from "@/components/VoteButtons";
 import { commonStyles } from "@/styles/common";
+import MapFiltersModal, {
+  MapFilters,
+  DEFAULT_FILTERS,
+} from "@/components/MapFiltersModal";
+import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -62,6 +68,11 @@ export default function CommunityScreen() {
   const bannerState = useAppSelector((state) => state.profileBanner);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [filtersModalVisible, setFiltersModalVisible] = useState(false);
+  const [communityFilters, setCommunityFilters] =
+    useState<MapFilters>(DEFAULT_FILTERS);
+  const { user } = useAuth();
+
   // Check profile completeness for recommendations
   const profileCheck = React.useMemo(() => {
     if (!profile) return { canUse: true, missingFields: [] };
@@ -72,6 +83,30 @@ export default function CommunityScreen() {
       missingFields: validation.missingFieldsForFeature,
     };
   }, [profile]);
+
+  const filteredReviews = React.useMemo(() => {
+    if (!communityReviews) return [];
+
+    return communityReviews.filter((review: any) => {
+      // Get the safety rating
+      const rating = parseFloat(review.safety_rating) || 0;
+      if (communityFilters.showMyReviewsOnly) {
+        if (review.user_id !== user?.id) return false;
+      }
+      // Filter by minimum safety rating
+      if (communityFilters.minSafetyRating !== null) {
+        if (rating < communityFilters.minSafetyRating) return false;
+      }
+
+      // Filter by place type (if location has place_type)
+      if (communityFilters.placeTypes.length > 0) {
+        if (!communityFilters.placeTypes.includes(review.place_type))
+          return false;
+      }
+
+      return true;
+    });
+  }, [communityReviews, communityFilters]);
 
   // Determine if we should show the banner
   const showProfileBanner = React.useMemo(() => {
@@ -425,7 +460,7 @@ export default function CommunityScreen() {
           <Text style={styles.screenSubtitle}>
             Recent reviews and safety updates from travelers like you
           </Text>
-          {/* ADD THIS TOGGLE UI */}
+
           <View style={styles.modeToggleContainer}>
             <TouchableOpacity
               style={[
@@ -581,8 +616,20 @@ export default function CommunityScreen() {
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
           </View>
-          {communityReviews.length > 0 ? (
-            communityReviews.map(renderReviewItem)
+          {/* Filter Button */}
+          <TouchableOpacity
+            style={[commonStyles.primaryButton, styles.filterReviewsButton]}
+            onPress={() => setFiltersModalVisible(true)}
+          >
+            <Ionicons
+              name="options"
+              size={20}
+              color={theme.colors.textOnPrimary}
+            />
+            <Text style={commonStyles.primaryButtonText}>Filter Reviews</Text>
+          </TouchableOpacity>
+          {filteredReviews.length > 0 ? (
+            filteredReviews.map(renderReviewItem)
           ) : (
             <Text style={styles.emptyText}>
               No reviews yet. Be the first to share your experience!
@@ -602,6 +649,15 @@ export default function CommunityScreen() {
           setSelectedUserId(null);
         }}
       />
+      {/* Filter Modal */}
+      <MapFiltersModal
+        visible={filtersModalVisible}
+        onClose={() => setFiltersModalVisible(false)}
+        filters={communityFilters}
+        onApplyFilters={setCommunityFilters}
+        showMyReviewsFilter={true}
+      />
+      <GlobalPremiumPromptModal />
     </SafeAreaView>
   );
 }
@@ -664,6 +720,18 @@ const styles = StyleSheet.create({
   modeButtonTextActive: {
     color: theme.colors.card,
   },
+  filterReviewsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 16,
+    gap: 8,
+  },
   noLocationContainer: {
     padding: 40,
     alignItems: "center",
@@ -713,7 +781,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 5,
   },
   seeAllText: {
     fontSize: 14,
@@ -726,8 +794,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     shadowColor: theme.colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 1, height: 2 },
+    shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -777,7 +845,7 @@ const styles = StyleSheet.create({
   reviewFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   clickableName: {
     textDecorationLine: "underline",

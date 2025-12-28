@@ -323,7 +323,7 @@ export default function PrivacySettings() {
           <MaterialIcons
             name="arrow-back"
             size={24}
-            color={theme.colors.text}
+            color={theme.colors.textOnPrimary}
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>Privacy Settings</Text>

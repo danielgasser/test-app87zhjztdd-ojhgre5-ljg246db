@@ -14,13 +14,13 @@ import { useAppDispatch } from "@/store/hooks";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
-
 export interface MapFilters {
   minSafetyRating: number | null; // null = show all, 2/3/4 = minimum rating
   hasReviews: boolean; // Only show locations with reviews
   hasDemographicReviews: boolean; // Only show locations with reviews from my demographic
   placeTypes: string[]; // Empty = show all
   useDemographicScore: boolean; // Whether to use demographic score in filtering
+  showMyReviewsOnly: boolean;
 }
 
 export const DEFAULT_FILTERS: MapFilters = {
@@ -29,6 +29,7 @@ export const DEFAULT_FILTERS: MapFilters = {
   hasDemographicReviews: false,
   placeTypes: [],
   useDemographicScore: false,
+  showMyReviewsOnly: false,
 };
 
 const PLACE_TYPE_OPTIONS = [
@@ -52,6 +53,7 @@ interface MapFiltersModalProps {
   onClose: () => void;
   filters: MapFilters;
   onApplyFilters: (filters: MapFilters) => void;
+  showMyReviewsFilter?: boolean;
 }
 
 export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
@@ -59,6 +61,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
   onClose,
   filters,
   onApplyFilters,
+  showMyReviewsFilter = false,
 }) => {
   const dispatch = useAppDispatch();
   const { hasAccess } = useFeatureAccess("advancedFilters");
@@ -70,6 +73,13 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters, visible]);
+
+  const handleToggleMyReviews = () => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      showMyReviewsOnly: !prev.showMyReviewsOnly,
+    }));
+  };
 
   const handleRatingSelect = (rating: number | null) => {
     setLocalFilters((prev) => ({ ...prev, minSafetyRating: rating }));
@@ -299,6 +309,30 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
                   )}
                 </View>
               </TouchableOpacity>
+              {showMyReviewsFilter && (
+                <TouchableOpacity
+                  style={styles.toggleRow}
+                  onPress={handleToggleMyReviews}
+                >
+                  <View style={styles.toggleLabel}>
+                    <Text style={styles.toggleText}>My reviews only</Text>
+                  </View>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      localFilters.showMyReviewsOnly && styles.checkboxActive,
+                    ]}
+                  >
+                    {localFilters.showMyReviewsOnly && (
+                      <Ionicons
+                        name="checkmark"
+                        size={16}
+                        color={theme.colors.background}
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Place Type Filter */}
