@@ -96,7 +96,11 @@ export default function DebugScreen() {
           onPress={() => router.back()}
           style={[commonStyles.primaryButton, commonStyles.backButton]}
         >
-          <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={theme.colors.textOnPrimary}
+          />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>🐛 Debug Console</Text>
         <TouchableOpacity onPress={handleRefresh}>

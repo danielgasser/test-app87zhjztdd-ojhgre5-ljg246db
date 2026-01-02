@@ -99,7 +99,7 @@ export default function NotificationSettings() {
           <MaterialIcons
             name="arrow-back"
             size={24}
-            color={theme.colors.text}
+            color={theme.colors.textOnPrimary}
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>Notifications</Text>
