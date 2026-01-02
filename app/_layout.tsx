@@ -60,11 +60,10 @@ function AppNavigator() {
       loadInterstitialAd();
       loadRewardedAd();
     };
-    /*
-    Un-comment for production build
+
     initAds();
     initializeRevenueCat();
-    */
+
     return () => {
       subscription.remove();
     };

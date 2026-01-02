@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
 // ============================================================================
 
 const API_KEYS = {
-    ios: 'test_lPoLbFyowpJiuiMThnesLPYifqI',      // Replace with your iOS key
+    ios: 'appl_eBWyDlgAvUVkjRXIEggxLNWYBJY',      // Replace with your iOS key
     android: 'test_lPoLbFyowpJiuiMThnesLPYifqI',  // Replace with your Android key
 };
 
