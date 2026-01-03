@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
 
 const API_KEYS = {
     ios: 'appl_eBWyDlgAvUVkjRXIEggxLNWYBJY',      // Replace with your iOS key
-    android: 'test_lPoLbFyowpJiuiMThnesLPYifqI',  // Replace with your Android key
+    android: 'goog_fpgZOiezFXEbdVcswWMxpOsTVhk',  // Replace with your Android key
 };
 
 const ENTITLEMENT_ID = 'SafePath Pro';
