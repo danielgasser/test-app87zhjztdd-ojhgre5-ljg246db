@@ -220,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const refreshPushToken = async () => {
       // Only refresh if authenticated and onboarding complete
-      if (!state.isAuthenticated || !state.user || state.needsOnboarding) {
+      if (!state.isAuthenticated || !state.user) {
         return;
       }
 
@@ -322,8 +322,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ============================================================================
 
   const signOut = async () => {
+    if (state.user?.id) {
+      await notificationService.removePushToken(state.user.id);
+    }
     await supabase.auth.signOut();
-
     // State will be updated by onAuthStateChange listener
   };
 
