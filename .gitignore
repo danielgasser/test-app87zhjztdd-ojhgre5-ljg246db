@@ -59,3 +59,8 @@ google-services.json
 eslint.config.js
 .ts-prunerc
 src/scripts/neighborhood_stats_data.json
+
+# builds
+
+*.apk
+*.aab
