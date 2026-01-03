@@ -42,9 +42,10 @@ module.exports = () => {
         },
       },
       android: {
-        versionCode: 7,
+        versionCode: 8,
         minSdkVersion: 24, // Android 7.0
         targetSdkVersion: 34, // Android 14
+        googleServicesFile: "./google-services.json",
         config: {
           googleMaps: {
             apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
