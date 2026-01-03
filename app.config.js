@@ -42,7 +42,7 @@ module.exports = () => {
         },
       },
       android: {
-        versionCode: 5,
+        versionCode: 6,
         minSdkVersion: 24, // Android 7.0
         targetSdkVersion: 34, // Android 14
         config: {
