@@ -318,7 +318,31 @@ export const commonStyles = StyleSheet.create({
   },
 
   // ==================== MODAL STYLES ====================
-  modalOverlay: {
+
+  modalSheetOverlay: {
+    flex: 1,
+    backgroundColor: theme.colors.overlay,
+    justifyContent: 'flex-end',
+  },
+
+  modalSheetContent: {
+    backgroundColor: theme.colors.card,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: '65%',
+    padding: theme.spacing.sm,
+    maxHeight: '90%',
+    ...theme.shadows.lg,
+  },
+
+  modalSheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  }, modalOverlay: {
     flex: 1,
     backgroundColor: theme.colors.overlay,
     justifyContent: 'center',

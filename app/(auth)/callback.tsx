@@ -12,6 +12,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { commonStyles } from "@/styles/common";
 
 export default function AuthCallback() {
   const { refreshOnboardingStatus } = useAuth();
@@ -116,7 +117,7 @@ export default function AuthCallback() {
           padding: 10,
         }}
       >
-        <Text style={{ color: "red", fontWeight: "bold" }}>DEV: Sign Out</Text>
+        <Text style={commonStyles.primaryButtonText}>Sign Out</Text>
       </TouchableOpacity>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.statusText}>{status}</Text>

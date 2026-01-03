@@ -82,10 +82,13 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 
   return (
     <View
-      style={[
-        commonStyles.container,
-        { borderLeftWidth: 4, borderLeftColor: badgeColor },
-      ]}
+      style={{
+        borderLeftWidth: 4,
+        borderLeftColor: badgeColor,
+        paddingLeft: 12,
+        paddingVertical: 16,
+        marginHorizontal: 16,
+      }}
     >
       {/* 🆕 Header changes based on source */}
       <View

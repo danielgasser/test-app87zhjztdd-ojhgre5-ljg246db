@@ -182,15 +182,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       selectedLocation?.longitude ||
       searchMarker?.longitude ||
       placeDetails?.geometry?.location?.lng;
-    console.log("👁️ Recently viewed check:", {
-      visible,
-      userId: currentUser?.id,
-      name,
-      latitude,
-      longitude,
-      locationId,
-      googlePlaceId,
-    });
+
     if (!name || !latitude || !longitude) return;
 
     dispatch(
@@ -466,10 +458,10 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={commonStyles.modalOverlay}>
-        <View style={commonStyles.modalContent}>
+      <View style={commonStyles.modalSheetOverlay}>
+        <View style={commonStyles.modalSheetContent}>
           {/* Header */}
-          <View style={commonStyles.header}>
+          <View style={commonStyles.modalSheetHeader}>
             <Text style={commonStyles.headerTitle}>Location Details</Text>
             <View style={styles.headerActions}>
               <SaveLocationButton
@@ -524,7 +516,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 <Text style={styles.locationType}>
                   {selectedLocation?.place_type ||
                     placeDetails?.place_id ||
-                    "unknown"}
+                    "Unknown Location Type"}
                   .
                 </Text>
 
