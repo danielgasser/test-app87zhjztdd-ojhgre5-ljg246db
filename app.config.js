@@ -13,7 +13,7 @@ module.exports = () => {
     expo: {
       name: appName,
       slug: "safepath",
-      version: "0.9.58",
+      version: "0.9.59",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -25,7 +25,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "138",
+        buildNumber: "139",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
@@ -36,9 +36,11 @@ module.exports = () => {
           ITSAppUsesNonExemptEncryption: false,
           UIBackgroundModes: ["location"],
           NSLocationAlwaysAndWhenInUseUsageDescription:
-            "SafePath needs your location in the background to provide turn-by-turn navigation and safety alerts.",
+            "SafePath uses your background location to provide turn-by-turn navigation directions and alert you in real-time if community members report safety concerns along your active route.",
           NSLocationWhenInUseUsageDescription:
-            "SafePath needs your location to show your position on the map and provide navigation.",
+            "SafePath uses your location to display your position on the map, show safety ratings for nearby areas based on community reviews from people who share your demographics, and calculate safe routes to your destination.",
+          NSPhotoLibraryUsageDescription:
+            "SafePath uses your photo library to let you select and upload a profile picture that other community members can see.",
         },
       },
       android: {
