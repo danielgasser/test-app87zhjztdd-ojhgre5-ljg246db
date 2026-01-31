@@ -6,8 +6,8 @@ module.exports = () => {
   const appName = IS_PRODUCTION
     ? "SafePath"
     : IS_PREVIEW
-    ? "SafePath TEST"
-    : "SafePath DEV";
+      ? "SafePath TEST"
+      : "SafePath DEV";
 
   return {
     expo: {
@@ -35,12 +35,12 @@ module.exports = () => {
         infoPlist: {
           ITSAppUsesNonExemptEncryption: false,
           UIBackgroundModes: ["location"],
-          NSLocationAlwaysAndWhenInUseUsageDescription:
-            "SafePath uses your background location to provide turn-by-turn navigation directions and alert you in real-time if community members report safety concerns along your active route.",
           NSLocationWhenInUseUsageDescription:
-            "SafePath uses your location to display your position on the map, show safety ratings for nearby areas based on community reviews from people who share your demographics, and calculate safe routes to your destination.",
+            "SafePath uses your location to provide safety-optimized navigation and show nearby places with demographic-specific safety ratings. For example, we'll show you gas stations rated safe by travelers like you.",
+          NSLocationAlwaysUsageDescription:
+            "SafePath uses your location to provide real-time safety alerts during navigation and notify you when dangerous reviews are posted near your active route.",
           NSPhotoLibraryUsageDescription:
-            "SafePath uses your photo library to let you select and upload a profile picture that other community members can see.",
+            "SafePath accesses your photos to let you add a profile picture and attach photos to your location reviews to help other travelers.",
         },
       },
       android: {

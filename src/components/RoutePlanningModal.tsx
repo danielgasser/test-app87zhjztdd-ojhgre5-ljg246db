@@ -49,6 +49,7 @@ import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { commonStyles } from "@/styles/common";
+import { router } from "expo-router";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -104,10 +105,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const bannerState = useAppSelector((state) => state.profileBanner);
 
   const searchHistory = useAppSelector(
-    (state) => state.locations.searchHistory
+    (state) => state.locations.searchHistory,
   );
   const { hasAccess: hasSearchHistoryAccess } =
     useFeatureAccess("searchHistory");
+  const { hasAccess: hasRoutePlanningAccess } =
+    useFeatureAccess("routePlanning");
 
   const scrollViewRef = useRef<ScrollView>(null);
   // Check profile completeness for safe routing
@@ -134,7 +137,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (profileCheck.canUse) return false;
     return shouldShowBanner(
       bannerState,
-      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE
+      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE,
     );
   }, [profileCheck.canUse, bannerState]);
 
@@ -151,7 +154,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const [dangerMessage, setDangerMessage] = useState<string>("");
   const [routeLoadingMessage, setRouteLoadingMessage] = useState(
-    "Finding safe route..."
+    "Finding safe route...",
   );
 
   // Initialize from location with current location
@@ -197,7 +200,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const reverseGeocodeLocation = async (
     latitude: number,
-    longitude: number
+    longitude: number,
   ): Promise<string> => {
     try {
       const results = await googlePlacesService.reverseGeocode({
@@ -237,9 +240,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         autocompleteParams.components = `country:${country}`;
       }
 
-      const results = await googlePlacesService.autocomplete(
-        autocompleteParams
-      );
+      const results =
+        await googlePlacesService.autocomplete(autocompleteParams);
 
       return results.slice(0, 5).map((result) => ({
         id: `google_${result.place_id}`,
@@ -271,7 +273,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           query,
           latitude: userLocation ? userLocation.latitude : undefined,
           longitude: userLocation ? userLocation.longitude : undefined,
-        })
+        }),
       );
 
       // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
@@ -279,7 +281,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
     },
-    [dispatch, userLocation, userTier]
+    [dispatch, userLocation, userTier],
   );
 
   // Handle starting navigation
@@ -333,7 +335,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         fromLocation.source === "current_location"
           ? await reverseGeocodeLocation(
               fromLocation.latitude,
-              fromLocation.longitude
+              fromLocation.longitude,
             )
           : fromLocation.name;
 
@@ -347,7 +349,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           duration_minutes: selectedRoute.estimated_duration_minutes,
           safety_score: selectedRoute.safety_analysis.overall_route_score,
           navigation_session_id: navigationSessionId,
-        })
+        }),
       ).unwrap();
 
       const optimizedRoute = {
@@ -399,8 +401,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           dangerZones > 0
             ? `${safetyNotes}.`
             : `⚠️ This route has a low safety score (${safetyScore.toFixed(
-                1
-              )}/5.0).`
+                1,
+              )}/5.0).`,
         );
       } else {
         setDangerMessage(""); // Clear message for safe routes
@@ -415,7 +417,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           userId: currentUser.id,
           context: "route",
           limit: 10,
-        })
+        }),
       );
     }
   }, [currentUser?.id, hasSearchHistoryAccess, visible, dispatch]);
@@ -439,7 +441,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         showPremiumPrompt({
           feature: "unlimitedSearches",
           description: `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
-        })
+        }),
       );
       return;
     }
@@ -464,7 +466,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             selectedLatitude: location.latitude,
             selectedLongitude: location.longitude,
             searchContext: "route",
-          })
+          }),
         );
       }
       setActiveInput(null);
@@ -507,7 +509,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               selectedLatitude: location.latitude,
               selectedLongitude: location.longitude,
               searchContext: "route",
-            })
+            }),
           );
         }
         setActiveInput(null);
@@ -538,10 +540,20 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   // Handle route generation
   const handleGenerateRoute = async () => {
+    if (!hasRoutePlanningAccess) {
+      dispatch(
+        showPremiumPrompt({
+          feature: "routePlanning",
+          description:
+            "Route planning is a Premium feature. Upgrade to plan safe routes tailored to your demographics.",
+        }),
+      );
+      return;
+    }
     if (!fromLocation || !toLocation) {
       notify.error(
         "Please set both origin and destination",
-        "Missing Information"
+        "Missing Information",
       );
       return;
     }
@@ -549,7 +561,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (!userProfile) {
       notify.error(
         "Please complete your profile to get personalized safety routes",
-        "Profile Required"
+        "Profile Required",
       );
       return;
     }
@@ -621,15 +633,15 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           dangerZones > 0
             ? `⚠️ This route passes through ${dangerZones} danger zone(s) for your demographics. ${safetyNotes}`
             : `⚠️ This route has a low safety score (${safetyScore.toFixed(
-                1
-              )}/5.0).`
+                1,
+              )}/5.0).`,
         );
       }
     } catch (error) {
       logger.error("Route generation error:", error);
       notify.error(
         error instanceof Error ? error.message : "Failed to generate route",
-        "Route Error"
+        "Route Error",
       );
 
       // Fallback to basic route generation
@@ -657,7 +669,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   const renderLocationInput = (
     type: "from" | "to",
     location: LocationResult | null,
-    placeholder: string
+    placeholder: string,
   ) => (
     <TouchableOpacity
       style={[
@@ -873,7 +885,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   {renderLocationInput(
                     "from",
                     fromLocation,
-                    "Choose starting point"
+                    "Choose starting point",
                   )}
                   {renderLocationInput("to", toLocation, "Choose destination")}
                 </View>
@@ -898,7 +910,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                         updateRoutePreferences({
                           avoidEveningDanger:
                             !routePreferences.avoidEveningDanger,
-                        })
+                        }),
                       )
                     }
                   >
@@ -927,16 +939,29 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     size="small"
                     color={theme.colors.background}
                   />
+                ) : !hasRoutePlanningAccess ? (
+                  <>
+                    <Ionicons
+                      name="lock-closed"
+                      size={20}
+                      color={theme.colors.background}
+                    />
+                    <Text style={styles.generateButtonText}>
+                      Generate Safe Route
+                    </Text>
+                  </>
                 ) : (
-                  <Ionicons
-                    name="navigate"
-                    size={20}
-                    color={theme.colors.background}
-                  />
+                  <>
+                    <Ionicons
+                      name="navigate"
+                      size={20}
+                      color={theme.colors.background}
+                    />
+                    <Text style={styles.generateButtonText}>
+                      {routeLoadingMessage || "Generate Safe Route"}
+                    </Text>
+                  </>
                 )}
-                <Text style={styles.generateButtonText}>
-                  {routeLoading ? routeLoadingMessage : "Generate Safe Route"}
-                </Text>
               </TouchableOpacity>
 
               {/* Error Display */}
@@ -982,7 +1007,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                           {
                             backgroundColor: getSafetyBadgeColor(
                               selectedRoute.safety_analysis
-                                ?.overall_route_score || 0
+                                ?.overall_route_score || 0,
                             ),
                           },
                         ]}
@@ -990,7 +1015,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                         <Text style={styles.safetyScore}>
                           {Math.round(
                             selectedRoute.safety_analysis
-                              ?.overall_route_score || 0
+                              ?.overall_route_score || 0,
                           )}
                         </Text>
                       </View>

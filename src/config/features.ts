@@ -8,6 +8,7 @@ export type SubscriptionTier = keyof typeof SUBSCRIPTION_TIERS;
 
 export const FEATURES = {
     // Navigation
+    routePlanning: { minTier: 'premium', label: 'Route Planning' },
     routeHistory: { minTier: 'premium', label: 'Route History' },
     unlimitedSearches: { minTier: 'premium', label: 'Unlimited Searches' },
     saveLocations: { minTier: 'premium', label: 'Save Locations' },
