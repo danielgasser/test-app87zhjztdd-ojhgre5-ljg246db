@@ -1,5 +1,5 @@
 -- ============================================
--- SafePath - Mark Test Users as Onboarded with Demographics
+-- TruGuide - Mark Test Users as Onboarded with Demographics
 -- ============================================
 
 -- Create or update profiles table entries for test users

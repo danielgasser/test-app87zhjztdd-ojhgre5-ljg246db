@@ -122,7 +122,7 @@ export default function MapScreen() {
   const [mapReady, setMapReady] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    null
+    null,
   );
   const [searchMarker, setSearchMarker] = useState<SearchResult | null>(null);
   const [routeOrigin, setRouteOrigin] = useState<RouteCoordinate | null>(null);
@@ -134,7 +134,7 @@ export default function MapScreen() {
   const [mapKey, setMapKey] = useState(0);
   const userSearchRadiusKm = useAppSelector(
     (state) => state.user.searchRadiusKm,
-    shallowEqual
+    shallowEqual,
   );
   const [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState<
     string | null
@@ -169,7 +169,7 @@ export default function MapScreen() {
   } = useAppSelector((state: any) => state.locations, shallowEqual);
 
   const navigationPosition = useAppSelector(
-    (state: any) => state.locations.navigationPosition
+    (state: any) => state.locations.navigationPosition,
   );
 
   const locationsStateRef = useRef(null);
@@ -183,25 +183,25 @@ export default function MapScreen() {
   const userId = user?.id;
   const userProfile = useAppSelector(
     (state: any) => state.user.profile,
-    shallowEqual
+    shallowEqual,
   );
   const isAppReady = userId && userProfile && userLocation;
 
   const bannerState = useAppSelector(
     (state: any) => state.profileBanner,
-    shallowEqual
+    shallowEqual,
   );
   const dangerZones = useAppSelector(
     (state) => state.locations.dangerZones,
-    shallowEqual
+    shallowEqual,
   );
   const dangerZonesVisible = useAppSelector(
     (state) => state.locations.dangerZonesVisible,
-    shallowEqual
+    shallowEqual,
   );
   const dangerZonesLoading = useAppSelector(
     (state) => state.locations.dangerZonesLoading,
-    shallowEqual
+    shallowEqual,
   );
 
   const { distanceUnit } = useUserPreferences();
@@ -255,7 +255,7 @@ export default function MapScreen() {
     for (let i = 1; i < routePoints.length; i++) {
       const dist = calculateDistanceBetweenPoints(
         routePoints[i - 1],
-        routePoints[i]
+        routePoints[i],
       );
       pointDistances.push(pointDistances[i - 1] + dist);
     }
@@ -288,8 +288,8 @@ export default function MapScreen() {
             1,
             ((navigationPosition.longitude - segStart.longitude) * dx +
               (navigationPosition.latitude - segStart.latitude) * dy) /
-              segLengthSq
-          )
+              segLengthSq,
+          ),
         );
 
         // Find projected point
@@ -360,9 +360,9 @@ export default function MapScreen() {
         APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
           ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
           : (segment.safety_score || segment.overall_score) >=
-            APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
-          ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
-          : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+              APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
+            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
+            : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
 
       const segmentCoords: { latitude: number; longitude: number }[] = [];
 
@@ -430,7 +430,7 @@ export default function MapScreen() {
     if (profileCheck.canUse) return false;
     return shouldShowBanner(
       bannerState,
-      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE
+      APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE,
     );
   }, [profileCheck.canUse, dangerZonesVisible, bannerState]);
   if (showProfileBannerRef.current !== showProfileBanner) {
@@ -447,7 +447,7 @@ export default function MapScreen() {
         type: "reviewed",
         score: location.demographic_safety_score || location.avg_safety_score,
         color: getMarkerColor(
-          location.demographic_safety_score || location.avg_safety_score
+          location.demographic_safety_score || location.avg_safety_score,
         ),
         description: `Safety: ${
           (
@@ -462,7 +462,7 @@ export default function MapScreen() {
         confidence: prediction.confidence,
         color: getMarkerColor(prediction.predicted_safety_score),
         description: `Predicted: ${prediction.predicted_safety_score.toFixed(
-          1
+          1,
         )}/5 (${Math.round(prediction.confidence * 100)}% confident)`,
       };
     } else {
@@ -491,7 +491,7 @@ export default function MapScreen() {
             locationId: locationId,
             latitude: searchMarker.latitude,
             longitude: searchMarker.longitude,
-          })
+          }),
         );
       }
       return;
@@ -500,7 +500,7 @@ export default function MapScreen() {
 
     // NEW: Fetch ML prediction on-demand if needed
     const location = nearbyLocations.find(
-      (loc: { id: string }) => loc.id === locationId
+      (loc: { id: string }) => loc.id === locationId,
     );
 
     if (location && userProfile) {
@@ -536,7 +536,7 @@ export default function MapScreen() {
       setMapCenter({
         latitude: location.latitude,
         longitude: location.longitude,
-      })
+      }),
     );
     mapRef.current?.animateToRegion(newRegion, 1000);
 
@@ -560,7 +560,7 @@ export default function MapScreen() {
 
     const addressData = await getCompleteAddressFromCoordinates(
       latitude,
-      longitude
+      longitude,
     );
 
     if (!addressData) {
@@ -595,7 +595,7 @@ export default function MapScreen() {
           locationId: newMarker.id,
           latitude: newMarker.latitude,
           longitude: newMarker.longitude,
-        })
+        }),
       );
     }
   };
@@ -619,7 +619,7 @@ export default function MapScreen() {
             longitude: region.longitude,
             radius: Math.min(userRadiusMeters, 100000),
             userDemographics: userProfile,
-          })
+          }),
         ).unwrap();
       }
     } catch (error) {
@@ -661,7 +661,7 @@ export default function MapScreen() {
     try {
       const permissionPromise = Location.requestForegroundPermissionsAsync();
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Permission timeout")), 5000)
+        setTimeout(() => reject(new Error("Permission timeout")), 5000),
       );
       const { status } = (await Promise.race([
         permissionPromise,
@@ -683,7 +683,7 @@ export default function MapScreen() {
             setUserLocation({
               latitude: location.coords.latitude,
               longitude: location.coords.longitude,
-            })
+            }),
           );
           const countryCode = await getUserCountry({
             latitude: location.coords.latitude,
@@ -711,7 +711,7 @@ export default function MapScreen() {
             setUserLocation({
               latitude: lastKnown.coords.latitude,
               longitude: lastKnown.coords.longitude,
-            })
+            }),
           );
           const countryCode = await getUserCountry({
             latitude: lastKnown.coords.latitude,
@@ -749,7 +749,7 @@ export default function MapScreen() {
    */
   const splitRouteIntoSegments = (
     routePoints: { latitude: number; longitude: number }[],
-    segmentScores: any[]
+    segmentScores: any[],
   ): { latitude: number; longitude: number }[][] => {
     if (
       !routePoints ||
@@ -765,7 +765,7 @@ export default function MapScreen() {
     for (let i = 1; i < routePoints.length; i++) {
       const dist = calculateDistanceBetweenPoints(
         routePoints[i - 1],
-        routePoints[i]
+        routePoints[i],
       );
       pointDistances.push(pointDistances[i - 1] + dist);
     }
@@ -832,7 +832,7 @@ export default function MapScreen() {
     // Non-navigation mode: show static colored segments
     const segmentChunks = splitRouteIntoSegments(
       route.route_points,
-      route.safety_analysis.segment_scores
+      route.safety_analysis.segment_scores,
     );
 
     return route.safety_analysis.segment_scores.map(
@@ -846,9 +846,9 @@ export default function MapScreen() {
           APP_CONFIG.ROUTE_PLANNING.SAFE_ROUTE_THRESHOLD
             ? APP_CONFIG.ROUTE_DISPLAY.COLORS.SAFE_ROUTE
             : (segment.safety_score || segment.overall_score) >=
-              APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
-            ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
-            : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
+                APP_CONFIG.ROUTE_PLANNING.MIXED_ROUTE_THRESHOLD
+              ? APP_CONFIG.ROUTE_DISPLAY.COLORS.MIXED_ROUTE
+              : APP_CONFIG.ROUTE_DISPLAY.COLORS.UNSAFE_ROUTE;
 
         return (
           <Polyline
@@ -860,7 +860,7 @@ export default function MapScreen() {
             strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.SELECTED}
           />
         );
-      }
+      },
     );
   };
 
@@ -942,9 +942,9 @@ export default function MapScreen() {
               setUserLocation({
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
-              })
+              }),
             );
-          }
+          },
         );
       } catch (error) {
         logger.error("Location watcher error:", error);
@@ -981,7 +981,7 @@ export default function MapScreen() {
       if (status !== "granted") {
         notify.error(
           "Location permission is required to show nearby locations",
-          "Permission Denied"
+          "Permission Denied",
         );
         return;
       }
@@ -999,7 +999,7 @@ export default function MapScreen() {
         setUserLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        })
+        }),
       );
     })();
   }, [dispatch]);
@@ -1031,7 +1031,7 @@ export default function MapScreen() {
             requestedPredictions.current.add(location.id);
             dispatch(fetchMLPredictions(location.id));
           }
-        }
+        },
       );
     }
   }, [nearbyLocations, userProfile, dispatch]);
@@ -1067,7 +1067,7 @@ export default function MapScreen() {
         updateUserProfile({
           userId,
           profileData: { notification_preferences: updatedPrefs },
-        })
+        }),
       ).catch((error) => {
         logger.error("Failed to initialize display preferences:", error);
       });
@@ -1123,10 +1123,10 @@ export default function MapScreen() {
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
             radius: APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS,
-          })
+          }),
         );
       }
-    }, [dispatch, userLocation, mapReady])
+    }, [dispatch, userLocation, mapReady]),
   );
   // Refresh modal when returning from review screen
   useFocusEffect(
@@ -1160,7 +1160,7 @@ export default function MapScreen() {
 
         refreshModalData();
       }
-    }, [modalVisible, selectedLocationId, searchMarker])
+    }, [modalVisible, selectedLocationId, searchMarker]),
   );
   // Handle navigation intents from other tabs - using useFocusEffect so it runs when tab is focused
   useFocusEffect(
@@ -1174,7 +1174,7 @@ export default function MapScreen() {
         setTimeout(async () => {
           try {
             const locationDetails = await dispatch(
-              fetchLocationDetails(navigationIntent.locationId)
+              fetchLocationDetails(navigationIntent.locationId),
             ).unwrap();
 
             const location = Array.isArray(locationDetails)
@@ -1207,7 +1207,7 @@ export default function MapScreen() {
           }
         }, 100);
       }
-    }, [navigationIntent])
+    }, [navigationIntent]),
   );
 
   // ============= CONDITIONAL RENDERS =============
@@ -1243,7 +1243,7 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text>Initializing SafePath...</Text>
+        <Text>Initializing TruGuide...</Text>
       </View>
     );
   }
@@ -1303,7 +1303,7 @@ export default function MapScreen() {
               setMapCenter({
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
-              })
+              }),
             );
 
             // Calculate radius based on user preference
@@ -1322,7 +1322,7 @@ export default function MapScreen() {
                 latitude: newRegion.latitude,
                 longitude: newRegion.longitude,
                 radius: fetchRadius,
-              })
+              }),
             );
           }
         }}
@@ -1408,8 +1408,8 @@ export default function MapScreen() {
                       typeof loc.name === "string"
                         ? loc.name
                         : loc.name != null
-                        ? String(loc.name)
-                        : ""
+                          ? String(loc.name)
+                          : ""
                     }
                     description={markerProps.description}
                     pinColor={markerProps.color}
@@ -1417,7 +1417,7 @@ export default function MapScreen() {
                   />
                 );
               }
-            }
+            },
           )}
         {/* Search result marker */}
         {searchMarker && (
@@ -1531,7 +1531,7 @@ export default function MapScreen() {
                 strokeWidth={APP_CONFIG.ROUTE_DISPLAY.LINE_WIDTH.ALTERNATIVE}
                 lineDashPattern={[10, 5]}
               />
-            )
+            ),
           )}
       </MapView>
       {/* Map Controls */}
@@ -1638,7 +1638,7 @@ export default function MapScreen() {
                     onPress: () => {
                       if (selectedRoute.databaseId) {
                         dispatch(
-                          deleteRouteFromHistory(selectedRoute.databaseId)
+                          deleteRouteFromHistory(selectedRoute.databaseId),
                         );
                       }
                       dispatch(clearRoutes());
@@ -1648,7 +1648,7 @@ export default function MapScreen() {
                     },
                   },
                 ],
-                "warning"
+                "warning",
               );
             }}
           >
@@ -1776,7 +1776,7 @@ export default function MapScreen() {
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
                 {selectedRoute.safety_analysis?.overall_route_score?.toFixed(
-                  1
+                  1,
                 ) ?? "3.0"}
               </Text>
               <Text style={styles.statLabel}>Safety Score</Text>
@@ -1792,7 +1792,7 @@ export default function MapScreen() {
                 {formatDistance(
                   selectedRoute.safety_analysis?.total_distance_meters ??
                     selectedRoute.distance_kilometers * 1000,
-                  distanceUnit
+                  distanceUnit,
                 )}
               </Text>
               <Text style={styles.statLabel}>Distance</Text>

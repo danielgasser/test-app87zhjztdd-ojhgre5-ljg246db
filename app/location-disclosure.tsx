@@ -76,7 +76,7 @@ export default function LocationDisclosureScreen() {
 
         <Text style={styles.title}>Location Access</Text>
         <Text style={styles.subtitle}>
-          SafePath needs location access to keep you safe
+          TruGuide needs location access to keep you safe
         </Text>
 
         <View style={styles.featureList}>

@@ -1,5 +1,5 @@
 -- ============================================
--- SafePath - Create Diverse Test Users
+-- TruGuide - Create Diverse Test Users
 -- ============================================
 
 -- Insert test users into auth.users first

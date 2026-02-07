@@ -104,19 +104,19 @@ export default function ProfileScreen() {
 
   const isLoggedIn = !!user;
   const hasCompletedOnboarding = useAppSelector(
-    (state) => state.user.onboardingComplete
+    (state) => state.user.onboardingComplete,
   );
   const savedLocations = useAppSelector(
-    (state) => state.locations.savedLocations
+    (state) => state.locations.savedLocations,
   );
   const savedLocationsLoading = useAppSelector(
-    (state) => state.locations.savedLocationsLoading
+    (state) => state.locations.savedLocationsLoading,
   );
   const recentlyViewed = useAppSelector(
-    (state) => state.locations.recentlyViewed
+    (state) => state.locations.recentlyViewed,
   );
   const recentlyViewedLoading = useAppSelector(
-    (state) => state.locations.recentlyViewedLoading
+    (state) => state.locations.recentlyViewedLoading,
   );
 
   const handleLogout = async () => {
@@ -143,7 +143,7 @@ export default function ProfileScreen() {
             onPress: () => Linking.openSettings(),
           },
         ],
-        "warning"
+        "warning",
       );
       return;
     }
@@ -203,7 +203,7 @@ export default function ProfileScreen() {
         updateUserProfile({
           userId: user!.id,
           profileData: { avatar_url: publicUrl },
-        })
+        }),
       ).unwrap();
 
       // Refresh the profile to ensure we have the latest data
@@ -226,7 +226,7 @@ export default function ProfileScreen() {
         updateUserProfile({
           userId: user!.id,
           profileData: { avatar_url: null }, // Changed from undefined to null
-        })
+        }),
       ).unwrap();
 
       // Refresh profile to get updated data
@@ -249,14 +249,14 @@ export default function ProfileScreen() {
         { text: "Cancel", style: "cancel", onPress: () => {} },
         { text: "Remove", style: "destructive", onPress: removeProfilePicture },
       ],
-      "warning"
+      "warning",
     );
   };
 
   const handleLoadMoreRoutes = () => {
     if (!routeHistoryLoading && routeHistoryHasMore && user?.id) {
       dispatch(
-        fetchUserRouteHistory({ userId: user.id, page: routeHistoryPage + 1 })
+        fetchUserRouteHistory({ userId: user.id, page: routeHistoryPage + 1 }),
       );
     }
   };
@@ -278,7 +278,7 @@ export default function ProfileScreen() {
           },
         },
       ],
-      "warning"
+      "warning",
     );
   };
 
@@ -288,7 +288,7 @@ export default function ProfileScreen() {
         targetTab: "map",
         action: "view_location",
         data: { route },
-      })
+      }),
     );
     router.push("/(tabs)");
   };
@@ -309,7 +309,7 @@ export default function ProfileScreen() {
     }
     if (profile.disability_status && profile.disability_status.length > 0) {
       demographics.push(
-        ...profile.disability_status.map((d) => `Disability: ${d}`)
+        ...profile.disability_status.map((d) => `Disability: ${d}`),
       );
     }
     if (profile.religion) {
@@ -435,7 +435,7 @@ export default function ProfileScreen() {
               </View>
             </TouchableOpacity>
             <Text style={styles.userName}>
-              {profile?.full_name || "SafePath User"}
+              {profile?.full_name || "TruGuide User"}
             </Text>
             <Text style={styles.memberSince}>
               Member since{" "}

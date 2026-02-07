@@ -56,7 +56,7 @@ export const Paywall: React.FC<PaywallProps> = ({
     const result = await purchasePackage(selectedPackage);
 
     if (result.success) {
-      notify.success("Welcome to SafePath Premium!");
+      notify.success("Welcome to TruGuide Premium!");
       onPurchaseComplete?.();
     } else if (result.error !== "User cancelled") {
       notify.error(result.error || "Purchase failed");

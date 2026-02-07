@@ -68,7 +68,7 @@ export default function PrivacySettings() {
         updateUserProfile({
           userId: user.id,
           profileData: { [field]: value },
-        })
+        }),
       ).unwrap();
 
       // NEW: Reload community reviews after privacy change
@@ -77,7 +77,7 @@ export default function PrivacySettings() {
           fetchRecentReviews({
             latitude: userLocation.latitude,
             longitude: userLocation.longitude,
-          })
+          }),
         );
       }
     } catch (error) {
@@ -133,7 +133,7 @@ export default function PrivacySettings() {
           name,
           address
         )
-      `
+      `,
         )
         .eq("user_id", user.id)
         .eq("status", "active")
@@ -221,7 +221,7 @@ export default function PrivacySettings() {
           profile_public: profileVisibility,
         },
         export_date: new Date().toISOString(),
-        note: "This is all the data SafePath has collected about you.",
+        note: "This is all the data TruGuide has collected about you.",
       };
 
       const jsonString = JSON.stringify(exportData, null, 2);
@@ -240,7 +240,7 @@ export default function PrivacySettings() {
           {
             subject: filename,
             dialogTitle: `Export ${filename}`,
-          }
+          },
         );
       } else {
         await Share.share(
@@ -251,7 +251,7 @@ export default function PrivacySettings() {
           {
             subject: filename,
             dialogTitle: `Export ${filename}`,
-          }
+          },
         );
       }
     } catch (error) {
@@ -295,7 +295,7 @@ export default function PrivacySettings() {
       notify.confirm(
         "Account Deleted",
         "Your account has been permanently deleted.",
-        [{ text: "OK", onPress: () => router.replace("/welcome") }]
+        [{ text: "OK", onPress: () => router.replace("/welcome") }],
       );
     } catch (error) {
       logger.error("=== DELETE ERROR ===", error);
@@ -357,7 +357,7 @@ export default function PrivacySettings() {
             setProfileVisibility(newValue);
             await savePrivacySetting(
               "privacy_level",
-              newValue ? "public" : "private"
+              newValue ? "public" : "private",
             );
           }}
         />
@@ -423,7 +423,7 @@ export default function PrivacySettings() {
           <View style={styles.actionTextContainer}>
             <Text style={styles.actionTitle}>View My Data</Text>
             <Text style={styles.actionDescription}>
-              See what information SafePath has collected
+              See what information TruGuide has collected
             </Text>
           </View>
           <MaterialIcons

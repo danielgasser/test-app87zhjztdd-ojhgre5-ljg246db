@@ -11,7 +11,7 @@ import { theme } from "@/styles/theme";
 import * as Sentry from "@sentry/react-native";
 import { NavigationController } from "@/providers/NavigationController";
 import { AuthProvider } from "@/providers/AuthProvider";
-import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
+import logoImage from "assets/images/TruGuideLogoTransparent1024x1024.png";
 import { notificationService } from "@/services/notificationService";
 import * as Notifications from "expo-notifications";
 import { logger } from "@/utils/logger";
@@ -51,7 +51,7 @@ function AppNavigator() {
     const subscription = Notifications.addNotificationReceivedListener(
       (notification) => {
         logger.info("📬 Notification received:", notification);
-      }
+      },
     );
     // Initialize AdMob
     const initAds = async () => {

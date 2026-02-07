@@ -1,5 +1,5 @@
 -- ============================================
--- SafePath - Cleanup All Test Data
+-- TruGuide - Cleanup All Test Data
 -- ============================================
 -- This migration removes all test data to start fresh
 -- Order matters due to foreign key constraints

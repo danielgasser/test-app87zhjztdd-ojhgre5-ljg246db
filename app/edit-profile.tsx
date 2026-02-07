@@ -51,8 +51,8 @@ export default function EditProfileScreen() {
           provider === "google"
             ? "Google"
             : provider === "apple"
-            ? "Apple"
-            : provider
+              ? "Apple"
+              : provider,
         );
       }
     }
@@ -70,7 +70,7 @@ export default function EditProfileScreen() {
         updateUserProfile({
           userId: user!.id,
           profileData: { full_name: fullName },
-        })
+        }),
       ).unwrap();
 
       notify.success("Name updated successfully");
@@ -106,14 +106,14 @@ export default function EditProfileScreen() {
         },
         {
           emailRedirectTo: "safepath://email-change-confirm",
-        }
+        },
       );
 
       if (error) {
         throw error;
       }
       notify.success(
-        "Confirmation email sent! Please confirm your new email address to confirm the change."
+        "Confirmation email sent! Please confirm your new email address to confirm the change.",
       );
       setEmail(user?.email || "");
     } catch (error: any) {
@@ -125,7 +125,7 @@ export default function EditProfileScreen() {
         errorMessage.includes("already been registered")
       ) {
         notify.error(
-          "Unable to update email. Please try a different email address or contact support."
+          "Unable to update email. Please try a different email address or contact support.",
         );
       } else {
         notify.error("Failed to update email. Please try again later.");
@@ -175,10 +175,10 @@ export default function EditProfileScreen() {
       if (updateError) throw updateError;
 
       notify.success(
-        "Password updated successfully! Please sign in with your new password."
+        "Password updated successfully! Please sign in with your new password.",
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve as () => void, 1500));
       await supabase.auth.signOut();
 
       router.replace("/login");

@@ -69,8 +69,8 @@ serve(async (req) => {
       ],
       proofs: [
         {
-          content: `User ${accepted ? "accepted" : "declined"} ${consent_type} in SafePath mobile app`,
-          form: `SafePath app - ${consent_type} acceptance screen`,
+          content: `User ${accepted ? "accepted" : "declined"} ${consent_type} in TruGuide mobile app`,
+          form: `TruGuide app - ${consent_type} acceptance screen`,
         },
       ],
       preferences: {

@@ -41,7 +41,7 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'SafePath <noreply@mail.safepathgo.com>',
+        from: 'TruGuide <noreply@mail.safepathgo.com>',
         to: [recipientEmail],
         subject: emailContent.subject,
         html: emailContent.html
@@ -98,7 +98,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
   switch (actionType) {
     case 'signup':
       return {
-        subject: 'Confirm your SafePath account',
+        subject: 'Confirm your TruGuide account',
         html: `
         <!DOCTYPE html>
         <html lang="en">
@@ -116,14 +116,14 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <!-- Header with Logo/Brand -->
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ SafePath</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ TruGuide</h1>
                       <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500;">Travel with Confidence</p>
                     </td>
                   </tr>
                   <!-- Main Content -->
                   <tr>
                     <td style="padding: 40px;">
-                      <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">Welcome to SafePath! 🎉</h2>
+                      <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">Welcome to TruGuide! 🎉</h2>
                       <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">Thank you for joining our community of conscious travelers. We're excited to help you navigate the world safely and inclusively.</p>
                       <p style="margin: 0 0 30px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">To get started, please confirm your email address by clicking the button below:</p>
                       <!-- CTA Button -->
@@ -151,8 +151,8 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <!-- Footer -->
                   <tr>
                     <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
-                      <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px; line-height: 1.6;">If you didn't create a SafePath account, you can safely ignore this email.</p>
-                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 SafePath. All rights reserved.</p>
+                      <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px; line-height: 1.6;">If you didn't create a TruGuide account, you can safely ignore this email.</p>
+                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 TruGuide. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -181,7 +181,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <!-- Header with Logo/Brand -->
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ SafePath</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ TruGuide</h1>
                       <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500;">Travel with Confidence</p>
                     </td>
                   </tr>
@@ -189,7 +189,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 40px;">
                       <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">Verify Your New Email Address 📧</h2>
-                      <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">You recently requested to update your email address for your SafePath account.</p>
+                      <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">You recently requested to update your email address for your TruGuide account.</p>
                       <p style="margin: 0 0 30px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">To complete this update, please verify your new email address by clicking the button below:</p>
                       <!-- CTA Button -->
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -208,7 +208,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
                       <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px; line-height: 1.6;">If you didn't request this change, please ignore this email and your email address will remain unchanged.</p>
-                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 SafePath. All rights reserved.</p>
+                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 TruGuide. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -220,7 +220,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
       };
     case 'recovery':
       return {
-        subject: 'Reset your SafePath password',
+        subject: 'Reset your TruGuide password',
         html: `
          <html lang="en">
         <head>
@@ -237,7 +237,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <!-- Header with Logo/Brand -->
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ SafePath</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ TruGuide</h1>
                       <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500;">Travel with Confidence</p>
                     </td>
                   </tr>
@@ -245,7 +245,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 40px;">
                       <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">Reset Your Password 🔑</h2>
-                      <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">We received a request to reset the password for your SafePath account.</p>
+                      <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">We received a request to reset the password for your TruGuide account.</p>
                       <p style="margin: 0 0 30px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">Click the button below to create a new password:</p>
                       <!-- CTA Button -->
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -270,7 +270,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
                       <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px; line-height: 1.6;">If you didn't request a password reset, you can safely ignore this email.</p>
-                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 SafePath. All rights reserved.</p>
+                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 TruGuide. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -282,7 +282,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
       };
     case 'magiclink':
       return {
-        subject: 'Your SafePath magic link',
+        subject: 'Your TruGuide magic link',
         html: `
          <html lang="en">
         <head>
@@ -299,7 +299,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <!-- Header with Logo/Brand -->
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ SafePath</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ TruGuide</h1>
                       <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500;">Travel with Confidence</p>
                     </td>
                   </tr>
@@ -307,13 +307,13 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 40px;">
                       <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">Your Magic Link is Here! ✨</h2>
-                      <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">Click the button below to sign in to your SafePath account. No password needed!</p>
+                      <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">Click the button below to sign in to your TruGuide account. No password needed!</p>
                       <p style="margin: 0 0 30px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">This link is unique to you and will sign you in automatically:</p>
                       <!-- CTA Button -->
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                         <tr>
                           <td align="center" style="padding: 10px 0 30px 0;">
-                            <a href="${confirmationUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">Sign In to SafePath</a>
+                            <a href="${confirmationUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">Sign In to TruGuide</a>
                           </td>
                         </tr>
                       </table>
@@ -332,7 +332,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
                       <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px; line-height: 1.6;">If you didn't request this magic link, you can safely ignore this email.</p>
-                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 SafePath. All rights reserved.</p>
+                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 TruGuide. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -361,7 +361,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <!-- Header with Logo/Brand -->
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ SafePath</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ TruGuide</h1>
                       <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500;">Travel with Confidence</p>
                     </td>
                   </tr>
@@ -396,7 +396,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   <tr>
                     <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
                       <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px; line-height: 1.6;">If you didn't attempt this action, you can safely ignore this email.</p>
-                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 SafePath. All rights reserved.</p>
+                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 TruGuide. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
@@ -408,7 +408,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
       };
     default:
       return {
-        subject: 'SafePath notification',
+        subject: 'TruGuide notification',
         html: `
          <html lang="en">
         <head>
@@ -424,13 +424,13 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                   <tr>
                     <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ SafePath</h1>
+                      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold; letter-spacing: -0.5px;">🛡️ TruGuide</h1>
                       <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px; font-weight: 500;">Travel with Confidence</p>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding: 40px;">
-                      <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">SafePath Notification</h2>
+                      <h2 style="margin: 0 0 20px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">TruGuide Notification</h2>
                       <p style="margin: 0 0 30px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">Click the button below to continue:</p>
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                         <tr>
@@ -443,7 +443,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
                   </tr>
                   <tr>
                     <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
-                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 SafePath. All rights reserved.</p>
+                      <p style="margin: 0; color: #9a9a9a; font-size: 12px;">© 2025 TruGuide. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>

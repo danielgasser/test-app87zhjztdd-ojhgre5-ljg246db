@@ -1,8 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
-import { APP_CONFIG } from "../../../src/config/appConfig.js";
-
+import { APP_CONFIG } from "../../../src/config/appConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

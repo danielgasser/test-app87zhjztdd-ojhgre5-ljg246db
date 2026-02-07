@@ -77,7 +77,7 @@ export default function RegisterScreen() {
                 // They'll need to click email link and come back
               },
             },
-          ]
+          ],
         );
       } else {
         // User is auto-signed in (email confirmation disabled or already confirmed)
@@ -108,7 +108,7 @@ export default function RegisterScreen() {
             bounces={false}
           >
             <View style={commonStyles.subHeader}>
-              <Text style={styles.title}>Join SafePath</Text>
+              <Text style={styles.title}>Join TruGuide</Text>
               <Text style={styles.subtitle}>Create your account</Text>
             </View>
 

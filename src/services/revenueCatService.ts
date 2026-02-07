@@ -14,7 +14,7 @@ const API_KEYS = {
     android: 'goog_fpgZOiezFXEbdVcswWMxpOsTVhk',  // Replace with your Android key
 };
 
-const ENTITLEMENT_ID = 'SafePath Pro';
+const ENTITLEMENT_ID = 'TruGuide Pro';
 
 // ============================================================================
 // INITIALIZATION

@@ -117,7 +117,7 @@ export default function LoginScreen() {
       if (!canOpen) {
         notify.error(
           `Cannot open URL: ${data.url.substring(0, 50)}...`,
-          "Error"
+          "Error",
         );
         return;
       }
@@ -143,7 +143,7 @@ export default function LoginScreen() {
             bounces={false}
           >
             <View style={commonStyles.subHeader}>
-              <Text style={styles.title}>SafePath</Text>
+              <Text style={styles.title}>TruGuide</Text>
               <Text style={styles.subtitle}>Travel with confidence</Text>
             </View>
 

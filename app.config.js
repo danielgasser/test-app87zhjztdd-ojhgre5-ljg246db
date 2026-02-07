@@ -1,13 +1,5 @@
 module.exports = () => {
-  const buildVariant = process.env.APP_VARIANT || "development";
-  const IS_PREVIEW = buildVariant === "preview";
-  const IS_PRODUCTION = buildVariant === "production";
-
-  const appName = IS_PRODUCTION
-    ? "SafePath"
-    : IS_PREVIEW
-      ? "SafePath TEST"
-      : "SafePath DEV";
+  const appName = "TruGuide";
 
   return {
     expo: {
@@ -17,10 +9,10 @@ module.exports = () => {
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
-      icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
+      icon: "./assets/images/TruGuideLogoTransparent1024x1024.png",
       userInterfaceStyle: "light",
       splash: {
-        image: "./assets/images/SafePathLogoTransparent1024x1024.png",
+        image: "./assets/images/TruGuideLogoTransparent1024x1024.png",
         resizeMode: "contain",
         backgroundColor: "#ffffff",
       },
@@ -36,11 +28,11 @@ module.exports = () => {
           ITSAppUsesNonExemptEncryption: false,
           UIBackgroundModes: ["location"],
           NSLocationWhenInUseUsageDescription:
-            "SafePath uses your location to provide safety-optimized navigation and show nearby places with demographic-specific safety ratings. For example, we'll show you gas stations rated safe by travelers like you.",
+            "TruGuide uses your location to provide safety-optimized navigation and show nearby places with demographic-specific safety ratings. For example, we'll show you gas stations rated safe by travelers like you.",
           NSLocationAlwaysUsageDescription:
-            "SafePath uses your location to provide real-time safety alerts during navigation and notify you when dangerous reviews are posted near your active route.",
+            "TruGuide uses your location to provide real-time safety alerts during navigation and notify you when dangerous reviews are posted near your active route.",
           NSPhotoLibraryUsageDescription:
-            "SafePath accesses your photos to let you add a profile picture and attach photos to your location reviews to help other travelers.",
+            "TruGuide accesses your photos to let you add a profile picture and attach photos to your location reviews to help other travelers.",
         },
       },
       android: {
@@ -56,7 +48,7 @@ module.exports = () => {
         },
         adaptiveIcon: {
           foregroundImage:
-            "./assets/images/SafePathLogoTransparent1024x1024.png",
+            "./assets/images/TruGuideLogoTransparent1024x1024.png",
           backgroundColor: "#FFFFFF",
         },
         package: "com.keradaniel.safepath.app",
@@ -85,7 +77,7 @@ module.exports = () => {
         [
           "expo-notifications",
           {
-            icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
+            icon: "./assets/images/TruGuideLogoTransparent1024x1024.png",
             color: "#2A5C99",
           },
         ],
@@ -93,7 +85,7 @@ module.exports = () => {
           "expo-location",
           {
             locationAlwaysAndWhenInUsePermission:
-              "SafePath needs your location in the background to provide turn-by-turn navigation and safety alerts.",
+              "TruGuide needs your location in the background to provide turn-by-turn navigation and safety alerts.",
             isAndroidBackgroundLocationEnabled: true,
             isAndroidForegroundServiceEnabled: true,
           },
@@ -107,10 +99,10 @@ module.exports = () => {
       },
       owner: "toesslab",
       notification: {
-        icon: "./assets/images/SafePathLogoTransparent1024x1024.png",
+        icon: "./assets/images/TruGuideLogoTransparent1024x1024.png",
         color: "#2A5C99",
         androidMode: "default",
-        androidCollapsedTitle: "SafePath Safety Alert",
+        androidCollapsedTitle: "TruGuide Safety Alert",
       },
     },
   };

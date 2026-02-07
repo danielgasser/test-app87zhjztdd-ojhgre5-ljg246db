@@ -1,5 +1,5 @@
 // src/styles/theme.ts
-// SafePath Theme - Safety-Focused Color Palette
+// TruGuide Theme - Safety-Focused Color Palette
 
 interface Colors {
     // Primary brand colors - Safety focused

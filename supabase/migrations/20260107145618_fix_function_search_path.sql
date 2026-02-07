@@ -1,5 +1,5 @@
 -- Migration: Fix function search_path mutable security warning
--- Adds SET search_path = public to all SafePath functions
+-- Adds SET search_path = public to all TruGuide functions
 -- This prevents potential SQL injection via search_path manipulation
 -- Created: 2025-01-07
 

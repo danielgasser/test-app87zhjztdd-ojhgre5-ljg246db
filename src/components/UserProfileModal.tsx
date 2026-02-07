@@ -68,7 +68,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       publicProfile.disability_status.length > 0
     ) {
       demographics.push(
-        "Disability: " + publicProfile.disability_status.join(", ")
+        "Disability: " + publicProfile.disability_status.join(", "),
       );
     }
     if (publicProfile.religion) {
@@ -203,7 +203,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </View>
                   )}
                   <Text style={styles.userName}>
-                    {publicProfile.full_name || "SafePath User"}
+                    {publicProfile.full_name || "TruGuide User"}
                   </Text>
                   <Text style={styles.memberSince}>
                     Member since{" "}

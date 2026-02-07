@@ -193,9 +193,9 @@ async function sendWelcomeEmail(email: string, firstName: string): Promise<void>
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'SafePath <hello@mail.safepathgo.com>',
+      from: 'TruGuide <hello@mail.safepathgo.com>',
       to: [email],
-      subject: '🎉 Welcome to SafePath - Early Access',
+      subject: '🎉 Welcome to TruGuide - Early Access',
       html: buildWelcomeEmail(firstName)
     })
   });
@@ -222,14 +222,14 @@ function buildWelcomeEmail(firstName?: string): string {
               <!-- Header -->
               <tr>
                 <td style="background: linear-gradient(135deg, #2A5C99 0%, #1A4679 50%, #5FB878 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                  <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold;">🛡️ SafePath</h1>
+                  <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold;">🛡️ TruGuide</h1>
                   <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">Navigate Safely. Belong Everywhere.</p>
                 </td>
               </tr>
               <!-- Content -->
               <tr>
                 <td style="padding: 40px;">
-                  <h2 style="margin: 0 0 20px 0; color: #2A5C99; font-size: 24px;">Welcome to SafePath ${firstName ? ', ' + firstName : ''}! 🎉</h2>
+                  <h2 style="margin: 0 0 20px 0; color: #2A5C99; font-size: 24px;">Welcome to TruGuide ${firstName ? ', ' + firstName : ''}! 🎉</h2>
                   <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">
                     Thank you for joining our community of conscious travelers! You're now on the early access list for the first GPS app that prioritizes safety for everyone.
                   </p>
@@ -239,7 +239,7 @@ function buildWelcomeEmail(firstName?: string): string {
                     <ul style="margin: 0; padding-left: 20px; color: #4a4a4a; line-height: 1.8;">
                       <li>📱 You'll be first to know when we launch on iOS</li>
                       <li>🎁 Early adopters get premium features free for 3 months</li>
-                      <li>💬 Join our community and help shape SafePath</li>
+                      <li>💬 Join our community and help shape TruGuide</li>
                       <li>🗺️ Get exclusive safety insights and travel tips</li>
                     </ul>
                   </div>
@@ -260,7 +260,7 @@ function buildWelcomeEmail(firstName?: string): string {
                     You're receiving this because you signed up at safepathgo.com
                   </p>
                   <p style="margin: 0; color: #9a9a9a; font-size: 12px;">
-                    © 2025 SafePath. All rights reserved.
+                    © 2025 TruGuide. All rights reserved.
                   </p>
                 </td>
               </tr>

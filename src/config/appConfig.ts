@@ -1,4 +1,4 @@
-// SafePath Configuration Constants
+// TruGuide Configuration Constants
 // Centralized configuration for all hardcoded values across the app
 
 export const APP_CONFIG = {

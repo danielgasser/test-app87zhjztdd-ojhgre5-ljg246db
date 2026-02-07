@@ -13,7 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import logoImage from "assets/images/SafePathLogoTransparent1024x1024.png";
+import logoImage from "assets/images/TruGuideLogoTransparent1024x1024.png";
 import { theme } from "@/styles/theme";
 import ShieldSvg from "assets/images/shield.svg";
 import MapBgSvg from "assets/images/map-bg.svg";

@@ -31,7 +31,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { commonStyles } from "@/styles/common";
 
 const ONBOARDING_STEPS = [
-  { id: "welcome", title: "Welcome to SafePath" },
+  { id: "welcome", title: "Welcome to TruGuide" },
   { id: "name", title: "What's your name?" },
   { id: "race", title: "Race & Ethnicity" },
   { id: "gender", title: "Gender Identity" },
@@ -145,7 +145,7 @@ export default function OnboardingScreen() {
       if (!formData.full_name || formData.full_name.trim() === "") {
         notify.error(
           "Please enter your name or a nickname to continue.",
-          "Required Field"
+          "Required Field",
         );
         return false;
       }
@@ -154,7 +154,7 @@ export default function OnboardingScreen() {
       if (formData.race_ethnicity.length === 0) {
         notify.error(
           "Please select at least one race/ethnicity option to continue.",
-          "Required Field"
+          "Required Field",
         );
         return false;
       }
@@ -164,7 +164,7 @@ export default function OnboardingScreen() {
       if (!formData.gender || formData.gender === "") {
         notify.error(
           "Please select your gender identity to continue.",
-          "Required Field"
+          "Required Field",
         );
         return false;
       }
@@ -230,7 +230,7 @@ export default function OnboardingScreen() {
         const parsedGender = parseOtherValue(profile.gender || "");
         const parsedReligion = parseOtherValue(profile.religion || "");
         const getValidPrivacyLevel = (
-          level: string | null | undefined
+          level: string | null | undefined,
         ): "public" | "anonymous" | "private" => {
           if (
             level === "public" ||
@@ -296,7 +296,7 @@ export default function OnboardingScreen() {
       race_ethnicity: formData.race_ethnicity.map((race) =>
         race === "Other" && otherInputs.race_other
           ? `Other: ${otherInputs.race_other}`
-          : race
+          : race,
       ),
       gender:
         formData.gender === "Other" && otherInputs.gender_other
@@ -309,7 +309,7 @@ export default function OnboardingScreen() {
       disability_status: formData.disability_status.map((disability) =>
         disability === "Other" && otherInputs.disability_other
           ? `Other: ${otherInputs.disability_other}`
-          : disability
+          : disability,
       ),
     };
 
@@ -398,7 +398,7 @@ export default function OnboardingScreen() {
         isEditing
           ? "Your profile has been updated successfully."
           : "Your profile has been set up. You can now start using the app!",
-        isEditing ? "Profile Updated!" : "Welcome to SafePath!"
+        isEditing ? "Profile Updated!" : "Welcome to TruGuide!",
       );
 
       // 5. Register push notifications for new users
@@ -427,8 +427,8 @@ export default function OnboardingScreen() {
     } else {
       // If initial setup, show alert that profile is required
       notify.info(
-        "Setting up your profile is required to use SafePath's personalized safety features. This helps us show you relevant safety information based on your travel needs.",
-        "Profile Required"
+        "Setting up your profile is required to use TruGuide's personalized safety features. This helps us show you relevant safety information based on your travel needs.",
+        "Profile Required",
       );
     }
   };
@@ -466,7 +466,7 @@ export default function OnboardingScreen() {
     } else {
       // For any other disability, remove "None" if it exists and toggle the selection
       const updatedStatus = formData.disability_status.filter(
-        (d) => d !== "None"
+        (d) => d !== "None",
       );
 
       if (updatedStatus.includes(disability)) {
@@ -495,7 +495,7 @@ export default function OnboardingScreen() {
           NUKE SESSION
         </Text>
       </TouchableOpacity>
-      <Text style={styles.stepTitle}>Welcome to SafePath!</Text>
+      <Text style={styles.stepTitle}>Welcome to TruGuide!</Text>
       <Text style={styles.stepDescription}>
         To provide personalized safety information, we need to understand your
         travel preferences and needs.
@@ -506,7 +506,7 @@ export default function OnboardingScreen() {
           { fontWeight: "600", color: theme.colors.text },
         ]}
       >
-        This setup is required to access SafePath's core features.
+        This setup is required to access TruGuide's core features.
       </Text>
       {showWelcomeBanner && currentStep === 0 && (
         <View style={styles.welcomeBanner}>
@@ -515,7 +515,7 @@ export default function OnboardingScreen() {
             <View style={styles.welcomeBannerText}>
               <Text style={styles.welcomeBannerTitle}>Email Confirmed!</Text>
               <Text style={styles.welcomeBannerSubtitle}>
-                Welcome to SafePath. Let's personalize your experience.
+                Welcome to TruGuide. Let's personalize your experience.
               </Text>
             </View>
           </View>
@@ -772,7 +772,7 @@ export default function OnboardingScreen() {
                 />
               )}
             </TouchableOpacity>
-          )
+          ),
         )}
       </View>
 
@@ -1044,10 +1044,10 @@ export default function OnboardingScreen() {
               {loading
                 ? "Saving..."
                 : currentStep === ONBOARDING_STEPS.length - 1
-                ? isEditing
-                  ? "Update Profile"
-                  : "Travel Safely"
-                : "Next"}
+                  ? isEditing
+                    ? "Update Profile"
+                    : "Travel Safely"
+                  : "Next"}
             </Text>
           </TouchableOpacity>
         </View>

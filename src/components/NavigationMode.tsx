@@ -110,7 +110,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   // Check if this review has already been handled in this navigation session
   const checkIfAlertAlreadyHandled = async (
-    reviewId: string
+    reviewId: string,
   ): Promise<boolean> => {
     if (!selectedRoute?.databaseId || !selectedRoute?.navigationSessionId) {
       return false;
@@ -134,7 +134,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           | SafetyAlertHandled[]
           | null;
         const handled = alerts?.some(
-          (alert: SafetyAlertHandled) => alert.review_id === reviewId
+          (alert: SafetyAlertHandled) => alert.review_id === reviewId,
         );
         if (handled) {
           return true;
@@ -168,7 +168,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         currentPosition.latitude,
         currentPosition.longitude,
         currentStep.end_location.latitude,
-        currentStep.end_location.longitude
+        currentStep.end_location.longitude,
       );
     }
 
@@ -202,7 +202,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const recordSafetyAlertHandled = async (
     routeId: string,
     review: any,
-    action: "reroute_attempted" | "user_continued"
+    action: "reroute_attempted" | "user_continued",
   ) => {
     try {
       // Get current alerts for this route
@@ -270,7 +270,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           currentPosition.latitude,
           currentPosition.longitude,
           currentStep.end_location.latitude,
-          currentStep.end_location.longitude
+          currentStep.end_location.longitude,
         );
         const roundedInitial = roundDistance(initialDistance);
         setDistanceToNextTurn(roundedInitial);
@@ -337,7 +337,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             routePoint.latitude,
             routePoint.longitude,
             review.location_latitude,
-            review.location_longitude
+            review.location_longitude,
           );
           return distance < 500; // Within 500 meters of route
         });
@@ -384,7 +384,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                     await recordSafetyAlertHandled(
                       currentRouteId,
                       review,
-                      "reroute_attempted"
+                      "reroute_attempted",
                     );
                   }
                 }
@@ -407,13 +407,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
                     await recordSafetyAlertHandled(
                       selectedRoute.databaseId,
                       review,
-                      "user_continued"
+                      "user_continued",
                     );
                   }
                 }
               },
             },
-          ]
+          ],
         );
       } else {
         alertShownRef.current = false;
@@ -434,7 +434,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           },
-          300
+          300,
         );
       }
     }, 30000);
@@ -444,16 +444,19 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   // Background token refresh during navigation
   useEffect(() => {
-    const refreshInterval = setInterval(async () => {
-      try {
-        const { error } = await supabase.auth.refreshSession();
-        if (error) {
-          logger.error("[Navigation] Token refresh failed:", error?.message);
+    const refreshInterval = setInterval(
+      async () => {
+        try {
+          const { error } = await supabase.auth.refreshSession();
+          if (error) {
+            logger.error("[Navigation] Token refresh failed:", error?.message);
+          }
+        } catch (e) {
+          console.warn("[Navigation] Token refresh error:", e);
         }
-      } catch (e) {
-        console.warn("[Navigation] Token refresh error:", e);
-      }
-    }, 30 * 60 * 1000); // Every 30 minutes
+      },
+      30 * 60 * 1000,
+    ); // Every 30 minutes
 
     return () => clearInterval(refreshInterval);
   }, []);
@@ -478,7 +481,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         lastPoint.latitude,
         lastPoint.longitude,
         newPosition.latitude,
-        newPosition.longitude
+        newPosition.longitude,
       ) > 50
     ) {
       traveledPath.current.push({
@@ -502,7 +505,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           pitch: 60,
           zoom: 18,
         },
-        { duration: 500 }
+        { duration: 500 },
       );
     }
 
@@ -518,7 +521,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           newPosition.latitude,
           newPosition.longitude,
           currentStep.end_location.latitude,
-          currentStep.end_location.longitude
+          currentStep.end_location.longitude,
         );
         const roundedDistance = roundDistance(distance);
         if (roundedDistance !== distanceToNextTurn) {
@@ -535,7 +538,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
               newPosition.latitude,
               newPosition.longitude,
               nextStep.start_location.latitude,
-              nextStep.start_location.longitude
+              nextStep.start_location.longitude,
             );
             return distToNextStart < distance;
           }
@@ -562,7 +565,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       if (foregroundStatus !== "granted") {
         notify.error(
           "Location permission is required for navigation",
-          "Permission needed"
+          "Permission needed",
         );
         onExit();
         return;
@@ -573,7 +576,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       if (backgroundStatus !== "granted") {
         notify.error(
           "Background location is required for navigation",
-          "Permission needed"
+          "Permission needed",
         );
         onExit();
         return;
@@ -585,7 +588,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         timeInterval: 1000,
         distanceInterval: 5,
         foregroundService: {
-          notificationTitle: "SafePath Navigation",
+          notificationTitle: "TruGuide Navigation",
           notificationBody: "Navigation is active",
           notificationColor: "#4A90D9",
         },
@@ -602,7 +605,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   const stopNavigation = async () => {
     try {
       const isRegistered = await Location.hasStartedLocationUpdatesAsync(
-        NAVIGATION_LOCATION_TASK
+        NAVIGATION_LOCATION_TASK,
       );
       if (isRegistered) {
         await Location.stopLocationUpdatesAsync(NAVIGATION_LOCATION_TASK);
@@ -630,13 +633,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
     if (selectedRoute?.route_points && selectedRoute.route_points.length > 0) {
       const closestPoint = findClosestPointOnRoute(
         position,
-        selectedRoute.route_points
+        selectedRoute.route_points,
       );
       const distance = calculateDistance(
         position.latitude,
         position.longitude,
         closestPoint.latitude,
-        closestPoint.longitude
+        closestPoint.longitude,
       );
 
       // If more than 50m off route, trigger reroute
@@ -660,7 +663,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
   const findClosestPointOnRoute = (
     position: { latitude: number; longitude: number },
-    routePoints: { latitude: number; longitude: number }[]
+    routePoints: { latitude: number; longitude: number }[],
   ) => {
     let closestPoint = routePoints[0];
     let minDistance = Infinity;
@@ -670,7 +673,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         position.latitude,
         position.longitude,
         point.latitude,
-        point.longitude
+        point.longitude,
       );
       if (distance < minDistance) {
         minDistance = distance;
@@ -691,7 +694,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         saveFinalRoute({
           routeId: selectedRoute.databaseId,
           actualPath: traveledPath.current,
-        })
+        }),
       );
     }
     if (selectedRoute?.databaseId) {
