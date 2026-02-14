@@ -760,7 +760,6 @@ export const submitReview = createAsyncThunk(
         return { queued: true, message: 'Review saved - will sync when online' };
       }
 
-      // Try to submit
       const { data, error } = await supabase
         .from("reviews")
         .insert({ ...dbReviewData, user_id: user.id })
@@ -771,15 +770,9 @@ export const submitReview = createAsyncThunk(
 
       return data;
     } catch (error) {
-      // If submission failed, queue it
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { offlineQueue } = await import('../services/offlineQueue');
-        const { time_of_day, ...dbReviewData } = reviewData;
-        await offlineQueue.add(dbReviewData, user.id);
-        return { queued: true, message: 'Review saved - will sync when online' };
-      }
-      return rejectWithValue(error instanceof Error ? error.message : "Failed to submit review");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to submit review"
+      );
     }
   }
 );

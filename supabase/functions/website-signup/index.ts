@@ -193,7 +193,7 @@ async function sendWelcomeEmail(email: string, firstName: string): Promise<void>
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'TruGuide <hello@mail.safepathgo.com>',
+      from: 'TruGuide <support@truguide.app>>',
       to: [email],
       subject: '🎉 Welcome to TruGuide - Early Access',
       html: buildWelcomeEmail(firstName)
@@ -249,7 +249,7 @@ function buildWelcomeEmail(firstName?: string): string {
                   </p>
 
                   <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://safepathgo.com" style="display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, #2A5C99 0%, #1A4679 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">Visit Our Website</a>
+                    <a href="https://truguide.app" style="display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, #2A5C99 0%, #1A4679 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">Visit Our Website</a>
                   </div>
                 </td>
               </tr>
@@ -257,7 +257,7 @@ function buildWelcomeEmail(firstName?: string): string {
               <tr>
                 <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
                   <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px;">
-                    You're receiving this because you signed up at safepathgo.com
+                    You're receiving this because you signed up at truguide.app
                   </p>
                   <p style="margin: 0; color: #9a9a9a; font-size: 12px;">
                     © 2025 TruGuide. All rights reserved.
