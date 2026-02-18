@@ -41,7 +41,7 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'TruGuide <support@truguide.app>',
+        from: 'TruGuide <noreply@truguide.app>',
         to: [recipientEmail],
         subject: emailContent.subject,
         html: emailContent.html

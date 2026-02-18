@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
+  Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
@@ -204,6 +205,24 @@ export const Paywall: React.FC<PaywallProps> = ({
         Subscription automatically renews unless canceled at least 24 hours
         before the end of the current period.
       </Text>
+      {/* Links */}
+      <View style={styles.legalLinks}>
+        <TouchableOpacity
+          onPress={() => Linking.openURL("https://truguide.app/privacy-policy")}
+        >
+          <Text style={styles.linkText}>Privacy Policy</Text>
+        </TouchableOpacity>
+        <Text style={styles.legalText}> • </Text>
+        <TouchableOpacity
+          onPress={() =>
+            Linking.openURL(
+              "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+            )
+          }
+        >
+          <Text style={styles.linkText}>Terms of Use</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -328,5 +347,16 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 16,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: theme.spacing.sm,
+  },
+  linkText: {
+    fontSize: 12,
+    color: theme.colors.primary,
+    textDecorationLine: "underline",
   },
 });

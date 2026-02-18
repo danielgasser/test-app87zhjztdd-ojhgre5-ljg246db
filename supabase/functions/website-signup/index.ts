@@ -193,7 +193,7 @@ async function sendWelcomeEmail(email: string, firstName: string): Promise<void>
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'TruGuide <support@truguide.app>>',
+      from: 'TruGuide <noreply@truguide.app>>',
       to: [email],
       subject: '🎉 Welcome to TruGuide - Early Access',
       html: buildWelcomeEmail(firstName)
