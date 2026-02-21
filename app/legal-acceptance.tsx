@@ -65,15 +65,6 @@ export default function LegalAcceptanceScreen() {
             color={theme.colors.primary}
           />
         </View>
-        <TouchableOpacity
-          onPress={async () => {
-            await supabase.auth.signOut();
-            await AsyncStorage.clear();
-            notify.success("Session cleared");
-          }}
-        >
-          <Text>NUKE SESSION</Text>
-        </TouchableOpacity>
         <Text style={styles.title}>Terms & Privacy</Text>
         <Text style={styles.subtitle}>
           Please review and accept our terms to continue

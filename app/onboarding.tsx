@@ -82,29 +82,6 @@ export default function OnboardingScreen() {
     disability_other: "",
   });
 
-  const nukeEverything = async () => {
-    try {
-      // Delete all possible Supabase keys
-      const possibleKeys = [
-        "supabase.auth.token",
-        `sb-${
-          process.env.EXPO_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0]
-        }-auth-token`,
-        "supabase-auth-token",
-      ];
-
-      for (const key of possibleKeys) {
-        try {
-          await SecureStore.deleteItemAsync(key);
-        } catch (e) {}
-      }
-
-      await AsyncStorage.clear();
-      Alert.alert("CLEARED! Force close app now (swipe up), then reopen");
-    } catch (error) {
-      logger.error(`${error}`);
-    }
-  };
   // Get navigation params
   const params = useLocalSearchParams();
   const jumpToField = params.jumpToField as string | undefined;
@@ -497,14 +474,6 @@ export default function OnboardingScreen() {
 
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
-      <TouchableOpacity
-        onPress={nukeEverything}
-        style={{ padding: 10, backgroundColor: "red", margin: 10 }}
-      >
-        <Text style={{ color: "white", textAlign: "center" }}>
-          NUKE SESSION
-        </Text>
-      </TouchableOpacity>
       <Text style={styles.stepTitle}>Welcome to TruGuide!</Text>
       <Text style={styles.stepDescription}>
         To provide personalized safety information, we need to understand your

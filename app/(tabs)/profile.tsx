@@ -87,7 +87,6 @@ export default function ProfileScreen() {
       dispatch(fetchRecentlyViewed({ userId: user.id }));
     }
   }, [user?.id, dispatch]);
-
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
       activity: false,
@@ -842,7 +841,19 @@ export default function ProfileScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
-
+              {profile?.role === "admin" && (
+                <TouchableOpacity
+                  style={styles.accountItem}
+                  onPress={() => router.push("/admin")}
+                >
+                  <Ionicons
+                    name="shield-checkmark"
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.accountText}>Admin Panel</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 style={styles.accountItem}
                 onPress={handleLogout}

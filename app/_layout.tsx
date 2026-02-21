@@ -94,6 +94,7 @@ function AppNavigator() {
       <Stack.Screen name="notification-settings" />
       <Stack.Screen name="display-settings" />
       <Stack.Screen name="edit-review" />
+      <Stack.Screen name="admin" />
       <Stack.Screen
         name="subscription"
         options={{ headerShown: false, presentation: "modal" }}
