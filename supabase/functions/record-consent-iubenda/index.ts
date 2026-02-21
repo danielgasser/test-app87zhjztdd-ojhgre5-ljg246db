@@ -101,7 +101,6 @@ serve(async (req) => {
     }
 
     const iubendaResult = await iubendaResponse.json();
-    console.log("iubenda consent recorded:", iubendaResult);
 
     return new Response(
       JSON.stringify({

@@ -20,6 +20,7 @@ type AuthState = {
   isAuthenticated: boolean;
   session: Session | null;
   user: User | null;
+  appleUserName?: string | null;
 
   // Onboarding state
   needsOnboarding: boolean;
@@ -43,7 +44,8 @@ type AuthAction =
       termsAccepted: boolean;
       locationDisclosureAccepted: boolean;
     }
-  | { type: "SIGN_OUT" };
+  | { type: "SIGN_OUT" }
+  | { type: "SET_APPLE_NAME"; name: string | null };
 
 // ============================================================================
 // REDUCER
@@ -102,6 +104,12 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         locationDisclosureAccepted: false,
       };
 
+    case "SET_APPLE_NAME":
+      return {
+        ...state,
+        appleUserName: action.name,
+      };
+
     default:
       return state;
   }
@@ -117,6 +125,7 @@ type AuthContextType = AuthState & {
   clearPendingDeepLink: () => void;
   setOnboardingStatus: (needsOnboarding: boolean) => void;
   refreshOnboardingStatus: () => Promise<void>;
+  setAppleName: (name: string | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     pendingDeepLink: null,
     termsAccepted: false,
     locationDisclosureAccepted: false,
+    appleUserName: null,
   });
 
   const mounted = useRef(true);
@@ -239,12 +249,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [state.isAuthenticated, state.user?.id, state.needsOnboarding]);
 
   useEffect(() => {
+    logger.info("🔍 useEffect triggered", {
+      hasUser: !!state.session?.user,
+      onboardingChecked: state.onboardingChecked,
+      isAuthenticated: state.isAuthenticated,
+      userId: state.session?.user?.id,
+    });
     if (!state.session?.user || state.onboardingChecked) {
+      logger.info("🔍 Skipping checkOnboardingStatus");
       return;
     }
     const userWithAmr = state.session.user as any;
     const isPasswordRecovery = userWithAmr.amr?.some(
-      (item: any) => item.method === "recovery"
+      (item: any) => item.method === "recovery",
     );
 
     if (!isPasswordRecovery && state.isAuthenticated) {
@@ -253,19 +270,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [state.session?.user?.id, state.onboardingChecked, state.isAuthenticated]);
 
   const checkOnboardingStatus = async (userId: string) => {
+    logger.info("🔍 checkOnboardingStatus called", { userId });
     try {
       // Add 3 second timeout
       const timeoutPromise = new Promise<{ data: null; error: any }>(
         (resolve) =>
           setTimeout(
             () => resolve({ data: null, error: { message: "Query timeout" } }),
-            3000
-          )
+            3000,
+          ),
       );
       const queryPromise = supabase
         .from("profiles")
         .select(
-          "onboarding_complete, terms_accepted_at, location_disclosure_accepted_at"
+          "onboarding_complete, terms_accepted_at, location_disclosure_accepted_at",
         )
         .eq("user_id", userId)
         .maybeSingle();
@@ -346,7 +364,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await checkOnboardingStatus(state.user.id);
     }
   };
-
+  const setAppleName = (name: string | null) => {
+    dispatch({ type: "SET_APPLE_NAME", name });
+  };
   // ============================================================================
   // CONTEXT VALUE
   // ============================================================================
@@ -358,6 +378,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearPendingDeepLink,
     setOnboardingStatus,
     refreshOnboardingStatus,
+    setAppleName,
   };
 
   return (

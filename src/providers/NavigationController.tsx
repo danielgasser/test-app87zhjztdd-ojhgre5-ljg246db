@@ -93,11 +93,15 @@ export function NavigationController({
   useEffect(() => {
     // Don't navigate while loading
     if (isLoading) {
+      logger.info("🧭 NavigationController: isLoading, skipping");
       return;
     }
 
     // Don't navigate until onboarding status is checked (for authenticated users)
     if (isAuthenticated && !onboardingChecked) {
+      logger.info(
+        "🧭 NavigationController: authenticated but onboarding not checked, skipping",
+      );
       return;
     }
 
@@ -118,7 +122,7 @@ export function NavigationController({
         "callback",
       ];
       const isOnPublicRoute = publicRoutes.some(
-        (route) => currentSegment === route || pathname?.includes(route)
+        (route) => currentSegment === route || pathname?.includes(route),
       );
 
       if (!isOnPublicRoute) {
@@ -184,7 +188,7 @@ export function NavigationController({
         "route-planning",
       ];
       const isOnProtectedRoute = protectedRoutes.some(
-        (route) => currentSegment === route || pathname?.includes(route)
+        (route) => currentSegment === route || pathname?.includes(route),
       );
 
       if (!isOnProtectedRoute) {

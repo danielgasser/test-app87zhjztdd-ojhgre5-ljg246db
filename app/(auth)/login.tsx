@@ -33,7 +33,7 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { refreshOnboardingStatus } = useAuth();
-
+  const { setAppleName } = useAuth();
   const handleLogin = async () => {
     if (!email || !password) {
       notify.error("Please fill in all fields");
@@ -80,8 +80,20 @@ export default function LoginScreen() {
 
       if (error) throw error;
 
-      // Refresh onboarding status
-      await refreshOnboardingStatus();
+      const { fullName } = credential;
+
+      if (fullName?.givenName || fullName?.familyName) {
+        // Get the newly created user
+        const name = [fullName?.givenName, fullName?.familyName]
+          .filter(Boolean)
+          .join(" ");
+
+        if (name) {
+          // REPLACE the database upsert with this:
+          setAppleName(name);
+          logger.info(`✅ Apple name stored for onboarding: ${name}`);
+        }
+      }
 
       // NavigationController will handle routing
     } catch (error: any) {
@@ -99,6 +111,7 @@ export default function LoginScreen() {
         provider: "google",
         options: {
           redirectTo: "safepath://callback",
+          skipBrowserRedirect: true,
         },
       });
 
@@ -112,17 +125,58 @@ export default function LoginScreen() {
         return;
       }
 
-      const canOpen = await Linking.canOpenURL(data.url);
+      const result = await WebBrowser.openAuthSessionAsync(
+        data.url,
+        "safepath://callback",
+      );
 
-      if (!canOpen) {
-        notify.error(
-          `Cannot open URL: ${data.url.substring(0, 50)}...`,
-          "Error",
-        );
+      if (result.type === "cancel" || result.type === "dismiss") {
         return;
       }
 
-      await Linking.openURL(data.url);
+      // Extract tokens from callback URL
+      if (result.type === "success" && result.url) {
+        // Parse URL - Supabase puts tokens in the hash fragment
+        const url = result.url;
+        const hashFragment = url.split("#")[1];
+
+        if (!hashFragment) {
+          notify.error("Authentication failed - no response data");
+          return;
+        }
+
+        // Parse hash fragment manually
+        const params: Record<string, string> = {};
+        hashFragment.split("&").forEach((pair) => {
+          const [key, value] = pair.split("=");
+          if (key && value) {
+            params[key] = decodeURIComponent(value);
+          }
+        });
+
+        const access_token = params.access_token;
+        const refresh_token = params.refresh_token;
+        const error_param = params.error;
+        const error_description = params.error_description;
+
+        if (error_param) {
+          notify.error(error_description || "Authentication failed");
+          return;
+        }
+
+        if (access_token && refresh_token) {
+          // Route to callback.tsx with tokens
+          router.push({
+            pathname: "/(auth)/callback",
+            params: {
+              access_token,
+              refresh_token,
+            },
+          } as any);
+        } else {
+          notify.error("Authentication failed - no tokens received");
+        }
+      }
       // OAuth callback will be handled by DeepLinkHandler -> callback.tsx
     } catch (error: any) {
       logger.error(`🔐 Google Sign-In error:`, error);
@@ -314,6 +368,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     color: theme.colors.textSecondary,
     fontSize: 14,
+    flexGrow: 1,
+    textAlign: "center",
   },
   appleButton: {
     backgroundColor: theme.colors.shadowBlack,

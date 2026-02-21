@@ -36,7 +36,6 @@ export async function recordConsent(
             };
         }
 
-        logger.info(`Consent recorded: ${consentType} = ${accepted}`, data);
         return data as RecordConsentResponse;
     } catch (error) {
         const errorMessage =

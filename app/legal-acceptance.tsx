@@ -17,6 +17,7 @@ import { logger } from "@/utils/logger";
 import { IubendaDocument } from "@/components/IubendaDocument";
 import { recordLegalAcceptance } from "@/services/consentService";
 import { commonStyles } from "@/styles/common";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const IUBENDA_PUBLIC_ID = "69238085";
 
@@ -43,7 +44,7 @@ export default function LegalAcceptanceScreen() {
       if (error) throw error;
 
       recordLegalAcceptance().catch((err) =>
-        logger.error("=== IUBENDA ERROR ===", err)
+        logger.error("=== IUBENDA ERROR ===", err),
       );
       await refreshOnboardingStatus();
     } catch (error) {
@@ -64,7 +65,15 @@ export default function LegalAcceptanceScreen() {
             color={theme.colors.primary}
           />
         </View>
-
+        <TouchableOpacity
+          onPress={async () => {
+            await supabase.auth.signOut();
+            await AsyncStorage.clear();
+            notify.success("Session cleared");
+          }}
+        >
+          <Text>NUKE SESSION</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Terms & Privacy</Text>
         <Text style={styles.subtitle}>
           Please review and accept our terms to continue

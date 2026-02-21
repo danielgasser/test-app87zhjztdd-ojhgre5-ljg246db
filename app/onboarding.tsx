@@ -55,7 +55,8 @@ const FIELD_TO_STEP_MAP: { [key: string]: number } = {
 
 export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
-  const { user, refreshOnboardingStatus } = useAuth();
+  const { user, refreshOnboardingStatus, appleUserName, setAppleName } =
+    useAuth();
   const { profile } = useAppSelector((state) => state.user);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [loading] = useState(false);
@@ -63,7 +64,7 @@ export default function OnboardingScreen() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: "",
+    full_name: appleUserName || "",
     race_ethnicity: [] as string[],
     gender: "",
     lgbtq_status: false,
@@ -218,7 +219,7 @@ export default function OnboardingScreen() {
         const parsedDisabilityStatus: string[] = [];
         const disabilityOtherValues: string[] = [];
 
-        profile.disability_status?.forEach((disability) => {
+        profile.disability_status?.forEach((disability: string) => {
           const parsed = parseOtherValue(disability);
           parsedDisabilityStatus.push(parsed.mainValue);
           if (parsed.customValue) {
@@ -286,6 +287,8 @@ export default function OnboardingScreen() {
   };
 
   const handleComplete = async () => {
+    setAppleName(null);
+
     if (!user?.id) {
       notify.error("User session not found. Please log in again.");
       return;
