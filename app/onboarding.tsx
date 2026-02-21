@@ -74,7 +74,7 @@ export default function OnboardingScreen() {
     privacy_level: "public" as "public" | "anonymous" | "private",
     show_demographics: true,
   });
-
+  console.log("Apple name from auth provider:", appleUserName);
   const [otherInputs, setOtherInputs] = useState({
     race_other: "",
     gender_other: "",
@@ -263,9 +263,16 @@ export default function OnboardingScreen() {
       } else {
         // Profile exists but is empty - this is initial setup
         setIsEditing(false);
+
+        if (appleUserName && !formData.full_name) {
+          setFormData((prev) => ({
+            ...prev,
+            full_name: appleUserName,
+          }));
+        }
       }
     }
-  }, [profile]);
+  }, [profile, appleUserName]);
 
   const handleNext = () => {
     const currentStepId = ONBOARDING_STEPS[currentStep].id;

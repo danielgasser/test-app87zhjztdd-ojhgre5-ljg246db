@@ -5,7 +5,7 @@ module.exports = () => {
     expo: {
       name: appName,
       slug: "safepath",
-      version: "0.9.61",
+      version: "0.9.62",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -17,7 +17,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "141",
+        buildNumber: "142",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
@@ -25,6 +25,7 @@ module.exports = () => {
           googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
         },
         infoPlist: {
+          CFBundleDisplayName: "TruGuide",
           ITSAppUsesNonExemptEncryption: false,
           UIBackgroundModes: ["location"],
           NSLocationWhenInUseUsageDescription:

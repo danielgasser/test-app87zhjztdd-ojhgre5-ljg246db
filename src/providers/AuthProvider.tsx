@@ -249,12 +249,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [state.isAuthenticated, state.user?.id, state.needsOnboarding]);
 
   useEffect(() => {
-    logger.info("🔍 useEffect triggered", {
-      hasUser: !!state.session?.user,
-      onboardingChecked: state.onboardingChecked,
-      isAuthenticated: state.isAuthenticated,
-      userId: state.session?.user?.id,
-    });
     if (!state.session?.user || state.onboardingChecked) {
       logger.info("🔍 Skipping checkOnboardingStatus");
       return;
