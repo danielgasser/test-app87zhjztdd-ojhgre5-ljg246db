@@ -66,7 +66,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { selectedLocation, loading } = useAppSelector(
-    (state) => state.locations
+    (state) => state.locations,
   );
   const { user } = useAuth();
   const currentUser = user;
@@ -75,31 +75,31 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [placeDetails, setPlaceDetails] = useState<PlaceDetails | null>(null);
   const mlPredictions = useAppSelector(
-    (state) => state.locations.mlPredictions
+    (state) => state.locations.mlPredictions,
   );
   const mlPredictionsLoading = useAppSelector(
-    (state) => state.locations.mlPredictionsLoading
+    (state) => state.locations.mlPredictionsLoading,
   );
   const demographicScores = useAppSelector(
     (state) =>
       state.locations.demographicScores[locationId || ""] ??
-      EMPTY_DEMOGRAPHIC_SCORES
+      EMPTY_DEMOGRAPHIC_SCORES,
   );
   const demographicScoresLoading = useAppSelector(
     (state) =>
-      state.locations.demographicScoresLoading[locationId || ""] || false
+      state.locations.demographicScoresLoading[locationId || ""] || false,
   );
   const neighborhoodStats = useAppSelector(
-    (state) => state.locations.neighborhoodStats
+    (state) => state.locations.neighborhoodStats,
   );
   const neighborhoodStatsLoading = useAppSelector(
-    (state) => state.locations.neighborhoodStatsLoading
+    (state) => state.locations.neighborhoodStatsLoading,
   );
   const timeSafetyData = useAppSelector(
-    (state) => state.locations.timeSafetyData
+    (state) => state.locations.timeSafetyData,
   );
   const timeSafetyLoading = useAppSelector(
-    (state) => state.locations.timeSafetyLoading
+    (state) => state.locations.timeSafetyLoading,
   );
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -150,7 +150,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
             locationId: identifier, // Use the identifier, not null
             latitude: lat,
             longitude: lng,
-          })
+          }),
         );
       }
     }
@@ -197,7 +197,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           searchMarker?.address,
         latitude,
         longitude,
-      })
+      }),
     );
   }, [
     visible,
@@ -225,7 +225,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
     if (latitude && longitude) {
       dispatch(
-        fetchNeighborhoodStats({ latitude, longitude, radiusMeters: 500 })
+        fetchNeighborhoodStats({ latitude, longitude, radiusMeters: 500 }),
       );
     }
   }, [visible, selectedLocation, searchMarker, placeDetails, dispatch]);
@@ -364,6 +364,10 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
             latitude: searchMarker.latitude,
             longitude: searchMarker.longitude,
             place_type: searchMarker.place_type || "other",
+            city: (searchMarker as any).city,
+            state_province: (searchMarker as any).state_province,
+            country: (searchMarker as any).country,
+            postal_code: (searchMarker as any).postal_code,
           }),
         },
       });
@@ -448,7 +452,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   };
 
   const userHasReviewed = reviews.some(
-    (review) => review.user_id === currentUser?.id
+    (review) => review.user_id === currentUser?.id,
   );
 
   return (
@@ -514,12 +518,14 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     ""}
                 </Text>
                 <Text style={styles.locationType}>
-                  {selectedLocation?.place_type ||
-                    placeDetails?.place_id ||
-                    "Unknown Location Type"}
-                  .
+                  {selectedLocation?.city && selectedLocation?.state_province
+                    ? `${selectedLocation.city}, ${selectedLocation.state_province}`
+                    : selectedLocation?.city ||
+                      selectedLocation?.state_province ||
+                      selectedLocation?.place_type ||
+                      placeDetails?.place_id ||
+                      ""}
                 </Text>
-
                 {/* Place Details from Google */}
                 {placeDetails?.opening_hours && (
                   <View style={{ marginTop: 12 }}>
@@ -594,7 +600,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         styles.safetyScoreBadge,
                         {
                           backgroundColor: getRatingColor(
-                            selectedLocation.overall_safety_score
+                            selectedLocation.overall_safety_score,
                           ),
                         },
                       ]}
@@ -676,7 +682,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                               locationId: identifier,
                               latitude: lat,
                               longitude: lng,
-                            })
+                            }),
                           );
                         }
                       }
@@ -833,7 +839,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                                   styles.ratingValue,
                                   {
                                     color: getRatingColor(
-                                      review.accessibility_rating
+                                      review.accessibility_rating,
                                     ),
                                   },
                                 ]}

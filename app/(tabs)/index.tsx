@@ -439,7 +439,7 @@ export default function MapScreen() {
   // ============= HELPER FUNCTIONS =============
   const getMarkerProps = (location: any) => {
     const hasReviews =
-      location.demographic_safety_score || location.avg_safety_score;
+      location.review_count != null && location.review_count > 0;
     const prediction = mlPredictions[location.id];
 
     if (hasReviews) {
@@ -455,7 +455,7 @@ export default function MapScreen() {
           )?.toFixed(1) || "N/A"
         }/5`,
       };
-    } else if (prediction) {
+    } else if (prediction && !hasReviews) {
       return {
         type: "predicted",
         score: prediction.predicted_safety_score,
@@ -467,9 +467,9 @@ export default function MapScreen() {
       };
     } else {
       return {
-        type: "unknown",
+        type: "no-reviews",
         score: null,
-        color: theme.colors.primary,
+        color: APP_CONFIG.MAP_MARKERS.COLOR_NO_REVIEWS,
         description: "No data available",
       };
     }
@@ -562,7 +562,7 @@ export default function MapScreen() {
       latitude,
       longitude,
     );
-
+    console.log("Address data for long press:", addressData);
     if (!addressData) {
       notify.error("Unable to get address for this location");
       return;
@@ -1015,9 +1015,11 @@ export default function MapScreen() {
           demographic_safety_score: any;
           avg_safety_score: any;
           id: string;
+          review_count: number | null | undefined;
         }) => {
           const hasReviews =
-            location.demographic_safety_score || location.avg_safety_score;
+            (location.demographic_safety_score || location.avg_safety_score) &&
+            (location.review_count ?? 0) > 0;
           const hasPrediction = mlPredictions[location.id];
           const isLoading = mlPredictionsLoading[location.id];
 
@@ -1378,7 +1380,34 @@ export default function MapScreen() {
                       longitude: Number(loc.longitude),
                     }}
                     onPress={() => handleMarkerPress(loc.id)}
+                    anchor={{ x: 0.5, y: 1 }}
                   >
+                    <View
+                      style={{
+                        backgroundColor: markerProps.color,
+                        borderRadius: 12,
+                        padding: 8,
+                        borderWidth: 2,
+                        borderColor: theme.colors.background,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        shadowColor: theme.colors.backdrop,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 2,
+                        elevation: 4,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: theme.colors.background,
+                          fontSize: 16,
+                          fontWeight: "700",
+                        }}
+                      >
+                        {markerProps.score?.toFixed(1) ?? "?"}
+                      </Text>
+                    </View>
                     <Callout>
                       <View style={styles.predictionCallout}>
                         <Text style={styles.calloutTitle}>{loc.name}</Text>

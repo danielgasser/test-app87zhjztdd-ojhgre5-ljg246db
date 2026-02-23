@@ -100,7 +100,7 @@ export default function ReviewScreen() {
     : null;
   const isCreatingNew = typedIsNewLocation === "true";
   const [currentLocationId, setCurrentLocationId] = useState<string | null>(
-    isCreatingNew ? null : typedLocationId || null
+    isCreatingNew ? null : typedLocationId || null,
   );
   const [editableLocationName, setEditableLocationName] = useState("");
   useEffect(() => {
@@ -160,7 +160,7 @@ export default function ReviewScreen() {
 
         // Create the location
         finalLocationId = await dispatch(
-          createLocationFromSearch({ searchLocation, userId: user!.id })
+          createLocationFromSearch({ searchLocation, userId: user!.id }),
         ).unwrap();
         setCurrentLocationId(finalLocationId);
 
@@ -168,7 +168,7 @@ export default function ReviewScreen() {
           setUserLocation({
             latitude: parsedLocationData.latitude,
             longitude: parsedLocationData.longitude,
-          })
+          }),
         );
       }
       if (!finalLocationId) {
@@ -220,14 +220,14 @@ export default function ReviewScreen() {
       if (error.code === "23505") {
         notify.success(
           "You have already reviewed this location. You can edit your existing review instead.",
-          "Already Reviewed"
+          "Already Reviewed",
         );
         return;
       }
 
       notify.error(
         "Error",
-        error?.message || "Failed to submit review. Please try again."
+        error?.message || "Failed to submit review. Please try again.",
       );
     }
   };

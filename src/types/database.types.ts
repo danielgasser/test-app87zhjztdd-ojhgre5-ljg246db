@@ -1025,6 +1025,10 @@ export type Database = {
         Args: { count_field: string; review_id: string }
         Returns: undefined
       }
+      delete_user_keep_content: {
+        Args: { target_user_id: string }
+        Returns: string
+      }
       disablelongtransactions: { Args: never; Returns: string }
       dropgeometrycolumn:
         | {
@@ -1281,6 +1285,7 @@ export type Database = {
           longitude: number
           name: string
           place_type: string
+          review_count: number
         }[]
       }
       get_nearby_reviews: {
