@@ -9,7 +9,24 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test": "jest --watchAll=false"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.[jt]s?(x)",
+      "**/?(*.)+(spec|test).[tj]s?(x)"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "^@react-native-async-storage/async-storage$": "<rootDir>/src/__mocks__/asyncStorage.ts",
+      "^../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
+      "^@/services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
+      "^@/utils/notificationService$": "<rootDir>/src/__mocks__/utils/notificationService.ts",
+      "^@/utils/logger$": "<rootDir>/src/__mocks__/utils/logger.ts"
+    }
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -42,6 +59,7 @@
     "expo-status-bar": "~3.0.8",
     "expo-task-manager": "~14.0.9",
     "expo-web-browser": "~15.0.9",
+    "jest-expo": "~54.0.17",
     "qs": "^6.14.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -62,6 +80,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@eslint/eslintrc": "^3.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.10",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",

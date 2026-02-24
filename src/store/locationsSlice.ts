@@ -19,6 +19,8 @@ import { checkProfileCompleteness } from "@/utils/profileValidation";
 import { shouldShowBanner, incrementShowCount, BannerType } from "./profileBannerSlice";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
+import { determineBestRouteName, determineRouteType } from '@/utils/routeHelpers';
+import { calculateDistanceSimple, findCorrectStepForPosition } from '@/utils/navigationHelpers';
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -73,7 +75,7 @@ interface RouteSegment {
   duration_seconds: number;
 }
 
-interface RouteSafetyAnalysis {
+export interface RouteSafetyAnalysis {
   confidence_score: ReactNode;
   overall_route_score: number;
   overall_confidence?: number;
@@ -1755,57 +1757,6 @@ export const generateSmartRoute = createAsyncThunk(
   }
 );
 
-// Simple distance calculation (meters)
-function calculateDistanceSimple(
-  lat1: number, lon1: number,
-  lat2: number, lon2: number
-): number {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-// Helper: Find correct step based on current position
-function findCorrectStepForPosition(
-  position: { latitude: number; longitude: number },
-  steps: NavigationStep[]
-): number {
-  let correctStep = 0;
-
-  for (let i = 0; i < steps.length - 1; i++) {
-    const currentStepEnd = steps[i].end_location;
-    const nextStepStart = steps[i + 1].start_location;
-
-    const distToCurrentEnd = calculateDistanceSimple(
-      position.latitude,
-      position.longitude,
-      currentStepEnd.latitude,
-      currentStepEnd.longitude
-    );
-
-    const distToNextStart = calculateDistanceSimple(
-      position.latitude,
-      position.longitude,
-      nextStepStart.latitude,
-      nextStepStart.longitude
-    );
-
-    // If closer to next step start OR within 50m of current step end, advance
-    if (distToNextStart < distToCurrentEnd || distToCurrentEnd < 50) {
-      correctStep = i + 1;
-    } else {
-      break;
-    }
-  }
-
-  return correctStep;
-}
-
 export const checkForReroute = createAsyncThunk(
   "locations/checkForReroute",
   async (
@@ -2422,35 +2373,6 @@ export const fetchTimeSafetyData = createAsyncThunk(
     } as TimeSafetyData;
   }
 );
-
-// ================================
-// HELPER FUNCTIONS
-// ================================
-
-function determineBestRouteName(safetyAnalysis: RouteSafetyAnalysis): string {
-  const { overall_route_score } = safetyAnalysis;
-
-  if (overall_route_score >= 4.0) {
-    return "Safe Route";
-  } else if (overall_route_score >= 3.0) {
-    return "Moderate Safety Route";
-  } else {
-    return "Caution Advised Route";
-  }
-}
-
-function determineRouteType(
-  safetyAnalysis: RouteSafetyAnalysis,
-  preferences: RouteRequest["route_preferences"]
-): "fastest" | "safest" | "balanced" {
-  if (preferences.prioritize_safety) {
-    return "safest";
-  } else if (safetyAnalysis.overall_route_score >= 4.0) {
-    return "balanced";
-  } else {
-    return "fastest";
-  }
-}
 
 // ================================
 // SLICE DEFINITION
