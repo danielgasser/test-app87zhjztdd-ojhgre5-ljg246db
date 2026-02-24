@@ -25,7 +25,8 @@
       "^../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
       "^@/services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
       "^@/utils/notificationService$": "<rootDir>/src/__mocks__/utils/notificationService.ts",
-      "^@/utils/logger$": "<rootDir>/src/__mocks__/utils/logger.ts"
+      "^@/utils/logger$": "<rootDir>/src/__mocks__/utils/logger.ts",
+      "^../../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts"
     }
   },
   "dependencies": {

@@ -1,37 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { checkForReroute } from '../locationsSlice';
+import locationsReducer, {
+    checkForReroute,
+    setSelectedRoute,
+    setRouteRequest,
+} from '../locationsSlice';
 import userReducer from '../userSlice';
+import { supabase } from '../../services/supabase';
 
-// ─── Supabase mock ────────────────────────────────────────────────────────────
-
-const mockFunctionsInvoke = jest.fn();
-
-jest.mock('../../services/supabase', () => ({
-    supabase: {
-        auth: {
-            getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
-            getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
-        },
-        functions: {
-            invoke: mockFunctionsInvoke,
-        },
-        from: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnThis(),
-            insert: jest.fn().mockReturnThis(),
-            update: jest.fn().mockReturnThis(),
-            eq: jest.fn().mockReturnThis(),
-            single: jest.fn().mockResolvedValue({ data: null, error: null }),
-        }),
-    },
-}));
-// ─── fetch mock (for generateSafeRoute fallback) ──────────────────────────────
-
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
-
-// ─── Real reducer ─────────────────────────────────────────────────────────────
-
-const locationsReducer = jest.requireActual('../locationsSlice').default;
+const mockFunctionsInvoke = supabase.functions.invoke as jest.Mock;
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -95,36 +71,32 @@ const SAFE_ROUTE_RESPONSE = {
 // ─── Store factory ────────────────────────────────────────────────────────────
 
 function makeStore(preloadedLocations: Partial<any> = {}) {
-    return configureStore({
+    const store = configureStore({
         reducer: {
             locations: locationsReducer as any,
             user: userReducer,
         },
-        preloadedState: {
-            locations: {
-                ...locationsReducer(undefined, { type: '@@INIT' }),
-                ...preloadedLocations,
-            } as any,
-        },
     });
-}
 
-function getLocations(store: ReturnType<typeof makeStore>) {
+    if (preloadedLocations.selectedRoute !== undefined) {
+        store.dispatch(setSelectedRoute(preloadedLocations.selectedRoute));
+    }
+    if (preloadedLocations.routeRequest !== undefined) {
+        store.dispatch(setRouteRequest(preloadedLocations.routeRequest));
+    }
+
+    return store;
+}
+type TestStore = ReturnType<typeof makeStore>;
+
+function getLocations(store: TestStore) {
     return (store.getState() as any).locations;
 }
-
 // ─── Setup ────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
     jest.useFakeTimers();
     jest.resetAllMocks();
-
-    // Default fetch mock — returns safe route response
-    mockFetch.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(SAFE_ROUTE_RESPONSE),
-        text: () => Promise.resolve(''),
-    });
 });
 
 afterEach(() => {
@@ -150,6 +122,18 @@ describe('early abort — missing state', () => {
         const store = makeStore({ selectedRoute: null, routeRequest: null });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
         expect(mockFunctionsInvoke).not.toHaveBeenCalled();
+    });
+    it('DEBUG — what does supabase.functions.invoke return', async () => {
+        const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
+
+        console.log('mockFunctionsInvoke before:', mockFunctionsInvoke.mock.calls.length);
+        console.log('mockFunctionsInvoke is:', typeof mockFunctionsInvoke);
+
+        const result = await store.dispatch(checkForReroute(BASE_POSITION) as any);
+
+        console.log('mockFunctionsInvoke after calls:', mockFunctionsInvoke.mock.calls.length);
+        console.log('dispatch result:', JSON.stringify(result));
+        console.log('state after:', JSON.stringify(getLocations(store).isRerouting));
     });
 });
 
@@ -184,10 +168,10 @@ describe('smart route success', () => {
         expect(getLocations(store).routeRequest?.origin).toEqual(newPosition);
     });
 
-    it('does not call fetch (no fallback needed)', async () => {
+    it('does not call fallback when smart route succeeds', async () => {
         const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
-        expect(mockFetch).not.toHaveBeenCalled();
+        expect(mockFunctionsInvoke).toHaveBeenCalledTimes(1);
     });
 
     it('clears isRerouting after setTimeout fires', async () => {
@@ -201,21 +185,22 @@ describe('smart route success', () => {
 // ─── Smart route failure → fallback ──────────────────────────────────────────
 
 describe('smart route failure — fallback to generateSafeRoute', () => {
-    it('calls fetch fallback when smart route throws generic error', async () => {
-        mockFunctionsInvoke.mockResolvedValue({ data: null, error: { message: 'Network error' } });
+    it('calls generateSafeRoute fallback when smart route throws generic error', async () => {
+        mockFunctionsInvoke
+            .mockResolvedValueOnce({ data: null, error: { message: 'Network error' } })
+            .mockResolvedValueOnce({ data: null, error: null }); // fallback call
         const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
-        expect(mockFetch).toHaveBeenCalled();
+        expect(mockFunctionsInvoke).toHaveBeenCalledTimes(2);
     });
-
-    it('does NOT call fetch when error contains "No safer alternative available"', async () => {
+    it('does NOT call fallback when error contains "No safer alternative available"', async () => {
         mockFunctionsInvoke.mockResolvedValue({
             data: null,
             error: { message: 'No safer alternative available' },
         });
         const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
-        expect(mockFetch).not.toHaveBeenCalled();
+        expect(mockFunctionsInvoke).toHaveBeenCalledTimes(1);
     });
 
     it('updates selectedRoute with fallback route preserving databaseId', async () => {
