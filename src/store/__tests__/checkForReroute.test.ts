@@ -6,6 +6,7 @@ import locationsReducer, {
 } from '../locationsSlice';
 import userReducer from '../userSlice';
 import { supabase } from '../../services/supabase';
+process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? 'test-key';
 
 const mockFunctionsInvoke = supabase.functions.invoke as jest.Mock;
 
@@ -92,11 +93,27 @@ type TestStore = ReturnType<typeof makeStore>;
 function getLocations(store: TestStore) {
     return (store.getState() as any).locations;
 }
+
+
 // ─── Setup ────────────────────────────────────────────────────────────────────
+
+const mockFetch = jest.fn();
 
 beforeEach(() => {
     jest.useFakeTimers();
+    global.fetch = mockFetch;
     jest.resetAllMocks();
+    mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+            status: 'OK',
+            routes: [{
+                legs: [{ duration: { value: 900 }, distance: { value: 5200 }, steps: [] }],
+                overview_polyline: { points: '' },
+            }],
+        }),
+    });
+    mockFunctionsInvoke.mockResolvedValue({ data: SMART_ROUTE_RESPONSE, error: null });
 });
 
 afterEach(() => {
@@ -122,18 +139,6 @@ describe('early abort — missing state', () => {
         const store = makeStore({ selectedRoute: null, routeRequest: null });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
         expect(mockFunctionsInvoke).not.toHaveBeenCalled();
-    });
-    it('DEBUG — what does supabase.functions.invoke return', async () => {
-        const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
-
-        console.log('mockFunctionsInvoke before:', mockFunctionsInvoke.mock.calls.length);
-        console.log('mockFunctionsInvoke is:', typeof mockFunctionsInvoke);
-
-        const result = await store.dispatch(checkForReroute(BASE_POSITION) as any);
-
-        console.log('mockFunctionsInvoke after calls:', mockFunctionsInvoke.mock.calls.length);
-        console.log('dispatch result:', JSON.stringify(result));
-        console.log('state after:', JSON.stringify(getLocations(store).isRerouting));
     });
 });
 
@@ -186,23 +191,21 @@ describe('smart route success', () => {
 
 describe('smart route failure — fallback to generateSafeRoute', () => {
     it('calls generateSafeRoute fallback when smart route throws generic error', async () => {
-        mockFunctionsInvoke
-            .mockResolvedValueOnce({ data: null, error: { message: 'Network error' } })
-            .mockResolvedValueOnce({ data: null, error: null }); // fallback call
+        mockFunctionsInvoke.mockResolvedValueOnce({ data: null, error: { message: 'Network error' } });
         const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
-        expect(mockFunctionsInvoke).toHaveBeenCalledTimes(2);
+
+        expect(mockFetch).toHaveBeenCalled();
     });
     it('does NOT call fallback when error contains "No safer alternative available"', async () => {
-        mockFunctionsInvoke.mockResolvedValue({
+        mockFunctionsInvoke.mockResolvedValueOnce({
             data: null,
-            error: { message: 'No safer alternative available' },
+            error: new Error('No safer alternative available'),
         });
         const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });
         await store.dispatch(checkForReroute(BASE_POSITION) as any);
         expect(mockFunctionsInvoke).toHaveBeenCalledTimes(1);
     });
-
     it('updates selectedRoute with fallback route preserving databaseId', async () => {
         mockFunctionsInvoke.mockResolvedValue({ data: null, error: { message: 'Network error' } });
         const store = makeStore({ selectedRoute: BASE_ROUTE, routeRequest: BASE_ROUTE_REQUEST });

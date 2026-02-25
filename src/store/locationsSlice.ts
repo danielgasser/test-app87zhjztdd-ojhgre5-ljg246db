@@ -2386,16 +2386,10 @@ const locationsSlice = createSlice({
       state.selectedLocation = null;
     },
     setSelectedRoute: (state, action: PayloadAction<SafeRoute | null>) => {
-      if (!action.payload?.navigationSessionId) {
-        console.trace('🟣 MISSING navigationSessionId - call stack:');
-      }
       state.selectedRoute = action.payload;
     },
 
     setRouteRequest: (state, action: PayloadAction<RouteRequest | null>) => {
-      if (action.payload === null) {
-        console.trace('📝 Setting to NULL - call stack:');
-      }
       state.routeRequest = action.payload;
     },
 
@@ -2511,9 +2505,6 @@ const locationsSlice = createSlice({
       state.isRerouting = action.payload;
     },
     setNavigationSessionId: (state, action: PayloadAction<string | null>) => {
-      if (action.payload === null) {
-        console.trace('🔵 Setting to NULL - call stack:');
-      }
       state.navigationSessionId = action.payload;
     },
     setNavigationPosition: (state, action: PayloadAction<{ latitude: number; longitude: number; heading?: number } | null>) => {
