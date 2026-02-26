@@ -26,8 +26,18 @@
       "^@/services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
       "^@/utils/notificationService$": "<rootDir>/src/__mocks__/utils/notificationService.ts",
       "^@/utils/logger$": "<rootDir>/src/__mocks__/utils/logger.ts",
-      "^../../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts"
-    }
+      "^../../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
+      "^../../../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
+      "^@react-native-community/netinfo$": "<rootDir>/src/__mocks__/netinfo.ts",
+      "^../services/offlineQueue$": "<rootDir>/src/__mocks__/services/offlineQueue.ts"
+    },
+    "setupFiles": [
+      "<rootDir>/src/jest.setup.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/src/store/__tests__/helpers/"
+    ]
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

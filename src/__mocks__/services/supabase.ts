@@ -15,6 +15,10 @@ export const supabase = {
             data: { session: { access_token: 'mock-token' } },
             error: null,
         }),
+        getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: 'mock-user-id' } },
+            error: null,
+        }),
         signOut: jest.fn().mockResolvedValue({ error: null }),
     },
     functions: {
