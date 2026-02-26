@@ -63,7 +63,7 @@ describe('fetchNearbyLocations', () => {
     describe('without user profile (fallback RPC)', () => {
         it('calls get_nearby_locations when no user profile', async () => {
             mockRpc.mockResolvedValue({ data: [NEARBY_LOCATION], error: null });
-            const store = makeStore(); // no user profile in state
+            const store = makeStore({ user: { profile: null } })
             await store.dispatch(fetchNearbyLocations(BASE_COORDS) as any);
             expect(mockRpc).toHaveBeenCalledWith('get_nearby_locations', expect.any(Object));
         });
