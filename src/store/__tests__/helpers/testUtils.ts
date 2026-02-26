@@ -49,6 +49,7 @@ export const MOCK_SESSION = {
 export function setupMocks() {
     global.fetch = mockFetch;
     jest.resetAllMocks();
+    // mockOfflineQueueAdd is not accessible here
 
     // Default: authenticated session
     mockAuthGetSession.mockResolvedValue({

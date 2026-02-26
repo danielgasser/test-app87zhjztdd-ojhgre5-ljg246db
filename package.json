@@ -29,7 +29,8 @@
       "^../../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
       "^../../../services/supabase$": "<rootDir>/src/__mocks__/services/supabase.ts",
       "^@react-native-community/netinfo$": "<rootDir>/src/__mocks__/netinfo.ts",
-      "^../services/offlineQueue$": "<rootDir>/src/__mocks__/services/offlineQueue.ts"
+      "^../services/offlineQueue$": "<rootDir>/src/__mocks__/services/offlineQueue.ts",
+      "^../../services/offlineQueue$": "<rootDir>/src/__mocks__/services/offlineQueue.ts"
     },
     "setupFiles": [
       "<rootDir>/src/jest.setup.ts"

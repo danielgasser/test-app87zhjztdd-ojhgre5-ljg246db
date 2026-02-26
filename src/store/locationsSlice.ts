@@ -20,7 +20,9 @@ import { shouldShowBanner, incrementShowCount, BannerType } from "./profileBanne
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { determineBestRouteName, determineRouteType } from '@/utils/routeHelpers';
-import { calculateDistanceSimple, findCorrectStepForPosition } from '@/utils/navigationHelpers';
+import { findCorrectStepForPosition } from '@/utils/navigationHelpers';
+import NetInfo from '@react-native-community/netinfo';
+import { offlineQueue } from '../services/offlineQueue';
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -752,12 +754,10 @@ export const submitReview = createAsyncThunk(
       const { time_of_day, ...dbReviewData } = reviewData;
 
       // Check network connectivity
-      const NetInfo = (await import('@react-native-community/netinfo')).default;
       const netInfo = await NetInfo.fetch();
 
       if (!netInfo.isConnected) {
         // Queue for later
-        const { offlineQueue } = await import('../services/offlineQueue');
         await offlineQueue.add(dbReviewData, user.id);
         return { queued: true, message: 'Review saved - will sync when online' };
       }

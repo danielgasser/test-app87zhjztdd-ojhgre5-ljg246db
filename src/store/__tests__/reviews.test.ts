@@ -1,5 +1,5 @@
 import { submitReview, updateReview } from '../locationsSlice';
-import { makeStore, setupMocks, getLocations } from './helpers/testUtils';
+import { makeStore, getLocations } from './helpers/testUtils';
 import { supabase } from '../../services/supabase';
 import NetInfo from '@react-native-community/netinfo';
 import { offlineQueue } from '../../services/offlineQueue';
@@ -58,11 +58,12 @@ const BASE_REVIEW_DATA = {
 // ─── Setup ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-    setupMocks();
-    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-123' } } });
+    jest.clearAllMocks();
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({ data: { user: { id: 'user-123' } } });
+    (supabase.auth.getSession as jest.Mock).mockResolvedValue({ data: { session: { access_token: 'mock-token' } }, error: null });
+    mockNetInfoFetch.mockResolvedValue({ isConnected: true });
     mockOfflineQueueAdd.mockResolvedValue(undefined);
 });
-
 // ══════════════════════════════════════════════════════════════════════════════
 // submitReview
 // ══════════════════════════════════════════════════════════════════════════════
