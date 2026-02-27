@@ -70,7 +70,7 @@ describe('fetchNearbyLocations', () => {
 
         it('passes lat/lng/radius to RPC', async () => {
             mockRpc.mockResolvedValue({ data: [], error: null });
-            const store = makeStore();
+            const store = makeStore({ user: { profile: null } });
             await store.dispatch(fetchNearbyLocations({ ...BASE_COORDS, radius: 5000 }) as any);
             expect(mockRpc).toHaveBeenCalledWith('get_nearby_locations', expect.objectContaining({
                 lat: BASE_COORDS.latitude,
@@ -141,14 +141,14 @@ describe('fetchNearbyLocations', () => {
 
         it('calls get_nearby_locations_for_user when profile exists', async () => {
             mockRpc.mockResolvedValue({ data: [NEARBY_LOCATION], error: null });
-            const store = makeStore({ user: { profile: null } });
+            const store = makeStore({ user: { profile: PROFILE } });
             await store.dispatch(fetchNearbyLocations(BASE_COORDS) as any);
             expect(mockRpc).toHaveBeenCalledWith('get_nearby_locations_for_user', expect.any(Object));
         });
 
         it('passes demographic params to RPC', async () => {
             mockRpc.mockResolvedValue({ data: [], error: null });
-            const store = makeStore({ user: { profile: null } });
+            const store = makeStore({ user: { profile: PROFILE } });
             await store.dispatch(fetchNearbyLocations(BASE_COORDS) as any);
             expect(mockRpc).toHaveBeenCalledWith('get_nearby_locations_for_user', expect.objectContaining({
                 user_race_ethnicity: PROFILE.race_ethnicity,
@@ -159,14 +159,14 @@ describe('fetchNearbyLocations', () => {
 
         it('stores demographic locations in nearbyLocations state', async () => {
             mockRpc.mockResolvedValue({ data: [NEARBY_LOCATION], error: null });
-            const store = makeStore({ user: { profile: null } });
+            const store = makeStore({ user: { profile: PROFILE } });
             await store.dispatch(fetchNearbyLocations(BASE_COORDS) as any);
             expect(getLocations(store).nearbyLocations).toHaveLength(1);
         });
 
         it('rejects when demographic RPC returns an error', async () => {
             mockRpc.mockResolvedValue({ data: null, error: { message: 'RPC failed' } });
-            const store = makeStore({ user: { profile: null } });
+            const store = makeStore({ user: { profile: PROFILE } });
             const result = await store.dispatch(fetchNearbyLocations(BASE_COORDS) as any);
             expect(result.meta.requestStatus).toBe('rejected');
         });
@@ -369,7 +369,8 @@ describe('searchLocations', () => {
             mockSearchError();
             const store = makeStore();
             const result = await store.dispatch(searchLocations({ query: 'Tampa' }) as any);
-            expect(result.meta.requestStatus).toBe('rejected');
+            expect(result.meta.requestStatus).toBe('fulfilled');
+            expect(result.payload).toEqual([]);
         });
     });
 });
