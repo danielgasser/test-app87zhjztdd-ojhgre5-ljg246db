@@ -10,6 +10,7 @@ import { offlineQueue } from '../offlineQueue';
 import { supabase } from '@/services/supabase';
 
 const mockFrom = supabase.from as jest.Mock;
+const mockedStorage = jest.mocked(AsyncStorage);
 
 const QUEUE_KEY = 'offline_review_queue';
 
@@ -43,6 +44,7 @@ function mockInsertError(message = 'Insert failed') {
         }),
     });
 }
+
 beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -96,8 +98,8 @@ describe('add', () => {
 
         const stored = JSON.parse(mockedStorage.setItem.mock.calls[0][1]);
         expect(stored).toHaveLength(2);
-        expect(stored[0].reviewData).toEqual(REVIEW_A); // original preserved
-        expect(stored[1].reviewData).toEqual(REVIEW_B); // new appended
+        expect(stored[0].reviewData).toEqual(REVIEW_A);
+        expect(stored[1].reviewData).toEqual(REVIEW_B);
     });
 
     it('stamps queuedAt with current timestamp', async () => {
@@ -181,7 +183,10 @@ describe('processAll', () => {
             makeQueuedItem(REVIEW_A, 'user-1', 1000),
             makeQueuedItem(REVIEW_B, 'user-2', 2000),
         ];
-        mockStoredQueue(items);
+        mockedStorage.getItem
+            .mockResolvedValueOnce(JSON.stringify(items)) // processAll → getAll
+            .mockResolvedValueOnce(JSON.stringify(items)) // remove item A → getAll
+            .mockResolvedValueOnce(JSON.stringify(items)) // remove item B → getAll
         mockInsertSuccess();
 
         const count = await offlineQueue.processAll();
@@ -190,14 +195,15 @@ describe('processAll', () => {
 
     it('inserts with merged reviewData and user_id', async () => {
         const item = makeQueuedItem(REVIEW_A, 'user-1', 1000);
-        mockStoredQueue([item]);
+        mockedStorage.getItem
+            .mockResolvedValueOnce(JSON.stringify([item])) // processAll → getAll
+            .mockResolvedValueOnce(JSON.stringify([item])); // remove → getAll
 
         const mockInsert = jest.fn().mockReturnValue({
             select: jest.fn().mockReturnValue({
                 single: jest.fn().mockResolvedValue({ data: { id: 'r1' }, error: null }),
             }),
         });
-        (supabase.from as jest.Mock).mockImplementation(() => ({ insert: mockInsert }));
         mockFrom.mockReturnValue({ insert: mockInsert });
 
         await offlineQueue.processAll();
@@ -209,8 +215,6 @@ describe('processAll', () => {
 
     it('removes item from queue after successful sync', async () => {
         const item = makeQueuedItem(REVIEW_A, 'user-1', 1000);
-        // First getItem call: processAll reads queue
-        // Second getItem call: remove() reads queue again
         mockedStorage.getItem
             .mockResolvedValueOnce(JSON.stringify([item])) // processAll → getAll
             .mockResolvedValueOnce(JSON.stringify([item])); // remove → getAll
@@ -230,7 +234,6 @@ describe('processAll', () => {
 
         await offlineQueue.processAll();
 
-        // setItem should never be called (no remove happened)
         expect(mockedStorage.setItem).not.toHaveBeenCalled();
     });
 
@@ -250,25 +253,21 @@ describe('processAll', () => {
             makeQueuedItem(REVIEW_A, 'user-1', 1000),
             makeQueuedItem(REVIEW_B, 'user-2', 2000),
         ];
-        mockStoredQueue(items);
-
-        // First insert fails, second succeeds
         mockFrom
-            (supabase.from as jest.Mock)
-            .mockImplementationOnce(() => ({
+            .mockReturnValueOnce({
                 insert: jest.fn().mockReturnValue({
                     select: jest.fn().mockReturnValue({
                         single: jest.fn().mockResolvedValue({ data: null, error: { message: 'fail' } }),
                     }),
                 }),
-            }))
-            .mockImplementationOnce(() => ({
+            })
+            .mockReturnValueOnce({
                 insert: jest.fn().mockReturnValue({
                     select: jest.fn().mockReturnValue({
                         single: jest.fn().mockResolvedValue({ data: { id: 'r2' }, error: null }),
                     }),
                 }),
-            }));
+            });
 
         mockedStorage.getItem
             .mockResolvedValueOnce(JSON.stringify(items)) // processAll → getAll
@@ -282,13 +281,13 @@ describe('processAll', () => {
         const item = makeQueuedItem(REVIEW_A, 'user-1', 1000);
         mockStoredQueue([item]);
 
-        (supabase.from as jest.Mock).mockImplementation(() => ({
+        mockFrom.mockReturnValue({
             insert: jest.fn().mockReturnValue({
                 select: jest.fn().mockReturnValue({
                     single: jest.fn().mockRejectedValue(new Error('Network error')),
                 }),
             }),
-        }));
+        });
 
         await expect(offlineQueue.processAll()).resolves.toBe(0);
     });

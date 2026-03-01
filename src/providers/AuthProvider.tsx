@@ -51,7 +51,7 @@ type AuthAction =
 // REDUCER
 // ============================================================================
 
-function authReducer(state: AuthState, action: AuthAction): AuthState {
+export function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case "SET_LOADING":
       return { ...state, isLoading: action.loading };
