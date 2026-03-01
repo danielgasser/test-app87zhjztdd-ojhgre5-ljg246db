@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -51,6 +51,7 @@ export default function ProfileScreen() {
     routeHistoryHasMore,
     routeHistoryPage,
   } = useAppSelector((state) => state.locations);
+
   const [uploading, setUploading] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     activity: false,
@@ -62,6 +63,10 @@ export default function ProfileScreen() {
     settings: false,
     account: false,
   });
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const sectionPositions = useRef<Record<string, number>>({});
+
   const subscriptionTier = useSubscriptionTier();
 
   useEffect(() => {
@@ -88,6 +93,7 @@ export default function ProfileScreen() {
     }
   }, [user?.id, dispatch]);
   const toggleSection = (section: keyof typeof expandedSections) => {
+    const isOpening = !expandedSections[section];
     setExpandedSections((prev) => ({
       activity: false,
       routeHistory: false,
@@ -99,6 +105,15 @@ export default function ProfileScreen() {
       account: false,
       [section]: !prev[section],
     }));
+
+    if (isOpening) {
+      setTimeout(() => {
+        const y = sectionPositions.current[section];
+        if (y !== undefined) {
+          scrollViewRef.current?.scrollTo({ y: y - 16, animated: true });
+        }
+      }, 300);
+    }
   };
 
   const isLoggedIn = !!user;
@@ -444,6 +459,7 @@ export default function ProfileScreen() {
 
           {/* Collapsible Sections */}
           <ScrollView
+            ref={scrollViewRef}
             style={styles.sectionsContainer}
             showsVerticalScrollIndicator={false}
           >
@@ -478,6 +494,9 @@ export default function ProfileScreen() {
               icon="stats-chart"
               isExpanded={expandedSections.activity}
               onToggle={() => toggleSection("activity")}
+              onLayout={(y) => {
+                sectionPositions.current["activity"] = y;
+              }}
             >
               <View style={styles.statsGrid}>
                 <View style={styles.statBox}>
@@ -507,8 +526,15 @@ export default function ProfileScreen() {
               icon="navigate"
               isExpanded={expandedSections.routeHistory}
               onToggle={() => toggleSection("routeHistory")}
+              onLayout={(y) => {
+                sectionPositions.current["routeHistory"] = y;
+              }}
             >
-              <PremiumGate feature="routeHistory" fallback="blur">
+              <PremiumGate
+                feature="routeHistory"
+                fallback="blur"
+                minHeight={110}
+              >
                 {routeHistoryLoading && routeHistory.length === 0 ? (
                   <ActivityIndicator
                     size="small"
@@ -605,6 +631,9 @@ export default function ProfileScreen() {
               icon="bookmark"
               isExpanded={expandedSections.savedLocations}
               onToggle={() => toggleSection("savedLocations")}
+              onLayout={(y) => {
+                sectionPositions.current["savedLocations"] = y;
+              }}
             >
               <PremiumGate feature="saveLocations" fallback="blur">
                 {savedLocationsLoading && savedLocations.length === 0 ? (
@@ -670,6 +699,9 @@ export default function ProfileScreen() {
               icon="eye"
               isExpanded={expandedSections.recentlyViewed}
               onToggle={() => toggleSection("recentlyViewed")}
+              onLayout={(y) => {
+                sectionPositions.current["recentlyViewed"] = y;
+              }}
             >
               <PremiumGate feature="recentlyViewed" fallback="blur">
                 {recentlyViewedLoading && recentlyViewed.length === 0 ? (
@@ -726,6 +758,9 @@ export default function ProfileScreen() {
               icon="people"
               isExpanded={expandedSections.demographics}
               onToggle={() => toggleSection("demographics")}
+              onLayout={(y) => {
+                sectionPositions.current["demographics"] = y;
+              }}
             >
               {renderDemographics()}
               {/* Edit Demographics Button */}
@@ -749,6 +784,9 @@ export default function ProfileScreen() {
               icon="map"
               isExpanded={expandedSections.mapSettings}
               onToggle={() => toggleSection("mapSettings")}
+              onLayout={(y) => {
+                sectionPositions.current["mapSettings"] = y;
+              }}
             >
               <SearchRadiusSelector />
             </CollapsibleSection>
@@ -758,6 +796,9 @@ export default function ProfileScreen() {
               icon="notifications"
               isExpanded={expandedSections.settings}
               onToggle={() => toggleSection("settings")}
+              onLayout={(y) => {
+                sectionPositions.current["settings"] = y;
+              }}
             >
               <TouchableOpacity
                 style={styles.settingItem}
@@ -815,6 +856,9 @@ export default function ProfileScreen() {
               icon="person-circle"
               isExpanded={expandedSections.account}
               onToggle={() => toggleSection("account")}
+              onLayout={(y) => {
+                sectionPositions.current["account"] = y;
+              }}
             >
               <TouchableOpacity
                 style={styles.accountItem}
@@ -880,15 +924,20 @@ function CollapsibleSection({
   isExpanded,
   onToggle,
   children,
+  onLayout,
 }: {
   title: string;
   icon: string;
   isExpanded: boolean;
   onToggle: () => void;
   children: React.ReactNode;
+  onLayout?: (y: number) => void;
 }) {
   return (
-    <View style={styles.section}>
+    <View
+      style={styles.section}
+      onLayout={(e) => onLayout?.(e.nativeEvent.layout.y)}
+    >
       <TouchableOpacity style={styles.sectionHeader} onPress={onToggle}>
         <View style={styles.sectionHeaderLeft}>
           <Ionicons name={icon as any} size={24} color={theme.colors.primary} />

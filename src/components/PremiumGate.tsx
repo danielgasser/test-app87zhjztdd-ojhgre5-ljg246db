@@ -15,6 +15,7 @@ interface PremiumGateProps {
   children: React.ReactNode;
   fallback?: FallbackBehavior;
   onUpgradePress?: () => void;
+  minHeight?: number;
 }
 
 export function PremiumGate({
@@ -22,6 +23,7 @@ export function PremiumGate({
   children,
   fallback = "prompt",
   onUpgradePress,
+  minHeight = 120,
 }: PremiumGateProps) {
   const { hasAccess, featureLabel, requiredTier } = useFeatureAccess(feature);
 
@@ -36,7 +38,7 @@ export function PremiumGate({
     case "blur":
       return (
         <TouchableOpacity
-          style={styles.blurContainer}
+          style={[styles.blurContainer, { minHeight }]}
           onPress={onUpgradePress || (() => router.push("/subscription"))}
           activeOpacity={0.8}
         >
@@ -91,10 +93,10 @@ export function PremiumGate({
 export function GlobalPremiumPromptModal() {
   const dispatch = useAppDispatch();
   const { visible, feature, description } = useAppSelector(
-    (state) => state.premiumPrompt
+    (state) => state.premiumPrompt,
   );
   const { featureLabel, requiredTier } = useFeatureAccess(
-    feature || "saveLocations"
+    feature || "saveLocations",
   );
 
   const handleClose = () => {
