@@ -148,11 +148,19 @@ export const loadRewardedAd = (): void => {
 
 export const showRewardedAd = (onRewarded?: () => void): boolean => {
     if (isRewardedLoaded && rewardedAd) {
+        let wasRewarded = false;
         if (onRewarded) {
             rewardedAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, onRewarded);
         }
-        rewardedAd.show();
-        return true;
+        rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
+            isRewardedLoaded = false;
+            loadRewardedAd();
+            if (wasRewarded && onRewarded) {
+                onRewarded();
+            }
+        });
+
+        rewardedAd.show(); return true;
     }
     return false;
 };

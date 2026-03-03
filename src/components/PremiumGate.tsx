@@ -1,20 +1,10 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  useFeatureAccess,
-  useSubscriptionTier,
-} from "@/hooks/useFeatureAccess";
+import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureName } from "@/config/features";
 import { theme } from "@/styles/theme";
 import { router } from "expo-router";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { hidePremiumPrompt } from "@/store/premiumPromptSlice";
-import { showRewardedAd } from "@/services/adMobService";
-import { supabase } from "@/services/supabase";
-import { useAuth } from "@/providers";
-import { fetchUserProfile } from "@/store/userSlice";
-import { notify } from "@/utils/notificationService";
 
 type FallbackBehavior = "hide" | "blur" | "prompt";
 
@@ -34,7 +24,6 @@ export function PremiumGate({
   minHeight = 120,
 }: PremiumGateProps) {
   const { hasAccess, featureLabel, requiredTier } = useFeatureAccess(feature);
-
   if (hasAccess) {
     return <>{children}</>;
   }
@@ -99,123 +88,8 @@ export function PremiumGate({
   }
 }
 
-// Global Premium Prompt Modal - mount once in _layout.tsx
-export function GlobalPremiumPromptModal() {
-  const dispatch = useAppDispatch();
-  const { visible, feature, description } = useAppSelector(
-    (state) => state.premiumPrompt,
-  );
-  const profile = useAppSelector((state) => state.user.profile);
+export { GlobalPremiumPromptModal } from "./premium/GlobalPremiumPromptModal";
 
-  const { featureLabel, requiredTier } = useFeatureAccess(
-    feature || "saveLocations",
-  );
-  const userTier = useSubscriptionTier();
-  const { user } = useAuth();
-
-  const handleClose = () => {
-    dispatch(hidePremiumPrompt());
-  };
-
-  const handleUpgrade = () => {
-    dispatch(hidePremiumPrompt());
-    setTimeout(() => {
-      router.push("/subscription");
-    }, 150);
-  };
-
-  const handleWatchAd = () => {
-    dispatch(hidePremiumPrompt());
-    setTimeout(() => {
-      showRewardedAd(async () => {
-        const expiresAt = new Date(
-          Date.now() + 24 * 60 * 60 * 1000,
-        ).toISOString();
-        const currentTrial =
-          (profile?.trial_expires_at as Record<string, string> | null) ?? {};
-        await supabase
-          .from("user_profiles")
-          .update({
-            trial_expires_at: { ...currentTrial, [feature!]: expiresAt },
-          })
-          .eq("id", user!.id);
-        dispatch(fetchUserProfile(user!.id));
-        notify.success(
-          `Access granted until ${new Date(expiresAt).toLocaleString([], {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}`,
-          "Reward Granted",
-        );
-      });
-    }, 150);
-  };
-
-  if (!visible) return null;
-  const showWatchAd = feature === "advancedFilters" && userTier === "free";
-  return (
-    <View style={globalStyles.absoluteOverlay} pointerEvents="box-none">
-      <TouchableOpacity
-        style={globalStyles.overlay}
-        activeOpacity={1}
-        onPress={handleClose}
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          style={globalStyles.specContainer}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View style={globalStyles.iconContainer}>
-            <Ionicons name="star" size={32} color={theme.colors.accent} />
-          </View>
-
-          <Text style={globalStyles.title}>Premium Feature</Text>
-          <Text style={globalStyles.featureName}>{featureLabel}</Text>
-          <Text style={globalStyles.description}>
-            {description ||
-              `Upgrade to ${requiredTier} to unlock this feature.`}
-          </Text>
-
-          <View style={globalStyles.buttons}>
-            <TouchableOpacity
-              style={globalStyles.cancelButton}
-              onPress={handleClose}
-            >
-              <Text style={globalStyles.cancelButtonText}>Not Now</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={globalStyles.upgradeButton}
-              onPress={handleUpgrade}
-            >
-              <Ionicons name="star" size={16} color={theme.colors.background} />
-              <Text style={globalStyles.upgradeButtonText}>Upgrade</Text>
-            </TouchableOpacity>
-          </View>
-          {showWatchAd && (
-            <View style={globalStyles.watchAdContainer}>
-              <TouchableOpacity
-                style={globalStyles.watchAdButton}
-                onPress={handleWatchAd}
-              >
-                <Ionicons
-                  name="play-circle"
-                  size={16}
-                  color={theme.colors.primary}
-                />
-                <Text style={globalStyles.watchAdButtonText}>
-                  Watch Ad (24h free)
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </TouchableOpacity>
-      </TouchableOpacity>
-    </View>
-  );
-}
 const styles = StyleSheet.create({
   blurContainer: {
     position: "relative",
@@ -274,111 +148,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.textSecondary,
     marginTop: 2,
-  },
-});
-
-const globalStyles = StyleSheet.create({
-  watchAdContainer: {
-    width: "100%",
-    marginTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  watchAdButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.primary,
-    marginTop: 8,
-  },
-  watchAdButtonText: {
-    fontSize: 14,
-    color: theme.colors.background,
-    fontWeight: "600",
-  },
-  absoluteOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 99999,
-    elevation: 99999,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  specContainer: {
-    backgroundColor: theme.colors.background,
-    borderRadius: 16,
-    padding: 24,
-    width: "100%",
-    maxWidth: 320,
-    alignItems: "center",
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: `${theme.colors.accent}20`,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: theme.colors.text,
-    marginBottom: 8,
-  },
-  featureName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.primary,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  buttons: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.textSecondary,
-  },
-  upgradeButton: {
-    flex: 1,
-    flexDirection: "row",
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  upgradeButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: theme.colors.background,
   },
 });
 

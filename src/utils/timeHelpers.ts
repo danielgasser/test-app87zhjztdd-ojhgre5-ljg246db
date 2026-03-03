@@ -65,3 +65,13 @@ export function formatArrivalTime(durationMinutes: number, use24Hour: boolean = 
         hour12: !use24Hour // Invert: use24Hour=true means hour12=false
     });
 }
+
+export function formatDateTime(isoString: string, timeFormat: '12h' | '24h'): string {
+    return new Date(isoString).toLocaleString([], {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: timeFormat === '12h',
+    });
+}

@@ -1,0 +1,123 @@
+import { StyleSheet } from "react-native";
+import { theme } from "@/styles/theme";
+
+export const premiumStyles = StyleSheet.create({
+    watchAdContainer: {
+        width: "100%",
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.border,
+    },
+    watchAdButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        marginTop: 8,
+    },
+    watchAdButtonText: {
+        fontSize: 14,
+        color: theme.colors.background,
+        fontWeight: "600",
+    },
+    absoluteOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 99999,
+        elevation: 99999,
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 24,
+    },
+    specContainer: {
+        backgroundColor: theme.colors.background,
+        borderRadius: 16,
+        padding: 24,
+        width: "100%",
+        maxWidth: 320,
+        alignItems: "center",
+    },
+    iconContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: `${theme.colors.accent}20`,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: theme.colors.text,
+        marginBottom: 8,
+    },
+    featureName: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: theme.colors.primary,
+        marginBottom: 12,
+    },
+    description: {
+        fontSize: 14,
+        color: theme.colors.textSecondary,
+        textAlign: "center",
+        lineHeight: 20,
+        marginBottom: 24,
+    },
+    buttons: {
+        flexDirection: "row",
+        gap: 12,
+        width: "100%",
+    },
+    cancelButton: {
+        flex: 1,
+        paddingVertical: 14,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        alignItems: "center",
+    },
+    cancelButtonText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: theme.colors.textSecondary,
+    },
+    upgradeButton: {
+        flex: 2,
+        paddingVertical: 14,
+        borderRadius: 8,
+        flexDirection: "row",
+
+        backgroundColor: theme.colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+    },
+    upgradeButtonText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: theme.colors.background,
+    },
+    okButton: {
+        width: "100%",
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        alignItems: "center",
+        marginTop: 8,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+    },
+    okButtonText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: theme.colors.background,
+    },
+});

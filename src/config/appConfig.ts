@@ -76,7 +76,9 @@ export const APP_CONFIG = {
       RATE_LIMIT_HOURS: 12,
     }
   },
-
+  PREMIUM: {
+    AD_REWARD_DURATION_HOURS: 24,
+  },
   PROFILE_COMPLETION: {
     // Mandatory fields for onboarding (3 required)
     MANDATORY_FIELDS: ['race_ethnicity', 'gender', 'lgbtq_status'],
