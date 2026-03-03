@@ -14,6 +14,7 @@ import { showRewardedAd } from "@/services/adMobService";
 import { supabase } from "@/services/supabase";
 import { useAuth } from "@/providers";
 import { fetchUserProfile } from "@/store/userSlice";
+import { notify } from "@/utils/notificationService";
 
 type FallbackBehavior = "hide" | "blur" | "prompt";
 
@@ -104,6 +105,8 @@ export function GlobalPremiumPromptModal() {
   const { visible, feature, description } = useAppSelector(
     (state) => state.premiumPrompt,
   );
+  const profile = useAppSelector((state) => state.user.profile);
+
   const { featureLabel, requiredTier } = useFeatureAccess(
     feature || "saveLocations",
   );
@@ -128,11 +131,24 @@ export function GlobalPremiumPromptModal() {
         const expiresAt = new Date(
           Date.now() + 24 * 60 * 60 * 1000,
         ).toISOString();
+        const currentTrial =
+          (profile?.trial_expires_at as Record<string, string> | null) ?? {};
         await supabase
           .from("user_profiles")
-          .update({ trial_expires_at: expiresAt })
+          .update({
+            trial_expires_at: { ...currentTrial, [feature!]: expiresAt },
+          })
           .eq("id", user!.id);
         dispatch(fetchUserProfile(user!.id));
+        notify.success(
+          `Access granted until ${new Date(expiresAt).toLocaleString([], {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}`,
+          "Reward Granted",
+        );
       });
     }, 150);
   };

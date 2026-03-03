@@ -119,10 +119,10 @@ function RootLayout() {
           <DeepLinkHandler>
             <NotificationProvider>
               <AppNavigator />
+              <GlobalPremiumPromptModal />
             </NotificationProvider>
           </DeepLinkHandler>
         </NavigationController>
-        <GlobalPremiumPromptModal />
       </AuthProvider>
     </Provider>
   );

@@ -758,7 +758,7 @@ export type Database = {
           show_demographics: boolean | null
           subscription_tier: string | null
           total_reviews: number | null
-          trial_expires_at: string | null
+          trial_expires_at: Json | null
           updated_at: string | null
           username: string | null
         }
@@ -782,7 +782,7 @@ export type Database = {
           show_demographics?: boolean | null
           subscription_tier?: string | null
           total_reviews?: number | null
-          trial_expires_at?: string | null
+          trial_expires_at?: Json | null
           updated_at?: string | null
           username?: string | null
         }
@@ -806,7 +806,7 @@ export type Database = {
           show_demographics?: boolean | null
           subscription_tier?: string | null
           total_reviews?: number | null
-          trial_expires_at?: string | null
+          trial_expires_at?: Json | null
           updated_at?: string | null
           username?: string | null
         }

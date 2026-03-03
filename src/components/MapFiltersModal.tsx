@@ -70,12 +70,6 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
   const [localFilters, setLocalFilters] = useState<MapFilters>(filters);
 
-  const trialExpiresAt = useAppSelector(
-    (state) => state.user.profile?.trial_expires_at,
-  );
-  const hasTrialAccess =
-    !!trialExpiresAt && new Date(trialExpiresAt) > new Date();
-
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters, visible]);
@@ -126,7 +120,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
     const hasDemographicFilter = localFilters.useDemographicScore;
 
     // If free user tries to apply advanced filters, show premium prompt
-    if (hasAdvancedFilters && !hasAccess && !hasTrialAccess) {
+    if (hasAdvancedFilters && !hasAccess) {
       dispatch(
         showPremiumPrompt({
           feature: "advancedFilters",
