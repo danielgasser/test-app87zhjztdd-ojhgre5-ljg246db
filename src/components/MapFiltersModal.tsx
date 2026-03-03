@@ -10,10 +10,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
+import { ModalSnackbar } from "./ModalSnackbar";
 export interface MapFilters {
   minSafetyRating: number | null; // null = show all, 2/3/4 = minimum rating
   hasReviews: boolean; // Only show locations with reviews
@@ -406,6 +407,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
         </View>
       </View>
       <GlobalPremiumPromptModal />
+      <ModalSnackbar />
     </Modal>
   );
 };

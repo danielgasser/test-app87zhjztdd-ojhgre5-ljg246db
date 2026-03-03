@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Snackbar, { SnackbarType } from "./Snackbar";
 import ConfirmationSheet from "./ConfirmationSheet";
 import { notify } from "@/utils/notificationService";
-
+import { Portal } from "@gorhom/portal";
 interface NotificationState {
   visible: boolean;
   message: string;
@@ -64,17 +64,18 @@ const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <>
       {children}
-
-      <Snackbar
-        visible={notification.visible}
-        message={notification.message}
-        type={notification.type}
-        duration={notification.duration}
-        actionText={notification.actionText}
-        onActionPress={notification.onActionPress}
-        title={notification.title}
-        onDismiss={() => setNotification({ ...notification, visible: false })}
-      />
+      <Portal hostName="root">
+        <Snackbar
+          visible={notification.visible}
+          message={notification.message}
+          type={notification.type}
+          duration={notification.duration}
+          actionText={notification.actionText}
+          onActionPress={notification.onActionPress}
+          title={notification.title}
+          onDismiss={() => setNotification({ ...notification, visible: false })}
+        />
+      </Portal>
 
       <ConfirmationSheet
         visible={confirmation.visible}

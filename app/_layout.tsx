@@ -24,7 +24,7 @@ import {
 import { initializeRevenueCat } from "@/services/revenueCatService";
 import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
 import { useLocationTriggers } from "@/hooks/useLocationTriggers";
-
+import { PortalHost, PortalProvider } from "@gorhom/portal";
 // Initialize Sentry
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -114,16 +114,19 @@ function AppNavigator() {
 function RootLayout() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <NavigationController>
-          <DeepLinkHandler>
-            <NotificationProvider>
-              <AppNavigator />
-              <GlobalPremiumPromptModal />
-            </NotificationProvider>
-          </DeepLinkHandler>
-        </NavigationController>
-      </AuthProvider>
+      <PortalProvider>
+        <AuthProvider>
+          <NavigationController>
+            <DeepLinkHandler>
+              <NotificationProvider>
+                <AppNavigator />
+              </NotificationProvider>
+            </DeepLinkHandler>
+          </NavigationController>
+          <GlobalPremiumPromptModal />
+        </AuthProvider>
+        <PortalHost name="root" />
+      </PortalProvider>
     </Provider>
   );
 }
