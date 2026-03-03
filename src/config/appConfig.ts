@@ -78,6 +78,7 @@ export const APP_CONFIG = {
   },
   PREMIUM: {
     AD_REWARD_DURATION_HOURS: 24,
+    TRIAL_REMINDER_HOURS_BEFORE_EXPIRY: [12, 6, 2], // notifications sent at 12h, 6h, 2h before expiry
   },
   PROFILE_COMPLETION: {
     // Mandatory fields for onboarding (3 required)

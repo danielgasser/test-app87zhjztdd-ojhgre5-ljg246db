@@ -58,3 +58,39 @@ export function getLockedFeatures(userTier: SubscriptionTier): FeatureName[] {
         (feature) => !hasFeatureAccess(userTier, feature)
     );
 }
+
+/**
+ * Maps each FeatureName to the route opened when the user taps
+ * a trial expiry notification for that feature.
+ *
+ * - route: Expo Router path
+ * - section: optional query param — profile.tsx reads this to auto-expand
+ *            and scroll to the relevant CollapsibleSection
+ *
+ * Omitted features (adFree, enterprise) are not triallable.
+ */
+export const FEATURE_DEEP_LINK_MAP: Partial<Record<FeatureName, {
+    route: string;
+    section?: string;
+}>> = {
+    // Community tab — filter modal lives here
+    advancedFilters: { route: '/(tabs)/community' },
+    demographicFilter: { route: '/(tabs)/community' },
+    timeFilter: { route: '/(tabs)/community' },
+
+    // Map tab
+    routePlanning: { route: '/(tabs)' },
+    unlimitedSearches: { route: '/(tabs)' },
+    offlineRoutes: { route: '/(tabs)' },
+    proactiveWarnings: { route: '/(tabs)' },
+    locationTriggers: { route: '/(tabs)' },
+
+    // Profile tab — section matches CollapsibleSection keys in profile.tsx
+    routeHistory: { route: '/(tabs)/profile', section: 'routeHistory' },
+    saveLocations: { route: '/(tabs)/profile', section: 'savedLocations' },
+    searchHistory: { route: '/(tabs)/profile', section: 'settings' },
+    recentlyViewed: { route: '/(tabs)/profile', section: 'recentlyViewed' },
+    statisticalInsights: { route: '/(tabs)/profile', section: 'activity' },
+    routeSafetyBreakdown: { route: '/(tabs)/profile', section: 'routeHistory' },
+    neighborhoodStats: { route: '/(tabs)/profile', section: 'activity' },
+};

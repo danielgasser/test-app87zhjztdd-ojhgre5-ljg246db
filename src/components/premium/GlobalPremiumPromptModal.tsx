@@ -15,6 +15,7 @@ import { premiumStyles } from "@/styles/premiumStyles";
 import { PremiumPromptContent } from "./PremiumPromptContent";
 import { RewardSuccessContent } from "./RewardSuccessContent";
 import { APP_CONFIG } from "@/config/appConfig";
+import { scheduleTrialReminders } from "@/services/trialNotificationService";
 
 export function GlobalPremiumPromptModal() {
   const dispatch = useAppDispatch();
@@ -58,6 +59,8 @@ export function GlobalPremiumPromptModal() {
           })
           .eq("id", user!.id);
         dispatch(fetchUserProfile(user!.id));
+        await scheduleTrialReminders(feature!, expiresAt);
+
         setRewardGranted({ expiresAt, featureLabel: grantedFeatureLabel });
       });
     }, 150);

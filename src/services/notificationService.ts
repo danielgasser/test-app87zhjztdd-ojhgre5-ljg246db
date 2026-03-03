@@ -112,6 +112,8 @@ export const notificationService = {
             } else if (data.type === 'location_safety_change' && data.locationId) {
                 // Navigate to location details
                 router.push(`/(tabs)?openLocationId=${data.locationId}&refresh=${Date.now()}`);
+            } else if (data.type === 'trial_expiry' && data.deepLink) {
+                router.push(data.deepLink as any);
             }
             // Add more notification types as needed
         });

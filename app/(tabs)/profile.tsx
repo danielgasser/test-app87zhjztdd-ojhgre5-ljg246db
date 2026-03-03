@@ -20,7 +20,7 @@ import {
 } from "src/store/userSlice";
 import { supabase } from "src/services/supabase";
 import { theme } from "src/styles/theme";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { decode } from "base64-arraybuffer";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
@@ -92,6 +92,18 @@ export default function ProfileScreen() {
       dispatch(fetchRecentlyViewed({ userId: user.id }));
     }
   }, [user?.id, dispatch]);
+
+  const { section } = useLocalSearchParams<{ section?: string }>();
+
+  useEffect(() => {
+    if (section && section in expandedSections) {
+      // Small delay to let the screen finish rendering
+      setTimeout(() => {
+        toggleSection(section as keyof typeof expandedSections);
+      }, 400);
+    }
+  }, [section]);
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     const isOpening = !expandedSections[section];
     setExpandedSections((prev) => ({
