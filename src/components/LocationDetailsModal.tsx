@@ -717,6 +717,14 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 </View>
               )}
               {/* Neighborhood Stats - Premium */}
+              <View style={commonStyles.header}>
+                <Ionicons
+                  name="stats-chart"
+                  size={18}
+                  color={theme.colors.primary}
+                />
+                <Text style={commonStyles.subtitle}>Neighborhood Stats</Text>
+              </View>
               <PremiumGate feature="neighborhoodStats" fallback="blur">
                 <NeighborhoodStats
                   stats={neighborhoodStats}
@@ -724,6 +732,10 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 />
               </PremiumGate>
               {/* Time Safety - Premium */}
+              <View style={commonStyles.header}>
+                <Ionicons name="time" size={18} color={theme.colors.primary} />
+                <Text style={commonStyles.subtitle}>Safety by Time of Day</Text>
+              </View>
               <PremiumGate feature="timeFilter" fallback="blur">
                 <TimeSafetyChart
                   data={timeSafetyData}

@@ -33,10 +33,6 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   if (loading) {
     return (
       <View style={styles.specContainer}>
-        <View style={commonStyles.header}>
-          <Ionicons name="time" size={18} color={theme.colors.primary} />
-          <Text style={styles.title}>Safety by Time of Day</Text>
-        </View>
         <Text style={commonStyles.loadingText}>Loading time data...</Text>
       </View>
     );
@@ -45,10 +41,6 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   if (!data || data.total_with_time === 0) {
     return (
       <View style={styles.specContainer}>
-        <View style={commonStyles.header}>
-          <Ionicons name="time" size={18} color={theme.colors.primary} />
-          <Text style={styles.title}>Safety by Time of Day</Text>
-        </View>
         <Text style={styles.emptyText}>No time-based safety data yet.</Text>
       </View>
     );
@@ -56,11 +48,6 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
 
   return (
     <View style={styles.specContainer}>
-      <View style={commonStyles.header}>
-        <Ionicons name="time" size={18} color={theme.colors.primary} />
-        <Text style={styles.title}>Safety by Time of Day</Text>
-      </View>
-
       <View style={styles.grid}>
         {TIME_PERIODS.map((period) => {
           const periodData = data[period.key];

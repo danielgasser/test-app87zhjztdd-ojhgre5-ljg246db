@@ -23,10 +23,6 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
   if (loading) {
     return (
       <View style={commonStyles.container}>
-        <View style={commonStyles.header}>
-          <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
-          <Text style={styles.title}>Neighborhood Stats</Text>
-        </View>
         <Text style={commonStyles.loadingText}>Loading census data...</Text>
       </View>
     );
@@ -35,10 +31,6 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
   if (!stats) {
     return (
       <View style={commonStyles.container}>
-        <View style={commonStyles.header}>
-          <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
-          <Text style={styles.title}>Neighborhood Stats</Text>
-        </View>
         <Text style={styles.emptyText}>
           No census data available for this area.
         </Text>
@@ -50,11 +42,6 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
 
   return (
     <View style={commonStyles.container}>
-      <View style={commonStyles.header}>
-        <Ionicons name="stats-chart" size={18} color={theme.colors.primary} />
-        <Text style={styles.title}>Neighborhood Stats</Text>
-      </View>
-
       <Text style={styles.areaName}>
         {stats.city}, {stats.state_code}
       </Text>

@@ -29,7 +29,7 @@ import { logger } from "@/utils/logger";
 import { validateVisitDateTime } from "@/utils/dateValidation";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
-
+import { showInterstitialWithCooldown } from "@/services/adMobService";
 interface RatingProps {
   label: string;
   value: number;
@@ -198,6 +198,7 @@ export default function ReviewScreen() {
         {
           text: "OK",
           onPress: () => {
+            showInterstitialWithCooldown();
             if (isCreatingNew && finalLocationId) {
               // Pass the real location ID back
               router.replace({

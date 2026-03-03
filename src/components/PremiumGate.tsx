@@ -23,6 +23,7 @@ interface PremiumGateProps {
   fallback?: FallbackBehavior;
   onUpgradePress?: () => void;
   minHeight?: number;
+  label?: string;
 }
 
 export function PremiumGate({
@@ -31,6 +32,7 @@ export function PremiumGate({
   fallback = "prompt",
   onUpgradePress,
   minHeight = 120,
+  label,
 }: PremiumGateProps) {
   const { hasAccess, featureLabel, requiredTier } = useFeatureAccess(feature);
 
@@ -44,27 +46,30 @@ export function PremiumGate({
 
     case "blur":
       return (
-        <TouchableOpacity
-          style={[styles.blurContainer, { minHeight }]}
-          onPress={onUpgradePress || (() => router.push("/subscription"))}
-          activeOpacity={0.8}
-        >
-          <View style={styles.blurredContent}>{children}</View>
-          <View style={styles.blurOverlay}>
-            <Ionicons
-              name="lock-closed"
-              size={32}
-              color={theme.colors.primary}
-            />
-            <Text style={styles.blurText}>
-              <Ionicons name="star" size={24} color={theme.colors.accent} />
-              {requiredTier.charAt(0).toUpperCase() +
-                requiredTier.slice(1)}{" "}
-              Feature
-            </Text>
-            <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>
-          </View>
-        </TouchableOpacity>
+        <View>
+          {label && <Text style={styles.blurLabel}>{label}</Text>}
+          <TouchableOpacity
+            style={[styles.blurContainer, { minHeight }]}
+            onPress={onUpgradePress || (() => router.push("/subscription"))}
+            activeOpacity={0.8}
+          >
+            <View style={styles.blurredContent}>{children}</View>
+            <View style={styles.blurOverlay}>
+              <Ionicons
+                name="lock-closed"
+                size={32}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.blurText}>
+                <Ionicons name="star" size={24} color={theme.colors.accent} />
+                {requiredTier.charAt(0).toUpperCase() +
+                  requiredTier.slice(1)}{" "}
+                Feature
+              </Text>
+              <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       );
     case "prompt":
     default:
@@ -118,7 +123,6 @@ export function GlobalPremiumPromptModal() {
       router.push("/subscription");
     }, 150);
   };
-  const FILTERS_UNLOCK_KEY = "advancedFilters_unlocked_until";
 
   const handleWatchAd = () => {
     dispatch(hidePremiumPrompt());
@@ -220,6 +224,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: theme.colors.primary,
+  },
+  blurLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: theme.colors.text,
+    marginBottom: 8,
   },
   tapToUpgrade: {
     marginTop: 4,
