@@ -10,7 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
@@ -70,6 +70,12 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
   const [localFilters, setLocalFilters] = useState<MapFilters>(filters);
 
+  const trialExpiresAt = useAppSelector(
+    (state) => state.user.profile?.trial_expires_at,
+  );
+  const hasTrialAccess =
+    !!trialExpiresAt && new Date(trialExpiresAt) > new Date();
+
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters, visible]);
@@ -120,12 +126,13 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
     const hasDemographicFilter = localFilters.useDemographicScore;
 
     // If free user tries to apply advanced filters, show premium prompt
-    if (hasAdvancedFilters && !hasAccess) {
+    if (hasAdvancedFilters && !hasAccess && !hasTrialAccess) {
       dispatch(
         showPremiumPrompt({
           feature: "advancedFilters",
-          description: "Apply filters to find exactly what you're looking for.",
-        })
+          description:
+            "Apply filters to find exactly what you're looking for. Watch an ad for 24h free access.",
+        }),
       );
       return;
     }
@@ -137,7 +144,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
           feature: "demographicFilter",
           description:
             "See safety scores specific to your demographic profile.",
-        })
+        }),
       );
       return;
     }

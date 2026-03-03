@@ -1,12 +1,19 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import {
+  useFeatureAccess,
+  useSubscriptionTier,
+} from "@/hooks/useFeatureAccess";
 import { FeatureName } from "@/config/features";
 import { theme } from "@/styles/theme";
 import { router } from "expo-router";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { hidePremiumPrompt } from "@/store/premiumPromptSlice";
+import { showRewardedAd } from "@/services/adMobService";
+import { supabase } from "@/services/supabase";
+import { useAuth } from "@/providers";
+import { fetchUserProfile } from "@/store/userSlice";
 
 type FallbackBehavior = "hide" | "blur" | "prompt";
 
@@ -98,6 +105,8 @@ export function GlobalPremiumPromptModal() {
   const { featureLabel, requiredTier } = useFeatureAccess(
     feature || "saveLocations",
   );
+  const userTier = useSubscriptionTier();
+  const { user } = useAuth();
 
   const handleClose = () => {
     dispatch(hidePremiumPrompt());
@@ -109,9 +118,26 @@ export function GlobalPremiumPromptModal() {
       router.push("/subscription");
     }, 150);
   };
+  const FILTERS_UNLOCK_KEY = "advancedFilters_unlocked_until";
+
+  const handleWatchAd = () => {
+    dispatch(hidePremiumPrompt());
+    setTimeout(() => {
+      showRewardedAd(async () => {
+        const expiresAt = new Date(
+          Date.now() + 24 * 60 * 60 * 1000,
+        ).toISOString();
+        await supabase
+          .from("user_profiles")
+          .update({ trial_expires_at: expiresAt })
+          .eq("id", user!.id);
+        dispatch(fetchUserProfile(user!.id));
+      });
+    }, 150);
+  };
 
   if (!visible) return null;
-
+  const showWatchAd = feature === "advancedFilters" && userTier === "free";
   return (
     <View style={globalStyles.absoluteOverlay} pointerEvents="box-none">
       <TouchableOpacity
@@ -151,6 +177,23 @@ export function GlobalPremiumPromptModal() {
               <Text style={globalStyles.upgradeButtonText}>Upgrade</Text>
             </TouchableOpacity>
           </View>
+          {showWatchAd && (
+            <View style={globalStyles.watchAdContainer}>
+              <TouchableOpacity
+                style={globalStyles.watchAdButton}
+                onPress={handleWatchAd}
+              >
+                <Ionicons
+                  name="play-circle"
+                  size={16}
+                  color={theme.colors.primary}
+                />
+                <Text style={globalStyles.watchAdButtonText}>
+                  Watch Ad (24h free)
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </TouchableOpacity>
       </TouchableOpacity>
     </View>
@@ -218,6 +261,27 @@ const styles = StyleSheet.create({
 });
 
 const globalStyles = StyleSheet.create({
+  watchAdContainer: {
+    width: "100%",
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
+  watchAdButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    marginTop: 8,
+  },
+  watchAdButtonText: {
+    fontSize: 14,
+    color: theme.colors.background,
+    fontWeight: "600",
+  },
   absoluteOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 99999,

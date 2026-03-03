@@ -122,8 +122,8 @@ function RootLayout() {
             </NotificationProvider>
           </DeepLinkHandler>
         </NavigationController>
+        <GlobalPremiumPromptModal />
       </AuthProvider>
-      <GlobalPremiumPromptModal />
     </Provider>
   );
 }

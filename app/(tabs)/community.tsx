@@ -43,6 +43,7 @@ import MapFiltersModal, {
 } from "@/components/MapFiltersModal";
 import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
 import { useAuth } from "@/providers/AuthProvider";
+import { AdBanner } from "@/components/ads/AdBanner";
 
 export default function CommunityScreen() {
   const dispatch = useAppDispatch();
@@ -59,7 +60,7 @@ export default function CommunityScreen() {
   } = useAppSelector((state) => state.locations);
 
   const { searchRadiusKm: userSearchRadiusKm } = useAppSelector(
-    (state) => state.user
+    (state) => state.user,
   );
 
   const [refreshing, setRefreshing] = React.useState(false);
@@ -114,7 +115,7 @@ export default function CommunityScreen() {
     return shouldShowBanner(
       bannerState,
       APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
-        .RECOMMENDATIONS_INCOMPLETE
+        .RECOMMENDATIONS_INCOMPLETE,
     );
   }, [profileCheck.canUse, bannerState]);
 
@@ -150,13 +151,13 @@ export default function CommunityScreen() {
               latitude: coords.latitude,
               longitude: coords.longitude,
               radius: fetchRadius, // ✅ Use user's radius
-            })
+            }),
           ).unwrap(),
           dispatch(
             fetchTrendingLocations({
               daysWindow: APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS,
               maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
-            })
+            }),
           ).unwrap(),
           dispatch(
             fetchSafetyInsights({
@@ -164,7 +165,7 @@ export default function CommunityScreen() {
               longitude: coords.longitude,
               radius: fetchRadius, // ✅ Use user's radius
               maxResults: 5,
-            })
+            }),
           ).unwrap(),
         ]);
       } catch (error) {
@@ -202,13 +203,13 @@ export default function CommunityScreen() {
             latitude: coords.latitude,
             longitude: coords.longitude,
             radius: fetchRadius, // ✅ Use user's radius
-          })
+          }),
         ).unwrap(),
         dispatch(
           fetchTrendingLocations({
             daysWindow: APP_CONFIG.COMMUNITY.TRENDING_TIMEFRAME_DAYS,
             maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
-          })
+          }),
         ).unwrap(),
         dispatch(
           fetchSafetyInsights({
@@ -216,7 +217,7 @@ export default function CommunityScreen() {
             longitude: coords.longitude,
             radius: fetchRadius, // ✅ Use user's radius
             maxResults: APP_CONFIG.COMMUNITY.REVIEWS_PER_PAGE,
-          })
+          }),
         ).unwrap(),
       ]);
     } catch (error) {
@@ -236,7 +237,7 @@ export default function CommunityScreen() {
         targetTab: "map",
         locationId: insight.location_id,
         action: "view_location",
-      })
+      }),
     );
     router.push("/(tabs)");
   };
@@ -304,7 +305,7 @@ export default function CommunityScreen() {
           targetTab: "map",
           locationId: review.location_id,
           action: "view_location",
-        })
+        }),
       );
 
       // Navigate to map tab
@@ -385,7 +386,7 @@ export default function CommunityScreen() {
     id: string,
     name: string,
     trend: string,
-    reviews: number
+    reviews: number,
   ) => {
     const handleTrendingPress = () => {
       dispatch(
@@ -393,7 +394,7 @@ export default function CommunityScreen() {
           targetTab: "map",
           locationId: id,
           action: "view_location",
-        })
+        }),
       );
       router.push("/(tabs)");
     };
@@ -601,8 +602,8 @@ export default function CommunityScreen() {
                 location.location_id || `trending-${index}`,
                 location.location_name,
                 location.trend_direction,
-                location.review_count_current
-              )
+                location.review_count_current,
+              ),
             )
           ) : (
             <Text style={styles.emptyText}>
@@ -636,9 +637,10 @@ export default function CommunityScreen() {
             </Text>
           )}
         </View>
+        <AdBanner />
 
-        {/* Bottom padding */}
-        <View style={{ height: 20 }} />
+        {/* Bottom padding 
+        <View style={{ height: 20 }} />*/}
       </ScrollView>
       {/* User Profile Modal */}
       <UserProfileModal

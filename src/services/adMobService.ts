@@ -17,15 +17,15 @@ import mobileAds, {
 
 const AD_UNIT_IDS = {
     banner: {
-        ios: 'ca-app-pub-xxxxxxxx/yyyyyyyyyy',      // Replace with your iOS banner ID
+        ios: 'ca-app-pub-7017745933597369/3188084588',      // Replace with your iOS banner ID
         android: 'ca-app-pub-xxxxxxxx/yyyyyyyyyy',  // Replace with your Android banner ID
     },
     interstitial: {
-        ios: 'ca-app-pub-xxxxxxxx/yyyyyyyyyy',
+        ios: 'ca-app-pub-3940256099942544/4411468910',
         android: 'ca-app-pub-xxxxxxxx/yyyyyyyyyy',
     },
     rewarded: {
-        ios: 'ca-app-pub-xxxxxxxx/yyyyyyyyyy',
+        ios: 'ca-app-pub-3940256099942544/1712485313',
         android: 'ca-app-pub-xxxxxxxx/yyyyyyyyyy',
     },
 };

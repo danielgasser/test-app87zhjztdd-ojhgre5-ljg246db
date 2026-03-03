@@ -5,7 +5,7 @@ module.exports = () => {
     expo: {
       name: appName,
       slug: "safepath",
-      version: "0.9.62",
+      version: "0.9.64",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -17,7 +17,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "142",
+        buildNumber: "144",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
