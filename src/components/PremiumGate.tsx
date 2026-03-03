@@ -23,7 +23,6 @@ interface PremiumGateProps {
   fallback?: FallbackBehavior;
   onUpgradePress?: () => void;
   minHeight?: number;
-  label?: string;
 }
 
 export function PremiumGate({
@@ -32,7 +31,6 @@ export function PremiumGate({
   fallback = "prompt",
   onUpgradePress,
   minHeight = 120,
-  label,
 }: PremiumGateProps) {
   const { hasAccess, featureLabel, requiredTier } = useFeatureAccess(feature);
 
@@ -47,7 +45,6 @@ export function PremiumGate({
     case "blur":
       return (
         <View>
-          {label && <Text style={styles.blurLabel}>{label}</Text>}
           <TouchableOpacity
             style={[styles.blurContainer, { minHeight }]}
             onPress={onUpgradePress || (() => router.push("/subscription"))}
@@ -224,12 +221,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: theme.colors.primary,
-  },
-  blurLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: 8,
   },
   tapToUpgrade: {
     marginTop: 4,
