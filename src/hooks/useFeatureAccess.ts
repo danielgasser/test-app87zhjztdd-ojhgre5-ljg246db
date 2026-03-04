@@ -5,7 +5,6 @@ import {
     hasFeatureAccess,
     SubscriptionTier,
 } from '@/config/features';
-import React from 'react';
 import { Json } from '@/types/database.types';
 
 interface FeatureAccessResult {
@@ -13,6 +12,8 @@ interface FeatureAccessResult {
     userTier: SubscriptionTier;
     requiredTier: SubscriptionTier;
     featureLabel: string;
+    isInLockPeriod: boolean;
+    lockExpiresAt: string | null;
 }
 
 export function useFeatureAccess(feature: FeatureName): FeatureAccessResult {
@@ -20,22 +21,26 @@ export function useFeatureAccess(feature: FeatureName): FeatureAccessResult {
         (state) => (state.user.profile?.subscription_tier || 'free') as SubscriptionTier
     );
 
-    const trialExpiresAt = useAppSelector(
+    const profileTrialRecord = useAppSelector(
         (state) => state.user.profile?.trial_expires_at as Json | null
     );
 
-    const trialRecord = trialExpiresAt as Record<string, string> | null;
+    const trialRecord = profileTrialRecord as Record<string, { expiresAt: string; grantedAt: string }> | null;
+    const trialFeatureEntry = trialRecord?.[feature] ?? null;
     const hasTrialAccess =
-        !!trialRecord &&
-        typeof trialRecord === 'object' &&
-        !!trialRecord[feature] &&
-        new Date(trialRecord[feature]) > new Date();
+        !!trialFeatureEntry &&
+        new Date(trialFeatureEntry.expiresAt) > new Date();
+
+    const isInLockPeriod = !!trialFeatureEntry && new Date(trialFeatureEntry.expiresAt) <= new Date();
+    const lockExpiresAt = trialFeatureEntry?.grantedAt ?? null;
 
     return {
         hasAccess: hasFeatureAccess(userTier, feature) || hasTrialAccess,
         userTier,
         requiredTier: FEATURES[feature].minTier as SubscriptionTier,
         featureLabel: FEATURES[feature].label,
+        isInLockPeriod,
+        lockExpiresAt,
     };
 }
 

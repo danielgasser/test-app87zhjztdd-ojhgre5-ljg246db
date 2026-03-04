@@ -25,7 +25,7 @@ export function GlobalPremiumPromptModal() {
     (state) => state.premiumPrompt,
   );
   const profile = useAppSelector((state) => state.user.profile);
-  const { featureLabel, requiredTier } = useFeatureAccess(
+  const { featureLabel, requiredTier, isInLockPeriod } = useFeatureAccess(
     feature || "saveLocations",
   );
   const userTier = useSubscriptionTier();
@@ -44,8 +44,9 @@ export function GlobalPremiumPromptModal() {
     const checkExpiringTrials = () => {
       const trialRecord = profile?.trial_expires_at as Record<
         string,
-        string
+        { expiresAt: string; grantedAt: string }
       > | null;
+
       if (!trialRecord || typeof trialRecord !== "object") return;
 
       const maxHours = Math.max(
@@ -55,21 +56,24 @@ export function GlobalPremiumPromptModal() {
 
       // Find all trials within the reminder window, not yet expired
       const expiring = Object.entries(trialRecord)
-        .filter(([_feature, expiresAt]) => {
-          const expiryMs = new Date(expiresAt).getTime();
+        .filter(([_feature, entry]) => {
+          const expiryMs = new Date(entry.expiresAt).getTime();
           const hoursUntilExpiry = (expiryMs - now) / (1000 * 60 * 60);
           return hoursUntilExpiry > 0 && hoursUntilExpiry <= maxHours;
         })
-        .sort(([, a], [, b]) => new Date(a).getTime() - new Date(b).getTime());
+        .sort(
+          ([, a], [, b]) =>
+            new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime(),
+        );
 
       if (expiring.length === 0) return;
 
-      const [soonestFeature, soonestExpiresAt] = expiring[0];
+      const [soonestFeature, soonestEntry] = expiring[0];
       const featureConfig = FEATURES[soonestFeature as FeatureName];
       if (!featureConfig) return;
 
       setExpiryReminder({
-        expiresAt: soonestExpiresAt,
+        expiresAt: soonestEntry.expiresAt,
         featureLabel: featureConfig.label,
       });
     };
@@ -105,11 +109,17 @@ export function GlobalPremiumPromptModal() {
             APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS * 60 * 60 * 1000,
         ).toISOString();
         const currentTrial =
-          (profile?.trial_expires_at as Record<string, string> | null) ?? {};
+          (profile?.trial_expires_at as Record<
+            string,
+            { expiresAt: string; grantedAt: string }
+          > | null) ?? {};
         await supabase
           .from("user_profiles")
           .update({
-            trial_expires_at: { ...currentTrial, [feature!]: expiresAt },
+            trial_expires_at: {
+              ...currentTrial,
+              [feature!]: { expiresAt, grantedAt: new Date().toISOString() },
+            },
           })
           .eq("id", user!.id);
         dispatch(fetchUserProfile(user!.id));
@@ -122,7 +132,8 @@ export function GlobalPremiumPromptModal() {
 
   if (!visible && !rewardGranted && !expiryReminder) return null;
 
-  const showWatchAd = feature === "advancedFilters" && userTier === "free";
+  const showWatchAd =
+    feature === "advancedFilters" && userTier === "free" && !isInLockPeriod;
 
   return (
     <View style={premiumStyles.absoluteOverlay} pointerEvents="box-none">
