@@ -66,3 +66,7 @@ src/scripts/neighborhood_stats_data.json
 
 *.apk
 *.aab
+
+safepath-e097a-2db8782709cf.json
+
+credential.json
