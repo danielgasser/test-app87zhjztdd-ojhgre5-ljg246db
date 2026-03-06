@@ -6,6 +6,7 @@ import {
     SubscriptionTier,
 } from '@/config/features';
 import { Json } from '@/types/database.types';
+import { APP_CONFIG } from '@/config/appConfig';
 
 interface FeatureAccessResult {
     hasAccess: boolean;
@@ -27,12 +28,16 @@ export function useFeatureAccess(feature: FeatureName): FeatureAccessResult {
 
     const trialRecord = profileTrialRecord as Record<string, { expiresAt: string; grantedAt: string }> | null;
     const trialFeatureEntry = trialRecord?.[feature] ?? null;
-    const hasTrialAccess =
-        !!trialFeatureEntry &&
-        new Date(trialFeatureEntry.expiresAt) > new Date();
 
-    const isInLockPeriod = !!trialFeatureEntry && new Date(trialFeatureEntry.expiresAt) <= new Date();
-    const lockExpiresAt = trialFeatureEntry?.grantedAt ?? null;
+    const now = new Date();
+    const expiresAt = trialFeatureEntry ? new Date(trialFeatureEntry.expiresAt) : null;
+    const lockUntil = expiresAt
+        ? new Date(expiresAt.getTime() + APP_CONFIG.PREMIUM.AD_REWARD_LOCK_HOURS * 60 * 60 * 1000)
+        : null;
+
+    const hasTrialAccess = !!expiresAt && expiresAt > now;
+    const isInLockPeriod = !!expiresAt && expiresAt <= now && lockUntil! > now;
+    const lockExpiresAt = lockUntil ? lockUntil.toISOString() : null;
 
     return {
         hasAccess: hasFeatureAccess(userTier, feature) || hasTrialAccess,
