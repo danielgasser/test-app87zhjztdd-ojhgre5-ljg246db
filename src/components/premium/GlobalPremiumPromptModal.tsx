@@ -103,6 +103,8 @@ export function GlobalPremiumPromptModal() {
 
     dispatch(hidePremiumPrompt());
     setTimeout(() => {
+      if (!APP_CONFIG.PREMIUM.ADS_ENABLED) return;
+
       showRewardedAd(async () => {
         const expiresAt = new Date(
           Date.now() +
@@ -133,7 +135,10 @@ export function GlobalPremiumPromptModal() {
   if (!visible && !rewardGranted && !expiryReminder) return null;
 
   const showWatchAd =
-    feature === "advancedFilters" && userTier === "free" && !isInLockPeriod;
+    APP_CONFIG.PREMIUM.ADS_ENABLED &&
+    feature === "advancedFilters" &&
+    userTier === "free" &&
+    !isInLockPeriod;
 
   return (
     <View style={premiumStyles.absoluteOverlay} pointerEvents="box-none">

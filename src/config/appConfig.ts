@@ -77,6 +77,7 @@ export const APP_CONFIG = {
     }
   },
   PREMIUM: {
+    ADS_ENABLED: false, // Global kill switch — set true when AdMob is ready
     AD_REWARD_DURATION_HOURS: 24,
     AD_REWARD_LOCK_HOURS: 72,
     TRIAL_REMINDER_HOURS_BEFORE_EXPIRY: [12, 6, 2], // notifications sent at 12h, 6h, 2h before expiry

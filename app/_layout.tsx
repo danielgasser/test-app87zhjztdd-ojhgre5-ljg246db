@@ -25,6 +25,7 @@ import { initializeRevenueCat } from "@/services/revenueCatService";
 import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
 import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 import { PortalHost, PortalProvider } from "@gorhom/portal";
+import { APP_CONFIG } from "@/config/appConfig";
 // Initialize Sentry
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -54,14 +55,16 @@ function AppNavigator() {
       },
     );
     // Initialize AdMob
-    const initAds = async () => {
-      await initializeAdMob();
-      await requestAdConsentIfNeeded();
-      loadInterstitialAd();
-      loadRewardedAd();
-    };
+    if (APP_CONFIG.PREMIUM.ADS_ENABLED) {
+      const initAds = async () => {
+        await initializeAdMob();
+        await requestAdConsentIfNeeded();
+        loadInterstitialAd();
+        loadRewardedAd();
+      };
 
-    initAds();
+      initAds();
+    }
     initializeRevenueCat();
 
     return () => {
