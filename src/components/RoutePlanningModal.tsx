@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  TextInput,
   FlatList,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
@@ -49,7 +49,6 @@ import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { commonStyles } from "@/styles/common";
-import { router } from "expo-router";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -775,6 +774,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               color={theme.colors.textSecondary}
             />
             <TextInput
+              filtered={false}
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}

@@ -15,3 +15,11 @@ jest.mock('@sentry/react-native', () => ({
     ReactNativeTracing: jest.fn(),
     ReactNavigationInstrumentation: jest.fn(),
 }));
+jest.mock('@2toad/profanity', () => ({
+    Profanity: jest.fn().mockImplementation(() => ({
+        exists: jest.fn().mockReturnValue(false),
+    })),
+    ProfanityOptions: jest.fn().mockImplementation(() => ({
+        wholeWord: false,
+    })),
+}));

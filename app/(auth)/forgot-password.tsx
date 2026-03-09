@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -11,6 +10,7 @@ import {
   Keyboard,
   ActivityIndicator,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -48,7 +48,7 @@ export default function ForgotPasswordScreen() {
         trimmedEmail,
         {
           redirectTo: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/auth-verify?next=reset-password`,
-        }
+        },
       );
 
       if (error) throw error;
@@ -56,13 +56,13 @@ export default function ForgotPasswordScreen() {
       setEmailSent(true);
       notify.success(
         "Password reset link sent! Please check your email.",
-        "Check Your Inbox"
+        "Check Your Inbox",
       );
     } catch (error: any) {
       logger.error("Password reset error:", error);
       notify.error(
         error.message || "Failed to send reset email. Please try again.",
-        "Error"
+        "Error",
       );
     } finally {
       setLoading(false);

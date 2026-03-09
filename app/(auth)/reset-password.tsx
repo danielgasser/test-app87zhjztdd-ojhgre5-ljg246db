@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -11,6 +10,7 @@ import {
   Keyboard,
   ActivityIndicator,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -110,7 +110,7 @@ export default function ResetPasswordScreen() {
       logger.error("Password reset error:", error);
       notify.error(
         error.message || "Failed to reset password. Please try again.",
-        "Error"
+        "Error",
       );
     } finally {
       setLoading(false);

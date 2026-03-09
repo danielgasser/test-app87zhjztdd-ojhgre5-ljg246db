@@ -4,13 +4,14 @@ import { TouchableWithoutFeedback, Keyboard } from "react-native";
 
 import {
   View,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   FlatList,
   Text,
   ActivityIndicator,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
+
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {
@@ -58,7 +59,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { searchResults, searchLoading, userCountry } = useAppSelector(
-    (state) => state.locations
+    (state) => state.locations,
   );
   // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -72,7 +73,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const userTier = (userProfile?.subscription_tier ||
     "free") as SubscriptionTier;
   const searchHistory = useAppSelector(
-    (state) => state.locations.searchHistory
+    (state) => state.locations.searchHistory,
   );
   const { hasAccess: hasSearchHistoryAccess } =
     useFeatureAccess("searchHistory");
@@ -101,9 +102,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
           APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS; // fallback
       }
 
-      const results = await googlePlacesService.autocomplete(
-        autocompleteParams
-      );
+      const results =
+        await googlePlacesService.autocomplete(autocompleteParams);
 
       return results.slice(0, 5).map((result) => ({
         id: `google_${result.place_id}`,
@@ -135,14 +135,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
           query,
           latitude: userLocation?.latitude,
           longitude: userLocation?.longitude,
-        })
+        }),
       );
       // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
       const mapboxResults = await searchGoogle(query);
       setMapboxResults(mapboxResults);
     },
-    [dispatch, userLocation, userTier]
+    [dispatch, userLocation, userTier],
   );
 
   const handleSelectLocation = async (location: SearchResult) => {
@@ -155,7 +155,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         [
           { text: "Maybe Later", style: "cancel", onPress: () => {} },
           { text: "Upgrade", onPress: () => router.push("/subscription") },
-        ]
+        ],
       );
       return;
     }
@@ -193,7 +193,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             selectedLatitude: location.latitude,
             selectedLongitude: location.longitude,
             searchContext: "map",
-          })
+          }),
         );
       }
       onSearchToggle?.(false);
@@ -230,7 +230,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               selectedLatitude: details.geometry.location.lat,
               selectedLongitude: details.geometry.location.lng,
               searchContext: "map",
-            })
+            }),
           );
         }
         onSearchToggle?.(false);
@@ -302,6 +302,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               style={styles.searchIcon}
             />
             <TextInput
+              filtered={false}
               style={styles.searchInput}
               placeholder="Search for places..."
               value={searchText}

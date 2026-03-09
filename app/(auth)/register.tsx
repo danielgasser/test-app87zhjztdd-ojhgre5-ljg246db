@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -13,6 +12,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";

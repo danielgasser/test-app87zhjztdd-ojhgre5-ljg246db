@@ -4,7 +4,6 @@ import { theme } from "src/styles/theme";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
@@ -13,6 +12,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { AppTextInput as TextInput } from "../src/components/AppTextInput";
+
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -132,7 +133,7 @@ export default function EditReviewScreen() {
           hoursSinceCreation > APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME
         ) {
           notify.error(
-            `This review can no longer be edited. Reviews can only be edited within ${APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME} hours of creation.`
+            `This review can no longer be edited. Reviews can only be edited within ${APP_CONFIG.BUSINESS_RULES.REVIEW_EDIT_TIMEFRAME} hours of creation.`,
           );
           router.back();
           return;
@@ -204,18 +205,18 @@ export default function EditReviewScreen() {
       };
 
       await dispatch(
-        updateReview({ id: reviewId as string, ...updateData })
+        updateReview({ id: reviewId as string, ...updateData }),
       ).unwrap();
 
       notify.confirm(
         "Review Updated",
         "Your review has been successfully updated!",
-        [{ text: "OK", onPress: () => router.back() }]
+        [{ text: "OK", onPress: () => router.back() }],
       );
     } catch (error: any) {
       logger.error("Review update error:", error);
       notify.error(
-        error?.message || "Failed to update review. Please try again."
+        error?.message || "Failed to update review. Please try again.",
       );
     }
   };
@@ -227,7 +228,7 @@ export default function EditReviewScreen() {
       [
         { text: "Keep Editing", style: "cancel", onPress: () => {} },
         { text: "Discard", style: "destructive", onPress: () => router.back() },
-      ]
+      ],
     );
   };
 

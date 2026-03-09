@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  TextInput,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";

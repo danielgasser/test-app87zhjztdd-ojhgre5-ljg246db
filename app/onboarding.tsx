@@ -8,13 +8,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from "react-native";
+import { AppTextInput as TextInput } from "../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -26,8 +24,6 @@ import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
-import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { commonStyles } from "@/styles/common";
 
 const ONBOARDING_STEPS = [

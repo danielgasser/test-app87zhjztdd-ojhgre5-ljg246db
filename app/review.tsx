@@ -6,13 +6,14 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   Platform,
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { AppTextInput as TextInput } from "../src/components/AppTextInput";
+
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";

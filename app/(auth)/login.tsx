@@ -4,16 +4,15 @@ import { theme } from "src/styles/theme";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Linking,
   TouchableWithoutFeedback,
   ScrollView,
   Keyboard,
 } from "react-native";
+import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
 import * as AppleAuthentication from "expo-apple-authentication";
