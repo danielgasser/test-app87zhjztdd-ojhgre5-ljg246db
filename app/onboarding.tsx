@@ -70,7 +70,6 @@ export default function OnboardingScreen() {
     privacy_level: "public" as "public" | "anonymous" | "private",
     show_demographics: true,
   });
-  console.log("Apple name from auth provider:", appleUserName);
   const [otherInputs, setOtherInputs] = useState({
     race_other: "",
     gender_other: "",
@@ -527,7 +526,7 @@ export default function OnboardingScreen() {
     </View>
   );
   const renderNameStep = () => (
-    <View style={styles.stepContainer}>
+    <View style={styles.otherInputContainer}>
       <Text style={styles.stepTitle}>
         What's your name? <Text style={commonStyles.requiredAsterisk}>*</Text>
       </Text>
@@ -1148,7 +1147,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: theme.colors.inputBackground,
     marginTop: 20,
-    width: "80%",
+    width: "100%",
   },
   optionButton: {
     flexDirection: "row",

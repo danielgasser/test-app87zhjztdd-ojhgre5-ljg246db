@@ -179,6 +179,10 @@ export const commonStyles = StyleSheet.create({
     ...theme.typography.button,
   },
 
+  warningProfaneText: {
+    color: theme.colors.warning,
+  },
+
   // ==================== TEXT STYLES ====================
   sectionTitle: {
     ...theme.typography.h3,

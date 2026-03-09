@@ -1,26 +1,39 @@
-import React from "react";
-import { TextInput, TextInputProps } from "react-native";
+import React, { useState } from "react";
+import { TextInput, TextInputProps, View, Text } from "react-native";
 import { isProfane } from "../utils/contentFilter";
-import { notify } from "@/utils/notificationService";
+import { commonStyles } from "@/styles/common";
 
 interface AppTextInputProps extends TextInputProps {
   filtered?: boolean;
+  errorMessage?: string;
 }
 
 export const AppTextInput: React.FC<AppTextInputProps> = ({
   filtered = true,
   onChangeText,
+  errorMessage,
   ...props
 }) => {
+  const [profanityError, setProfanityError] = useState<string | null>(null);
+
   const handleChangeText = (text: string) => {
     if (filtered && isProfane(text)) {
-      notify.error(
+      setProfanityError(
         "Your text contains inappropriate language. Please revise before submitting.",
       );
-      return;
+    } else {
+      setProfanityError(null);
     }
     onChangeText?.(text);
   };
+  const displayError = profanityError ?? errorMessage ?? null;
 
-  return <TextInput onChangeText={handleChangeText} {...props} />;
+  return (
+    <View>
+      <TextInput onChangeText={handleChangeText} {...props} />
+      {displayError && (
+        <Text style={commonStyles.warningProfaneText}>{displayError}</Text>
+      )}
+    </View>
+  );
 };
