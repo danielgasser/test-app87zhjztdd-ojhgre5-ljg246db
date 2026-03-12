@@ -430,6 +430,31 @@ export default function ProfileScreen() {
         </View>
       ) : (
         <View style={styles.profileContainer}>
+          {/* Upgrade Banner - only show for free users */}
+          {subscriptionTier === "free" && (
+            <TouchableOpacity
+              style={styles.upgradeBanner}
+              onPress={() => {
+                router.push("/subscription");
+              }}
+            >
+              <View style={styles.upgradeBannerContent}>
+                <Ionicons
+                  name="star"
+                  size={24}
+                  color={theme.colors.mixedYellow}
+                />
+                <View style={styles.upgradeBannerText}>
+                  <Text style={styles.upgradeBannerTitle}>
+                    Upgrade to Premium
+                  </Text>
+                  <Text style={styles.upgradeBannerSubtitle}>
+                    Unlock all features & go ad-free
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
           {/* Fixed Header */}
           <View style={commonStyles.subHeader}>
             <TouchableOpacity
@@ -475,31 +500,6 @@ export default function ProfileScreen() {
             style={styles.sectionsContainer}
             showsVerticalScrollIndicator={false}
           >
-            {/* Upgrade Banner - only show for free users */}
-            {subscriptionTier === "free" && (
-              <TouchableOpacity
-                style={styles.upgradeBanner}
-                onPress={() => {
-                  router.push("/subscription");
-                }}
-              >
-                <View style={styles.upgradeBannerContent}>
-                  <Ionicons
-                    name="star"
-                    size={24}
-                    color={theme.colors.mixedYellow}
-                  />
-                  <View style={styles.upgradeBannerText}>
-                    <Text style={styles.upgradeBannerTitle}>
-                      Upgrade to Premium
-                    </Text>
-                    <Text style={styles.upgradeBannerSubtitle}>
-                      Unlock all features & go ad-free
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            )}
             {/* Activity Section */}
             <CollapsibleSection
               title="My Activity"
@@ -974,7 +974,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
     marginHorizontal: theme.spacing.md,
-    marginTop: theme.spacing.md,
+    marginTop: -40,
     borderRadius: theme.borderRadius.md,
   },
   upgradeBannerContent: {

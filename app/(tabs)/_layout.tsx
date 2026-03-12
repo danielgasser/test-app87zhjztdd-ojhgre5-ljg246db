@@ -9,9 +9,27 @@ import { supabase } from "@/services/supabase";
 import { useAuth } from "@/providers/AuthProvider";
 import Constants from "expo-constants";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
+import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
+
+function ProfileTabIcon({ color }: { color: string }) {
+  const tier = useSubscriptionTier();
+  return (
+    <View>
+      <MaterialIcons name="person" size={32} color={color} />
+      {tier !== "free" && (
+        <MaterialIcons
+          name="star"
+          size={15}
+          color={theme.colors.warning}
+          style={{ position: "absolute", top: -2, left: -2 }}
+        />
+      )}
+    </View>
+  );
+}
 
 export default function TabLayout() {
   const dispatch = useAppDispatch();
@@ -27,7 +45,7 @@ export default function TabLayout() {
     "Platform:",
     Platform.OS,
     " v: ",
-    Platform.Version
+    Platform.Version,
   );
 
   useEffect(() => {
@@ -112,9 +130,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="person" size={32} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <ProfileTabIcon color={color} />,
         }}
       />
       <Tabs.Screen

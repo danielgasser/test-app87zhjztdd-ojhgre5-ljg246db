@@ -39,6 +39,7 @@ import {
   adminDeleteTestUser,
   adminAddTestUser,
   adminFetchTestUsers,
+  exportTestUsersCSV,
 } from "@/services/adminService";
 import { useAuth } from "@/providers/AuthProvider";
 import { getBuiltInWords } from "../../src/utils/contentFilter";
@@ -73,9 +74,10 @@ function UsersTab() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<UserFilter>("all");
-  const [newTesterEmail] = useState("");
-  const [addingTester] = useState(false);
   const [showAddTester, setShowAddTester] = useState(false);
+  const [platformFilter, setPlatformFilter] = useState<
+    "all" | "ios" | "android" | "both"
+  >("all");
   const load = useCallback(async () => {
     try {
       const [userData, testerData] = await Promise.all([
@@ -266,31 +268,23 @@ function UsersTab() {
             <TouchableOpacity
               style={[adminStyles.actionBtn, adminStyles.actionBtnActive]}
               onPress={() => setShowAddTester(true)}
-              disabled={addingTester || !newTesterEmail.trim()}
             >
-              {addingTester ? (
-                <ActivityIndicator
+              <Text
+                style={{
+                  ...adminStyles.actionBtnTextActive,
+                  fontSize: 16,
+                  paddingHorizontal: 0,
+                  paddingBottom: 6,
+                  paddingTop: 2,
+                }}
+              >
+                <Ionicons
+                  name="add"
                   size={22}
                   color={theme.colors.textOnPrimary}
                 />
-              ) : (
-                <Text
-                  style={{
-                    ...adminStyles.actionBtnTextActive,
-                    fontSize: 16,
-                    paddingHorizontal: 0,
-                    paddingBottom: 6,
-                    paddingTop: 2,
-                  }}
-                >
-                  <Ionicons
-                    name="add"
-                    size={22}
-                    color={theme.colors.textOnPrimary}
-                  />
-                  Add Test User
-                </Text>
-              )}
+                Add Test User
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -320,7 +314,10 @@ function UsersTab() {
             <TouchableOpacity
               key={f}
               style={[adminStyles.chip, filter === f && adminStyles.chipActive]}
-              onPress={() => setFilter(f)}
+              onPress={() => {
+                setFilter(f);
+                setPlatformFilter("all");
+              }}
             >
               <Text
                 style={[
@@ -332,6 +329,22 @@ function UsersTab() {
               </Text>
             </TouchableOpacity>
           ))}
+          {filter === "tester" && (
+            <TouchableOpacity
+              style={[adminStyles.chip, adminStyles.chipActive]}
+              onPress={() =>
+                exportTestUsersCSV(testUsers).catch(() =>
+                  notify.error("Export failed"),
+                )
+              }
+            >
+              <Ionicons
+                name="download-outline"
+                size={14}
+                color={theme.colors.textOnPrimary}
+              />
+            </TouchableOpacity>
+          )}
         </ScrollView>
         <Text style={adminStyles.countLabel}>{filtered.length} results</Text>
       </View>

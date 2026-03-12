@@ -25,12 +25,13 @@ export function TestUserCard({
   onDelete,
 }: TesterCardProps) {
   const meta = item.metadata as TesterMetadata | null;
+  console.log("Rendering TestUserCard for", item.email, "with metadata", meta);
   return (
     <View style={commonStyles.card}>
       <View style={adminStyles.cardHeader}>
         <View style={adminStyles.cardTitleRow}>
           <Text style={adminStyles.cardTitle}>{item.name || item.email}</Text>
-          <Badge label="tester" color={theme.colors.warning} />
+          <Badge label="Tester" color={theme.colors.warning} />
           <Badge
             label={item.status.replace(/_/g, " ")}
             color={
@@ -60,7 +61,7 @@ export function TestUserCard({
             style={[adminStyles.actionBtn, adminStyles.actionBtnOutline]}
             onPress={() => onStatusChange(item, "signed_up")}
           >
-            <Text style={adminStyles.actionBtnTextOutline}>→ signed up</Text>
+            <Text style={adminStyles.actionBtnTextOutline}>→ Sign user up</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity

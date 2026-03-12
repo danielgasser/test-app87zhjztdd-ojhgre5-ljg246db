@@ -1,9 +1,12 @@
 // src/services/adminService.ts
 
+import { TesterMetadata } from '@/components/admin/AddTesterModal';
 import { supabase } from './supabase';
 import { Json } from '@/types/database.types';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types ────────────
 
 export interface AdminUser {
     id: string;
@@ -297,4 +300,27 @@ export const adminDeleteBlockedWord = async (id: string): Promise<void> => {
         .eq('id', id);
 
     if (error) throw new Error(error.message);
+};
+
+export const exportTestUsersCSV = async (testers: TestUser[]): Promise<void> => {
+    const headers = ['name', 'email', 'status', 'platform', 'source', 'notes', 'created_at'];
+
+    const rows = testers.map((t) => {
+        const meta = (typeof t.metadata === 'string' ? JSON.parse(t.metadata) : t.metadata) as TesterMetadata | null;
+        return [
+            t.name ?? '',
+            t.email,
+            t.status,
+            meta?.platform ?? '',
+            meta?.source ?? '',
+            meta?.notes ?? '',
+            t.created_at ? new Date(t.created_at).toLocaleDateString() : '',
+        ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    const file = new File(Paths.cache, `test_users_${Date.now()}.csv`);
+    file.create();
+    file.write(csv);
+    await Sharing.shareAsync(file.uri, { mimeType: 'text/csv', dialogTitle: 'Export Testers' });
 };
