@@ -15,7 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
-
+import { adminStyles } from "@/styles/adminStyles";
 export type TesterMetadata = {
   platform?: "ios" | "android" | "both";
   source?: string;
@@ -136,8 +136,8 @@ export function AddTesterModal({
                       <TouchableOpacity
                         key={p.value}
                         style={[
-                          styles.chip,
-                          platform === p.value && styles.chipActive,
+                          adminStyles.chip,
+                          platform === p.value && adminStyles.chipActive,
                         ]}
                         onPress={() =>
                           setPlatform(platform === p.value ? "" : p.value)
@@ -145,8 +145,8 @@ export function AddTesterModal({
                       >
                         <Text
                           style={[
-                            styles.chipText,
-                            platform === p.value && styles.chipTextActive,
+                            adminStyles.chipText,
+                            platform === p.value && adminStyles.chipTextActive,
                           ]}
                         >
                           {p.label}
@@ -218,25 +218,3 @@ export function AddTesterModal({
     </Modal>
   );
 }
-
-const styles = {
-  chip: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: 6,
-    borderRadius: theme.borderRadius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  chipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-  },
-  chipText: {
-    fontSize: 13,
-    color: theme.colors.textSecondary,
-  },
-  chipTextActive: {
-    color: theme.colors.textOnPrimary,
-    fontWeight: "600" as const,
-  },
-};

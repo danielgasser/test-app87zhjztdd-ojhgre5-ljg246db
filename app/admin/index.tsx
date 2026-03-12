@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -43,10 +42,9 @@ import {
 } from "@/services/adminService";
 import { useAuth } from "@/providers/AuthProvider";
 import { getBuiltInWords } from "../../src/utils/contentFilter";
-import {
-  AddTesterModal,
-  TesterMetadata,
-} from "@/components/admin/AddTesterModal";
+import { AddTesterModal } from "@/components/admin/AddTesterModal";
+import { adminStyles } from "@/styles/adminStyles";
+import { TestUserCard } from "@/components/admin/TestUserCard";
 
 type Tab = "users" | "locations" | "reviews" | "content";
 
@@ -54,8 +52,8 @@ type Tab = "users" | "locations" | "reviews" | "content";
 
 function Badge({ label, color }: { label: string; color: string }) {
   return (
-    <View style={[styles.badge, { backgroundColor: color + "22" }]}>
-      <Text style={[styles.badgeText, { color }]}>{label}</Text>
+    <View style={[adminStyles.badge, { backgroundColor: color + "22" }]}>
+      <Text style={[adminStyles.badgeText, { color }]}>{label}</Text>
     </View>
   );
 }
@@ -75,8 +73,7 @@ function UsersTab() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<UserFilter>("all");
-  const [newTesterEmail, setNewTesterEmail] = useState("");
-  const [newTesterName, setNewTesterName] = useState("");
+  const [newTesterEmail] = useState("");
   const [addingTester] = useState(false);
   const [showAddTester, setShowAddTester] = useState(false);
   const load = useCallback(async () => {
@@ -246,13 +243,16 @@ function UsersTab() {
 
   if (loading) {
     return (
-      <ActivityIndicator style={styles.centered} color={theme.colors.primary} />
+      <ActivityIndicator
+        style={adminStyles.centered}
+        color={theme.colors.primary}
+      />
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.stickyHeader}>
+      <View style={adminStyles.stickyHeader}>
         {/* Add tester row */}
         <View
           style={{
@@ -264,7 +264,7 @@ function UsersTab() {
         >
           <View style={{ flex: 1, height: 40 }}>
             <TouchableOpacity
-              style={[styles.actionBtn, styles.actionBtnActive]}
+              style={[adminStyles.actionBtn, adminStyles.actionBtnActive]}
               onPress={() => setShowAddTester(true)}
               disabled={addingTester || !newTesterEmail.trim()}
             >
@@ -276,7 +276,7 @@ function UsersTab() {
               ) : (
                 <Text
                   style={{
-                    ...styles.actionBtnTextActive,
+                    ...adminStyles.actionBtnTextActive,
                     fontSize: 16,
                     paddingHorizontal: 0,
                     paddingBottom: 6,
@@ -302,7 +302,7 @@ function UsersTab() {
           }}
         >
           <TextInput
-            style={styles.searchInput}
+            style={adminStyles.searchInput}
             placeholder="Search by username, name or email…"
             placeholderTextColor={theme.colors.textLight}
             value={search}
@@ -314,23 +314,26 @@ function UsersTab() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.chipRow}
+          style={adminStyles.chipRow}
         >
           {(["all", "user", "admin", "tester"] as UserFilter[]).map((f) => (
             <TouchableOpacity
               key={f}
-              style={[styles.chip, filter === f && styles.chipActive]}
+              style={[adminStyles.chip, filter === f && adminStyles.chipActive]}
               onPress={() => setFilter(f)}
             >
               <Text
-                style={[styles.chipText, filter === f && styles.chipTextActive]}
+                style={[
+                  adminStyles.chipText,
+                  filter === f && adminStyles.chipTextActive,
+                ]}
               >
                 {f}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <Text style={styles.countLabel}>{filtered.length} results</Text>
+        <Text style={adminStyles.countLabel}>{filtered.length} results</Text>
       </View>
 
       <ScrollView
@@ -343,116 +346,63 @@ function UsersTab() {
             }}
           />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={adminStyles.listContent}
       >
         {filtered.map((item) =>
           item.itemType === "tester" ? (
-            <View key={`tester-${item.id}`} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleRow}>
-                  <Text style={styles.cardTitle}>
-                    {item.name || item.email}
-                  </Text>
-                  <Badge label="tester" color={theme.colors.warning} />
-                  <Badge
-                    label={item.status.replace(/_/g, " ")}
-                    color={
-                      item.status === "signed_up"
-                        ? theme.colors.success
-                        : theme.colors.textSecondary
-                    }
-                  />
-                </View>
-                <Text style={styles.cardSubtitle}>{item.email}</Text>
-                {item.metadata && (
-                  <Text style={styles.cardMeta}>
-                    {(item.metadata as TesterMetadata).platform &&
-                      `Platform: ${(item.metadata as TesterMetadata).platform}`}
-                    {(item.metadata as TesterMetadata).source &&
-                      ` · Source: ${(item.metadata as TesterMetadata).source}`}
-                    {(item.metadata as TesterMetadata).notes &&
-                      ` · ${(item.metadata as TesterMetadata).notes}`}
-                  </Text>
-                )}
-                <Text style={styles.cardMeta}>
-                  {item.created_at
-                    ? new Date(item.created_at).toLocaleDateString()
-                    : "—"}
-                </Text>
-              </View>
-              <View style={styles.cardActions}>
-                {item.status === "invited" && (
-                  <TouchableOpacity
-                    style={[styles.actionBtn, styles.actionBtnOutline]}
-                    onPress={() => handleTesterStatusChange(item, "signed_up")}
-                  >
-                    <Text style={styles.actionBtnTextOutline}>→ signed_up</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={[styles.actionBtn, styles.actionBtnDanger]}
-                  onPress={() => handleDeleteTester(item)}
-                >
-                  <Ionicons
-                    name="trash"
-                    size={14}
-                    color={theme.colors.textOnPrimary}
-                  />
-                  <Text
-                    style={[styles.actionBtnText, styles.actionBtnTextActive]}
-                  >
-                    Remove
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <TestUserCard
+              key={`tester-${item.id}`}
+              item={item}
+              onStatusChange={handleTesterStatusChange}
+              onDelete={handleDeleteTester}
+            />
           ) : (
-            <View key={`user-${item.id}`} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleRow}>
-                  <Text style={styles.cardTitle}>
+            <View key={`user-${item.id}`} style={adminStyles.card}>
+              <View style={adminStyles.cardHeader}>
+                <View style={adminStyles.cardTitleRow}>
+                  <Text style={adminStyles.cardTitle}>
                     {item.username || item.full_name || "—"}
                   </Text>
                   {item.role === "admin" && (
                     <Badge label="admin" color={theme.colors.primary} />
                   )}
                 </View>
-                <Text style={styles.cardSubtitle} numberOfLines={1}>
+                <Text style={adminStyles.cardSubtitle} numberOfLines={1}>
                   {item.id}
                 </Text>
-                <Text style={styles.cardMeta}>
+                <Text style={adminStyles.cardMeta}>
                   Reviews: {item.total_reviews ?? 0} · Tier:{" "}
                   {item.subscription_tier ?? "free"}
                 </Text>
-                <Text style={styles.cardMeta}>
+                <Text style={adminStyles.cardMeta}>
                   {item.created_at
                     ? new Date(item.created_at).toLocaleDateString()
                     : "—"}
                 </Text>
               </View>
-              <View style={styles.cardActions}>
+              <View style={adminStyles.cardActions}>
                 <TouchableOpacity
                   style={[
-                    styles.actionBtn,
+                    adminStyles.actionBtn,
                     item.role === "admin"
-                      ? styles.actionBtnOutline
-                      : styles.actionBtnActive,
+                      ? adminStyles.actionBtnOutline
+                      : adminStyles.actionBtnActive,
                   ]}
                   onPress={() => handleRoleToggle(item)}
                 >
                   <Text
                     style={[
-                      styles.actionBtnText,
+                      adminStyles.actionBtnText,
                       item.role === "admin"
-                        ? styles.actionBtnTextOutline
-                        : styles.actionBtnTextActive,
+                        ? adminStyles.actionBtnTextOutline
+                        : adminStyles.actionBtnTextActive,
                     ]}
                   >
                     {item.role === "admin" ? "Revoke Admin" : "Make Admin"}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.actionBtn, styles.actionBtnOutline]}
+                  style={[adminStyles.actionBtn, adminStyles.actionBtnOutline]}
                   onPress={() => handleSubscriptionToggle(item)}
                 >
                   <Ionicons
@@ -464,12 +414,12 @@ function UsersTab() {
                     size={14}
                     color={theme.colors.primary}
                   />
-                  <Text style={styles.actionBtnTextOutline}>
+                  <Text style={adminStyles.actionBtnTextOutline}>
                     {item.subscription_tier === "premium" ? "free" : "premium"}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.actionBtn, styles.actionBtnDanger]}
+                  style={[adminStyles.actionBtn, adminStyles.actionBtnDanger]}
                   onPress={() => handleDeleteUser(item)}
                 >
                   <Ionicons
@@ -478,7 +428,10 @@ function UsersTab() {
                     color={theme.colors.textOnPrimary}
                   />
                   <Text
-                    style={[styles.actionBtnText, styles.actionBtnTextActive]}
+                    style={[
+                      adminStyles.actionBtnText,
+                      adminStyles.actionBtnTextActive,
+                    ]}
                   >
                     Delete
                   </Text>
@@ -573,22 +526,25 @@ function LocationsTab() {
 
   if (loading) {
     return (
-      <ActivityIndicator style={styles.centered} color={theme.colors.primary} />
+      <ActivityIndicator
+        style={adminStyles.centered}
+        color={theme.colors.primary}
+      />
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.stickyHeader}>
+      <View style={adminStyles.stickyHeader}>
         <TextInput
           filtered={false}
-          style={styles.searchInput}
+          style={adminStyles.searchInput}
           placeholder="Search by name or city…"
           placeholderTextColor={theme.colors.textLight}
           value={search}
           onChangeText={setSearch}
         />
-        <Text style={styles.countLabel}>{filtered.length} locations</Text>
+        <Text style={adminStyles.countLabel}>{filtered.length} locations</Text>
       </View>
       <ScrollView
         refreshControl={
@@ -600,13 +556,13 @@ function LocationsTab() {
             }}
           />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={adminStyles.listContent}
       >
         {filtered.map((loc) => (
-          <View key={loc.id} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View style={styles.cardTitleRow}>
-                <Text style={styles.cardTitle} numberOfLines={1}>
+          <View key={loc.id} style={adminStyles.card}>
+            <View style={adminStyles.cardHeader}>
+              <View style={adminStyles.cardTitleRow}>
+                <Text style={adminStyles.cardTitle} numberOfLines={1}>
                   {loc.name}
                 </Text>
                 <Badge
@@ -614,20 +570,22 @@ function LocationsTab() {
                   color={loc.active ? theme.colors.success : theme.colors.error}
                 />
               </View>
-              <Text style={styles.cardSubtitle}>
+              <Text style={adminStyles.cardSubtitle}>
                 {loc.city}, {loc.state_province} · {loc.place_type}
               </Text>
-              <Text style={styles.cardMeta}>
+              <Text style={adminStyles.cardMeta}>
                 Reviews: {loc.review_count ?? 0} · Score:{" "}
                 {loc.avg_overall_score?.toFixed(1) ?? "—"}
               </Text>
             </View>
 
-            <View style={styles.cardActions}>
+            <View style={adminStyles.cardActions}>
               <TouchableOpacity
                 style={[
-                  styles.actionBtn,
-                  loc.active ? styles.actionBtnOutline : styles.actionBtnActive,
+                  adminStyles.actionBtn,
+                  loc.active
+                    ? adminStyles.actionBtnOutline
+                    : adminStyles.actionBtnActive,
                 ]}
                 onPress={() => handleToggleActive(loc)}
               >
@@ -642,10 +600,10 @@ function LocationsTab() {
                 />
                 <Text
                   style={[
-                    styles.actionBtnText,
+                    adminStyles.actionBtnText,
                     loc.active
-                      ? styles.actionBtnTextOutline
-                      : styles.actionBtnTextActive,
+                      ? adminStyles.actionBtnTextOutline
+                      : adminStyles.actionBtnTextActive,
                   ]}
                 >
                   {loc.active ? "Deactivate" : "Activate"}
@@ -653,7 +611,7 @@ function LocationsTab() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnDanger]}
+                style={[adminStyles.actionBtn, adminStyles.actionBtnDanger]}
                 onPress={() => handleDelete(loc)}
               >
                 <Ionicons
@@ -662,7 +620,10 @@ function LocationsTab() {
                   color={theme.colors.textOnPrimary}
                 />
                 <Text
-                  style={[styles.actionBtnText, styles.actionBtnTextActive]}
+                  style={[
+                    adminStyles.actionBtnText,
+                    adminStyles.actionBtnTextActive,
+                  ]}
                 >
                   Delete
                 </Text>
@@ -761,39 +722,45 @@ function ReviewsTab() {
 
   if (loading) {
     return (
-      <ActivityIndicator style={styles.centered} color={theme.colors.primary} />
+      <ActivityIndicator
+        style={adminStyles.centered}
+        color={theme.colors.primary}
+      />
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.stickyHeader}>
+      <View style={adminStyles.stickyHeader}>
         <TextInput
           filtered={false}
-          style={styles.searchInput}
+          style={adminStyles.searchInput}
           placeholder="Search by location, user or comment…"
           placeholderTextColor={theme.colors.textLight}
           value={search}
           onChangeText={setSearch}
         />
       </View>
-      <View style={styles.stickyHeader}>
+      <View style={adminStyles.stickyHeader}>
         {/* Status filter chips */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.chipRow}
+          style={adminStyles.chipRow}
         >
           {(["all", ...REVIEW_STATUSES] as const).map((s) => (
             <TouchableOpacity
               key={s}
-              style={[styles.chip, filterStatus === s && styles.chipActive]}
+              style={[
+                adminStyles.chip,
+                filterStatus === s && adminStyles.chipActive,
+              ]}
               onPress={() => setFilterStatus(s)}
             >
               <Text
                 style={[
-                  styles.chipText,
-                  filterStatus === s && styles.chipTextActive,
+                  adminStyles.chipText,
+                  filterStatus === s && adminStyles.chipTextActive,
                 ]}
               >
                 {s}
@@ -801,7 +768,7 @@ function ReviewsTab() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <Text style={styles.countLabel}>{filtered.length} reviews</Text>
+        <Text style={adminStyles.countLabel}>{filtered.length} reviews</Text>
       </View>
 
       <ScrollView
@@ -814,13 +781,13 @@ function ReviewsTab() {
             }}
           />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={adminStyles.listContent}
       >
         {filtered.map((review) => (
-          <View key={review.id} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View style={styles.cardTitleRow}>
-                <Text style={styles.cardTitle} numberOfLines={1}>
+          <View key={review.id} style={adminStyles.card}>
+            <View style={adminStyles.cardHeader}>
+              <View style={adminStyles.cardTitleRow}>
+                <Text style={adminStyles.cardTitle} numberOfLines={1}>
                   {review.location_name ?? "Unknown location"}
                 </Text>
                 <Badge
@@ -828,36 +795,36 @@ function ReviewsTab() {
                   color={statusColor[review.status] ?? theme.colors.textLight}
                 />
               </View>
-              <Text style={styles.cardSubtitle}>
+              <Text style={adminStyles.cardSubtitle}>
                 By: {review.username ?? review.user_id.slice(0, 8)}… · Rating:{" "}
                 {review.overall_rating}/5
               </Text>
               {review.comment ? (
-                <Text style={styles.cardComment} numberOfLines={2}>
+                <Text style={adminStyles.cardComment} numberOfLines={2}>
                   "{review.comment}"
                 </Text>
               ) : null}
-              <Text style={styles.cardMeta}>
+              <Text style={adminStyles.cardMeta}>
                 {review.created_at
                   ? new Date(review.created_at).toLocaleDateString()
                   : "—"}
               </Text>
             </View>
 
-            <View style={styles.cardActions}>
+            <View style={adminStyles.cardActions}>
               {/* Status cycle buttons */}
               {REVIEW_STATUSES.filter((s) => s !== review.status).map((s) => (
                 <TouchableOpacity
                   key={s}
-                  style={[styles.actionBtn, styles.actionBtnOutline]}
+                  style={[adminStyles.actionBtn, adminStyles.actionBtnOutline]}
                   onPress={() => handleStatusChange(review, s)}
                 >
-                  <Text style={styles.actionBtnTextOutline}>→ {s}</Text>
+                  <Text style={adminStyles.actionBtnTextOutline}>→ {s}</Text>
                 </TouchableOpacity>
               ))}
 
               <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnDanger]}
+                style={[adminStyles.actionBtn, adminStyles.actionBtnDanger]}
                 onPress={() => handleDelete(review)}
               >
                 <Ionicons
@@ -866,7 +833,10 @@ function ReviewsTab() {
                   color={theme.colors.textOnPrimary}
                 />
                 <Text
-                  style={[styles.actionBtnText, styles.actionBtnTextActive]}
+                  style={[
+                    adminStyles.actionBtnText,
+                    adminStyles.actionBtnTextActive,
+                  ]}
                 >
                   Delete
                 </Text>
@@ -964,17 +934,20 @@ function ContentTab() {
 
   if (loading) {
     return (
-      <ActivityIndicator style={styles.centered} color={theme.colors.primary} />
+      <ActivityIndicator
+        style={adminStyles.centered}
+        color={theme.colors.primary}
+      />
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
       {/* Search */}
-      <View style={styles.stickyHeader}>
+      <View style={adminStyles.stickyHeader}>
         <TextInput
           filtered={false}
-          style={styles.searchInput}
+          style={adminStyles.searchInput}
           value={search}
           onChangeText={setSearch}
           placeholder="Search words..."
@@ -984,7 +957,7 @@ function ContentTab() {
         />
         <View style={{ flexDirection: "row", gap: theme.spacing.sm }}>
           <TextInput
-            style={[styles.searchInput, { flex: 1, marginBottom: 0 }]}
+            style={[adminStyles.searchInput, { flex: 1, marginBottom: 0 }]}
             value={newWord}
             onChangeText={setNewWord}
             placeholder="Add a word to block..."
@@ -994,8 +967,8 @@ function ContentTab() {
           />
           <TouchableOpacity
             style={[
-              styles.actionBtn,
-              styles.actionBtnActive,
+              adminStyles.actionBtn,
+              adminStyles.actionBtnActive,
               { alignSelf: "center" },
             ]}
             onPress={handleAdd}
@@ -1017,21 +990,23 @@ function ContentTab() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.listContent}>
+      <ScrollView contentContainerStyle={adminStyles.listContent}>
         {/* Custom words */}
-        <Text style={styles.countLabel}>Custom ({filteredCustom.length})</Text>
+        <Text style={adminStyles.countLabel}>
+          Custom ({filteredCustom.length})
+        </Text>
         {filteredCustom.map((word) => (
-          <View key={word.id} style={styles.card}>
+          <View key={word.id} style={adminStyles.card}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{word.word}</Text>
-              <Text style={styles.cardMeta}>
+              <Text style={adminStyles.cardTitle}>{word.word}</Text>
+              <Text style={adminStyles.cardMeta}>
                 {word.created_at
                   ? new Date(word.created_at).toLocaleDateString()
                   : "—"}
               </Text>
             </View>
             <TouchableOpacity
-              style={[styles.actionBtn, styles.actionBtnDanger]}
+              style={[adminStyles.actionBtn, adminStyles.actionBtnDanger]}
               onPress={() => handleDelete(word)}
             >
               <Ionicons
@@ -1044,12 +1019,12 @@ function ContentTab() {
         ))}
 
         {/* Built-in words */}
-        <Text style={[styles.countLabel, { marginTop: theme.spacing.md }]}>
+        <Text style={[adminStyles.countLabel, { marginTop: theme.spacing.md }]}>
           Built-in ({filteredBuiltIn.length})
         </Text>
         {filteredBuiltIn.map((word, i) => (
-          <View key={i} style={[styles.card, { opacity: 0.5 }]}>
-            <Text style={styles.cardTitle}>{word}</Text>
+          <View key={i} style={[adminStyles.card, { opacity: 0.5 }]}>
+            <Text style={adminStyles.cardTitle}>{word}</Text>
             <Badge label="built-in" color={theme.colors.textSecondary} />
           </View>
         ))}
@@ -1068,7 +1043,7 @@ export default function AdminScreen() {
     return (
       <SafeAreaView style={commonStyles.container}>
         <ActivityIndicator
-          style={styles.centered}
+          style={adminStyles.centered}
           color={theme.colors.primary}
         />
       </SafeAreaView>
@@ -1080,30 +1055,36 @@ export default function AdminScreen() {
   return (
     <SafeAreaView style={commonStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+      <View style={adminStyles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={adminStyles.backBtn}
+        >
           <Ionicons
             name="arrow-back"
             size={24}
             color={theme.colors.textOnPrimary}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Admin Panel</Text>
+        <Text style={adminStyles.headerTitle}>Admin Panel</Text>
         <View style={{ width: 40 }} />
       </View>
 
       {/* Tab bar */}
-      <View style={styles.tabBar}>
+      <View style={adminStyles.tabBar}>
         {(["users", "locations", "reviews", "content"] as Tab[]).map((tab) => (
           <TouchableOpacity
             key={tab}
-            style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
+            style={[
+              adminStyles.tabItem,
+              activeTab === tab && adminStyles.tabItemActive,
+            ]}
             onPress={() => setActiveTab(tab)}
           >
             <Text
               style={[
-                styles.tabLabel,
-                activeTab === tab && styles.tabLabelActive,
+                adminStyles.tabLabel,
+                activeTab === tab && adminStyles.tabLabelActive,
               ]}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -1113,7 +1094,7 @@ export default function AdminScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <View style={adminStyles.content}>
         {activeTab === "users" && <UsersTab />}
         {activeTab === "locations" && <LocationsTab />}
         {activeTab === "reviews" && <ReviewsTab />}
@@ -1122,194 +1103,3 @@ export default function AdminScreen() {
     </SafeAreaView>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  stickyHeader: {
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.sm,
-    backgroundColor: theme.colors.background,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
-  },
-  listContentNoHeader: {
-    padding: theme.spacing.md,
-    paddingBottom: 40,
-  },
-  centered: {
-    flex: 1,
-    alignSelf: "center",
-    marginTop: 60,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
-  },
-  backBtn: {
-    padding: 4,
-    width: 40,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: theme.colors.textOnPrimary,
-  },
-  tabBar: {
-    flexDirection: "row",
-    backgroundColor: theme.colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  tabItem: {
-    flex: 1,
-    paddingVertical: theme.spacing.sm + 2,
-    alignItems: "center",
-  },
-  tabItemActive: {
-    borderBottomWidth: 2,
-    borderBottomColor: theme.colors.primary,
-  },
-  tabLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: theme.colors.textSecondary,
-  },
-  tabLabelActive: {
-    color: theme.colors.primary,
-    fontWeight: "700",
-  },
-  content: {
-    flex: 1,
-  },
-  listContent: {
-    padding: theme.spacing.md,
-    paddingBottom: 40,
-  },
-  searchInput: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    fontSize: 14,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.sm,
-  },
-  countLabel: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
-  },
-  card: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.borderLight,
-    ...theme.shadows.sm,
-  },
-  cardHeader: {
-    marginBottom: theme.spacing.sm,
-  },
-  cardTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.spacing.sm,
-    marginBottom: 2,
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: theme.colors.text,
-    flex: 1,
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-    marginBottom: 2,
-  },
-  cardMeta: {
-    fontSize: 11,
-    color: theme.colors.textLight,
-  },
-  cardComment: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-    fontStyle: "italic",
-    marginVertical: 4,
-  },
-  cardActions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.xs,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: theme.borderRadius.full,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: 6,
-    borderRadius: theme.borderRadius.sm,
-  },
-  actionBtnActive: {
-    backgroundColor: theme.colors.primary,
-  },
-  actionBtnOutline: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  actionBtnDanger: {
-    backgroundColor: theme.colors.error,
-  },
-  actionBtnText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  actionBtnTextActive: {
-    color: theme.colors.textOnPrimary,
-  },
-  actionBtnTextOutline: {
-    color: theme.colors.textSecondary,
-  },
-  chipRow: {
-    marginBottom: theme.spacing.sm,
-  },
-  chip: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: 6,
-    borderRadius: theme.borderRadius.full,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    marginRight: theme.spacing.sm,
-  },
-  chipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-  },
-  chipText: {
-    fontSize: 13,
-    color: theme.colors.textSecondary,
-  },
-  chipTextActive: {
-    color: theme.colors.textOnPrimary,
-    fontWeight: "600",
-  },
-});
