@@ -43,7 +43,10 @@ import {
 } from "@/services/adminService";
 import { useAuth } from "@/providers/AuthProvider";
 import { getBuiltInWords } from "../../src/utils/contentFilter";
-import { AddTesterModal } from "@/components/admin/AddTesterModal";
+import {
+  AddTesterModal,
+  TesterMetadata,
+} from "@/components/admin/AddTesterModal";
 import { adminStyles } from "@/styles/adminStyles";
 import { TestUserCard } from "@/components/admin/TestUserCard";
 
@@ -120,7 +123,12 @@ function UsersTab() {
         : filter === "tester"
           ? item.itemType === "tester"
           : item.itemType === "user" && item.role === filter;
-    return matchesSearch && matchesFilter;
+    const matchesPlatform =
+      filter !== "tester" || platformFilter === "all"
+        ? true
+        : item.itemType === "tester" &&
+          (item.metadata as TesterMetadata | null)?.platform === platformFilter;
+    return matchesSearch && matchesFilter && matchesPlatform;
   });
 
   const handleRoleToggle = (user: AdminUser) => {
@@ -329,6 +337,26 @@ function UsersTab() {
               </Text>
             </TouchableOpacity>
           ))}
+          {filter === "tester" &&
+            (["all", "ios", "android", "both"] as const).map((p) => (
+              <TouchableOpacity
+                key={`platform-${p}`}
+                style={[
+                  adminStyles.chip,
+                  platformFilter === p && adminStyles.chipActive,
+                ]}
+                onPress={() => setPlatformFilter(p)}
+              >
+                <Text
+                  style={[
+                    adminStyles.chipText,
+                    platformFilter === p && adminStyles.chipTextActive,
+                  ]}
+                >
+                  {p}
+                </Text>
+              </TouchableOpacity>
+            ))}
           {filter === "tester" && (
             <TouchableOpacity
               style={[adminStyles.chip, adminStyles.chipActive]}
