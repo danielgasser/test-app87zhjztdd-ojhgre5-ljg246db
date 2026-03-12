@@ -1,6 +1,7 @@
 // src/services/adminService.ts
 
 import { supabase } from './supabase';
+import { Json } from '@/types/database.types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,6 +42,22 @@ export interface AdminReview {
     username?: string | null; // joined
 }
 
+export interface BlockedWord {
+    id: string;
+    word: string;
+    created_at: string | null;
+    created_by: string | null;
+}
+
+export interface TestUser {
+    id: string;
+    email: string;
+    name: string | null;
+    status: string;
+    metadata: Json | null;
+    created_at: string | null;
+}
+
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 export const adminFetchUsers = async (): Promise<AdminUser[]> => {
@@ -75,6 +92,61 @@ export const adminUpdateUserSubscription = async (
         .eq('id', userId);
 
     if (error) throw error;
+};
+
+// ─── TEST Users ───────────────────────────────────────────────────────────────────
+
+export const adminFetchTestUsers = async (): Promise<TestUser[]> => {
+    const { data, error } = await supabase
+        .from('test_users')
+        .select('id, email, name, status, metadata, created_at')
+        .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data.map((row) => ({
+        ...row,
+        metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+    }));
+};
+
+export const adminAddTestUser = async (params: {
+    email: string;
+    name?: string;
+    metadata?: Record<string, any>;
+}): Promise<TestUser> => {
+    const { data, error } = await supabase
+        .from('test_users')
+        .insert({
+            email: params.email.trim().toLowerCase(),
+            name: params.name ?? null,
+            metadata: params.metadata ?? null,
+        })
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+};
+
+export const adminUpdateTestUserStatus = async (
+    id: string,
+    status: string
+): Promise<void> => {
+    const { error } = await supabase
+        .from('test_users')
+        .update({ status })
+        .eq('id', id);
+
+    if (error) throw new Error(error.message);
+};
+
+export const adminDeleteTestUser = async (id: string): Promise<void> => {
+    const { error } = await supabase
+        .from('test_users')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw new Error(error.message);
 };
 
 // ─── Locations ────────────────────────────────────────────────────────────────
@@ -162,7 +234,7 @@ export const adminUpdateReviewStatus = async (
         .update({ status })
         .eq('id', reviewId);
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
 };
 
 export const adminDeleteReview = async (reviewId: string): Promise<void> => {
@@ -171,7 +243,7 @@ export const adminDeleteReview = async (reviewId: string): Promise<void> => {
         .delete()
         .eq('id', reviewId);
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
 };
 
 export const adminDeleteUser = async (userId: string): Promise<void> => {
@@ -191,4 +263,38 @@ export const adminDeleteUser = async (userId: string): Promise<void> => {
 
     const result = await response.json();
     if (!result.success) throw new Error(result.error);
+};
+
+// Content
+export const adminFetchBlockedWords = async (): Promise<BlockedWord[]> => {
+    const { data, error } = await supabase
+        .from('blocked_words')
+        .select('id, word, created_at, created_by')
+        .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data ?? [];
+};
+
+export const adminAddBlockedWord = async (
+    word: string,
+    userId: string
+): Promise<BlockedWord> => {
+    const { data, error } = await supabase
+        .from('blocked_words')
+        .insert({ word: word.toLowerCase().trim(), created_by: userId })
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+};
+
+export const adminDeleteBlockedWord = async (id: string): Promise<void> => {
+    const { error } = await supabase
+        .from('blocked_words')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw new Error(error.message);
 };

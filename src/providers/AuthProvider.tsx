@@ -9,6 +9,7 @@ import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/services/supabase";
 import { logger } from "@/utils/logger";
 import { notificationService } from "@/services/notificationService";
+import { loadBlockedWords } from "../utils/contentFilter";
 
 // ============================================================================
 // STATE TYPES
@@ -328,6 +329,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   };
+
+  // ============================================================================
+  // LOAD BLOCKED WORDS: When user logs in
+  // ============================================================================
+  useEffect(() => {
+    if (!state.isAuthenticated) return;
+    loadBlockedWords().catch((e) =>
+      logger.error("Failed to load blocked words:", e),
+    );
+  }, [state.isAuthenticated]);
 
   // ============================================================================
   // CONTEXT METHODS

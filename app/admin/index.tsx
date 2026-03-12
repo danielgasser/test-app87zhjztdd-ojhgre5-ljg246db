@@ -31,9 +31,24 @@ import {
   AdminLocation,
   AdminReview,
   adminDeleteUser,
+  BlockedWord,
+  adminDeleteBlockedWord,
+  adminAddBlockedWord,
+  adminFetchBlockedWords,
+  adminUpdateTestUserStatus,
+  TestUser,
+  adminDeleteTestUser,
+  adminAddTestUser,
+  adminFetchTestUsers,
 } from "@/services/adminService";
+import { useAuth } from "@/providers/AuthProvider";
+import { getBuiltInWords } from "../../src/utils/contentFilter";
+import {
+  AddTesterModal,
+  TesterMetadata,
+} from "@/components/admin/AddTesterModal";
 
-type Tab = "users" | "locations" | "reviews";
+type Tab = "users" | "locations" | "reviews" | "content";
 
 // ─── Pill badge ───────────────────────────────────────────────────────────────
 
@@ -47,16 +62,31 @@ function Badge({ label, color }: { label: string; color: string }) {
 
 // ─── Users tab ────────────────────────────────────────────────────────────────
 
+type UserListItem =
+  | (AdminUser & { itemType: "user" })
+  | (TestUser & { itemType: "tester" });
+
+type UserFilter = "all" | "user" | "admin" | "tester";
+
 function UsersTab() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [testUsers, setTestUsers] = useState<TestUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-
+  const [filter, setFilter] = useState<UserFilter>("all");
+  const [newTesterEmail, setNewTesterEmail] = useState("");
+  const [newTesterName, setNewTesterName] = useState("");
+  const [addingTester] = useState(false);
+  const [showAddTester, setShowAddTester] = useState(false);
   const load = useCallback(async () => {
     try {
-      const data = await adminFetchUsers();
-      setUsers(data);
+      const [userData, testerData] = await Promise.all([
+        adminFetchUsers(),
+        adminFetchTestUsers(),
+      ]);
+      setUsers(userData);
+      setTestUsers(testerData);
     } catch (e) {
       logger.error("Admin: fetch users", e);
       notify.error("Failed to load users");
@@ -69,6 +99,30 @@ function UsersTab() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const allItems: UserListItem[] = [
+    ...users.map((u) => ({ ...u, itemType: "user" as const })),
+    ...testUsers.map((t) => ({ ...t, itemType: "tester" as const })),
+  ];
+
+  const filtered = allItems.filter((item) => {
+    const q = search.toLowerCase();
+    const matchesSearch =
+      item.itemType === "tester"
+        ? item.email.toLowerCase().includes(q) ||
+          item.name?.toLowerCase().includes(q) ||
+          false
+        : item.username?.toLowerCase().includes(q) ||
+          item.full_name?.toLowerCase().includes(q) ||
+          item.id.toLowerCase().includes(q);
+    const matchesFilter =
+      filter === "all"
+        ? true
+        : filter === "tester"
+          ? item.itemType === "tester"
+          : item.itemType === "user" && item.role === filter;
+    return matchesSearch && matchesFilter;
+  });
 
   const handleRoleToggle = (user: AdminUser) => {
     const newRole = user.role === "admin" ? "user" : "admin";
@@ -131,14 +185,64 @@ function UsersTab() {
     );
   };
 
-  const filtered = users.filter((u) => {
-    const q = search.toLowerCase();
-    return (
-      u.username?.toLowerCase().includes(q) ||
-      u.full_name?.toLowerCase().includes(q) ||
-      u.id.toLowerCase().includes(q)
+  const handleDeleteUser = (user: AdminUser) => {
+    notify.confirm(
+      `Delete user "${user.username || user.id.slice(0, 8)}"?`,
+      "Their reviews, votes and locations will be preserved.",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => {} },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await adminDeleteUser(user.id);
+              setUsers((prev) => prev.filter((u) => u.id !== user.id));
+              notify.success("User deleted");
+            } catch (e: any) {
+              notify.error(e.message || "Failed to delete user");
+            }
+          },
+        },
+      ],
+      "warning",
     );
-  });
+  };
+
+  const handleDeleteTester = (tester: TestUser) => {
+    notify.confirm(
+      `Remove "${tester.email}"?`,
+      "They will be removed from the tester list.",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => {} },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await adminDeleteTestUser(tester.id);
+              setTestUsers((prev) => prev.filter((t) => t.id !== tester.id));
+              notify.success("Tester removed");
+            } catch (e) {
+              notify.error("Failed to remove tester");
+            }
+          },
+        },
+      ],
+      "warning",
+    );
+  };
+
+  const handleTesterStatusChange = async (tester: TestUser, status: string) => {
+    try {
+      await adminUpdateTestUserStatus(tester.id, status);
+      setTestUsers((prev) =>
+        prev.map((t) => (t.id === tester.id ? { ...t, status } : t)),
+      );
+    } catch (e) {
+      notify.error("Failed to update status");
+    }
+  };
 
   if (loading) {
     return (
@@ -149,15 +253,86 @@ function UsersTab() {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.stickyHeader}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by username or name…"
-          placeholderTextColor={theme.colors.textLight}
-          value={search}
-          onChangeText={setSearch}
-        />
-        <Text style={styles.countLabel}>{filtered.length} users</Text>
+        {/* Add tester row */}
+        <View
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexDirection: "row",
+          }}
+        >
+          <View style={{ flex: 1, height: 40 }}>
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnActive]}
+              onPress={() => setShowAddTester(true)}
+              disabled={addingTester || !newTesterEmail.trim()}
+            >
+              {addingTester ? (
+                <ActivityIndicator
+                  size={22}
+                  color={theme.colors.textOnPrimary}
+                />
+              ) : (
+                <Text
+                  style={{
+                    ...styles.actionBtnTextActive,
+                    fontSize: 16,
+                    paddingHorizontal: 0,
+                    paddingBottom: 6,
+                    paddingTop: 2,
+                  }}
+                >
+                  <Ionicons
+                    name="add"
+                    size={22}
+                    color={theme.colors.textOnPrimary}
+                  />
+                  Add Test User
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Search */}
+        <View
+          style={{
+            marginTop: 8,
+          }}
+        >
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by username, name or email…"
+            placeholderTextColor={theme.colors.textLight}
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+
+        {/* Filter chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipRow}
+        >
+          {(["all", "user", "admin", "tester"] as UserFilter[]).map((f) => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.chip, filter === f && styles.chipActive]}
+              onPress={() => setFilter(f)}
+            >
+              <Text
+                style={[styles.chipText, filter === f && styles.chipTextActive]}
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <Text style={styles.countLabel}>{filtered.length} results</Text>
       </View>
+
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -170,133 +345,158 @@ function UsersTab() {
         }
         contentContainerStyle={styles.listContent}
       >
-        {filtered.map((user) => (
-          <View key={user.id} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View style={styles.cardTitleRow}>
-                <Text style={styles.cardTitle}>
-                  {user.username || user.full_name || "—"}
-                </Text>
-                {user.role === "admin" && (
-                  <Badge label="admin" color={theme.colors.primary} />
+        {filtered.map((item) =>
+          item.itemType === "tester" ? (
+            <View key={`tester-${item.id}`} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardTitleRow}>
+                  <Text style={styles.cardTitle}>
+                    {item.name || item.email}
+                  </Text>
+                  <Badge label="tester" color={theme.colors.warning} />
+                  <Badge
+                    label={item.status.replace(/_/g, " ")}
+                    color={
+                      item.status === "signed_up"
+                        ? theme.colors.success
+                        : theme.colors.textSecondary
+                    }
+                  />
+                </View>
+                <Text style={styles.cardSubtitle}>{item.email}</Text>
+                {item.metadata && (
+                  <Text style={styles.cardMeta}>
+                    {(item.metadata as TesterMetadata).platform &&
+                      `Platform: ${(item.metadata as TesterMetadata).platform}`}
+                    {(item.metadata as TesterMetadata).source &&
+                      ` · Source: ${(item.metadata as TesterMetadata).source}`}
+                    {(item.metadata as TesterMetadata).notes &&
+                      ` · ${(item.metadata as TesterMetadata).notes}`}
+                  </Text>
                 )}
+                <Text style={styles.cardMeta}>
+                  {item.created_at
+                    ? new Date(item.created_at).toLocaleDateString()
+                    : "—"}
+                </Text>
               </View>
-              <Text style={styles.cardSubtitle} numberOfLines={1}>
-                {user.id}
-              </Text>
-              <Text style={styles.cardMeta}>
-                Reviews: {user.total_reviews ?? 0} · Joined:{" "}
-                {user.created_at
-                  ? new Date(user.created_at).toLocaleDateString()
-                  : "—"}
-              </Text>
+              <View style={styles.cardActions}>
+                {item.status === "invited" && (
+                  <TouchableOpacity
+                    style={[styles.actionBtn, styles.actionBtnOutline]}
+                    onPress={() => handleTesterStatusChange(item, "signed_up")}
+                  >
+                    <Text style={styles.actionBtnTextOutline}>→ signed_up</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.actionBtnDanger]}
+                  onPress={() => handleDeleteTester(item)}
+                >
+                  <Ionicons
+                    name="trash"
+                    size={14}
+                    color={theme.colors.textOnPrimary}
+                  />
+                  <Text
+                    style={[styles.actionBtnText, styles.actionBtnTextActive]}
+                  >
+                    Remove
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-
-            <View style={styles.cardActions}>
-              {/* Subscription toggle */}
-              <TouchableOpacity
-                style={[
-                  styles.actionBtn,
-                  user.subscription_tier === "premium"
-                    ? styles.actionBtnActive
-                    : styles.actionBtnOutline,
-                ]}
-                onPress={() => handleSubscriptionToggle(user)}
-              >
-                <Ionicons
-                  name="star"
-                  size={14}
-                  color={
-                    user.subscription_tier === "premium"
-                      ? theme.colors.textOnPrimary
-                      : theme.colors.primary
-                  }
-                />
-                <Text
+          ) : (
+            <View key={`user-${item.id}`} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardTitleRow}>
+                  <Text style={styles.cardTitle}>
+                    {item.username || item.full_name || "—"}
+                  </Text>
+                  {item.role === "admin" && (
+                    <Badge label="admin" color={theme.colors.primary} />
+                  )}
+                </View>
+                <Text style={styles.cardSubtitle} numberOfLines={1}>
+                  {item.id}
+                </Text>
+                <Text style={styles.cardMeta}>
+                  Reviews: {item.total_reviews ?? 0} · Tier:{" "}
+                  {item.subscription_tier ?? "free"}
+                </Text>
+                <Text style={styles.cardMeta}>
+                  {item.created_at
+                    ? new Date(item.created_at).toLocaleDateString()
+                    : "—"}
+                </Text>
+              </View>
+              <View style={styles.cardActions}>
+                <TouchableOpacity
                   style={[
-                    styles.actionBtnText,
-                    user.subscription_tier === "premium"
-                      ? styles.actionBtnTextActive
-                      : styles.actionBtnTextOutline,
+                    styles.actionBtn,
+                    item.role === "admin"
+                      ? styles.actionBtnOutline
+                      : styles.actionBtnActive,
                   ]}
+                  onPress={() => handleRoleToggle(item)}
                 >
-                  {user.subscription_tier === "premium" ? "Premium" : "Free"}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Role toggle */}
-              <TouchableOpacity
-                style={[
-                  styles.actionBtn,
-                  user.role === "admin"
-                    ? styles.actionBtnDanger
-                    : styles.actionBtnOutline,
-                ]}
-                onPress={() => handleRoleToggle(user)}
-              >
-                <Ionicons
-                  name="shield"
-                  size={14}
-                  color={
-                    user.role === "admin"
-                      ? theme.colors.textOnPrimary
-                      : theme.colors.textSecondary
-                  }
-                />
-                <Text
-                  style={[
-                    styles.actionBtnText,
-                    user.role === "admin"
-                      ? styles.actionBtnTextActive
-                      : styles.actionBtnTextOutline,
-                  ]}
+                  <Text
+                    style={[
+                      styles.actionBtnText,
+                      item.role === "admin"
+                        ? styles.actionBtnTextOutline
+                        : styles.actionBtnTextActive,
+                    ]}
+                  >
+                    {item.role === "admin" ? "Revoke Admin" : "Make Admin"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.actionBtnOutline]}
+                  onPress={() => handleSubscriptionToggle(item)}
                 >
-                  {user.role === "admin" ? "Revoke Admin" : "Make Admin"}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionBtnDanger]}
-                onPress={() => {
-                  notify.confirm(
-                    `Delete user "${user.username || user.id.slice(0, 8)}"?`,
-                    "Their reviews, votes and locations will be preserved.",
-                    [
-                      { text: "Cancel", style: "cancel", onPress: () => {} },
-                      {
-                        text: "Delete",
-                        style: "destructive",
-                        onPress: async () => {
-                          try {
-                            await adminDeleteUser(user.id);
-                            setUsers((prev) =>
-                              prev.filter((u) => u.id !== user.id),
-                            );
-                            notify.success("User deleted");
-                          } catch (e: any) {
-                            notify.error(e.message || "Failed to delete user");
-                          }
-                        },
-                      },
-                    ],
-                    "warning",
-                  );
-                }}
-              >
-                <Ionicons
-                  name="trash"
-                  size={14}
-                  color={theme.colors.textOnPrimary}
-                />
-                <Text
-                  style={[styles.actionBtnText, styles.actionBtnTextActive]}
+                  <Ionicons
+                    name={
+                      item.subscription_tier === "premium"
+                        ? "star-outline"
+                        : "star"
+                    }
+                    size={14}
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.actionBtnTextOutline}>
+                    {item.subscription_tier === "premium" ? "free" : "premium"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.actionBtnDanger]}
+                  onPress={() => handleDeleteUser(item)}
                 >
-                  Delete
-                </Text>
-              </TouchableOpacity>
+                  <Ionicons
+                    name="trash"
+                    size={14}
+                    color={theme.colors.textOnPrimary}
+                  />
+                  <Text
+                    style={[styles.actionBtnText, styles.actionBtnTextActive]}
+                  >
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          ),
+        )}
       </ScrollView>
+      <AddTesterModal
+        visible={showAddTester}
+        onClose={() => setShowAddTester(false)}
+        onAdd={async (params) => {
+          const newTester = await adminAddTestUser(params);
+          setTestUsers((prev) => [...prev, newTester]);
+          notify.success("Tester added");
+        }}
+      />
     </View>
   );
 }
@@ -381,6 +581,7 @@ function LocationsTab() {
     <View style={{ flex: 1 }}>
       <View style={styles.stickyHeader}>
         <TextInput
+          filtered={false}
           style={styles.searchInput}
           placeholder="Search by name or city…"
           placeholderTextColor={theme.colors.textLight}
@@ -568,6 +769,7 @@ function ReviewsTab() {
     <View style={{ flex: 1 }}>
       <View style={styles.stickyHeader}>
         <TextInput
+          filtered={false}
           style={styles.searchInput}
           placeholder="Search by location, user or comment…"
           placeholderTextColor={theme.colors.textLight}
@@ -677,6 +879,185 @@ function ReviewsTab() {
   );
 }
 
+// ─── Content tab ─────────────────────────────────────────────────────────────
+
+function ContentTab() {
+  const { user } = useAuth();
+  const [words, setWords] = useState<BlockedWord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newWord, setNewWord] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [search, setSearch] = useState("");
+  const [builtInWords] = useState<string[]>(() => getBuiltInWords());
+
+  const load = useCallback(async () => {
+    try {
+      const data = await adminFetchBlockedWords();
+      setWords(data);
+    } catch (e) {
+      logger.error("Admin: fetch blocked words", e);
+      notify.error("Failed to load blocked words");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleAdd = async () => {
+    const trimmed = newWord.trim().toLowerCase();
+    if (!trimmed || !user?.id) return;
+    if (words.some((w) => w.word === trimmed)) {
+      notify.error(`"${trimmed}" is already in your custom list`);
+      return;
+    }
+    if (builtInWords.includes(trimmed)) {
+      notify.error(`"${trimmed}" is already covered by the built-in filter`);
+      return;
+    }
+    setAdding(true);
+    try {
+      const added = await adminAddBlockedWord(trimmed, user.id);
+      setWords((prev) => [added, ...prev]);
+      setNewWord("");
+      notify.success(`"${trimmed}" added`);
+    } catch (e) {
+      notify.error("Failed to add word");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleDelete = (word: BlockedWord) => {
+    notify.confirm(
+      `Remove "${word.word}"?`,
+      "This word will no longer be filtered.",
+      [
+        { text: "Cancel", style: "cancel", onPress: () => {} },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await adminDeleteBlockedWord(word.id);
+              setWords((prev) => prev.filter((w) => w.id !== word.id));
+              notify.success(`"${word.word}" removed`);
+            } catch (e) {
+              notify.error("Failed to remove word");
+            }
+          },
+        },
+      ],
+      "warning",
+    );
+  };
+
+  const filteredCustom = search
+    ? words.filter((w) => w.word.includes(search.toLowerCase()))
+    : words;
+
+  const filteredBuiltIn = search
+    ? builtInWords.filter((w) => w.includes(search.toLowerCase()))
+    : builtInWords;
+
+  if (loading) {
+    return (
+      <ActivityIndicator style={styles.centered} color={theme.colors.primary} />
+    );
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* Search */}
+      <View style={styles.stickyHeader}>
+        <TextInput
+          filtered={false}
+          style={styles.searchInput}
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search words..."
+          placeholderTextColor={theme.colors.textSecondary}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        <View style={{ flexDirection: "row", gap: theme.spacing.sm }}>
+          <TextInput
+            style={[styles.searchInput, { flex: 1, marginBottom: 0 }]}
+            value={newWord}
+            onChangeText={setNewWord}
+            placeholder="Add a word to block..."
+            placeholderTextColor={theme.colors.textSecondary}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <TouchableOpacity
+            style={[
+              styles.actionBtn,
+              styles.actionBtnActive,
+              { alignSelf: "center" },
+            ]}
+            onPress={handleAdd}
+            disabled={adding || !newWord.trim()}
+          >
+            {adding ? (
+              <ActivityIndicator
+                size="small"
+                color={theme.colors.textOnPrimary}
+              />
+            ) : (
+              <Ionicons
+                name="add"
+                size={18}
+                color={theme.colors.textOnPrimary}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.listContent}>
+        {/* Custom words */}
+        <Text style={styles.countLabel}>Custom ({filteredCustom.length})</Text>
+        {filteredCustom.map((word) => (
+          <View key={word.id} style={styles.card}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardTitle}>{word.word}</Text>
+              <Text style={styles.cardMeta}>
+                {word.created_at
+                  ? new Date(word.created_at).toLocaleDateString()
+                  : "—"}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnDanger]}
+              onPress={() => handleDelete(word)}
+            >
+              <Ionicons
+                name="trash"
+                size={14}
+                color={theme.colors.textOnPrimary}
+              />
+            </TouchableOpacity>
+          </View>
+        ))}
+
+        {/* Built-in words */}
+        <Text style={[styles.countLabel, { marginTop: theme.spacing.md }]}>
+          Built-in ({filteredBuiltIn.length})
+        </Text>
+        {filteredBuiltIn.map((word, i) => (
+          <View key={i} style={[styles.card, { opacity: 0.5 }]}>
+            <Text style={styles.cardTitle}>{word}</Text>
+            <Badge label="built-in" color={theme.colors.textSecondary} />
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function AdminScreen() {
@@ -713,7 +1094,7 @@ export default function AdminScreen() {
 
       {/* Tab bar */}
       <View style={styles.tabBar}>
-        {(["users", "locations", "reviews"] as Tab[]).map((tab) => (
+        {(["users", "locations", "reviews", "content"] as Tab[]).map((tab) => (
           <TouchableOpacity
             key={tab}
             style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
@@ -736,6 +1117,7 @@ export default function AdminScreen() {
         {activeTab === "users" && <UsersTab />}
         {activeTab === "locations" && <LocationsTab />}
         {activeTab === "reviews" && <ReviewsTab />}
+        {activeTab === "content" && <ContentTab />}
       </View>
     </SafeAreaView>
   );
