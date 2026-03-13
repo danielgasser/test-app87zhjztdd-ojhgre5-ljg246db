@@ -17,8 +17,8 @@ export interface AdminUser {
     total_reviews: number | null;
     created_at: string | null;
     email?: string; // joined from auth.users via RPC
+    is_protected?: boolean;
 }
-
 export interface AdminLocation {
     id: string;
     name: string;

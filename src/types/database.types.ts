@@ -803,6 +803,7 @@ export type Database = {
           gender: string | null
           helpful_votes: number | null
           id: string
+          is_protected: boolean | null
           lgbtq_status: boolean | null
           notification_preferences: Json | null
           preferences: Json | null
@@ -827,6 +828,7 @@ export type Database = {
           gender?: string | null
           helpful_votes?: number | null
           id: string
+          is_protected?: boolean | null
           lgbtq_status?: boolean | null
           notification_preferences?: Json | null
           preferences?: Json | null
@@ -851,6 +853,7 @@ export type Database = {
           gender?: string | null
           helpful_votes?: number | null
           id?: string
+          is_protected?: boolean | null
           lgbtq_status?: boolean | null
           notification_preferences?: Json | null
           preferences?: Json | null

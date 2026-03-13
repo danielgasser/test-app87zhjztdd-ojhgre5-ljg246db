@@ -422,26 +422,28 @@ function UsersTab() {
                 </Text>
               </View>
               <View style={adminStyles.cardActions}>
-                <TouchableOpacity
-                  style={[
-                    adminStyles.actionBtn,
-                    item.role === "admin"
-                      ? adminStyles.actionBtnOutline
-                      : adminStyles.actionBtnActive,
-                  ]}
-                  onPress={() => handleRoleToggle(item)}
-                >
-                  <Text
+                {!item.is_protected && (
+                  <TouchableOpacity
                     style={[
-                      adminStyles.actionBtnText,
+                      adminStyles.actionBtn,
                       item.role === "admin"
-                        ? adminStyles.actionBtnTextOutline
-                        : adminStyles.actionBtnTextActive,
+                        ? adminStyles.actionBtnOutline
+                        : adminStyles.actionBtnActive,
                     ]}
+                    onPress={() => handleRoleToggle(item)}
                   >
-                    {item.role === "admin" ? "Revoke Admin" : "Make Admin"}
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={[
+                        adminStyles.actionBtnText,
+                        item.role === "admin"
+                          ? adminStyles.actionBtnTextOutline
+                          : adminStyles.actionBtnTextActive,
+                      ]}
+                    >
+                      {item.role === "admin" ? "Revoke Admin" : "Make Admin"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
                   style={[adminStyles.actionBtn, adminStyles.actionBtnOutline]}
                   onPress={() => handleSubscriptionToggle(item)}
