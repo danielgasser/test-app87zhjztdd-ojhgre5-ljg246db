@@ -73,6 +73,10 @@ export const commonStyles = StyleSheet.create({
   },
   backButton: {
     padding: theme.spacing.sm,
+
+  },
+  backButtonText: {
+    color: theme.colors.primary,
   },
   cancelButton: {
     flex: 1,

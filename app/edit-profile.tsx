@@ -202,8 +202,15 @@ export default function EditProfileScreen() {
       >
         {/* Header */}
         <View style={commonStyles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={commonStyles.backButton}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={28}
+              style={commonStyles.backButtonText}
+            />
           </TouchableOpacity>
           <Text style={commonStyles.headerTitle}>Edit Profile</Text>
           <View style={{ width: 24 }} />

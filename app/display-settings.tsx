@@ -27,12 +27,12 @@ export default function DisplaySettings() {
   const { user } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
   const userCountry = useAppSelector(
-    (state: any) => state.locations.userCountry
+    (state: any) => state.locations.userCountry,
   );
 
   const [timeFormat, setTimeFormat] = useState<"12h" | "24h">("12h");
   const [distanceUnit, setDistanceUnit] = useState<"metric" | "imperial">(
-    "metric"
+    "metric",
   );
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
@@ -64,7 +64,7 @@ export default function DisplaySettings() {
         updateUserProfile({
           userId: user.id,
           profileData: { notification_preferences: updatedPrefs },
-        })
+        }),
       ).unwrap();
 
       notify.success("Preference saved");
@@ -90,12 +90,12 @@ export default function DisplaySettings() {
       <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={[commonStyles.primaryButton, commonStyles.backButton]}
+          style={[commonStyles.backButton]}
         >
           <MaterialIcons
             name="arrow-back"
-            size={24}
-            color={theme.colors.textOnPrimary}
+            size={28}
+            style={commonStyles.backButtonText}
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>Display Preferences</Text>

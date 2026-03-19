@@ -264,11 +264,14 @@ export default function ReviewScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View>
             <View style={commonStyles.header}>
-              <TouchableOpacity onPress={() => router.back()}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={commonStyles.backButton}
+              >
                 <Ionicons
                   name="arrow-back"
-                  size={24}
-                  color={theme.colors.text}
+                  size={28}
+                  style={commonStyles.backButtonText}
                 />
               </TouchableOpacity>
               <Text style={commonStyles.headerTitle}>Write a Review</Text>

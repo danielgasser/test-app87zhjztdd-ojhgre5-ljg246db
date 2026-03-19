@@ -57,7 +57,7 @@ export default function NotificationSettings() {
 
   const saveNotificationPreference = async (
     field: string,
-    value: boolean | string
+    value: boolean | string,
   ) => {
     if (!user) return;
     try {
@@ -70,7 +70,7 @@ export default function NotificationSettings() {
         updateUserProfile({
           userId: user.id,
           profileData: { notification_preferences: updatedPrefs },
-        })
+        }),
       ).unwrap();
     } catch (error) {
       notify.error("Failed to save setting. Please try again.");
@@ -94,12 +94,12 @@ export default function NotificationSettings() {
       <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={[commonStyles.primaryButton, commonStyles.backButton]}
+          style={[commonStyles.backButton]}
         >
           <MaterialIcons
             name="arrow-back"
-            size={24}
-            color={theme.colors.textOnPrimary}
+            size={28}
+            style={commonStyles.backButtonText}
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>Notifications</Text>
@@ -141,7 +141,7 @@ export default function NotificationSettings() {
                   feature: "locationTriggers",
                   description:
                     "Get notified when you're near highly-rated safe spots for your demographics.",
-                })
+                }),
               );
               return;
             }

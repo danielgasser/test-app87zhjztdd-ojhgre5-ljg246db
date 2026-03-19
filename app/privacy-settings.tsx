@@ -318,12 +318,12 @@ export default function PrivacySettings() {
       <View style={commonStyles.header}>
         <TouchableOpacity
           onPress={() => router.back()}
-          style={[commonStyles.primaryButton, commonStyles.backButton]}
+          style={[commonStyles.backButton]}
         >
           <MaterialIcons
             name="arrow-back"
-            size={24}
-            color={theme.colors.textOnPrimary}
+            size={28}
+            style={commonStyles.backButtonText}
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>Privacy Settings</Text>
