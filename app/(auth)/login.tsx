@@ -217,7 +217,7 @@ export default function LoginScreen() {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder={t("auth.password")}
+                  placeholder={t("common.password")}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -310,7 +310,7 @@ export default function LoginScreen() {
                 <Link href="/(auth)/register" asChild>
                   <TouchableOpacity>
                     <Text style={commonStyles.textPrimaryLink}>
-                      {t("auth.sign_up")}
+                      {t("common.sign_up")}
                     </Text>
                   </TouchableOpacity>
                 </Link>

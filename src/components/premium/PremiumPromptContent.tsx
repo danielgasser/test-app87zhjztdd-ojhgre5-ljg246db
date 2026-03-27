@@ -39,7 +39,7 @@ export function PremiumPromptContent({
       <View style={premiumStyles.buttons}>
         <TouchableOpacity style={premiumStyles.cancelButton} onPress={onClose}>
           <Text style={premiumStyles.cancelButtonText}>
-            {t("premium.not_now")}
+            {t("common.not_now")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -48,7 +48,7 @@ export function PremiumPromptContent({
         >
           <Ionicons name="star" size={16} color={theme.colors.background} />
           <Text style={premiumStyles.upgradeButtonText}>
-            {t("premium.upgrade")}
+            {t("common.upgrade")}
           </Text>
         </TouchableOpacity>
       </View>

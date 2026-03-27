@@ -120,7 +120,7 @@ export default function AuthCallback() {
           padding: 10,
         }}
       >
-        <Text style={commonStyles.primaryButtonText}>{t("auth.sign_out")}</Text>
+        <Text style={commonStyles.primaryButtonText}>{t("common.sign_out")}</Text>
       </TouchableOpacity>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.statusText}>{status}</Text>

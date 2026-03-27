@@ -405,7 +405,7 @@ export default function ProfileScreen() {
             style={styles.signInButton}
             onPress={() => router.push("/(auth)/login")}
           >
-            <Text style={styles.signInButtonText}>{t('profile.sign_in')}</Text>
+            <Text style={styles.signInButtonText}>{t('common.sign_in')}</Text>
           </TouchableOpacity>
         </View>
       ) : !hasCompletedOnboarding ? (
@@ -444,7 +444,7 @@ export default function ProfileScreen() {
                 />
                 <View style={styles.upgradeBannerText}>
                   <Text style={styles.upgradeBannerTitle}>
-                    {t('profile.upgrade_to_premium')}</Text>
+                    {t('common.upgrade_to_premium')}</Text>
                   <Text style={styles.upgradeBannerSubtitle}>
                     {t('profile.unlock_all_features_go_adfree')}</Text>
                 </View>
@@ -590,11 +590,11 @@ export default function ProfileScreen() {
                             <Text style={styles.routeHistoryMetaText}>
                               {route.distance_km.toFixed(1)} km
                             </Text>
-                            <Text style={styles.routeHistoryMetaText}>{t('profile.unknown')}</Text>
+                            <Text style={styles.routeHistoryMetaText}>{t('common.unknown')}</Text>
                             <Text style={styles.routeHistoryMetaText}>
                               {route.duration_minutes} min
                             </Text>
-                            <Text style={styles.routeHistoryMetaText}>{t('profile.unknown')}</Text>
+                            <Text style={styles.routeHistoryMetaText}>{t('common.unknown')}</Text>
                             <Text style={styles.routeHistoryMetaText}>
                               Safety: {route.safety_score?.toFixed(1) || "N/A"}
                             </Text>
@@ -817,7 +817,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.settingText}>{t('profile.privacy_settings')}</Text>
+                <Text style={styles.settingText}>{t('common.privacy_settings')}</Text>
                 <Ionicons
                   name="chevron-forward"
                   size={24}
@@ -834,7 +834,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.settingText}>{t('profile.notifications')}</Text>
+                <Text style={styles.settingText}>{t('common.notifications')}</Text>
                 <Ionicons
                   name="chevron-forward"
                   size={24}
@@ -850,7 +850,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.settingText}>{t('profile.display_preferences')}</Text>
+                <Text style={styles.settingText}>{t('common.display_preferences')}</Text>
                 <Ionicons
                   name="chevron-forward"
                   size={24}
@@ -877,7 +877,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.accountText}>{t('profile.edit_profile')}</Text>
+                <Text style={styles.accountText}>{t('common.edit_profile')}</Text>
               </TouchableOpacity>
 
               {profile?.avatar_url && (
@@ -902,7 +902,7 @@ export default function ProfileScreen() {
                     size={24}
                     color={theme.colors.primary}
                   />
-                  <Text style={styles.accountText}>{t('profile.admin_panel')}</Text>
+                  <Text style={styles.accountText}>{t('common.admin_panel')}</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
@@ -914,7 +914,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.accountText}>{t('profile.sign_out')}</Text>
+                <Text style={styles.accountText}>{t('common.sign_out')}</Text>
               </TouchableOpacity>
             </CollapsibleSection>
           </ScrollView>

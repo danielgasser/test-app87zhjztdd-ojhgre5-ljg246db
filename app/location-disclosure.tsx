@@ -63,7 +63,7 @@ export default function LocationDisclosureScreen() {
       // NavigationController will handle routing to onboarding
     } catch (error) {
       logger.error("Failed to save location disclosure:", error);
-      notify.error(t("legal.something_went_wrong_please_try_again"));
+      notify.error(t("common.something_went_wrong_please_try_again"));
     } finally {
       setIsLoading(false);
     }
@@ -158,7 +158,7 @@ export default function LocationDisclosureScreen() {
             <ActivityIndicator color={theme.colors.textOnPrimary} />
           ) : (
             <Text style={commonStyles.primaryButtonText}>
-              {t("legal.continue")}
+              {t("common.continue")}
             </Text>
           )}
         </TouchableOpacity>

@@ -216,7 +216,7 @@ export default function EditProfileScreen() {
             />
           </TouchableOpacity>
           <Text style={commonStyles.headerTitle}>
-            {t("settings.edit_profile")}
+            {t("common.edit_profile")}
           </Text>
           <View style={{ width: 24 }} />
         </View>
@@ -249,7 +249,7 @@ export default function EditProfileScreen() {
               style={commonStyles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder={t("settings.enter_your_name_or_a_nickname")}
+              placeholder={t("common.enter_your_name_or_a_nickname")}
               placeholderTextColor={theme.colors.textSecondary}
               autoCapitalize="words"
             />
@@ -275,7 +275,7 @@ export default function EditProfileScreen() {
           {!isOAuthUser && (
             <View style={styles.section}>
               <Text style={commonStyles.sectionTitle}>
-                {t("settings.email_address")}
+                {t("common.email_address")}
               </Text>
               <Text style={styles.helperText}>
                 {t('settings.youll_need_to_confirm_the_your_new')}</Text>
@@ -283,7 +283,7 @@ export default function EditProfileScreen() {
                 style={commonStyles.input}
                 value={email}
                 onChangeText={setEmail}
-                placeholder={t("settings.enter_your_email")}
+                placeholder={t("common.enter_your_email")}
                 placeholderTextColor={theme.colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -311,7 +311,7 @@ export default function EditProfileScreen() {
           {isOAuthUser && (
             <View style={styles.section}>
               <Text style={commonStyles.sectionTitle}>
-                {t("settings.email_address")}
+                {t("common.email_address")}
               </Text>
               <View style={styles.oauthInfoBox}>
                 <Ionicons
@@ -363,7 +363,7 @@ export default function EditProfileScreen() {
                 style={commonStyles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder={t("settings.confirm_new_password")}
+                placeholder={t("common.confirm_new_password")}
                 placeholderTextColor={theme.colors.textSecondary}
                 secureTextEntry
                 autoComplete="new-password"
@@ -391,7 +391,7 @@ export default function EditProfileScreen() {
           {isOAuthUser && (
             <View style={styles.section}>
               <Text style={commonStyles.sectionTitle}>
-                {t("settings.password")}
+                {t("common.password")}
               </Text>
               <View style={styles.oauthInfoBox}>
                 <Ionicons

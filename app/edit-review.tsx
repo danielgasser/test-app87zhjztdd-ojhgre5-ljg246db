@@ -54,7 +54,7 @@ const RatingInput: React.FC<RatingProps> = ({
         {label}{" "}
         {required && (
           <Text style={commonStyles.requiredAsterisk}>
-            {t("review.unknown")}
+            {t("common.unknown")}
           </Text>
         )}
       </Text>
@@ -282,7 +282,7 @@ export default function EditReviewScreen() {
             onPress={() => router.back()}
           >
             <Text style={commonStyles.primaryButtonText}>
-              {t("review.go_back")}
+              {t("common.go_back")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -306,7 +306,7 @@ export default function EditReviewScreen() {
                 <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
               <Text style={commonStyles.headerTitle}>
-                {t("review.edit_review")}
+                {t("common.edit_review")}
               </Text>
               <View style={{ width: 24 }} />
             </View>
@@ -317,7 +317,7 @@ export default function EditReviewScreen() {
                 <Text style={commonStyles.formLabel}>
                   Review Title{" "}
                   <Text style={commonStyles.requiredAsterisk}>
-                    {t("review.unknown")}
+                    {t("common.unknown")}
                   </Text>
                 </Text>
                 <TextInput
@@ -380,7 +380,7 @@ export default function EditReviewScreen() {
                 <Text style={commonStyles.formLabel}>
                   Your Review{" "}
                   <Text style={commonStyles.requiredAsterisk}>
-                    {t("review.unknown")}
+                    {t("common.unknown")}
                   </Text>
                 </Text>
                 <TextInput
@@ -554,7 +554,7 @@ export default function EditReviewScreen() {
                         onPress={() => setShowVisitTypePicker(false)}
                       >
                         <Text style={commonStyles.modalDone}>
-                          {t("review.done")}
+                          {t("common.done")}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -586,7 +586,7 @@ export default function EditReviewScreen() {
                   onPress={handleCancel}
                 >
                   <Text style={commonStyles.cancelButtonText}>
-                    {t("review.cancel")}
+                    {t("common.cancel")}
                   </Text>
                 </TouchableOpacity>
 

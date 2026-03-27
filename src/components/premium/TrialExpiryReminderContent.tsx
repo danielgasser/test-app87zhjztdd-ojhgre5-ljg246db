@@ -53,7 +53,7 @@ export function TrialExpiryReminderContent({
       <View style={premiumStyles.buttons}>
         <TouchableOpacity style={premiumStyles.cancelButton} onPress={onClose}>
           <Text style={premiumStyles.cancelButtonText}>
-            {t("premium.dismiss")}
+            {t("common.dismiss")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -61,7 +61,7 @@ export function TrialExpiryReminderContent({
           onPress={onUpgrade}
         >
           <Text style={premiumStyles.upgradeButtonText}>
-            {t("premium.upgrade")}
+            {t("common.upgrade")}
           </Text>
         </TouchableOpacity>
       </View>

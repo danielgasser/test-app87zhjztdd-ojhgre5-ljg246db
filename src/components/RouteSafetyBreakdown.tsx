@@ -100,7 +100,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                       { backgroundColor: theme.colors.success },
                     ]}
                   />
-                  <Text style={styles.statLabel}>{t("navigation.safe")}</Text>
+                  <Text style={styles.statLabel}>{t("common.safe")}</Text>
                 </View>
               </View>
               <View style={styles.statItem}>
@@ -125,7 +125,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                     ]}
                   />
                   <Text style={styles.statLabel}>
-                    {t("navigation.caution")}
+                    {t("common.caution")}
                   </Text>
                 </View>
               </View>

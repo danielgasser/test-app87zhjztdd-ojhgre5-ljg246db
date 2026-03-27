@@ -101,11 +101,11 @@ export default function ForgotPasswordScreen() {
                 {/* Email Input */}
                 <View style={styles.form}>
                   <Text style={commonStyles.formLabel}>
-                    {t("auth.email_address")}
+                    {t("common.email_address")}
                   </Text>
                   <TextInput
                     style={commonStyles.input}
-                    placeholder={t("auth.enter_your_email")}
+                    placeholder={t("common.enter_your_email")}
                     placeholderTextColor={theme.colors.textSecondary}
                     value={email}
                     onChangeText={setEmail}

@@ -53,7 +53,7 @@ const RatingInput: React.FC<RatingProps> = ({
         {label}{" "}
         {required && (
           <Text style={commonStyles.requiredAsterisk}>
-            {t("review.unknown")}
+            {t("common.unknown")}
           </Text>
         )}
       </Text>
@@ -285,7 +285,7 @@ export default function ReviewScreen() {
                 />
               </TouchableOpacity>
               <Text style={commonStyles.headerTitle}>
-                {t("review.write_a_review")}
+                {t("common.write_a_review")}
               </Text>
               <View style={{ width: 24 }} />
             </View>
@@ -303,7 +303,7 @@ export default function ReviewScreen() {
                   <Text style={commonStyles.formLabel}>
                     📍 What is this place called?
                     <Text style={commonStyles.requiredAsterisk}>
-                      {t("review.unknown")}
+                      {t("common.unknown")}
                     </Text>
                   </Text>
                   <TextInput
@@ -326,7 +326,7 @@ export default function ReviewScreen() {
                 <Text style={commonStyles.formLabel}>
                   Review Title{" "}
                   <Text style={commonStyles.requiredAsterisk}>
-                    {t("review.unknown")}
+                    {t("common.unknown")}
                   </Text>
                 </Text>
                 <TextInput
@@ -383,7 +383,7 @@ export default function ReviewScreen() {
                 <Text style={commonStyles.formLabel}>
                   Your Review{" "}
                   <Text style={commonStyles.requiredAsterisk}>
-                    {t("review.unknown")}
+                    {t("common.unknown")}
                   </Text>
                 </Text>
                 <TextInput
@@ -533,7 +533,7 @@ export default function ReviewScreen() {
                         onPress={() => setShowVisitTypePicker(false)}
                       >
                         <Text style={commonStyles.modalDone}>
-                          {t("review.done")}
+                          {t("common.done")}
                         </Text>
                       </TouchableOpacity>
                     </View>

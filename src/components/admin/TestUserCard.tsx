@@ -77,7 +77,7 @@ export function TestUserCard({
           <Text
             style={[adminStyles.actionBtnText, adminStyles.actionBtnTextActive]}
           >
-            {t('admin.remove')}</Text>
+            {t('common.remove')}</Text>
         </TouchableOpacity>
       </View>
     </View>

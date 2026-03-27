@@ -37,7 +37,7 @@ export function RewardSuccessContent({
         {`Active until ${formatDateTime(expiresAt, timeFormat)}`}
       </Text>
       <TouchableOpacity style={premiumStyles.okButton} onPress={onClose}>
-        <Text style={premiumStyles.okButtonText}>{t("premium.ok")}</Text>
+        <Text style={premiumStyles.okButtonText}>{t("common.ok")}</Text>
       </TouchableOpacity>
     </>
   );

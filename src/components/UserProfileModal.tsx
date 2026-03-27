@@ -163,7 +163,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Text style={commonStyles.loadingText}>
-                  {t("profile.loading_profile")}
+                  {t("common.loading_profile")}
                 </Text>
               </View>
             ) : publicProfileError ? (
@@ -179,7 +179,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   onPress={onClose}
                 >
                   <Text style={commonStyles.primaryButtonText}>
-                    {t("profile.close")}
+                    {t("common.close")}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -230,7 +230,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <Text style={styles.statNumber}>
                       {publicProfile.total_reviews}
                     </Text>
-                    <Text style={styles.statLabel}>{t("profile.reviews")}</Text>
+                    <Text style={styles.statLabel}>{t("common.reviews")}</Text>
                   </View>
                 </View>
 
@@ -240,7 +240,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {/* Reviews section will be added in next step */}
                 <View style={styles.section}>
                   <Text style={commonStyles.sectionTitle}>
-                    {t("profile.recent_reviews")}
+                    {t("common.recent_reviews")}
                   </Text>
                   {renderReviews()}
                 </View>

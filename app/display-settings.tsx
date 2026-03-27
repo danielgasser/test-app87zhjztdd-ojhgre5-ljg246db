@@ -102,7 +102,7 @@ export default function DisplaySettings() {
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>
-          {t("settings.display_preferences")}
+          {t("common.display_preferences")}
         </Text>
         <View style={commonStyles.headerPlaceholder} />
       </View>

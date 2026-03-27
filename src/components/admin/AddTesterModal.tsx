@@ -130,7 +130,7 @@ export function AddTesterModal({
                     style={commonStyles.input}
                     value={name}
                     onChangeText={setName}
-                    placeholder={t("admin.optional")}
+                    placeholder={t("common.optional")}
                     placeholderTextColor={theme.colors.textLight}
                   />
                 </View>
@@ -186,7 +186,7 @@ export function AddTesterModal({
                     ]}
                     value={notes}
                     onChangeText={setNotes}
-                    placeholder={t("admin.optional")}
+                    placeholder={t("common.optional")}
                     placeholderTextColor={theme.colors.textLight}
                     multiline
                   />
@@ -199,7 +199,7 @@ export function AddTesterModal({
                   onPress={handleClose}
                 >
                   <Text style={commonStyles.cancelButtonText}>
-                    {t("admin.cancel")}
+                    {t("common.cancel")}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity

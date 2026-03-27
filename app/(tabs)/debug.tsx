@@ -146,7 +146,7 @@ export default function DebugScreen() {
               />
             </View>
           ) : (
-            <Text style={commonStyles.loadingText}>{t("debug.loading")}</Text>
+            <Text style={commonStyles.loadingText}>{t("common.loading")}</Text>
           )}
         </View>
 

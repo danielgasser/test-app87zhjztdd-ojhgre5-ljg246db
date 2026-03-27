@@ -811,7 +811,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             </Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>{t("navigation.distance")}</Text>
+            <Text style={styles.statLabel}>{t("common.distance")}</Text>
             <Text style={styles.statValue}>
               {formatDistance(remainingDistance, distanceUnit)}
             </Text>

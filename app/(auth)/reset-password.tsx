@@ -189,7 +189,7 @@ export default function ResetPasswordScreen() {
                   <View style={styles.passwordContainer}>
                     <TextInput
                       style={styles.passwordInput}
-                      placeholder={t("auth.confirm_new_password")}
+                      placeholder={t("common.confirm_new_password")}
                       placeholderTextColor={theme.colors.textSecondary}
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}

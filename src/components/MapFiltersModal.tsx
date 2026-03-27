@@ -224,7 +224,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
             {/* Review Filters */}
             <View style={styles.section}>
-              <Text style={styles.specSectionTitle}>{t("map.reviews")}</Text>
+              <Text style={styles.specSectionTitle}>{t("common.reviews")}</Text>
 
               <TouchableOpacity
                 style={styles.toggleRow}
@@ -405,7 +405,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
                   !hasActiveFilters && styles.resetButtonTextDisabled,
                 ]}
               >
-                {t('map.reset')}</Text>
+                {t('common.reset')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.applyButton} onPress={handleApply}>

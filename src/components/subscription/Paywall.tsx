@@ -125,7 +125,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             color={theme.colors.primary}
           />
         </View>
-        <Text style={styles.title}>{t("premium.upgrade_to_premium")}</Text>
+        <Text style={styles.title}>{t("common.upgrade_to_premium")}</Text>
         <Text style={styles.subtitle}>
           {t('premium.unlock_all_features_and_travel_with')}</Text>
       </View>
@@ -213,9 +213,9 @@ export const Paywall: React.FC<PaywallProps> = ({
         <TouchableOpacity
           onPress={() => Linking.openURL("https://truguide.app/privacy-policy")}
         >
-          <Text style={styles.linkText}>{t("premium.privacy_policy")}</Text>
+          <Text style={styles.linkText}>{t("common.privacy_policy")}</Text>
         </TouchableOpacity>
-        <Text style={styles.legalText}>{t("premium.unknown")}</Text>
+        <Text style={styles.legalText}>{t("common.unknown")}</Text>
         <TouchableOpacity
           onPress={() =>
             Linking.openURL(
@@ -223,7 +223,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             )
           }
         >
-          <Text style={styles.linkText}>{t("premium.terms_of_use")}</Text>
+          <Text style={styles.linkText}>{t("common.terms_of_use")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -50,7 +50,7 @@ export default function LegalAcceptanceScreen() {
       await refreshOnboardingStatus();
     } catch (error) {
       logger.error("Failed to save terms acceptance:", error);
-      notify.error(t("legal.something_went_wrong_please_try_again"));
+      notify.error(t("common.something_went_wrong_please_try_again"));
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +154,7 @@ export default function LegalAcceptanceScreen() {
             <ActivityIndicator color={theme.colors.textOnPrimary} />
           ) : (
             <Text style={commonStyles.primaryButtonText}>
-              {t("legal.continue")}
+              {t("common.continue")}
             </Text>
           )}
         </TouchableOpacity>
@@ -165,7 +165,7 @@ export default function LegalAcceptanceScreen() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showPrivacy}
         onClose={() => setShowPrivacy(false)}
-        title={t("legal.privacy_policy")}
+        title={t("common.privacy_policy")}
       />
 
       <IubendaDocument
@@ -173,7 +173,7 @@ export default function LegalAcceptanceScreen() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showTerms}
         onClose={() => setShowTerms(false)}
-        title={t("legal.terms_of_service")}
+        title={t("common.terms_of_service")}
       />
     </SafeAreaView>
   );

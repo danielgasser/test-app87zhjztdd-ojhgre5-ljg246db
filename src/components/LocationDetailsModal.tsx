@@ -708,7 +708,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     color={theme.colors.card}
                   />
                   <Text style={styles.writeReviewText}>
-                    {t("map.write_a_review")}
+                    {t("common.write_a_review")}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -757,7 +757,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               {(selectedLocation || reviews.length > 0) && (
                 <View style={styles.reviewsSection}>
                   <Text style={commonStyles.sectionTitle}>
-                    {t("map.recent_reviews")}
+                    {t("common.recent_reviews")}
                   </Text>
 
                   {loadingReviews ? (
@@ -791,7 +791,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                                 color={theme.colors.card}
                               />
                               <Text style={styles.editButtonText}>
-                                {t('map.edit_review')}</Text>
+                                {t('common.edit_review')}</Text>
                             </TouchableOpacity>
                           )}
                         <View style={styles.reviewHeader}>
@@ -814,7 +814,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                               </TouchableOpacity>
                             ) : (
                               <Text style={styles.reviewerName}>
-                                {t("map.anonymous")}
+                                {t("common.anonymous")}
                               </Text>
                             )}
                             {renderDemographics(review.user_profiles)}

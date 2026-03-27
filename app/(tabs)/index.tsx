@@ -1828,7 +1828,7 @@ export default function MapScreen() {
                   distanceUnit,
                 )}
               </Text>
-              <Text style={styles.statLabel}>{t("map.distance")}</Text>
+              <Text style={styles.statLabel}>{t("common.distance")}</Text>
             </View>
           </View>
 

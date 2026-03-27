@@ -533,7 +533,7 @@ export default function OnboardingScreen() {
       <Text style={styles.stepTitle}>
         What's your name?{" "}
         <Text style={commonStyles.requiredAsterisk}>
-          {t("onboarding.unknown_1")}
+          {t("common.unknown")}
         </Text>
       </Text>
       <Text style={styles.stepDescription}>
@@ -542,7 +542,7 @@ export default function OnboardingScreen() {
         {t('onboarding.help_others_recognise_your_profile_and')}</Text>
       <TextInput
         style={styles.nameInput}
-        placeholder={t("onboarding.enter_your_name_or_a_nickname")}
+        placeholder={t("common.enter_your_name_or_a_nickname")}
         value={formData.full_name}
         onChangeText={(text) => setFormData({ ...formData, full_name: text })}
         autoCapitalize="words"
@@ -555,7 +555,7 @@ export default function OnboardingScreen() {
       <Text style={styles.stepTitle}>
         Race & Ethnicity{" "}
         <Text style={commonStyles.requiredAsterisk}>
-          {t("onboarding.unknown_2")}
+          {t("common.unknown")}
         </Text>
       </Text>
       <Text style={styles.stepDescription}>
@@ -612,7 +612,7 @@ export default function OnboardingScreen() {
       <Text style={styles.stepTitle}>
         Gender Identity{" "}
         <Text style={commonStyles.requiredAsterisk}>
-          {t("onboarding.unknown_3")}
+          {t("common.unknown")}
         </Text>
       </Text>
       <Text style={styles.stepDescription}>
@@ -671,7 +671,7 @@ export default function OnboardingScreen() {
       <Text style={styles.stepTitle}>
         LGBTQ+ Identity{" "}
         <Text style={commonStyles.requiredAsterisk}>
-          {t("onboarding.unknown_4")}
+          {t("common.unknown")}
         </Text>
       </Text>
       <Text style={styles.stepDescription}>
@@ -692,7 +692,7 @@ export default function OnboardingScreen() {
               !formData.lgbtq_status && styles.toggleTextSelected,
             ]}
           >
-            {t('onboarding.no')}</Text>
+            {t('common.no')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -707,7 +707,7 @@ export default function OnboardingScreen() {
               formData.lgbtq_status && styles.toggleTextSelected,
             ]}
           >
-            {t('onboarding.yes')}</Text>
+            {t('common.yes')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -855,7 +855,7 @@ export default function OnboardingScreen() {
 
   const renderPrivacyStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>{t("onboarding.privacy_settings")}</Text>
+      <Text style={styles.stepTitle}>{t("common.privacy_settings")}</Text>
       <Text style={styles.stepDescription}>
         {t('onboarding.choose_how_your_demographic_information')}</Text>
       <View style={styles.privacyOptions}>
@@ -886,7 +886,7 @@ export default function OnboardingScreen() {
         >
           <View style={styles.privacyHeader}>
             <Ionicons name="eye-off" size={24} color={theme.colors.accent} />
-            <Text style={styles.privacyTitle}>{t("onboarding.anonymous")}</Text>
+            <Text style={styles.privacyTitle}>{t("common.anonymous")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
             {t('onboarding.your_reviews_are_visible_but_without')}</Text>
@@ -1000,7 +1000,7 @@ export default function OnboardingScreen() {
             style={[styles.navButton, styles.skipButton]}
             onPress={handleSkip}
           >
-            <Text style={styles.skipButtonText}>{t("onboarding.cancel")}</Text>
+            <Text style={styles.skipButtonText}>{t("common.cancel")}</Text>
           </TouchableOpacity>
         )}
 
@@ -1010,7 +1010,7 @@ export default function OnboardingScreen() {
               style={[styles.navButton, commonStyles.backButton]}
               onPress={handleBack}
             >
-              <Text style={styles.backButtonText}>{t("onboarding.back")}</Text>
+              <Text style={styles.backButtonText}>{t("common.back")}</Text>
             </TouchableOpacity>
           )}
 

@@ -330,7 +330,7 @@ export default function PrivacySettings() {
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>
-          {t("settings.privacy_settings")}
+          {t("common.privacy_settings")}
         </Text>
         <View style={commonStyles.headerPlaceholder} />
       </View>
@@ -384,7 +384,7 @@ export default function PrivacySettings() {
           />
           <View style={styles.actionTextContainer}>
             <Text style={styles.actionTitle}>
-              {t("settings.terms_of_service")}
+              {t("common.terms_of_service")}
             </Text>
             <Text style={styles.actionDescription}>
               {t("settings.view_our_terms_and_conditions")}
@@ -408,7 +408,7 @@ export default function PrivacySettings() {
           />
           <View style={styles.actionTextContainer}>
             <Text style={styles.actionTitle}>
-              {t("settings.privacy_policy")}
+              {t("common.privacy_policy")}
             </Text>
             <Text style={styles.actionDescription}>
               {t("settings.view_how_we_handle_your_data")}
@@ -543,7 +543,7 @@ export default function PrivacySettings() {
               {profile?.disability_status?.join(", ") || "None"}
             </Text>
             <Text style={styles.dataSection}>
-              {t("settings.privacy_settings")}
+              {t("common.privacy_settings")}
             </Text>
             <Text style={styles.dataText}>
               Privacy Level: {profile?.privacy_level || "public"}
@@ -607,7 +607,7 @@ export default function PrivacySettings() {
                 onPress={() => setDeleteConfirmVisible(false)}
               >
                 <Text style={styles.cancelButtonText}>
-                  {t("settings.cancel")}
+                  {t("common.cancel")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -629,7 +629,7 @@ export default function PrivacySettings() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showPrivacy}
         onClose={() => setShowPrivacy(false)}
-        title={t("settings.privacy_policy")}
+        title={t("common.privacy_policy")}
       />
 
       <IubendaDocument
@@ -637,7 +637,7 @@ export default function PrivacySettings() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showTerms}
         onClose={() => setShowTerms(false)}
-        title={t("settings.terms_of_service")}
+        title={t("common.terms_of_service")}
       />
     </SafeAreaView>
   );

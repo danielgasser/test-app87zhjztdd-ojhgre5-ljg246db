@@ -129,7 +129,7 @@ export default function RegisterScreen() {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder={t("auth.password")}
+                  placeholder={t("common.password")}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -191,7 +191,7 @@ export default function RegisterScreen() {
                 <Link href="/(auth)/login" asChild>
                   <TouchableOpacity>
                     <Text style={commonStyles.textPrimaryLink}>
-                      {t("auth.sign_in")}
+                      {t("common.sign_in")}
                     </Text>
                   </TouchableOpacity>
                 </Link>

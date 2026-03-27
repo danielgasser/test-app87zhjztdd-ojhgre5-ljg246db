@@ -570,7 +570,7 @@ export default function CommunityScreen() {
                   notify.info("Full insights view coming soon!", "Coming Soon")
                 }
               >
-                <Text style={styles.seeAllText}>{t("community.see_all")}</Text>
+                <Text style={styles.seeAllText}>{t("common.see_all")}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -597,7 +597,7 @@ export default function CommunityScreen() {
                   notify.info("Full list view coming soon!", "Coming Soon")
                 }
               >
-                <Text style={styles.seeAllText}>{t("community.see_all")}</Text>
+                <Text style={styles.seeAllText}>{t("common.see_all")}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -622,7 +622,7 @@ export default function CommunityScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.sectionTitle}>
-              {t("community.recent_reviews")}
+              {t("common.recent_reviews")}
             </Text>
           </View>
           {/* Filter Button */}

@@ -149,7 +149,7 @@ const WelcomeScreenNew = () => {
                   { backgroundColor: theme.colors.secondary },
                 ]}
               />
-              <Text style={styles.pinLabel}>{t("profile.safe")}</Text>
+              <Text style={styles.pinLabel}>{t("common.safe")}</Text>
             </View>
             <View style={styles.mapPin2}>
               <View
@@ -158,7 +158,7 @@ const WelcomeScreenNew = () => {
                   { backgroundColor: theme.colors.mixedYellow },
                 ]}
               />
-              <Text style={styles.pinLabel}>{t("profile.caution")}</Text>
+              <Text style={styles.pinLabel}>{t("common.caution")}</Text>
             </View>
             <View style={styles.mapPin3}>
               <View
@@ -224,7 +224,7 @@ const WelcomeScreenNew = () => {
           onPress={handleSignIn}
           activeOpacity={0.7}
         >
-          <Text style={styles.secondaryButtonText}>{t("profile.sign_in")}</Text>
+          <Text style={styles.secondaryButtonText}>{t("common.sign_in")}</Text>
         </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>

@@ -168,7 +168,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     await incrementSearchCount();
     // GUARD: Wait for profile to be ready
     if (!userProfile && userId) {
-      notify.info(t("navigation.loading_profile"));
+      notify.info(t("common.loading_profile"));
       // Give it 2 seconds to load
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

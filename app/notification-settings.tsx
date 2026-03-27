@@ -105,7 +105,7 @@ export default function NotificationSettings() {
           />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>
-          {t("settings.notifications")}
+          {t("common.notifications")}
         </Text>
         <View style={commonStyles.headerPlaceholder} />
       </View>
