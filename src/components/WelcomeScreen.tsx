@@ -122,7 +122,8 @@ const WelcomeScreenNew = () => {
           </Text>
 
           <Text style={styles.heroSubtitle}>
-            {t('profile.the_first_gps_app_that_shows_you_how')}</Text>
+            {t("profile.the_first_gps_app_that_shows_you_how")}
+          </Text>
         </View>
 
         {/* Feature Illustration */}
@@ -173,12 +174,14 @@ const WelcomeScreenNew = () => {
           <View style={styles.benefit}>
             <Text style={styles.benefitIcon}>{t("profile.unknown_1")}</Text>
             <Text style={styles.benefitText}>
-              {t('profile.demographicaware_safety_ratings')}</Text>
+              {t("profile.demographic_aware_safety_ratings")}
+            </Text>
           </View>
           <View style={styles.benefit}>
             <Text style={styles.benefitIcon}>{t("profile.unknown_2")}</Text>
             <Text style={styles.benefitText}>
-              {t('profile.communitypowered_recommendations')}</Text>
+              {t("profile.community_powered_recommendations")}
+            </Text>
           </View>
           <View style={styles.benefit}>
             <Text style={styles.benefitIcon}>{t("profile.unknown_3")}</Text>

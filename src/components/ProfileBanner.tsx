@@ -23,7 +23,7 @@ const getBannerMessages = (t: (key: string) => string) =>
     [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
       .INCOMPLETE_PROFILE_GENERAL]: {
       icon: "information-circle" as any,
-      title: t("profile.complete_your_profile_i"),
+      title: "📊" + t("profile.complete_your_profile"),
       description: t("profile.complete_your_profile_description"),
     },
     [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES

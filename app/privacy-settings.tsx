@@ -352,7 +352,8 @@ export default function PrivacySettings() {
         />
 
         <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
-          {t('settings.profile_privacy')}</Text>
+          {t("settings.profile_privacy")}
+        </Text>
 
         <SettingToggle
           label="Public profile"
@@ -369,7 +370,8 @@ export default function PrivacySettings() {
         />
         {/* Legal Documents Section */}
         <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
-          {t('settings.legal_documents')}</Text>
+          {t("settings.legal_documents")}
+        </Text>
 
         <TouchableOpacity
           style={styles.actionButton}
@@ -385,7 +387,8 @@ export default function PrivacySettings() {
               {t("settings.terms_of_service")}
             </Text>
             <Text style={styles.actionDescription}>
-              {t('settings.view_our_terms_and_conditions')}</Text>
+              {t("settings.view_our_terms_and_conditions")}
+            </Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -408,7 +411,8 @@ export default function PrivacySettings() {
               {t("settings.privacy_policy")}
             </Text>
             <Text style={styles.actionDescription}>
-              {t('settings.view_how_we_handle_your_data')}</Text>
+              {t("settings.view_how_we_handle_your_data")}
+            </Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -419,7 +423,8 @@ export default function PrivacySettings() {
 
         {/* Account Management Section */}
         <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
-          {t('settings.account_management')}</Text>
+          {t("settings.account_management")}
+        </Text>
 
         <TouchableOpacity
           style={styles.actionButton}
@@ -429,7 +434,8 @@ export default function PrivacySettings() {
           <View style={styles.actionTextContainer}>
             <Text style={styles.actionTitle}>{t("settings.view_my_data")}</Text>
             <Text style={styles.actionDescription}>
-              {t('settings.see_what_information_truguide_has')}</Text>
+              {t("settings.see_what_information_truguide_has")}
+            </Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -452,7 +458,8 @@ export default function PrivacySettings() {
               {t("settings.export_my_data")}
             </Text>
             <Text style={styles.actionDescription}>
-              {t('settings.download_all_your_data_in_json_format')}</Text>
+              {t("settings.download_all_your_data_in_json_format")}
+            </Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -474,9 +481,11 @@ export default function PrivacySettings() {
           />
           <View style={styles.actionTextContainer}>
             <Text style={[styles.actionTitle, styles.dangerText]}>
-              {t('settings.delete_account')}</Text>
+              {t("settings.delete_account")}
+            </Text>
             <Text style={styles.actionDescription}>
-              {t('settings.permanently_delete_your_account_and_all')}</Text>
+              {t("settings.permanently_delete_your_account_and_all")}
+            </Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -548,19 +557,27 @@ export default function PrivacySettings() {
             ) : activityStats ? (
               <>
                 <Text style={styles.dataText}>
-                  Reviews Posted: {activityStats.review_count}
+                  {t("settings.reviews_posted", {
+                    count: activityStats.review_count ?? 0,
+                  })}
                 </Text>
                 <Text style={styles.dataText}>
-                  Routes Planned: {activityStats.route_count}
+                  {t("settings.routes_planned", {
+                    count: activityStats.route_count ?? 0,
+                  })}
                 </Text>
               </>
             ) : (
               <>
                 <Text style={styles.dataText}>
-                  {t("settings.reviews_posted_0")}
+                  {t("settings.reviews_posted", {
+                    count: 0,
+                  })}
                 </Text>
                 <Text style={styles.dataText}>
-                  {t("settings.routes_planned_0")}
+                  {t("settings.routes_planned", {
+                    count: 0,
+                  })}
                 </Text>
               </>
             )}
