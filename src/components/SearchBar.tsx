@@ -309,7 +309,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <TextInput
               filtered={false}
               style={styles.searchInput}
-              placeholder={t("navigation.search_for_places")}
+              placeholder={t("map.search_for_places")}
               value={searchText}
               onChangeText={(text) => {
                 setSearchText(text);
@@ -431,7 +431,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 No places found for "{searchText}"
               </Text>
               <Text style={styles.noResultsSubtext}>
-                {t('navigation.try_a_different_search_term')}</Text>
+                {t("navigation.try_a_different_search_term")}
+              </Text>
             </View>
           )}
       </View>

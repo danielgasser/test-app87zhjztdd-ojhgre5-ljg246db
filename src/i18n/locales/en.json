@@ -128,6 +128,7 @@
     "yes": "Yes"
   },
   "community": {
+    "title": "Community",
     "anonymous_reviewer": "Anonymous Reviewer",
     "be_the_first_to_review_a_location_in": "Be the first to review a location in this area!",
     "community": "Community",
@@ -176,6 +177,7 @@
     "your_privacy_matters_we_only_collect": "Your privacy matters. We only collect data necessary to provide\n            personalized safety recommendations. You control what demographic\n            information you share."
   },
   "map": {
+    "title": "Map",
     "5": "/5",
     "access": "Access:",
     "afternoon": "Afternoon",
@@ -243,6 +245,7 @@
     "safety_by_demographics": "Safety by Demographics",
     "safety_by_time_of_day": "Safety by Time of Day",
     "safety_score": "Safety Score",
+    "search_for_places": "Search for places...",
     "start_navigation": "Start Navigation",
     "unable_to_get_address_for_this_location": "Unable to get address for this location",
     "use_my_demographic_safety_scores": "Use my demographic safety scores",
@@ -293,7 +296,6 @@
     "safety": "Safety",
     "safety_preferences": "Safety Preferences",
     "saved": "Saved",
-    "search_for_places": "Search for places...",
     "search_radius": "Search Radius",
     "selected": "Selected",
     "start": "Start",

@@ -113,7 +113,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Map",
+          title: t("map.title"),
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="map" size={32} color={color} />
           ),
@@ -122,7 +122,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="community"
         options={{
-          title: "Community",
+          title: t("community.title"),
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="people" size={32} color={color} />
           ),
