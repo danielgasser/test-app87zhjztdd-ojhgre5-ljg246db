@@ -22,8 +22,11 @@ import { logger } from "@/utils/logger";
 import { passwordChecker } from "@/utils/passwordChecker";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function EditProfileScreen() {
+  const { t } = useTranslation();
+
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { profile } = useAppSelector((state) => state.user);
@@ -60,7 +63,7 @@ export default function EditProfileScreen() {
 
   const handleUpdateName = async () => {
     if (!fullName.trim()) {
-      notify.error("Please enter your full name");
+      notify.error(t("settings.please_enter_your_full_name"));
       return;
     }
 
@@ -73,7 +76,7 @@ export default function EditProfileScreen() {
         }),
       ).unwrap();
 
-      notify.success("Name updated successfully");
+      notify.success(t("settings.name_updated_successfully"));
     } catch (error: any) {
       logger.error("Name update error:", error);
       notify.error(error.message || "Failed to update name");
@@ -84,17 +87,17 @@ export default function EditProfileScreen() {
 
   const handleUpdateEmail = async () => {
     if (isOAuthUser) {
-      notify.error("Cannot change email for OAuth accounts");
+      notify.error(t("settings.cannot_change_email_for_oauth_accounts"));
       return;
     }
 
     if (!email.trim()) {
-      notify.error("Please enter your email");
+      notify.error(t("settings.please_enter_your_email"));
       return;
     }
 
     if (email === user?.email) {
-      notify.error("This is already your current email");
+      notify.error(t("settings.this_is_already_your_current_email"));
       return;
     }
 
@@ -128,7 +131,7 @@ export default function EditProfileScreen() {
           "Unable to update email. Please try a different email address or contact support.",
         );
       } else {
-        notify.error("Failed to update email. Please try again later.");
+        notify.error(t("settings.failed_to_update_email_please_try_again"));
       }
     } finally {
       setLoading(false);
@@ -137,12 +140,12 @@ export default function EditProfileScreen() {
 
   const handleUpdatePassword = async () => {
     if (isOAuthUser) {
-      notify.error("Cannot change password for OAuth accounts");
+      notify.error(t("settings.cannot_change_password_for_oauth"));
       return;
     }
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      notify.error("Please fill in all password fields");
+      notify.error(t("settings.please_fill_in_all_password_fields"));
       return;
     }
 
@@ -151,7 +154,7 @@ export default function EditProfileScreen() {
     }
 
     if (newPassword !== confirmPassword) {
-      notify.error("New passwords do not match");
+      notify.error(t("settings.new_passwords_do_not_match"));
       return;
     }
 
@@ -212,7 +215,9 @@ export default function EditProfileScreen() {
               style={commonStyles.backButtonText}
             />
           </TouchableOpacity>
-          <Text style={commonStyles.headerTitle}>Edit Profile</Text>
+          <Text style={commonStyles.headerTitle}>
+            {t("settings.edit_profile")}
+          </Text>
           <View style={{ width: 24 }} />
         </View>
 
@@ -237,12 +242,14 @@ export default function EditProfileScreen() {
 
           {/* Full Name Section */}
           <View style={styles.section}>
-            <Text style={commonStyles.sectionTitle}>Name or Nickname</Text>
+            <Text style={commonStyles.sectionTitle}>
+              {t("settings.name_or_nickname")}
+            </Text>
             <TextInput
               style={commonStyles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder="Enter your name or a nickname"
+              placeholder={t("settings.enter_your_name_or_a_nickname")}
               placeholderTextColor={theme.colors.textSecondary}
               autoCapitalize="words"
             />
@@ -257,7 +264,9 @@ export default function EditProfileScreen() {
               {loading ? (
                 <ActivityIndicator color={theme.colors.textOnPrimary} />
               ) : (
-                <Text style={commonStyles.primaryButtonText}>Update Name</Text>
+                <Text style={commonStyles.primaryButtonText}>
+                  {t("settings.update_name")}
+                </Text>
               )}
             </TouchableOpacity>
           </View>
@@ -265,15 +274,16 @@ export default function EditProfileScreen() {
           {/* Email Section - Only for non-OAuth users */}
           {!isOAuthUser && (
             <View style={styles.section}>
-              <Text style={commonStyles.sectionTitle}>Email Address</Text>
-              <Text style={styles.helperText}>
-                You'll need to confirm the your new email address.
+              <Text style={commonStyles.sectionTitle}>
+                {t("settings.email_address")}
               </Text>
+              <Text style={styles.helperText}>
+                {t('settings.youll_need_to_confirm_the_your_new')}</Text>
               <TextInput
                 style={commonStyles.input}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="Enter your email"
+                placeholder={t("settings.enter_your_email")}
                 placeholderTextColor={theme.colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -291,8 +301,7 @@ export default function EditProfileScreen() {
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
                   <Text style={commonStyles.primaryButtonText}>
-                    Update Email
-                  </Text>
+                    {t('settings.update_email')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -301,7 +310,9 @@ export default function EditProfileScreen() {
           {/* OAuth Email Display - Read-only */}
           {isOAuthUser && (
             <View style={styles.section}>
-              <Text style={commonStyles.sectionTitle}>Email Address</Text>
+              <Text style={commonStyles.sectionTitle}>
+                {t("settings.email_address")}
+              </Text>
               <View style={styles.oauthInfoBox}>
                 <Ionicons
                   name="lock-closed"
@@ -322,16 +333,17 @@ export default function EditProfileScreen() {
           {/* Password Section - Only for non-OAuth users */}
           {!isOAuthUser && (
             <View style={styles.section}>
-              <Text style={commonStyles.sectionTitle}>Change Password</Text>
-              <Text style={styles.helperText}>
-                Password must be at least 8 characters
+              <Text style={commonStyles.sectionTitle}>
+                {t("settings.change_password")}
               </Text>
+              <Text style={styles.helperText}>
+                {t('settings.password_must_be_at_least_8_characters')}</Text>
 
               <TextInput
                 style={commonStyles.input}
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
-                placeholder="Current password"
+                placeholder={t("settings.current_password")}
                 placeholderTextColor={theme.colors.textSecondary}
                 secureTextEntry
                 autoComplete="current-password"
@@ -341,7 +353,7 @@ export default function EditProfileScreen() {
                 style={commonStyles.input}
                 value={newPassword}
                 onChangeText={setNewPassword}
-                placeholder="New password"
+                placeholder={t("settings.new_password")}
                 placeholderTextColor={theme.colors.textSecondary}
                 secureTextEntry
                 autoComplete="new-password"
@@ -351,7 +363,7 @@ export default function EditProfileScreen() {
                 style={commonStyles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Confirm new password"
+                placeholder={t("settings.confirm_new_password")}
                 placeholderTextColor={theme.colors.textSecondary}
                 secureTextEntry
                 autoComplete="new-password"
@@ -369,8 +381,7 @@ export default function EditProfileScreen() {
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
                   <Text style={commonStyles.primaryButtonText}>
-                    Update Password
-                  </Text>
+                    {t('settings.update_password')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -379,7 +390,9 @@ export default function EditProfileScreen() {
           {/* OAuth Password Info */}
           {isOAuthUser && (
             <View style={styles.section}>
-              <Text style={commonStyles.sectionTitle}>Password</Text>
+              <Text style={commonStyles.sectionTitle}>
+                {t("settings.password")}
+              </Text>
               <View style={styles.oauthInfoBox}>
                 <Ionicons
                   name="lock-closed"

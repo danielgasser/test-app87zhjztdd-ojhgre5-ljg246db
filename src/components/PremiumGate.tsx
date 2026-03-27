@@ -5,6 +5,7 @@ import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureName } from "@/config/features";
 import { theme } from "@/styles/theme";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 type FallbackBehavior = "hide" | "blur" | "prompt";
 
@@ -23,6 +24,8 @@ export function PremiumGate({
   onUpgradePress,
   minHeight = 120,
 }: PremiumGateProps) {
+  const { t } = useTranslation();
+
   const { hasAccess, featureLabel, requiredTier } = useFeatureAccess(feature);
   if (hasAccess) {
     return <>{children}</>;
@@ -53,7 +56,9 @@ export function PremiumGate({
                   requiredTier.slice(1)}{" "}
                 Feature
               </Text>
-              <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>
+              <Text style={styles.tapToUpgrade}>
+                {t("premium.tap_to_upgrade")}
+              </Text>
             </View>
           </TouchableOpacity>
         </View>

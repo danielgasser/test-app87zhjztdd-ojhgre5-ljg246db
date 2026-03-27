@@ -11,6 +11,7 @@ import { theme } from "@/styles/theme";
 import { DemographicScore } from "@/store/locationsSlice";
 import { PremiumGate } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface DemographicBreakdownProps {
   scores: DemographicScore[];
@@ -49,6 +50,7 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
   loading,
   onFetch,
 }) => {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleToggle = () => {
@@ -60,14 +62,17 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
 
   // Filter out 'overall' and group by demographic type
   const demographicScores = scores.filter(
-    (s) => s.demographic_type !== "overall"
+    (s) => s.demographic_type !== "overall",
   );
-  const groupedScores = demographicScores.reduce((acc, score) => {
-    const type = score.demographic_type;
-    if (!acc[type]) acc[type] = [];
-    acc[type].push(score);
-    return acc;
-  }, {} as { [key: string]: DemographicScore[] });
+  const groupedScores = demographicScores.reduce(
+    (acc, score) => {
+      const type = score.demographic_type;
+      if (!acc[type]) acc[type] = [];
+      acc[type].push(score);
+      return acc;
+    },
+    {} as { [key: string]: DemographicScore[] },
+  );
 
   const renderScoreBar = (score: DemographicScore) => {
     const safetyScore = score.avg_safety_score;
@@ -111,7 +116,9 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
       <TouchableOpacity style={styles.specHeader} onPress={handleToggle}>
         <View style={styles.headerLeft}>
           <Ionicons name="stats-chart" size={20} color={theme.colors.primary} />
-          <Text style={commonStyles.textBold}>Safety by Demographics</Text>
+          <Text style={commonStyles.textBold}>
+            {t("map.safety_by_demographics")}
+          </Text>
         </View>
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
@@ -127,13 +134,11 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
               <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="small" color={theme.colors.primary} />
                 <Text style={commonStyles.loadingText}>
-                  Loading insights...
-                </Text>
+                  {t('map.loading_insights')}</Text>
               </View>
             ) : Object.keys(groupedScores).length === 0 ? (
               <Text style={styles.noDataText}>
-                No demographic breakdown available yet. Be the first to review!
-              </Text>
+                {t('map.no_demographic_breakdown_available_yet')}</Text>
             ) : (
               Object.entries(groupedScores).map(([type, typeScores]) => (
                 <View key={type} style={styles.demographicGroup}>

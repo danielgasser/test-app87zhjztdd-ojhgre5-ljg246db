@@ -18,6 +18,7 @@ import {
   fetchPublicUserReviews,
 } from "../store/userSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface UserProfileModalProps {
   visible: boolean;
@@ -30,6 +31,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   userId,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     publicProfile,
@@ -82,7 +84,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
     return (
       <View style={styles.section}>
-        <Text style={commonStyles.sectionTitle}>Demographics</Text>
+        <Text style={commonStyles.sectionTitle}>
+          {t("profile.demographics")}
+        </Text>
         <View style={styles.demographicsContainer}>
           {demographics.map((demo, index) => (
             <View key={index} style={styles.demographicChip}>
@@ -104,7 +108,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     }
 
     if (publicReviews.length === 0) {
-      return <Text style={styles.noReviewsText}>No reviews yet</Text>;
+      return (
+        <Text style={styles.noReviewsText}>{t("profile.no_reviews_yet")}</Text>
+      );
     }
 
     return publicReviews.map((review) => (
@@ -143,7 +149,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
         <SafeAreaView style={commonStyles.modalContent}>
           {/* Header */}
           <View style={styles.specHeader}>
-            <Text style={commonStyles.headerTitle}>User Profile</Text>
+            <Text style={commonStyles.headerTitle}>
+              {t("profile.user_profile")}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
@@ -154,7 +162,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
             {publicProfileLoading ? (
               <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
-                <Text style={commonStyles.loadingText}>Loading profile...</Text>
+                <Text style={commonStyles.loadingText}>
+                  {t("profile.loading_profile")}
+                </Text>
               </View>
             ) : publicProfileError ? (
               <View style={styles.errorContainer}>
@@ -168,7 +178,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   style={commonStyles.primaryButton}
                   onPress={onClose}
                 >
-                  <Text style={commonStyles.primaryButtonText}>Close</Text>
+                  <Text style={commonStyles.primaryButtonText}>
+                    {t("profile.close")}
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : publicProfile && !publicProfile.is_public ? (
@@ -178,10 +190,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   size={48}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.privateTitle}>Private Profile</Text>
-                <Text style={styles.privateText}>
-                  This user has set their profile to private.
+                <Text style={styles.privateTitle}>
+                  {t("profile.private_profile")}
                 </Text>
+                <Text style={styles.privateText}>
+                  {t('profile.this_user_has_set_their_profile_to')}</Text>
               </View>
             ) : publicProfile ? (
               <>
@@ -217,7 +230,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <Text style={styles.statNumber}>
                       {publicProfile.total_reviews}
                     </Text>
-                    <Text style={styles.statLabel}>Reviews</Text>
+                    <Text style={styles.statLabel}>{t("profile.reviews")}</Text>
                   </View>
                 </View>
 
@@ -226,7 +239,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
                 {/* Reviews section will be added in next step */}
                 <View style={styles.section}>
-                  <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
+                  <Text style={commonStyles.sectionTitle}>
+                    {t("profile.recent_reviews")}
+                  </Text>
                   {renderReviews()}
                 </View>
               </>

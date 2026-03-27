@@ -13,8 +13,11 @@ import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function AuthCallback() {
+  const { t } = useTranslation();
+
   const { refreshOnboardingStatus } = useAuth();
   const [status, setStatus] = useState("Processing authentication...");
   const params = useLocalSearchParams();
@@ -117,7 +120,7 @@ export default function AuthCallback() {
           padding: 10,
         }}
       >
-        <Text style={commonStyles.primaryButtonText}>Sign Out</Text>
+        <Text style={commonStyles.primaryButtonText}>{t("auth.sign_out")}</Text>
       </TouchableOpacity>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.statusText}>{status}</Text>

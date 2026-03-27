@@ -37,6 +37,8 @@ import PremiumGate, { GlobalPremiumPromptModal } from "./PremiumGate";
 import NeighborhoodStats from "./NeighborhoodStats";
 import TimeSafetyChart from "./TimeSafetyChart";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
+
 interface SearchResult {
   id: string;
   name: string;
@@ -63,6 +65,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   searchMarker,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { selectedLocation, loading } = useAppSelector(
@@ -466,7 +470,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
         <View style={commonStyles.modalSheetContent}>
           {/* Header */}
           <View style={commonStyles.modalSheetHeader}>
-            <Text style={commonStyles.headerTitle}>Location Details</Text>
+            <Text style={commonStyles.headerTitle}>
+              {t("map.location_details")}
+            </Text>
             <View style={styles.headerActions}>
               <SaveLocationButton
                 locationId={locationId}
@@ -701,7 +707,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     size={20}
                     color={theme.colors.card}
                   />
-                  <Text style={styles.writeReviewText}>Write a Review</Text>
+                  <Text style={styles.writeReviewText}>
+                    {t("map.write_a_review")}
+                  </Text>
                 </TouchableOpacity>
               )}
               {currentUser && userHasReviewed && (
@@ -712,8 +720,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     color={theme.colors.secondary}
                   />
                   <Text style={styles.alreadyReviewedText}>
-                    You've reviewed this location
-                  </Text>
+                    {t('map.youve_reviewed_this_location')}</Text>
                 </View>
               )}
               {/* Neighborhood Stats - Premium */}
@@ -723,7 +730,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                   size={18}
                   color={theme.colors.primary}
                 />
-                <Text style={commonStyles.subtitle}>Neighborhood Stats</Text>
+                <Text style={commonStyles.subtitle}>
+                  {t("map.neighborhood_stats")}
+                </Text>
               </View>
               <PremiumGate feature="neighborhoodStats" fallback="blur">
                 <NeighborhoodStats
@@ -734,7 +743,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               {/* Time Safety - Premium */}
               <View style={commonStyles.header}>
                 <Ionicons name="time" size={18} color={theme.colors.primary} />
-                <Text style={commonStyles.subtitle}>Safety by Time of Day</Text>
+                <Text style={commonStyles.subtitle}>
+                  {t("map.safety_by_time_of_day")}
+                </Text>
               </View>
               <PremiumGate feature="timeFilter" fallback="blur">
                 <TimeSafetyChart
@@ -745,7 +756,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
               {/* Reviews Section */}
               {(selectedLocation || reviews.length > 0) && (
                 <View style={styles.reviewsSection}>
-                  <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
+                  <Text style={commonStyles.sectionTitle}>
+                    {t("map.recent_reviews")}
+                  </Text>
 
                   {loadingReviews ? (
                     <ActivityIndicator
@@ -778,8 +791,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                                 color={theme.colors.card}
                               />
                               <Text style={styles.editButtonText}>
-                                Edit Review
-                              </Text>
+                                {t('map.edit_review')}</Text>
                             </TouchableOpacity>
                           )}
                         <View style={styles.reviewHeader}>
@@ -801,7 +813,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                                 </Text>
                               </TouchableOpacity>
                             ) : (
-                              <Text style={styles.reviewerName}>Anonymous</Text>
+                              <Text style={styles.reviewerName}>
+                                {t("map.anonymous")}
+                              </Text>
                             )}
                             {renderDemographics(review.user_profiles)}
                           </View>
@@ -815,8 +829,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         <View style={styles.reviewRatings}>
                           <View style={styles.ratingItem}>
                             <Text style={commonStyles.ratingLabel}>
-                              Safety:
-                            </Text>
+                              {t('map.safety')}</Text>
                             <Text
                               style={[
                                 styles.ratingValue,
@@ -828,8 +841,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           </View>
                           <View style={styles.ratingItem}>
                             <Text style={commonStyles.ratingLabel}>
-                              Comfort:
-                            </Text>
+                              {t('map.comfort')}</Text>
                             <Text
                               style={[
                                 styles.ratingValue,
@@ -844,8 +856,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           {review.accessibility_rating && (
                             <View style={styles.ratingItem}>
                               <Text style={commonStyles.ratingLabel}>
-                                Access:
-                              </Text>
+                                {t('map.access')}</Text>
                               <Text
                                 style={[
                                   styles.ratingValue,
@@ -876,8 +887,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     ))
                   ) : (
                     <Text style={styles.noReviewsText}>
-                      No reviews yet. Be the first to review this location!
-                    </Text>
+                      {t('map.no_reviews_yet_be_the_first_to_review')}</Text>
                   )}
                 </View>
               )}

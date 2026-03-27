@@ -14,8 +14,11 @@ import { updateSearchRadius } from "@/store/userSlice";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useAuth } from "@/providers";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function SearchRadiusSelector() {
+  const { t } = useTranslation();
+
   const dispatch = useAppDispatch();
   const { distanceUnit } = useUserPreferences();
   const { user } = useAuth();
@@ -85,7 +88,7 @@ export default function SearchRadiusSelector() {
     <View style={styles.specContainer}>
       {/* Header */}
       <View style={commonStyles.header}>
-        <Text style={styles.title}>Search Radius</Text>
+        <Text style={styles.title}>{t("navigation.search_radius")}</Text>
         {showSaved && (
           <Animated.View style={[styles.savedIndicator, { opacity: fadeAnim }]}>
             <Ionicons
@@ -93,11 +96,13 @@ export default function SearchRadiusSelector() {
               size={16}
               color={theme.colors.primary}
             />
-            <Text style={styles.savedText}>Saved</Text>
+            <Text style={styles.savedText}>{t("navigation.saved")}</Text>
           </Animated.View>
         )}
       </View>
-      <Text style={styles.subtitle}>How far to search for locations</Text>
+      <Text style={styles.subtitle}>
+        {t("navigation.how_far_to_search_for_locations")}
+      </Text>
 
       {/* Segmented Control */}
       <View style={styles.segmentedControl}>
@@ -158,10 +163,10 @@ export default function SearchRadiusSelector() {
           {selectedRadius >= 999999
             ? "Searching globally - all countries"
             : distanceUnit === "imperial"
-            ? `Currently showing locations within ${Math.round(
-                selectedRadius * 0.621371
-              )} miles of map center`
-            : `Currently showing locations within ${selectedRadius} km of map center`}
+              ? `Currently showing locations within ${Math.round(
+                  selectedRadius * 0.621371,
+                )} miles of map center`
+              : `Currently showing locations within ${selectedRadius} km of map center`}
         </Text>
       </View>
     </View>

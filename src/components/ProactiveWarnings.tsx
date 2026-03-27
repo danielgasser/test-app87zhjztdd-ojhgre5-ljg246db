@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { PremiumGate } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface ProactiveWarningsProps {
   safetyAnalysis: any;
@@ -41,6 +42,8 @@ const getWarningColor = (note: string): string => {
 export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
   safetyAnalysis,
 }) => {
+  const { t } = useTranslation();
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!safetyAnalysis) return null;
@@ -78,7 +81,9 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
       >
         <View style={styles.headerLeft}>
           <Ionicons name="alert-circle" size={18} color={theme.colors.accent} />
-          <Text style={commonStyles.primaryButtonText}>Route Warnings</Text>
+          <Text style={commonStyles.primaryButtonText}>
+            {t("navigation.route_warnings")}
+          </Text>
           {warningCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{warningCount}</Text>
@@ -153,7 +158,9 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
             {/* Risk Factors from Segments */}
             {uniqueRiskFactors.size > 0 && (
               <View style={styles.riskSection}>
-                <Text style={styles.riskTitle}>Risk Factors</Text>
+                <Text style={styles.riskTitle}>
+                  {t("navigation.risk_factors")}
+                </Text>
                 {Array.from(uniqueRiskFactors)
                   .slice(0, 5)
                   .map((risk, index) => (

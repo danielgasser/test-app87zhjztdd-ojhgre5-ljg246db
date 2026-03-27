@@ -16,6 +16,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
 import { adminStyles } from "@/styles/adminStyles";
+import { useTranslation } from "react-i18next";
+
 export type TesterMetadata = {
   platform?: "ios" | "android" | "both";
   source?: string;
@@ -43,6 +45,8 @@ export function AddTesterModal({
   onClose,
   onAdd,
 }: AddTesterModalProps) {
+  const { t } = useTranslation();
+
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [platform, setPlatform] = useState<"ios" | "android" | "both" | "">("");
@@ -98,7 +102,9 @@ export function AddTesterModal({
           <View style={{ ...commonStyles.modalOverlay }}>
             <View style={{ ...commonStyles.modalContent }}>
               <View style={commonStyles.modalHeader}>
-                <Text style={commonStyles.modalTitle}>Add Tester</Text>
+                <Text style={commonStyles.modalTitle}>
+                  {t("admin.add_tester")}
+                </Text>
                 <TouchableOpacity onPress={handleClose}>
                   <Ionicons name="close" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
@@ -106,12 +112,12 @@ export function AddTesterModal({
 
               <ScrollView keyboardShouldPersistTaps="handled">
                 <View style={{ ...commonStyles.formField, paddingRight: 20 }}>
-                  <Text style={commonStyles.formLabel}>Email *</Text>
+                  <Text style={commonStyles.formLabel}>{t("admin.email")}</Text>
                   <TextInput
                     style={commonStyles.input}
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="tester@example.com"
+                    placeholder={t("admin.testerexamplecom")}
                     placeholderTextColor={theme.colors.textLight}
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -119,18 +125,20 @@ export function AddTesterModal({
                 </View>
 
                 <View style={commonStyles.formField}>
-                  <Text style={commonStyles.formLabel}>Name</Text>
+                  <Text style={commonStyles.formLabel}>{t("admin.name")}</Text>
                   <TextInput
                     style={commonStyles.input}
                     value={name}
                     onChangeText={setName}
-                    placeholder="Optional"
+                    placeholder={t("admin.optional")}
                     placeholderTextColor={theme.colors.textLight}
                   />
                 </View>
 
                 <View style={commonStyles.formField}>
-                  <Text style={commonStyles.formLabel}>Platform</Text>
+                  <Text style={commonStyles.formLabel}>
+                    {t("admin.platform")}
+                  </Text>
                   <View style={{ flexDirection: "row", gap: theme.spacing.sm }}>
                     {PLATFORMS.map((p) => (
                       <TouchableOpacity
@@ -157,18 +165,20 @@ export function AddTesterModal({
                 </View>
 
                 <View style={commonStyles.formField}>
-                  <Text style={commonStyles.formLabel}>Source</Text>
+                  <Text style={commonStyles.formLabel}>
+                    {t("admin.source")}
+                  </Text>
                   <TextInput
                     style={commonStyles.input}
                     value={source}
                     onChangeText={setSource}
-                    placeholder="e.g. linkedin, reddit, personal"
+                    placeholder={t("admin.eg_linkedin_reddit_personal")}
                     placeholderTextColor={theme.colors.textLight}
                   />
                 </View>
 
                 <View style={commonStyles.formField}>
-                  <Text style={commonStyles.formLabel}>Notes</Text>
+                  <Text style={commonStyles.formLabel}>{t("admin.notes")}</Text>
                   <TextInput
                     style={[
                       commonStyles.input,
@@ -176,7 +186,7 @@ export function AddTesterModal({
                     ]}
                     value={notes}
                     onChangeText={setNotes}
-                    placeholder="Optional"
+                    placeholder={t("admin.optional")}
                     placeholderTextColor={theme.colors.textLight}
                     multiline
                   />
@@ -188,7 +198,9 @@ export function AddTesterModal({
                   style={[commonStyles.cancelButton, { flex: 1 }]}
                   onPress={handleClose}
                 >
-                  <Text style={commonStyles.cancelButtonText}>Cancel</Text>
+                  <Text style={commonStyles.cancelButtonText}>
+                    {t("admin.cancel")}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
@@ -206,8 +218,7 @@ export function AddTesterModal({
                     />
                   ) : (
                     <Text style={commonStyles.primaryButtonText}>
-                      Add Tester
-                    </Text>
+                      {t('admin.add_tester')}</Text>
                   )}
                 </TouchableOpacity>
               </View>

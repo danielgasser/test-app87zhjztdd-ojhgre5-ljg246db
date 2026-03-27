@@ -26,6 +26,7 @@ import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { NAVIGATION_LOCATION_TASK } from "@/tasks/navigationLocationTask";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface NavigationModeProps {
   onExit: () => void;
@@ -68,6 +69,8 @@ const getManeuverIcon = (maneuver?: string): string => {
 
 const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   useRealtimeReviews();
+  const { t } = useTranslation();
+
   const { timeFormat, distanceUnit } = useUserPreferences();
 
   const dispatch = useAppDispatch();
@@ -597,7 +600,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       });
     } catch (error) {
       logger.error("Navigation start error:", error);
-      notify.error("Could not start navigation");
+      notify.error(t("navigation.could_not_start_navigation"));
       onExit();
     }
   };
@@ -709,7 +712,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
   if (!selectedRoute || !currentPosition) {
     return (
       <View style={commonStyles.container}>
-        <Text>Loading navigation...</Text>
+        <Text>{t("navigation.loading_navigation")}</Text>
       </View>
     );
   }
@@ -784,7 +787,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
 
         {nextInstruction && (
           <View style={styles.thenPill}>
-            <Text style={styles.thenText}>Then</Text>
+            <Text style={styles.thenText}>{t("navigation.then")}</Text>
             <Ionicons
               name={getManeuverIcon(nextManeuver) as any}
               size={24}
@@ -798,23 +801,23 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       <View style={styles.controls}>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>ETA</Text>
+            <Text style={styles.statLabel}>{t("navigation.eta")}</Text>
             <Text style={styles.statValue}>
               {formatDuration(remainingMinutes)}
             </Text>
-            <Text style={styles.statLabel}>Arrival</Text>
+            <Text style={styles.statLabel}>{t("navigation.arrival")}</Text>
             <Text style={styles.statValue}>
               {formatArrivalTime(remainingMinutes, timeFormat === "24h")}
             </Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Distance</Text>
+            <Text style={styles.statLabel}>{t("navigation.distance")}</Text>
             <Text style={styles.statValue}>
               {formatDistance(remainingDistance, distanceUnit)}
             </Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Safety</Text>
+            <Text style={styles.statLabel}>{t("navigation.safety")}</Text>
             <Text style={styles.statValue}>
               {selectedRoute.safety_analysis?.overall_route_score.toFixed(1)}
             </Text>
@@ -826,7 +829,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           onPress={handleEndNavigation}
         >
           <Ionicons name="close-circle" size={24} color={theme.colors.card} />
-          <Text style={styles.endButtonText}>End Navigation</Text>
+          <Text style={styles.endButtonText}>
+            {t("navigation.end_navigation")}
+          </Text>
         </TouchableOpacity>
       </View>
     </>

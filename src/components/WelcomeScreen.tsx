@@ -17,10 +17,12 @@ import logoImage from "assets/images/TruGuideLogoTransparent1024x1024.png";
 import { theme } from "@/styles/theme";
 import ShieldSvg from "assets/images/shield.svg";
 import MapBgSvg from "assets/images/map-bg.svg";
+import { useTranslation } from "react-i18next";
 
 const { height } = Dimensions.get("window");
 
 const WelcomeScreenNew = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -120,9 +122,7 @@ const WelcomeScreenNew = () => {
           </Text>
 
           <Text style={styles.heroSubtitle}>
-            The first GPS app that shows you how safe places are for people like
-            you
-          </Text>
+            {t('profile.the_first_gps_app_that_shows_you_how')}</Text>
         </View>
 
         {/* Feature Illustration */}
@@ -148,7 +148,7 @@ const WelcomeScreenNew = () => {
                   { backgroundColor: theme.colors.secondary },
                 ]}
               />
-              <Text style={styles.pinLabel}>Safe</Text>
+              <Text style={styles.pinLabel}>{t("profile.safe")}</Text>
             </View>
             <View style={styles.mapPin2}>
               <View
@@ -157,13 +157,13 @@ const WelcomeScreenNew = () => {
                   { backgroundColor: theme.colors.mixedYellow },
                 ]}
               />
-              <Text style={styles.pinLabel}>Caution</Text>
+              <Text style={styles.pinLabel}>{t("profile.caution")}</Text>
             </View>
             <View style={styles.mapPin3}>
               <View
                 style={[styles.pin, { backgroundColor: theme.colors.error }]}
               />
-              <Text style={styles.pinLabel}>Avoid</Text>
+              <Text style={styles.pinLabel}>{t("profile.avoid")}</Text>
             </View>
           </View>
         </Animated.View>
@@ -171,20 +171,20 @@ const WelcomeScreenNew = () => {
         {/* Key Benefits */}
         <View style={styles.benefitsContainer}>
           <View style={styles.benefit}>
-            <Text style={styles.benefitIcon}>🎯</Text>
+            <Text style={styles.benefitIcon}>{t("profile.unknown_1")}</Text>
             <Text style={styles.benefitText}>
-              Demographic-aware safety ratings
-            </Text>
+              {t('profile.demographicaware_safety_ratings')}</Text>
           </View>
           <View style={styles.benefit}>
-            <Text style={styles.benefitIcon}>👥</Text>
+            <Text style={styles.benefitIcon}>{t("profile.unknown_2")}</Text>
             <Text style={styles.benefitText}>
-              Community-powered recommendations
-            </Text>
+              {t('profile.communitypowered_recommendations')}</Text>
           </View>
           <View style={styles.benefit}>
-            <Text style={styles.benefitIcon}>🤖</Text>
-            <Text style={styles.benefitText}>AI-powered travel insights</Text>
+            <Text style={styles.benefitIcon}>{t("profile.unknown_3")}</Text>
+            <Text style={styles.benefitText}>
+              {t("profile.aipowered_travel_insights")}
+            </Text>
           </View>
         </View>
       </Animated.View>
@@ -210,7 +210,9 @@ const WelcomeScreenNew = () => {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={styles.primaryButtonText}>Get Started</Text>
+            <Text style={styles.primaryButtonText}>
+              {t("profile.get_started")}
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -219,7 +221,7 @@ const WelcomeScreenNew = () => {
           onPress={handleSignIn}
           activeOpacity={0.7}
         >
-          <Text style={styles.secondaryButtonText}>Sign In</Text>
+          <Text style={styles.secondaryButtonText}>{t("profile.sign_in")}</Text>
         </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>

@@ -17,11 +17,12 @@ import { logger } from "@/utils/logger";
 import { IubendaDocument } from "@/components/IubendaDocument";
 import { recordLegalAcceptance } from "@/services/consentService";
 import { commonStyles } from "@/styles/common";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
 
 const IUBENDA_PUBLIC_ID = "69238085";
 
 export default function LegalAcceptanceScreen() {
+  const { t } = useTranslation();
   const { user, refreshOnboardingStatus } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [termsChecked, setTermsChecked] = useState(false);
@@ -49,7 +50,7 @@ export default function LegalAcceptanceScreen() {
       await refreshOnboardingStatus();
     } catch (error) {
       logger.error("Failed to save terms acceptance:", error);
-      notify.error("Something went wrong. Please try again.");
+      notify.error(t("legal.something_went_wrong_please_try_again"));
     } finally {
       setIsLoading(false);
     }
@@ -65,10 +66,9 @@ export default function LegalAcceptanceScreen() {
             color={theme.colors.primary}
           />
         </View>
-        <Text style={styles.title}>Terms & Privacy</Text>
+        <Text style={styles.title}>{t("legal.terms_privacy")}</Text>
         <Text style={styles.subtitle}>
-          Please review and accept our terms to continue
-        </Text>
+          {t('legal.please_review_and_accept_our_terms_to')}</Text>
 
         <View style={styles.checkboxContainer}>
           <TouchableOpacity
@@ -136,10 +136,7 @@ export default function LegalAcceptanceScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.infoText}>
-            Your privacy matters. We only collect data necessary to provide
-            personalized safety recommendations. You control what demographic
-            information you share.
-          </Text>
+            {t('legal.your_privacy_matters_we_only_collect')}</Text>
         </View>
       </ScrollView>
 
@@ -156,7 +153,9 @@ export default function LegalAcceptanceScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.colors.textOnPrimary} />
           ) : (
-            <Text style={commonStyles.primaryButtonText}>Continue</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("legal.continue")}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
@@ -166,7 +165,7 @@ export default function LegalAcceptanceScreen() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showPrivacy}
         onClose={() => setShowPrivacy(false)}
-        title="Privacy Policy"
+        title={t("legal.privacy_policy")}
       />
 
       <IubendaDocument
@@ -174,7 +173,7 @@ export default function LegalAcceptanceScreen() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showTerms}
         onClose={() => setShowTerms(false)}
-        title="Terms of Service"
+        title={t("legal.terms_of_service")}
       />
     </SafeAreaView>
   );

@@ -1,7 +1,7 @@
 import { store } from '@/store';
 import { useAppDispatch } from '@/store/hooks';
-import { 
-  checkForActiveNavigation, 
+import {
+  checkForActiveNavigation,
   startNavigationSession,
   endNavigationSession,
   setSelectedRoute,
@@ -18,8 +18,10 @@ import { logger } from '@/utils/logger';
 import { formatTimeAgo, hoursAgo } from '@/utils/timeHelpers';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
+import { useTranslation } from "react-i18next";
 
 export function useNavigationManager() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -37,18 +39,18 @@ export function useNavigationManager() {
             typeof coord.longitude === "number"
         )
       ) {
-        notify.error("Invalid route data format");
+        notify.error(t('navigation.invalid_route_data_format'));
         return;
       }
 
       const routeCoords = activeRoute.route_coordinates as unknown as RouteCoordinate[];
-      notify.info("Recalculating route safety...");
+      notify.info(t('navigation.recalculating_route_safety'));
 
       const state = store.getState();
       const userProfile = state.user.profile;
 
       if (!userProfile) {
-        notify.error("Profile required to calculate route safety");
+        notify.error(t('navigation.profile_required_to_calculate_route'));
         return;
       }
 
@@ -81,7 +83,7 @@ export function useNavigationManager() {
 
       const origin = routeCoords[0];
       const destination = routeCoords[routeCoords.length - 1];
-      
+
       // Restore the route request for rerouting
       dispatch(
         setRouteRequest({
@@ -113,14 +115,14 @@ export function useNavigationManager() {
       if (activeRoute.navigation_session_id) {
         dispatch(setNavigationSessionId(activeRoute.navigation_session_id));
       }
-      
+
       dispatch(setSelectedRoute(safeRoute));
       await dispatch(startNavigationSession(activeRoute.id));
       dispatch(startNavigation());
       router.push("/(tabs)");
     } catch (error) {
       logger.error("Failed to restore navigation:", error);
-      notify.error("Failed to restore route. Please try again.");
+      notify.error(t('navigation.failed_to_restore_route_please_try_again'));
     }
   }, [dispatch, router]);
 
@@ -172,7 +174,7 @@ export function useNavigationManager() {
           {
             text: "Not Now",
             style: "cancel",
-            onPress: () => {},
+            onPress: () => { },
           },
           {
             text: "Continue",

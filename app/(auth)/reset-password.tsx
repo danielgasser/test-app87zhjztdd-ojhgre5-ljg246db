@@ -21,8 +21,11 @@ import { useLocalSearchParams } from "expo-router";
 import { logger } from "@/utils/logger";
 import { passwordChecker } from "@/utils/passwordChecker";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function ResetPasswordScreen() {
+  const { t } = useTranslation();
+
   const params = useLocalSearchParams();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -57,7 +60,7 @@ export default function ResetPasswordScreen() {
       if (session) {
         setIsValidatingToken(false);
       } else {
-        notify.error("Invalid or expired reset link.");
+        notify.error(t("auth.invalid_or_expired_reset_link"));
         router.replace("/(auth)/forgot-password");
       }
     };
@@ -76,12 +79,12 @@ export default function ResetPasswordScreen() {
     const trimmedNewPassword = newPassword.trim();
     const trimmedConfirmPassword = confirmPassword.trim();
     if (!trimmedNewPassword || !trimmedConfirmPassword) {
-      notify.error("Please fill in all fields");
+      notify.error(t("auth.please_fill_in_all_fields"));
       return;
     }
 
     if (trimmedNewPassword !== trimmedConfirmPassword) {
-      notify.error("Passwords do not match");
+      notify.error(t("auth.passwords_do_not_match"));
       return;
     }
 
@@ -130,8 +133,7 @@ export default function ResetPasswordScreen() {
               <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Text style={commonStyles.loadingText}>
-                  Validating reset link...
-                </Text>
+                  {t('auth.validating_reset_link')}</Text>
               </View>
             ) : (
               <>
@@ -143,21 +145,23 @@ export default function ResetPasswordScreen() {
                     color={theme.colors.primary}
                     style={styles.icon}
                   />
-                  <Text style={styles.title}>Create New Password</Text>
-                  <Text style={styles.subtitle}>
-                    Your new password must be different from previously used
-                    passwords
+                  <Text style={styles.title}>
+                    {t("auth.create_new_password")}
                   </Text>
+                  <Text style={styles.subtitle}>
+                    {t('auth.your_new_password_must_be_different')}</Text>
                 </View>
 
                 {/* Form */}
                 <View style={styles.form}>
                   {/* New Password */}
-                  <Text style={commonStyles.formLabel}>New Password</Text>
+                  <Text style={commonStyles.formLabel}>
+                    {t("auth.new_password")}
+                  </Text>
                   <View style={styles.passwordContainer}>
                     <TextInput
                       style={styles.passwordInput}
-                      placeholder="Enter new password"
+                      placeholder={t("auth.enter_new_password")}
                       placeholderTextColor={theme.colors.textSecondary}
                       value={newPassword}
                       onChangeText={setNewPassword}
@@ -179,11 +183,13 @@ export default function ResetPasswordScreen() {
                   </View>
 
                   {/* Confirm Password */}
-                  <Text style={commonStyles.formLabel}>Confirm Password</Text>
+                  <Text style={commonStyles.formLabel}>
+                    {t("auth.confirm_password")}
+                  </Text>
                   <View style={styles.passwordContainer}>
                     <TextInput
                       style={styles.passwordInput}
-                      placeholder="Confirm new password"
+                      placeholder={t("auth.confirm_new_password")}
                       placeholderTextColor={theme.colors.textSecondary}
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
@@ -213,20 +219,15 @@ export default function ResetPasswordScreen() {
                   {/* Password Requirements */}
                   <View style={styles.requirementsBox}>
                     <Text style={styles.requirementsTitle}>
-                      Password must contain:
-                    </Text>
+                      {t('auth.password_must_contain')}</Text>
                     <Text style={styles.requirement}>
-                      • At least 8 characters
-                    </Text>
+                      {t('auth.at_least_8_characters')}</Text>
                     <Text style={styles.requirement}>
-                      • Uppercase and lowercase letters
-                    </Text>
+                      {t('auth.uppercase_and_lowercase_letters')}</Text>
                     <Text style={styles.requirement}>
-                      • At least one number
-                    </Text>
+                      {t('auth.at_least_one_number')}</Text>
                     <Text style={styles.requirement}>
-                      • At least one special character (!@#$%^&*)
-                    </Text>
+                      {t('auth.at_least_one_special_character')}</Text>
                   </View>
                 </View>
 
@@ -242,7 +243,9 @@ export default function ResetPasswordScreen() {
                   {loading ? (
                     <ActivityIndicator color={theme.colors.background} />
                   ) : (
-                    <Text style={styles.resetButtonText}>Reset Password</Text>
+                    <Text style={styles.resetButtonText}>
+                      {t("auth.reset_password")}
+                    </Text>
                   )}
                 </TouchableOpacity>
 
@@ -256,7 +259,9 @@ export default function ResetPasswordScreen() {
                     size={16}
                     color={theme.colors.primary}
                   />
-                  <Text style={styles.loginLinkText}>Back to Login</Text>
+                  <Text style={styles.loginLinkText}>
+                    {t("auth.back_to_login")}
+                  </Text>
                 </TouchableOpacity>
               </>
             )}

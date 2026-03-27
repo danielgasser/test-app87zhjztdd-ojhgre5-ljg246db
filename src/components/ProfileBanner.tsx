@@ -9,6 +9,7 @@ import { FIELD_DISPLAY_NAMES } from "@/constants/profileRequirements";
 import { theme } from "@/styles/theme";
 import type { BannerType } from "@/store/profileBannerSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface ProfileBannerProps {
   bannerType: string;
@@ -17,34 +18,31 @@ interface ProfileBannerProps {
   onDismiss?: () => void;
 }
 
-const BANNER_MESSAGES = {
-  [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
-    .INCOMPLETE_PROFILE_GENERAL]: {
-    icon: "information-circle" as any,
-    title: "📊 Complete Your Profile",
-    description:
-      "Add more fields for better safety predictions and personalized recommendations.",
-  },
-  [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
-    .RECOMMENDATIONS_INCOMPLETE]: {
-    icon: "star" as any,
-    title: "⭐ Limited Recommendations",
-    description:
-      "We need your race/ethnicity and gender to find travelers with similar experiences.",
-  },
-  [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE]: {
-    icon: "warning" as any,
-    title: "⚠️ Basic Routing Only",
-    description:
-      "Add more profile fields for personalized safe routing based on who you are.",
-  },
-  [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.SIMILARITY_FAILED]: {
-    icon: "close-circle" as any,
-    title: "❌ Can't Find Similar Users",
-    description:
-      "We need at least your race/ethnicity and gender to connect you with similar travelers.",
-  },
-} as Record<string, { icon: any; title: string; description: string }>;
+const getBannerMessages = (t: (key: string) => string) =>
+  ({
+    [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
+      .INCOMPLETE_PROFILE_GENERAL]: {
+      icon: "information-circle" as any,
+      title: t("profile.complete_your_profile_i"),
+      description: t("profile.complete_your_profile_description"),
+    },
+    [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES
+      .RECOMMENDATIONS_INCOMPLETE]: {
+      icon: "star" as any,
+      title: t("profile.limited_recommendations"),
+      description: t("profile.limited_recommendations_description"),
+    },
+    [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.ROUTING_INCOMPLETE]: {
+      icon: "warning" as any,
+      title: t("profile.basic_routing_only"),
+      description: t("profile.basic_routing_only_description"),
+    },
+    [APP_CONFIG.PROFILE_COMPLETION.BANNERS.BANNER_TYPES.SIMILARITY_FAILED]: {
+      icon: "close-circle" as any,
+      title: t("profile.cant_find_similar_users"),
+      description: t("profile.cant_find_similar_users_description"),
+    },
+  }) as Record<string, { icon: any; title: string; description: string }>;
 
 export default function ProfileBanner({
   bannerType,
@@ -52,9 +50,12 @@ export default function ProfileBanner({
   visible,
   onDismiss,
 }: ProfileBannerProps) {
+  const { t } = useTranslation();
+  const BANNER_MESSAGES = getBannerMessages(t);
+
   const dispatch = useAppDispatch();
   const dismissal = useAppSelector(
-    (state) => state.profileBanner.dismissedBanners[bannerType as BannerType]
+    (state) => state.profileBanner.dismissedBanners[bannerType as BannerType],
   );
 
   // Get banner content
@@ -81,7 +82,7 @@ export default function ProfileBanner({
 
   const handleDismiss = (permanent: boolean = false) => {
     dispatch(
-      dismissBanner({ bannerType: bannerType as BannerType, permanent })
+      dismissBanner({ bannerType: bannerType as BannerType, permanent }),
     );
     if (onDismiss) onDismiss();
   };
@@ -105,7 +106,9 @@ export default function ProfileBanner({
         {/* Missing Fields List */}
         {missingFields.length > 0 && (
           <View style={styles.missingFieldsContainer}>
-            <Text style={styles.missingFieldsLabel}>Missing:</Text>
+            <Text style={styles.missingFieldsLabel}>
+              {t("profile.missing")}
+            </Text>
             <Text style={styles.missingFieldsList}>
               {missingFields
                 .map((field) => FIELD_DISPLAY_NAMES[field])
@@ -120,7 +123,9 @@ export default function ProfileBanner({
             style={[commonStyles.primaryButton]}
             onPress={handleCompleteProfile}
           >
-            <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("profile.complete_profile")}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity

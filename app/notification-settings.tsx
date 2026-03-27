@@ -21,8 +21,10 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationSettings() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
 
@@ -73,7 +75,7 @@ export default function NotificationSettings() {
         }),
       ).unwrap();
     } catch (error) {
-      notify.error("Failed to save setting. Please try again.");
+      notify.error(t("settings.failed_to_save_setting_please_try_again"));
       logger.error("Save error:", error);
     }
   };
@@ -102,7 +104,9 @@ export default function NotificationSettings() {
             style={commonStyles.backButtonText}
           />
         </TouchableOpacity>
-        <Text style={commonStyles.headerTitle}>Notifications</Text>
+        <Text style={commonStyles.headerTitle}>
+          {t("settings.notifications")}
+        </Text>
         <View style={commonStyles.headerPlaceholder} />
       </View>
 

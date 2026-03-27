@@ -31,6 +31,7 @@ import { validateVisitDateTime } from "@/utils/dateValidation";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
 import { showInterstitialWithCooldown } from "@/services/adMobService";
+import { useTranslation } from "react-i18next";
 interface RatingProps {
   label: string;
   value: number;
@@ -44,11 +45,17 @@ const RatingInput: React.FC<RatingProps> = ({
   onChange,
   required,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <View style={commonStyles.ratingContainer}>
       <Text style={commonStyles.ratingLabel}>
         {label}{" "}
-        {required && <Text style={commonStyles.requiredAsterisk}>*</Text>}
+        {required && (
+          <Text style={commonStyles.requiredAsterisk}>
+            {t("review.unknown")}
+          </Text>
+        )}
       </Text>
       <View style={commonStyles.stars}>
         {[1, 2, 3, 4, 5].map((star) => (
@@ -68,6 +75,8 @@ const RatingInput: React.FC<RatingProps> = ({
 };
 
 export default function ReviewScreen() {
+  const { t } = useTranslation();
+
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { locationId, locationName, locationData, isNewLocation } =
@@ -106,13 +115,13 @@ export default function ReviewScreen() {
   const [editableLocationName, setEditableLocationName] = useState("");
   useEffect(() => {
     if (!isCreatingNew && !typedLocationId) {
-      notify.error("No location specified");
+      notify.error(t("review.no_location_specified"));
       router.back();
       return;
     }
 
     if (isCreatingNew && !parsedLocationData) {
-      notify.error("No location data provided");
+      notify.error(t("review.no_location_data_provided"));
       router.back();
       return;
     }
@@ -123,22 +132,22 @@ export default function ReviewScreen() {
 
     // Validation
     if (!formData.title.trim()) {
-      notify.error("Please enter a review title");
+      notify.error(t("review.please_enter_a_review_title"));
       return;
     }
 
     if (isCreatingNew && !editableLocationName.trim()) {
-      notify.error("Please enter a name for this location");
+      notify.error(t("review.please_enter_a_name_for_this_location"));
       return;
     }
 
     if (!formData.content.trim()) {
-      notify.error("Please enter review content");
+      notify.error(t("review.please_enter_review_content"));
       return;
     }
 
     if (!formData.overall_rating || !formData.safety_rating) {
-      notify.error("Please provide both overall and safety ratings");
+      notify.error(t("review.please_provide_both_overall_and_safety"));
       return;
     }
 
@@ -191,9 +200,9 @@ export default function ReviewScreen() {
 
       const result = await dispatch(submitReview(reviewData)).unwrap();
       if (result && "queued" in result) {
-        notify.success("Review saved - will sync when online");
+        notify.success(t("review.review_saved_will_sync_when_online"));
       } else {
-        notify.success("Review submitted successfully!");
+        notify.success(t("review.review_submitted_successfully"));
       }
       notify.confirm("Success", "Review submitted successfully!", [
         {
@@ -239,13 +248,14 @@ export default function ReviewScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
           <Text style={commonStyles.textError}>
-            Please log in to submit a review
-          </Text>
+            {t('review.please_log_in_to_submit_a_review')}</Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
           >
-            <Text style={commonStyles.primaryButtonText}>Go to Login</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("review.go_to_login")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -274,7 +284,9 @@ export default function ReviewScreen() {
                   style={commonStyles.backButtonText}
                 />
               </TouchableOpacity>
-              <Text style={commonStyles.headerTitle}>Write a Review</Text>
+              <Text style={commonStyles.headerTitle}>
+                {t("review.write_a_review")}
+              </Text>
               <View style={{ width: 24 }} />
             </View>
 
@@ -290,7 +302,9 @@ export default function ReviewScreen() {
                 <View style={commonStyles.formField}>
                   <Text style={commonStyles.formLabel}>
                     📍 What is this place called?
-                    <Text style={commonStyles.requiredAsterisk}>*</Text>
+                    <Text style={commonStyles.requiredAsterisk}>
+                      {t("review.unknown")}
+                    </Text>
                   </Text>
                   <TextInput
                     style={commonStyles.input}
@@ -301,8 +315,7 @@ export default function ReviewScreen() {
                     autoCapitalize="words"
                   />
                   <Text style={styles.helperText}>
-                    Give this location a name so others can find it
-                  </Text>
+                    {t('review.give_this_location_a_name_so_others_can')}</Text>
                 </View>
               </View>
             )}
@@ -312,11 +325,13 @@ export default function ReviewScreen() {
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
                   Review Title{" "}
-                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                  <Text style={commonStyles.requiredAsterisk}>
+                    {t("review.unknown")}
+                  </Text>
                 </Text>
                 <TextInput
                   style={commonStyles.input}
-                  placeholder="Summarize your experience"
+                  placeholder={t("review.summarize_your_experience")}
                   value={formData.title}
                   onChangeText={(text) =>
                     setFormData({ ...formData, title: text })
@@ -367,11 +382,15 @@ export default function ReviewScreen() {
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
                   Your Review{" "}
-                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                  <Text style={commonStyles.requiredAsterisk}>
+                    {t("review.unknown")}
+                  </Text>
                 </Text>
                 <TextInput
                   style={[commonStyles.input, commonStyles.textArea]}
-                  placeholder="Share your experience at this location..."
+                  placeholder={t(
+                    "review.share_your_experience_at_this_location",
+                  )}
                   value={formData.content}
                   onChangeText={(text) =>
                     setFormData({ ...formData, content: text })
@@ -387,7 +406,9 @@ export default function ReviewScreen() {
               </View>
               {/* Visit Details */}
               <View style={commonStyles.formField}>
-                <Text style={commonStyles.formLabel}>Visit Date</Text>
+                <Text style={commonStyles.formLabel}>
+                  {t("review.visit_date")}
+                </Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowDatePicker(true)}
@@ -426,7 +447,9 @@ export default function ReviewScreen() {
                 />
               )}
               <View style={commonStyles.formField}>
-                <Text style={commonStyles.formLabel}>Visit Time</Text>
+                <Text style={commonStyles.formLabel}>
+                  {t("review.visit_time")}
+                </Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowTimePicker(true)}
@@ -458,7 +481,9 @@ export default function ReviewScreen() {
 
                       // Check if the combined date+time is in the future
                       if (newDateTime > new Date()) {
-                        notify.error("Visit time cannot be in the future");
+                        notify.error(
+                          t("review.visit_time_cannot_be_in_the_future"),
+                        );
                         const now = new Date();
                         newDateTime.setHours(now.getHours());
                         newDateTime.setMinutes(now.getMinutes());
@@ -470,7 +495,9 @@ export default function ReviewScreen() {
                 />
               )}
               <View style={commonStyles.formField}>
-                <Text style={commonStyles.formLabel}>Visit Type</Text>
+                <Text style={commonStyles.formLabel}>
+                  {t("review.visit_type")}
+                </Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowVisitTypePicker(true)}
@@ -501,12 +528,13 @@ export default function ReviewScreen() {
                   <View style={commonStyles.modalContent}>
                     <View style={commonStyles.modalHeader}>
                       <Text style={commonStyles.modalTitle}>
-                        Select Visit Type
-                      </Text>
+                        {t('review.select_visit_type')}</Text>
                       <TouchableOpacity
                         onPress={() => setShowVisitTypePicker(false)}
                       >
-                        <Text style={commonStyles.modalDone}>Done</Text>
+                        <Text style={commonStyles.modalDone}>
+                          {t("review.done")}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                     <Picker
@@ -533,10 +561,7 @@ export default function ReviewScreen() {
                   color={theme.colors.textSecondary}
                 />
                 <Text style={styles.noteText}>
-                  Your demographic profile will be attached to this review to
-                  help others who share similar identities make informed
-                  decisions.
-                </Text>
+                  {t('review.your_demographic_profile_will_be')}</Text>
               </View>
               {/* Submit Button */}
               <TouchableOpacity

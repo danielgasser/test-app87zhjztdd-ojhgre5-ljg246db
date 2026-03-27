@@ -49,6 +49,7 @@ import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -80,6 +81,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   onClose,
   initialDestination,
 }) => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     selectedRoute,
@@ -300,7 +302,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         !fromLocation ||
         !toLocation
       ) {
-        notify.error("No route selected for navigation");
+        notify.error(t("navigation.no_route_selected_for_navigation"));
         return;
       }
 
@@ -515,11 +517,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         setSearchQuery("");
         setMapboxResults([]);
       } else {
-        notify.error("Unable to get location details. Please try again.");
+        notify.error(t("navigation.unable_to_get_location_details_please"));
       }
     } catch (error) {
       logger.error("Error fetching place details:", error);
-      notify.error("Unable to get location details. Please try again.");
+      notify.error(t("navigation.unable_to_get_location_details_please"));
     }
   };
 
@@ -647,7 +649,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       try {
         await dispatch(generateSafeRoute(routeRequest)).unwrap();
       } catch (fallbackError) {
-        notify.error("Unable to generate route. Please try again.");
+        notify.error(t("navigation.unable_to_generate_route_please_try"));
       }
     }
   };
@@ -747,7 +749,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>Plan Safe Route</Text>
+        <Text style={styles.title}>{t("navigation.plan_safe_route")}</Text>
         <View style={styles.headerSpacer} />
       </View>
       {/* Warning banner for low safety routes */}
@@ -758,8 +760,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             <Ionicons name="warning" size={24} color={theme.colors.accent} />
             <View style={styles.dangerWarningContent}>
               <Text style={styles.dangerWarningTitle}>
-                Route passes through danger zones
-              </Text>
+                {t('navigation.route_passes_through_danger_zones')}</Text>
               <Text style={styles.dangerWarningText}>{dangerMessage}</Text>
             </View>
           </View>
@@ -799,7 +800,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                   size={16}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.recentHeaderText}>Recent Searches</Text>
+                <Text style={styles.recentHeaderText}>
+                  {t("navigation.recent_searches")}
+                </Text>
               </View>
               <FlatList
                 data={searchHistory}
@@ -862,7 +865,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               ListEmptyComponent={
                 searchQuery.length > 0 && !searchLoading ? (
                   <View style={styles.noResults}>
-                    <Text style={styles.noResultsText}>No results found</Text>
+                    <Text style={styles.noResultsText}>
+                      {t("navigation.no_results_found")}
+                    </Text>
                   </View>
                 ) : null
               }
@@ -880,7 +885,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             <View>
               {/* Location Inputs */}
               <View style={styles.section}>
-                <Text style={commonStyles.sectionTitle}>Route Details</Text>
+                <Text style={commonStyles.sectionTitle}>
+                  {t("navigation.route_details")}
+                </Text>
                 <View style={styles.locationInputs}>
                   {renderLocationInput(
                     "from",
@@ -894,11 +901,12 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               {/* Safety Preferences */}
               <View style={styles.section}>
                 <Text style={commonStyles.sectionTitle}>
-                  Safety Preferences
-                </Text>
+                  {t('navigation.safety_preferences')}</Text>
 
                 <View style={styles.toggleRow}>
-                  <Text style={styles.toggleLabel}>Avoid evening dangers</Text>
+                  <Text style={styles.toggleLabel}>
+                    {t("navigation.avoid_evening_dangers")}
+                  </Text>
                   <TouchableOpacity
                     style={[
                       styles.toggle,
@@ -947,8 +955,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                       color={theme.colors.background}
                     />
                     <Text style={styles.generateButtonText}>
-                      Generate Safe Route
-                    </Text>
+                      {t('navigation.generate_safe_route')}</Text>
                   </>
                 ) : (
                   <>
@@ -990,7 +997,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               {/* Selected Route Display */}
               {selectedRoute && !showSmartRouteComparison && (
                 <View style={styles.routesSection}>
-                  <Text style={commonStyles.sectionTitle}>Your Route</Text>
+                  <Text style={commonStyles.sectionTitle}>
+                    {t("navigation.your_route")}
+                  </Text>
                   <View style={[styles.routeCard, styles.selectedRouteCard]}>
                     <View style={styles.routeHeader}>
                       <View style={styles.routeInfo}>

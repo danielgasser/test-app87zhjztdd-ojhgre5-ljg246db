@@ -15,6 +15,7 @@ import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
 import { ModalSnackbar } from "./ModalSnackbar";
+import { useTranslation } from "react-i18next";
 export interface MapFilters {
   minSafetyRating: number | null; // null = show all, 2/3/4 = minimum rating
   hasReviews: boolean; // Only show locations with reviews
@@ -64,6 +65,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
   onApplyFilters,
   showMyReviewsFilter = false,
 }) => {
+  const { t } = useTranslation();
+
   const dispatch = useAppDispatch();
   const { hasAccess } = useFeatureAccess("advancedFilters");
   const { hasAccess: hasDemographicAccess } =
@@ -169,7 +172,9 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
         <View style={styles.specContainer}>
           {/* Header */}
           <View style={commonStyles.header}>
-            <Text style={commonStyles.headerTitle}>Filter Locations</Text>
+            <Text style={commonStyles.headerTitle}>
+              {t("map.filter_locations")}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
@@ -181,7 +186,9 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
           >
             {/* Safety Rating Filter */}
             <View style={styles.section}>
-              <Text style={styles.specSectionTitle}>Minimum Safety Rating</Text>
+              <Text style={styles.specSectionTitle}>
+                {t("map.minimum_safety_rating")}
+              </Text>
               <View style={styles.optionsRow}>
                 {RATING_OPTIONS.map((option) => (
                   <TouchableOpacity
@@ -217,14 +224,14 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
             {/* Review Filters */}
             <View style={styles.section}>
-              <Text style={styles.specSectionTitle}>Reviews</Text>
+              <Text style={styles.specSectionTitle}>{t("map.reviews")}</Text>
 
               <TouchableOpacity
                 style={styles.toggleRow}
                 onPress={handleToggleHasReviews}
               >
                 <View style={styles.toggleLabel}>
-                  <Text style={styles.toggleText}>Has reviews</Text>
+                  <Text style={styles.toggleText}>{t("map.has_reviews")}</Text>
                   {!hasAccess && (
                     <Ionicons
                       name="lock-closed"
@@ -255,8 +262,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
               >
                 <View style={styles.toggleLabel}>
                   <Text style={styles.toggleText}>
-                    Reviewed by my demographic
-                  </Text>
+                    {t('map.reviewed_by_my_demographic')}</Text>
                   {!hasDemographicAccess && (
                     <Ionicons
                       name="lock-closed"
@@ -286,8 +292,7 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
               >
                 <View style={styles.toggleLabel}>
                   <Text style={styles.toggleText}>
-                    Use my demographic safety scores
-                  </Text>
+                    {t('map.use_my_demographic_safety_scores')}</Text>
                   {!hasAccess && (
                     <Ionicons
                       name="lock-closed"
@@ -317,7 +322,9 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
                   onPress={handleToggleMyReviews}
                 >
                   <View style={styles.toggleLabel}>
-                    <Text style={styles.toggleText}>My reviews only</Text>
+                    <Text style={styles.toggleText}>
+                      {t("map.my_reviews_only")}
+                    </Text>
                   </View>
                   <View
                     style={[
@@ -339,7 +346,9 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
 
             {/* Place Type Filter */}
             <View style={styles.section}>
-              <Text style={commonStyles.sectionTitle}>Place Type</Text>
+              <Text style={commonStyles.sectionTitle}>
+                {t("map.place_type")}
+              </Text>
               <View style={styles.placeTypesGrid}>
                 {PLACE_TYPE_OPTIONS.map((option) => (
                   <TouchableOpacity
@@ -396,12 +405,13 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
                   !hasActiveFilters && styles.resetButtonTextDisabled,
                 ]}
               >
-                Reset
-              </Text>
+                {t('map.reset')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-              <Text style={styles.applyButtonText}>Apply Filters</Text>
+              <Text style={styles.applyButtonText}>
+                {t("map.apply_filters")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

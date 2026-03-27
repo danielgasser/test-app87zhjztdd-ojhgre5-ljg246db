@@ -15,6 +15,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { notify } from "@/utils/notificationService";
 import { showPremiumPrompt } from "@/store/premiumPromptSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface SaveLocationButtonProps {
   locationId?: string | null;
@@ -35,11 +36,13 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
   longitude,
   compact = false,
 }) => {
+  const { t } = useTranslation();
+
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   const { hasAccess } = useFeatureAccess("saveLocations");
   const savedLocations = useAppSelector(
-    (state) => state.locations.savedLocations
+    (state) => state.locations.savedLocations,
   );
 
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -52,7 +55,7 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
     const found = savedLocations.find(
       (loc) =>
         (locationId && loc.location_id === locationId) ||
-        (googlePlaceId && loc.google_place_id === googlePlaceId)
+        (googlePlaceId && loc.google_place_id === googlePlaceId),
     );
 
     setSavedId(found?.id || null);
@@ -60,7 +63,7 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
 
   const handlePress = async () => {
     if (!user?.id) {
-      notify.info("Please sign in to save locations");
+      notify.info(t("map.please_sign_in_to_save_locations"));
       return;
     }
 
@@ -70,7 +73,7 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
         showPremiumPrompt({
           feature: "saveLocations",
           description: "Save your favorite locations for quick access anytime.",
-        })
+        }),
       );
       return;
     }
@@ -82,7 +85,7 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
         // Unsave
         await dispatch(unsaveLocation({ savedLocationId: savedId })).unwrap();
         setSavedId(null);
-        notify.success("Location removed from saved");
+        notify.success(t("map.location_removed_from_saved"));
       } else {
         // Save
         const result = await dispatch(
@@ -94,16 +97,16 @@ export const SaveLocationButton: React.FC<SaveLocationButtonProps> = ({
             address,
             latitude,
             longitude,
-          })
+          }),
         ).unwrap();
         setSavedId(result.id);
-        notify.success("Location saved!");
+        notify.success(t("map.location_saved"));
       }
     } catch (error: any) {
       if (error?.code === "23505") {
-        notify.info("Location already saved");
+        notify.info(t("map.location_already_saved"));
       } else {
-        notify.error("Failed to save location");
+        notify.error(t("map.failed_to_save_location"));
       }
     } finally {
       setLoading(false);

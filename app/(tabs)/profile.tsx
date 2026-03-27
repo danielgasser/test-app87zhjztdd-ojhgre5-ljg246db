@@ -152,7 +152,7 @@ export default function ProfileScreen() {
       await signOut();
       router.replace("/(auth)/login");
     } catch (error) {
-      notify.error("Failed to sign out");
+      notify.error(t('profile.failed_to_sign_out'));
     }
   };
 
@@ -260,10 +260,10 @@ export default function ProfileScreen() {
       // Refresh profile to get updated data
       await dispatch(fetchUserProfile(user!.id));
 
-      notify.success("Profile picture removed!");
+      notify.success(t('profile.profile_picture_removed'));
     } catch (error) {
       logger.error("Remove avatar error:", error);
-      notify.error("Failed to remove profile picture.");
+      notify.error(t('profile.failed_to_remove_profile_picture'));
     } finally {
       setUploading(false);
     }
@@ -349,7 +349,7 @@ export default function ProfileScreen() {
 
     if (demographics.length === 0) {
       return (
-        <Text style={styles.noDemographicsText}>No demographics added yet</Text>
+        <Text style={styles.noDemographicsText}>{t('profile.no_demographics_added_yet')}</Text>
       );
     }
 
@@ -367,9 +367,9 @@ export default function ProfileScreen() {
   const handleDeleteSavedLocation = async (savedLocationId: string) => {
     try {
       await dispatch(unsaveLocation({ savedLocationId })).unwrap();
-      notify.success("Location removed");
+      notify.success(t('profile.location_removed'));
     } catch (error) {
-      notify.error("Failed to remove location");
+      notify.error(t('profile.failed_to_remove_location'));
     }
   };
 
@@ -400,13 +400,12 @@ export default function ProfileScreen() {
       {!isLoggedIn ? (
         <View style={styles.notLoggedInContainer}>
           <Text style={styles.notLoggedInText}>
-            Please sign in to view your profile
-          </Text>
+            {t('profile.please_sign_in_to_view_your_profile')}</Text>
           <TouchableOpacity
             style={styles.signInButton}
             onPress={() => router.push("/(auth)/login")}
           >
-            <Text style={styles.signInButtonText}>Sign In</Text>
+            <Text style={styles.signInButtonText}>{t('profile.sign_in')}</Text>
           </TouchableOpacity>
         </View>
       ) : !hasCompletedOnboarding ? (
@@ -416,18 +415,15 @@ export default function ProfileScreen() {
             size={64}
             color={theme.colors.primary}
           />
-          <Text style={styles.onboardingTitle}>Complete Your Profile</Text>
+          <Text style={styles.onboardingTitle}>{t('profile.complete_your_profile')}</Text>
           <Text style={styles.onboardingText}>
-            Add your demographic information to get personalized safety
-            recommendations
-          </Text>
+            {t('profile.add_your_demographic_information_to_get')}</Text>
           <TouchableOpacity
             style={styles.completeProfileButton}
             onPress={() => router.push("/onboarding")}
           >
             <Text style={styles.completeProfileButtonText}>
-              Complete Profile
-            </Text>
+              {t('profile.complete_profile')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -448,11 +444,9 @@ export default function ProfileScreen() {
                 />
                 <View style={styles.upgradeBannerText}>
                   <Text style={styles.upgradeBannerTitle}>
-                    Upgrade to Premium
-                  </Text>
+                    {t('profile.upgrade_to_premium')}</Text>
                   <Text style={styles.upgradeBannerSubtitle}>
-                    Unlock all features & go ad-free
-                  </Text>
+                    {t('profile.unlock_all_features_go_adfree')}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -504,7 +498,7 @@ export default function ProfileScreen() {
           >
             {/* Activity Section */}
             <CollapsibleSection
-              title="My Activity"
+              title={t('profile.my_activity')}
               icon="stats-chart"
               isExpanded={expandedSections.activity}
               onToggle={() => toggleSection("activity")}
@@ -525,20 +519,20 @@ export default function ProfileScreen() {
                   <Text style={styles.statNumber}>
                     {voteStats?.helpful_votes_given || 0}
                   </Text>
-                  <Text style={styles.statLabel}>Helpful Votes</Text>
+                  <Text style={styles.statLabel}>{t('profile.helpful_votes')}</Text>
                 </View>
 
                 <View style={styles.statBox}>
                   <Text style={styles.statNumber}>
                     {voteStats?.unhelpful_votes_given || 0}
                   </Text>
-                  <Text style={styles.statLabel}>Unhelpful Votes</Text>
+                  <Text style={styles.statLabel}>{t('profile.unhelpful_votes')}</Text>
                 </View>
               </View>
             </CollapsibleSection>
             {/* Route History Section */}
             <CollapsibleSection
-              title="Route History"
+              title={t('profile.route_history')}
               icon="navigate"
               isExpanded={expandedSections.routeHistory}
               onToggle={() => toggleSection("routeHistory")}
@@ -557,7 +551,7 @@ export default function ProfileScreen() {
                     color={theme.colors.primary}
                   />
                 ) : routeHistory.length === 0 ? (
-                  <Text style={styles.noRoutesText}>No routes</Text>
+                  <Text style={styles.noRoutesText}>{t('profile.no_routes')}</Text>
                 ) : (
                   <>
                     {routeHistory.map((route) => (
@@ -596,11 +590,11 @@ export default function ProfileScreen() {
                             <Text style={styles.routeHistoryMetaText}>
                               {route.distance_km.toFixed(1)} km
                             </Text>
-                            <Text style={styles.routeHistoryMetaText}>•</Text>
+                            <Text style={styles.routeHistoryMetaText}>{t('profile.unknown')}</Text>
                             <Text style={styles.routeHistoryMetaText}>
                               {route.duration_minutes} min
                             </Text>
-                            <Text style={styles.routeHistoryMetaText}>•</Text>
+                            <Text style={styles.routeHistoryMetaText}>{t('profile.unknown')}</Text>
                             <Text style={styles.routeHistoryMetaText}>
                               Safety: {route.safety_score?.toFixed(1) || "N/A"}
                             </Text>
@@ -633,7 +627,7 @@ export default function ProfileScreen() {
                             color={theme.colors.primary}
                           />
                         ) : (
-                          <Text style={styles.loadMoreText}>Load More</Text>
+                          <Text style={styles.loadMoreText}>{t('profile.load_more')}</Text>
                         )}
                       </TouchableOpacity>
                     )}
@@ -643,7 +637,7 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Saved Locations Section */}
             <CollapsibleSection
-              title="Saved Locations"
+              title={t('profile.saved_locations')}
               icon="bookmark"
               isExpanded={expandedSections.savedLocations}
               onToggle={() => toggleSection("savedLocations")}
@@ -658,7 +652,7 @@ export default function ProfileScreen() {
                     color={theme.colors.primary}
                   />
                 ) : savedLocations.length === 0 ? (
-                  <Text style={styles.noRoutesText}>No saved locations</Text>
+                  <Text style={styles.noRoutesText}>{t('profile.no_saved_locations')}</Text>
                 ) : (
                   <>
                     {savedLocations.map((location) => (
@@ -711,7 +705,7 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Recently Viewed Section */}
             <CollapsibleSection
-              title="Recently Viewed"
+              title={t('profile.recently_viewed')}
               icon="eye"
               isExpanded={expandedSections.recentlyViewed}
               onToggle={() => toggleSection("recentlyViewed")}
@@ -727,8 +721,7 @@ export default function ProfileScreen() {
                   />
                 ) : recentlyViewed.length === 0 ? (
                   <Text style={styles.noRoutesText}>
-                    No recently viewed locations
-                  </Text>
+                    {t('profile.no_recently_viewed_locations')}</Text>
                 ) : (
                   <>
                     {recentlyViewed.slice(0, 10).map((location) => (
@@ -770,7 +763,7 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Demographics Section */}
             <CollapsibleSection
-              title="Demographics"
+              title={t('profile.demographics')}
               icon="people"
               isExpanded={expandedSections.demographics}
               onToggle={() => toggleSection("demographics")}
@@ -790,13 +783,12 @@ export default function ProfileScreen() {
                   color={theme.colors.primary}
                 />
                 <Text style={styles.editDemographicsText}>
-                  Edit Demographics
-                </Text>
+                  {t('profile.edit_demographics')}</Text>
               </TouchableOpacity>
             </CollapsibleSection>
             {/* Map Settings Section */}
             <CollapsibleSection
-              title="Map Settings"
+              title={t('profile.map_settings')}
               icon="map"
               isExpanded={expandedSections.mapSettings}
               onToggle={() => toggleSection("mapSettings")}
@@ -808,7 +800,7 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Settings Section */}
             <CollapsibleSection
-              title="Alerts & Privacy Settings"
+              title={t('profile.alerts_privacy_settings')}
               icon="notifications"
               isExpanded={expandedSections.settings}
               onToggle={() => toggleSection("settings")}
@@ -825,7 +817,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.settingText}>Privacy Settings</Text>
+                <Text style={styles.settingText}>{t('profile.privacy_settings')}</Text>
                 <Ionicons
                   name="chevron-forward"
                   size={24}
@@ -842,7 +834,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.settingText}>Notifications</Text>
+                <Text style={styles.settingText}>{t('profile.notifications')}</Text>
                 <Ionicons
                   name="chevron-forward"
                   size={24}
@@ -858,7 +850,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.settingText}>Display Preferences</Text>
+                <Text style={styles.settingText}>{t('profile.display_preferences')}</Text>
                 <Ionicons
                   name="chevron-forward"
                   size={24}
@@ -868,7 +860,7 @@ export default function ProfileScreen() {
             </CollapsibleSection>
             {/* Account Section */}
             <CollapsibleSection
-              title="Account"
+              title={t('profile.account')}
               icon="person-circle"
               isExpanded={expandedSections.account}
               onToggle={() => toggleSection("account")}
@@ -885,7 +877,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.accountText}>Edit Profile</Text>
+                <Text style={styles.accountText}>{t('profile.edit_profile')}</Text>
               </TouchableOpacity>
 
               {profile?.avatar_url && (
@@ -897,8 +889,7 @@ export default function ProfileScreen() {
                   <Text
                     style={[styles.accountText, { color: theme.colors.error }]}
                   >
-                    Remove Profile Picture
-                  </Text>
+                    {t('profile.remove_profile_picture')}</Text>
                 </TouchableOpacity>
               )}
               {profile?.role === "admin" && (
@@ -911,7 +902,7 @@ export default function ProfileScreen() {
                     size={24}
                     color={theme.colors.primary}
                   />
-                  <Text style={styles.accountText}>Admin Panel</Text>
+                  <Text style={styles.accountText}>{t('profile.admin_panel')}</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
@@ -923,7 +914,7 @@ export default function ProfileScreen() {
                   size={24}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.accountText}>Sign Out</Text>
+                <Text style={styles.accountText}>{t('profile.sign_out')}</Text>
               </TouchableOpacity>
             </CollapsibleSection>
           </ScrollView>

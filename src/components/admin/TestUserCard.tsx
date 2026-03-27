@@ -6,6 +6,7 @@ import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
 import { adminStyles } from "@/styles/adminStyles";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface TesterCardProps {
   item: TestUser & { itemType: "tester" };
@@ -24,6 +25,8 @@ export function TestUserCard({
   onStatusChange,
   onDelete,
 }: TesterCardProps) {
+  const { t } = useTranslation();
+
   const meta = item.metadata as TesterMetadata | null;
   console.log("Rendering TestUserCard for", item.email, "with metadata", meta);
   return (
@@ -61,7 +64,9 @@ export function TestUserCard({
             style={[adminStyles.actionBtn, adminStyles.actionBtnOutline]}
             onPress={() => onStatusChange(item, "signed_up")}
           >
-            <Text style={adminStyles.actionBtnTextOutline}>→ Sign user up</Text>
+            <Text style={adminStyles.actionBtnTextOutline}>
+              {t("admin.sign_user_up")}
+            </Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
@@ -72,8 +77,7 @@ export function TestUserCard({
           <Text
             style={[adminStyles.actionBtnText, adminStyles.actionBtnTextActive]}
           >
-            Remove
-          </Text>
+            {t('admin.remove')}</Text>
         </TouchableOpacity>
       </View>
     </View>

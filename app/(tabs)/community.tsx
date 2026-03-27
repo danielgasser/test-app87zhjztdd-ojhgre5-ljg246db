@@ -44,8 +44,11 @@ import MapFiltersModal, {
 import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
 import { useAuth } from "@/providers/AuthProvider";
 import { AdBanner } from "@/components/ads/AdBanner";
+import { useTranslation } from "react-i18next";
 
 export default function CommunityScreen() {
+  const { t } = useTranslation();
+
   const dispatch = useAppDispatch();
   const {
     communityReviews,
@@ -367,7 +370,9 @@ export default function CommunityScreen() {
                   .join(" • ")}
               </Text>
             ) : (
-              <Text style={styles.anonymousText}>Anonymous Reviewer</Text>
+              <Text style={styles.anonymousText}>
+                {t("community.anonymous_reviewer")}
+              </Text>
             )}
           </View>
           <Text style={styles.timeText}>{timeAgo}</Text>
@@ -428,8 +433,7 @@ export default function CommunityScreen() {
         <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={commonStyles.loadingText}>
-            Loading community updates...
-          </Text>
+            {t('community.loading_community_updates')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -457,10 +461,9 @@ export default function CommunityScreen() {
       >
         {/* Header */}
         <View style={commonStyles.subHeader}>
-          <Text style={styles.screenTitle}>Community</Text>
+          <Text style={styles.screenTitle}>{t("community.community")}</Text>
           <Text style={styles.screenSubtitle}>
-            Recent reviews and safety updates from travelers like you
-          </Text>
+            {t('community.recent_reviews_and_safety_updates_from')}</Text>
 
           <View style={styles.modeToggleContainer}>
             <TouchableOpacity
@@ -486,8 +489,7 @@ export default function CommunityScreen() {
                     styles.modeButtonTextActive,
                 ]}
               >
-                Within my Search Radius
-              </Text>
+                {t('community.within_my_search_radius')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -513,8 +515,7 @@ export default function CommunityScreen() {
                     styles.modeButtonTextActive,
                 ]}
               >
-                Visible Map Area
-              </Text>
+                {t('community.visible_map_area')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -527,7 +528,9 @@ export default function CommunityScreen() {
               size={48}
               color={theme.colors.textLight}
             />
-            <Text style={styles.noLocationTitle}>Location Required</Text>
+            <Text style={styles.noLocationTitle}>
+              {t("community.location_required")}
+            </Text>
             <Text style={styles.noLocationText}>
               {communityFeedMode === "near_me"
                 ? "Enable location services to see reviews near you"
@@ -547,24 +550,27 @@ export default function CommunityScreen() {
               size={48}
               color={theme.colors.textLight}
             />
-            <Text style={styles.emptyTitle}>No Reviews Nearby</Text>
-            <Text style={styles.emptyText}>
-              Be the first to review a location in this area!
+            <Text style={styles.emptyTitle}>
+              {t("community.no_reviews_nearby")}
             </Text>
+            <Text style={styles.emptyText}>
+              {t('community.be_the_first_to_review_a_location_in')}</Text>
           </View>
         ) : null}
 
         {/* Safety Updates Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={commonStyles.sectionTitle}>Safety Insights</Text>
+            <Text style={commonStyles.sectionTitle}>
+              {t("community.safety_insights")}
+            </Text>
             {safetyInsights.length > 0 && (
               <TouchableOpacity
                 onPress={() =>
                   notify.info("Full insights view coming soon!", "Coming Soon")
                 }
               >
-                <Text style={styles.seeAllText}>See all</Text>
+                <Text style={styles.seeAllText}>{t("community.see_all")}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -573,7 +579,9 @@ export default function CommunityScreen() {
           ) : safetyInsights.length > 0 ? (
             safetyInsights.map(renderSafetyInsight)
           ) : (
-            <Text style={styles.emptyText}>No safety alerts at this time</Text>
+            <Text style={styles.emptyText}>
+              {t("community.no_safety_alerts_at_this_time")}
+            </Text>
           )}
         </View>
 
@@ -581,8 +589,7 @@ export default function CommunityScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.sectionTitle}>
-              Community Awareness This Week
-            </Text>
+              {t('community.community_awareness_this_week')}</Text>
             {/* Only show "See all" if there are trending locations */}
             {trendingLocations.length > 0 && (
               <TouchableOpacity
@@ -590,7 +597,7 @@ export default function CommunityScreen() {
                   notify.info("Full list view coming soon!", "Coming Soon")
                 }
               >
-                <Text style={styles.seeAllText}>See all</Text>
+                <Text style={styles.seeAllText}>{t("community.see_all")}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -607,15 +614,16 @@ export default function CommunityScreen() {
             )
           ) : (
             <Text style={styles.emptyText}>
-              No significant activity this week
-            </Text>
+              {t('community.no_significant_activity_this_week')}</Text>
           )}
         </View>
 
         {/* Recent Reviews Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
+            <Text style={commonStyles.sectionTitle}>
+              {t("community.recent_reviews")}
+            </Text>
           </View>
           {/* Filter Button */}
           <TouchableOpacity
@@ -627,14 +635,15 @@ export default function CommunityScreen() {
               size={20}
               color={theme.colors.textOnPrimary}
             />
-            <Text style={commonStyles.primaryButtonText}>Filter Reviews</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("community.filter_reviews")}
+            </Text>
           </TouchableOpacity>
           {filteredReviews.length > 0 ? (
             filteredReviews.map(renderReviewItem)
           ) : (
             <Text style={styles.emptyText}>
-              No reviews yet. Be the first to share your experience!
-            </Text>
+              {t('community.no_reviews_yet_be_the_first_to_share')}</Text>
           )}
         </View>
         <AdBanner />

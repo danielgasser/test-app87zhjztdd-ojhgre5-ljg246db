@@ -22,8 +22,11 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function DisplaySettings() {
+  const { t } = useTranslation();
+
   const { user } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
   const userCountry = useAppSelector(
@@ -67,9 +70,9 @@ export default function DisplaySettings() {
         }),
       ).unwrap();
 
-      notify.success("Preference saved");
+      notify.success(t("settings.preference_saved"));
     } catch (error) {
-      notify.error("Failed to save preference. Please try again.");
+      notify.error(t("settings.failed_to_save_preference_please_try"));
       logger.error("Save error:", error);
     }
   };
@@ -98,14 +101,15 @@ export default function DisplaySettings() {
             style={commonStyles.backButtonText}
           />
         </TouchableOpacity>
-        <Text style={commonStyles.headerTitle}>Display Preferences</Text>
+        <Text style={commonStyles.headerTitle}>
+          {t("settings.display_preferences")}
+        </Text>
         <View style={commonStyles.headerPlaceholder} />
       </View>
 
       <ScrollView style={styles.content}>
         <Text style={styles.sectionDescription}>
-          Customize how times and distances are displayed throughout the app
-        </Text>
+          {t('settings.customize_how_times_and_distances_are')}</Text>
 
         <SettingToggle
           label="Time Format"

@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 const IUBENDA_API_BASE = "https://www.iubenda.com/api";
 
@@ -33,6 +34,7 @@ export function IubendaDocument({
   onClose,
   title,
 }: IubendaDocumentProps) {
+  const { t } = useTranslation();
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +119,7 @@ export function IubendaDocument({
         {loading && (
           <View style={styles.centered}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={commonStyles.loadingText}>Loading...</Text>
+            <Text style={commonStyles.loadingText}>{t("common.loading")}</Text>
           </View>
         )}
 
@@ -133,7 +135,9 @@ export function IubendaDocument({
               style={commonStyles.primaryButton}
               onPress={fetchDocument}
             >
-              <Text style={commonStyles.primaryButtonText}>Retry</Text>
+              <Text style={commonStyles.primaryButtonText}>
+                {t("common.retry")}
+              </Text>
             </TouchableOpacity>
           </View>
         )}

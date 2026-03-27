@@ -7,6 +7,7 @@ import { APP_CONFIG } from "@/config/appConfig";
 import { theme } from "@/styles/theme";
 import { logger } from "@/utils/logger";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 interface DangerZoneOverlayProps {
   dangerZones: DangerZone[];
   visible: boolean;
@@ -39,6 +40,7 @@ export default function DangerZoneOverlay({
   dangerZones,
   visible,
 }: DangerZoneOverlayProps) {
+  const { t } = useTranslation();
   if (!visible || dangerZones.length === 0) {
     return null;
   }
@@ -101,8 +103,7 @@ export default function DangerZoneOverlay({
                   <View style={commonStyles.divider} />
 
                   <Text style={commonStyles.sectionTitle}>
-                    Affected Groups:
-                  </Text>
+                    {t('navigation.affected_groups')}</Text>
                   {zone.affected_demographics.map((demo, idx) => (
                     <Text key={idx} style={styles.demographicItem}>
                       {demo.charAt(0).toUpperCase() +
@@ -112,7 +113,9 @@ export default function DangerZoneOverlay({
 
                   <View style={commonStyles.divider} />
 
-                  <Text style={commonStyles.sectionTitle}>Reasons:</Text>
+                  <Text style={commonStyles.sectionTitle}>
+                    {t("navigation.reasons")}
+                  </Text>
                   {zone.reasons.map((reason, idx) => (
                     <Text key={idx} style={styles.reasonItem}>
                       • {reason}

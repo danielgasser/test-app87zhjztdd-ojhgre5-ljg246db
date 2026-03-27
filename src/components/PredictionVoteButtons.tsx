@@ -14,6 +14,7 @@ import { logger } from "@/utils/logger";
 import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface PredictionVoteButtonsProps {
   locationId: string;
@@ -45,12 +46,13 @@ export default function PredictionVoteButtons({
   currentUserVote = null,
   onVoteSuccess,
 }: PredictionVoteButtonsProps) {
+  const { t } = useTranslation();
   const [userVote, setUserVote] = useState<"accurate" | "inaccurate" | null>(
-    currentUserVote
+    currentUserVote,
   );
   const [accurateCount, setAccurateCount] = useState(initialAccurateCount);
   const [inaccurateCount, setInaccurateCount] = useState(
-    initialInaccurateCount
+    initialInaccurateCount,
   );
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +62,7 @@ export default function PredictionVoteButtons({
 
   const handleVote = async (voteType: "accurate" | "inaccurate") => {
     if (!userId) {
-      notify.error("Please log in to vote");
+      notify.error(t("community.please_log_in_to_vote"));
       return;
     }
 
@@ -71,7 +73,7 @@ export default function PredictionVoteButtons({
         data: { session },
       } = await supabase.auth.getSession();
       if (!session) {
-        notify.error("Please log in to vote");
+        notify.error(t("community.please_log_in_to_vote"));
         return;
       }
       const payload = {
@@ -98,7 +100,7 @@ export default function PredictionVoteButtons({
             Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const result = await response.json();
@@ -138,7 +140,7 @@ export default function PredictionVoteButtons({
     } catch (error) {
       logger.error("Error voting on prediction:", error);
       console.error("Error voting on prediction:", error);
-      notify.error("Failed to submit vote");
+      notify.error(t("community.failed_to_submit_vote"));
     } finally {
       setLoading(false);
     }
@@ -146,7 +148,9 @@ export default function PredictionVoteButtons({
 
   return (
     <View style={commonStyles.container}>
-      <Text style={commonStyles.formLabel}>Was this prediction accurate?</Text>
+      <Text style={commonStyles.formLabel}>
+        {t("community.was_this_prediction_accurate")}
+      </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[

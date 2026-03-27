@@ -25,6 +25,7 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 const ONBOARDING_STEPS = [
   { id: "welcome", title: "Welcome to TruGuide" },
@@ -50,6 +51,7 @@ const FIELD_TO_STEP_MAP: { [key: string]: number } = {
 };
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { user, refreshOnboardingStatus, appleUserName, setAppleName } =
     useAuth();
@@ -269,7 +271,7 @@ export default function OnboardingScreen() {
     setAppleName(null);
 
     if (!user?.id) {
-      notify.error("User session not found. Please log in again.");
+      notify.error(t("onboarding.user_session_not_found_please_log_in"));
       return;
     }
 
@@ -355,7 +357,7 @@ export default function OnboardingScreen() {
       }
 
       if (profileResult.error) {
-        notify.error("Failed to save profile. Please try again.");
+        notify.error(t("onboarding.failed_to_save_profile_please_try_again"));
         return;
       }
 
@@ -368,7 +370,7 @@ export default function OnboardingScreen() {
 
       if (profilesError) {
         console.error("Failed to update profiles:", profilesError);
-        notify.error("Failed to complete onboarding. Please try again.");
+        notify.error(t("onboarding.failed_to_complete_onboarding_please"));
         return;
       }
 
@@ -398,7 +400,7 @@ export default function OnboardingScreen() {
       }
     } catch (error) {
       logger.error("Profile save error:", error);
-      notify.error("Failed to save profile. Please try again.");
+      notify.error(t("onboarding.failed_to_save_profile_please_try_again"));
     }
   };
 
@@ -469,28 +471,30 @@ export default function OnboardingScreen() {
 
   const renderWelcomeStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Welcome to TruGuide!</Text>
-      <Text style={styles.stepDescription}>
-        To provide personalized safety information, we need to understand your
-        travel preferences and needs.
+      <Text style={styles.stepTitle}>
+        {t("onboarding.welcome_to_truguide")}
       </Text>
+      <Text style={styles.stepDescription}>
+        {t('onboarding.to_provide_personalized_safety')}</Text>
       <Text
         style={[
           styles.stepDescription,
           { fontWeight: "600", color: theme.colors.text },
         ]}
       >
-        This setup is required to access TruGuide's core features.
-      </Text>
+        {t('onboarding.this_setup_is_required_to_access')}</Text>
       {showWelcomeBanner && currentStep === 0 && (
         <View style={styles.welcomeBanner}>
           <View style={styles.welcomeBannerContent}>
-            <Text style={styles.welcomeBannerIcon}>🎉</Text>
+            <Text style={styles.welcomeBannerIcon}>
+              {t("onboarding.unknown")}
+            </Text>
             <View style={styles.welcomeBannerText}>
-              <Text style={styles.welcomeBannerTitle}>Email Confirmed!</Text>
-              <Text style={styles.welcomeBannerSubtitle}>
-                Welcome to TruGuide. Let's personalize your experience.
+              <Text style={styles.welcomeBannerTitle}>
+                {t("onboarding.email_confirmed")}
               </Text>
+              <Text style={styles.welcomeBannerSubtitle}>
+                {t('onboarding.welcome_to_truguide_lets_personalize')}</Text>
             </View>
           </View>
         </View>
@@ -503,24 +507,23 @@ export default function OnboardingScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.bulletText}>
-            Get safety ratings personalized for your demographic
-          </Text>
+            {t('onboarding.get_safety_ratings_personalized_for')}</Text>
         </View>
         <View style={styles.bulletPoint}>
           <Ionicons name="map" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>
-            See location safety from your perspective
-          </Text>
+            {t('onboarding.see_location_safety_from_your')}</Text>
         </View>
         <View style={styles.bulletPoint}>
           <Ionicons name="people" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>
-            Connect with travelers who share your experiences
-          </Text>
+            {t('onboarding.connect_with_travelers_who_share_your')}</Text>
         </View>
         <View style={styles.bulletPoint}>
           <Ionicons name="lock-closed" size={20} color={theme.colors.primary} />
-          <Text style={styles.bulletText}>Your data is private and secure</Text>
+          <Text style={styles.bulletText}>
+            {t("onboarding.your_data_is_private_and_secure")}
+          </Text>
         </View>
       </View>
     </View>
@@ -528,18 +531,18 @@ export default function OnboardingScreen() {
   const renderNameStep = () => (
     <View style={styles.otherInputContainer}>
       <Text style={styles.stepTitle}>
-        What's your name? <Text style={commonStyles.requiredAsterisk}>*</Text>
+        What's your name?{" "}
+        <Text style={commonStyles.requiredAsterisk}>
+          {t("onboarding.unknown_1")}
+        </Text>
       </Text>
       <Text style={styles.stepDescription}>
-        This helps personalize your experience. You can control who sees this in
-        privacy settings.
-      </Text>
+        {t('onboarding.this_helps_personalize_your_experience')}</Text>
       <Text style={styles.helpText}>
-        💡 Help others recognise your profile and reviews
-      </Text>
+        {t('onboarding.help_others_recognise_your_profile_and')}</Text>
       <TextInput
         style={styles.nameInput}
-        placeholder="Enter your name or a nickname"
+        placeholder={t("onboarding.enter_your_name_or_a_nickname")}
         value={formData.full_name}
         onChangeText={(text) => setFormData({ ...formData, full_name: text })}
         autoCapitalize="words"
@@ -550,15 +553,15 @@ export default function OnboardingScreen() {
   const renderRaceStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Race & Ethnicity <Text style={commonStyles.requiredAsterisk}>*</Text>
+        Race & Ethnicity{" "}
+        <Text style={commonStyles.requiredAsterisk}>
+          {t("onboarding.unknown_2")}
+        </Text>
       </Text>
       <Text style={styles.stepDescription}>
-        Select all that apply. This helps us show you safety ratings from people
-        with similar experiences.
-      </Text>
+        {t('onboarding.select_all_that_apply_this_helps_us')}</Text>
       <Text style={styles.helpText}>
-        💡 See safety ratings from people like you
-      </Text>
+        {t('onboarding.see_safety_ratings_from_people_like_you')}</Text>
       <View style={styles.optionsContainer}>
         {DEMOGRAPHIC_OPTIONS.race.map((race) => (
           <TouchableOpacity
@@ -587,10 +590,12 @@ export default function OnboardingScreen() {
 
       {formData.race_ethnicity.includes("Other") && (
         <View style={styles.otherInputContainer}>
-          <Text style={styles.otherInputLabel}>Please specify:</Text>
+          <Text style={styles.otherInputLabel}>
+            {t("onboarding.please_specify")}
+          </Text>
           <TextInput
             style={styles.otherInput}
-            placeholder="Enter your race/ethnicity"
+            placeholder={t("onboarding.enter_your_raceethnicity")}
             value={otherInputs.race_other}
             onChangeText={(text) =>
               setOtherInputs({ ...otherInputs, race_other: text })
@@ -605,12 +610,16 @@ export default function OnboardingScreen() {
   const renderGenderStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Gender Identity <Text style={commonStyles.requiredAsterisk}>*</Text>
+        Gender Identity{" "}
+        <Text style={commonStyles.requiredAsterisk}>
+          {t("onboarding.unknown_3")}
+        </Text>
       </Text>
       <Text style={styles.stepDescription}>
-        How do you identify? This helps us provide relevant safety information.
+        {t('onboarding.how_do_you_identify_this_helps_us')}</Text>
+      <Text style={styles.helpText}>
+        {t("onboarding.find_routes_safe_for_your_gender")}
       </Text>
-      <Text style={styles.helpText}>💡 Find routes safe for your gender</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.gender}
@@ -640,10 +649,12 @@ export default function OnboardingScreen() {
 
       {formData.gender === "Other" && (
         <View style={styles.otherInputContainer}>
-          <Text style={styles.otherInputLabel}>Please specify:</Text>
+          <Text style={styles.otherInputLabel}>
+            {t("onboarding.please_specify")}
+          </Text>
           <TextInput
             style={styles.otherInput}
-            placeholder="Enter your gender identity"
+            placeholder={t("onboarding.enter_your_gender_identity")}
             value={otherInputs.gender_other}
             onChangeText={(text) =>
               setOtherInputs({ ...otherInputs, gender_other: text })
@@ -658,15 +669,15 @@ export default function OnboardingScreen() {
   const renderLGBTQStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        LGBTQ+ Identity <Text style={commonStyles.requiredAsterisk}>*</Text>
+        LGBTQ+ Identity{" "}
+        <Text style={commonStyles.requiredAsterisk}>
+          {t("onboarding.unknown_4")}
+        </Text>
       </Text>
       <Text style={styles.stepDescription}>
-        Do you identify as LGBTQ+? This helps us show you safety information
-        from other LGBTQ+ travelers.
-      </Text>
+        {t('onboarding.do_you_identify_as_lgbtq_this_helps_us')}</Text>
       <Text style={styles.helpText}>
-        💡 Discover LGBTQ+ friendly businesses
-      </Text>
+        {t('onboarding.discover_lgbtq_friendly_businesses')}</Text>
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={[
@@ -681,8 +692,7 @@ export default function OnboardingScreen() {
               !formData.lgbtq_status && styles.toggleTextSelected,
             ]}
           >
-            No
-          </Text>
+            {t('onboarding.no')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -697,8 +707,7 @@ export default function OnboardingScreen() {
               formData.lgbtq_status && styles.toggleTextSelected,
             ]}
           >
-            Yes
-          </Text>
+            {t('onboarding.yes')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -708,15 +717,12 @@ export default function OnboardingScreen() {
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
         Disability Status Status
-        <Text style={styles.optionalBadge}>(Optional)</Text>
+        <Text style={styles.optionalBadge}>{t("onboarding.optional")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        Select any that apply. This helps us show accessibility information
-        relevant to your needs.
-      </Text>
+        {t('onboarding.select_any_that_apply_this_helps_us')}</Text>
       <Text style={styles.helpText}>
-        ⭐ See accessibility ratings relevant to your needs
-      </Text>
+        {t('onboarding.see_accessibility_ratings_relevant_to')}</Text>
       <View style={styles.optionsContainer}>
         {["None", "Mobility", "Visual", "Hearing", "Cognitive", "Other"].map(
           (disability) => (
@@ -752,10 +758,12 @@ export default function OnboardingScreen() {
 
       {formData.disability_status.includes("Other") && (
         <View style={styles.otherInputContainer}>
-          <Text style={styles.otherInputLabel}>Please specify:</Text>
+          <Text style={styles.otherInputLabel}>
+            {t("onboarding.please_specify")}
+          </Text>
           <TextInput
             style={styles.otherInput}
-            placeholder="Enter your disability status"
+            placeholder={t("onboarding.enter_your_disability_status")}
             value={otherInputs.disability_other}
             onChangeText={(text) =>
               setOtherInputs({ ...otherInputs, disability_other: text })
@@ -770,14 +778,13 @@ export default function OnboardingScreen() {
   const renderReligionStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Religious Identity <Text style={styles.optionalBadge}>(Optional)</Text>
+        Religious Identity{" "}
+        <Text style={styles.optionalBadge}>{t("onboarding.optional")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        What is your religious or spiritual identity?
-      </Text>
+        {t('onboarding.what_is_your_religious_or_spiritual')}</Text>
       <Text style={styles.helpText}>
-        ⭐ Unlock prayer-friendly recommendations
-      </Text>
+        {t('onboarding.unlock_prayerfriendly_recommendations')}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.religion}
@@ -798,10 +805,12 @@ export default function OnboardingScreen() {
 
       {formData.religion === "Other" && (
         <View style={styles.otherInputContainer}>
-          <Text style={styles.otherInputLabel}>Please specify:</Text>
+          <Text style={styles.otherInputLabel}>
+            {t("onboarding.please_specify")}
+          </Text>
           <TextInput
             style={styles.otherInput}
-            placeholder="Enter your religious identity"
+            placeholder={t("onboarding.enter_your_religious_identity")}
             value={otherInputs.religion_other}
             onChangeText={(text) =>
               setOtherInputs({ ...otherInputs, religion_other: text })
@@ -816,12 +825,14 @@ export default function OnboardingScreen() {
   const renderAgeStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Age Range <Text style={styles.optionalBadge}>(Optional)</Text>
+        Age Range{" "}
+        <Text style={styles.optionalBadge}>{t("onboarding.optional")}</Text>
       </Text>
-      <Text style={styles.stepDescription}>Select your age range.</Text>
+      <Text style={styles.stepDescription}>
+        {t("onboarding.select_your_age_range")}
+      </Text>
       <Text style={styles.helpText}>
-        ⭐ See ratings from travelers in your age group
-      </Text>
+        {t('onboarding.see_ratings_from_travelers_in_your_age')}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.age_range}
@@ -844,10 +855,9 @@ export default function OnboardingScreen() {
 
   const renderPrivacyStep = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Privacy Settings</Text>
+      <Text style={styles.stepTitle}>{t("onboarding.privacy_settings")}</Text>
       <Text style={styles.stepDescription}>
-        Choose how your demographic information is shown to others.
-      </Text>
+        {t('onboarding.choose_how_your_demographic_information')}</Text>
       <View style={styles.privacyOptions}>
         <TouchableOpacity
           style={[
@@ -858,11 +868,10 @@ export default function OnboardingScreen() {
         >
           <View style={styles.privacyHeader}>
             <Ionicons name="eye" size={24} color={theme.colors.primary} />
-            <Text style={styles.privacyTitle}>Public</Text>
+            <Text style={styles.privacyTitle}>{t("onboarding.public")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
-            Other users can see your demographic information with your reviews
-          </Text>
+            {t('onboarding.other_users_can_see_your_demographic')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -877,11 +886,10 @@ export default function OnboardingScreen() {
         >
           <View style={styles.privacyHeader}>
             <Ionicons name="eye-off" size={24} color={theme.colors.accent} />
-            <Text style={styles.privacyTitle}>Anonymous</Text>
+            <Text style={styles.privacyTitle}>{t("onboarding.anonymous")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
-            Your reviews are visible but without personal demographic details
-          </Text>
+            {t('onboarding.your_reviews_are_visible_but_without')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -894,16 +902,17 @@ export default function OnboardingScreen() {
         >
           <View style={styles.privacyHeader}>
             <Ionicons name="lock-closed" size={24} color={theme.colors.error} />
-            <Text style={styles.privacyTitle}>Private</Text>
+            <Text style={styles.privacyTitle}>{t("onboarding.private")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
-            Only you can see your demographic information
-          </Text>
+            {t('onboarding.only_you_can_see_your_demographic')}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>Show demographics on reviews</Text>
+        <Text style={styles.toggleLabel}>
+          {t("onboarding.show_demographics_on_reviews")}
+        </Text>
         <TouchableOpacity
           style={[
             styles.switch,
@@ -991,7 +1000,7 @@ export default function OnboardingScreen() {
             style={[styles.navButton, styles.skipButton]}
             onPress={handleSkip}
           >
-            <Text style={styles.skipButtonText}>Cancel</Text>
+            <Text style={styles.skipButtonText}>{t("onboarding.cancel")}</Text>
           </TouchableOpacity>
         )}
 
@@ -1001,7 +1010,7 @@ export default function OnboardingScreen() {
               style={[styles.navButton, commonStyles.backButton]}
               onPress={handleBack}
             >
-              <Text style={styles.backButtonText}>Back</Text>
+              <Text style={styles.backButtonText}>{t("onboarding.back")}</Text>
             </TouchableOpacity>
           )}
 

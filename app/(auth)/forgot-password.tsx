@@ -19,8 +19,11 @@ import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -28,14 +31,14 @@ export default function ForgotPasswordScreen() {
   const handleResetPassword = async () => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      notify.error("Please enter your email address");
+      notify.error(t("auth.please_enter_your_email_address"));
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      notify.error("Please enter a valid email address");
+      notify.error(t("auth.please_enter_a_valid_email_address"));
       return;
     }
 
@@ -85,7 +88,7 @@ export default function ForgotPasswordScreen() {
                 color={theme.colors.primary}
                 style={styles.icon}
               />
-              <Text style={styles.title}>Forgot Password?</Text>
+              <Text style={styles.title}>{t("auth.forgot_password")}</Text>
               <Text style={styles.subtitle}>
                 {emailSent
                   ? "We've sent you a password reset link"
@@ -97,10 +100,12 @@ export default function ForgotPasswordScreen() {
               <>
                 {/* Email Input */}
                 <View style={styles.form}>
-                  <Text style={commonStyles.formLabel}>Email Address</Text>
+                  <Text style={commonStyles.formLabel}>
+                    {t("auth.email_address")}
+                  </Text>
                   <TextInput
                     style={commonStyles.input}
-                    placeholder="Enter your email"
+                    placeholder={t("auth.enter_your_email")}
                     placeholderTextColor={theme.colors.textSecondary}
                     value={email}
                     onChangeText={setEmail}
@@ -123,7 +128,9 @@ export default function ForgotPasswordScreen() {
                   {loading ? (
                     <ActivityIndicator color={theme.colors.background} />
                   ) : (
-                    <Text style={styles.resetButtonText}>Send Reset Link</Text>
+                    <Text style={styles.resetButtonText}>
+                      {t("auth.send_reset_link")}
+                    </Text>
                   )}
                 </TouchableOpacity>
               </>
@@ -138,13 +145,11 @@ export default function ForgotPasswordScreen() {
                     style={styles.successIcon}
                   />
                   <Text style={styles.successText}>
-                    Check your email at{" "}
+                    {t("auth.check_your_email_at")}{" "}
                     <Text style={styles.emailText}>{email}</Text>
                   </Text>
                   <Text style={styles.successSubtext}>
-                    Click the link in the email to reset your password. The link
-                    will expire in 1 hour.
-                  </Text>
+                    {t('auth.click_the_link_in_the_email_to_reset')}</Text>
                 </View>
 
                 {/* Resend Button */}
@@ -153,8 +158,7 @@ export default function ForgotPasswordScreen() {
                   onPress={() => setEmailSent(false)}
                 >
                   <Text style={styles.resendButtonText}>
-                    Didn't receive the email? Try again
-                  </Text>
+                    {t('auth.didnt_receive_the_email_try_again')}</Text>
                 </TouchableOpacity>
 
                 {/* Back to Login */}
@@ -162,7 +166,9 @@ export default function ForgotPasswordScreen() {
                   style={styles.backToLoginButton}
                   onPress={() => router.replace("/login")}
                 >
-                  <Text style={styles.backToLoginText}>Back to Sign In</Text>
+                  <Text style={styles.backToLoginText}>
+                    {t("auth.back_to_sign_in")}
+                  </Text>
                 </TouchableOpacity>
               </>
             )}
@@ -178,7 +184,9 @@ export default function ForgotPasswordScreen() {
                   size={16}
                   color={theme.colors.primary}
                 />
-                <Text style={styles.loginLinkText}>Back to Login</Text>
+                <Text style={styles.loginLinkText}>
+                  {t("auth.back_to_login")}
+                </Text>
               </TouchableOpacity>
             )}
           </View>

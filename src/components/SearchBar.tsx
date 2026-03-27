@@ -33,6 +33,7 @@ import {
 import { SubscriptionTier } from "@/config/features";
 import { router } from "expo-router";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useTranslation } from "react-i18next";
 
 // NOTE: Despite the "mapbox" naming, this actually uses Google Geocoding API
 
@@ -57,6 +58,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearchToggle,
   userLocation,
 }) => {
+  const { t } = useTranslation();
+
   const dispatch = useAppDispatch();
   const { searchResults, searchLoading, userCountry } = useAppSelector(
     (state) => state.locations,
@@ -165,14 +168,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     await incrementSearchCount();
     // GUARD: Wait for profile to be ready
     if (!userProfile && userId) {
-      notify.info("Loading profile...");
+      notify.info(t("navigation.loading_profile"));
       // Give it 2 seconds to load
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Check again
       const state = store.getState();
       if (!state.user.profile) {
-        notify.error("Profile not loaded. Please try again.");
+        notify.error(t("navigation.profile_not_loaded_please_try_again"));
         return;
       }
     }
@@ -235,11 +238,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
         onSearchToggle?.(false);
       } else {
-        notify.error("Unable to get location details. Please try again.");
+        notify.error(t("navigation.unable_to_get_location_details_please"));
       }
     } catch (error) {
       logger.error("Error fetching place details:", error);
-      notify.error("Unable to get location details. Please try again.");
+      notify.error(t("navigation.unable_to_get_location_details_please"));
     }
   };
 
@@ -284,7 +287,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <Text style={styles.resultName}>{item.name}</Text>
         <Text style={styles.resultAddress}>{item.address}</Text>
         {item.source === "database" && (
-          <Text style={styles.hasReviewsText}>• Has reviews</Text>
+          <Text style={styles.hasReviewsText}>
+            {t("navigation.has_reviews")}
+          </Text>
         )}
       </View>
     </TouchableOpacity>
@@ -304,7 +309,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <TextInput
               filtered={false}
               style={styles.searchInput}
-              placeholder="Search for places..."
+              placeholder={t("navigation.search_for_places")}
               value={searchText}
               onChangeText={(text) => {
                 setSearchText(text);
@@ -352,7 +357,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   size={16}
                   color={theme.colors.textSecondary}
                 />
-                <Text style={styles.recentHeaderText}>Recent Searches</Text>
+                <Text style={styles.recentHeaderText}>
+                  {t("navigation.recent_searches")}
+                </Text>
               </View>
               <FlatList
                 data={searchHistory}
@@ -424,8 +431,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 No places found for "{searchText}"
               </Text>
               <Text style={styles.noResultsSubtext}>
-                Try a different search term
-              </Text>
+                {t('navigation.try_a_different_search_term')}</Text>
             </View>
           )}
       </View>

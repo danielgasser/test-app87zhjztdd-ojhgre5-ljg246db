@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { MLPrediction } from "@/store/locationsSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface PredictionBadgeProps {
   prediction: MLPrediction;
@@ -14,6 +15,7 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
   prediction,
   loading,
 }) => {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <View style={commonStyles.container}>
@@ -22,7 +24,9 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
           size={16}
           color={theme.colors.textSecondary}
         />
-        <Text style={commonStyles.loadingText}>Getting prediction...</Text>
+        <Text style={commonStyles.loadingText}>
+          {t("map.getting_prediction")}
+        </Text>
       </View>
     );
   }
@@ -100,7 +104,7 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
 
       <Text style={styles.scoreText}>
         {prediction.predicted_safety_score.toFixed(1)}
-        <Text style={styles.scoreSubtext}>/5</Text>
+        <Text style={styles.scoreSubtext}>{t("map.5")}</Text>
       </Text>
 
       {/* 🆕 Confidence level text + based on text */}

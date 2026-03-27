@@ -19,6 +19,7 @@ import {
 import { theme } from "@/styles/theme";
 import { notify } from "@/utils/notificationService";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface PaywallProps {
   onPurchaseComplete?: () => void;
@@ -29,6 +30,7 @@ export const Paywall: React.FC<PaywallProps> = ({
   onPurchaseComplete,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [selectedPackage, setSelectedPackage] =
     useState<PurchasesPackage | null>(null);
@@ -57,7 +59,7 @@ export const Paywall: React.FC<PaywallProps> = ({
     const result = await purchasePackage(selectedPackage);
 
     if (result.success) {
-      notify.success("Welcome to TruGuide Premium!");
+      notify.success(t("premium.welcome_to_truguide_premium"));
       onPurchaseComplete?.();
     } else if (result.error !== "User cancelled") {
       notify.error(result.error || "Purchase failed");
@@ -70,10 +72,10 @@ export const Paywall: React.FC<PaywallProps> = ({
     const result = await restorePurchases();
 
     if (result.isPremium) {
-      notify.success("Purchases restored!");
+      notify.success(t("premium.purchases_restored"));
       onPurchaseComplete?.();
     } else if (result.success) {
-      notify.info("No previous purchases found");
+      notify.info(t("premium.no_previous_purchases_found"));
     } else {
       notify.error(result.error || "Restore failed");
     }
@@ -123,10 +125,9 @@ export const Paywall: React.FC<PaywallProps> = ({
             color={theme.colors.primary}
           />
         </View>
-        <Text style={styles.title}>Upgrade to Premium</Text>
+        <Text style={styles.title}>{t("premium.upgrade_to_premium")}</Text>
         <Text style={styles.subtitle}>
-          Unlock all features and travel with confidence
-        </Text>
+          {t('premium.unlock_all_features_and_travel_with')}</Text>
       </View>
 
       {/* Features */}
@@ -189,13 +190,15 @@ export const Paywall: React.FC<PaywallProps> = ({
         {isPurchasing ? (
           <ActivityIndicator color={theme.colors.textOnPrimary} />
         ) : (
-          <Text style={styles.purchaseButtonText}>Subscribe Now</Text>
+          <Text style={styles.purchaseButtonText}>
+            {t("premium.subscribe_now")}
+          </Text>
         )}
       </TouchableOpacity>
 
       {/* Restore */}
       <TouchableOpacity style={styles.restoreButton} onPress={handleRestore}>
-        <Text style={styles.restoreText}>Restore Purchases</Text>
+        <Text style={styles.restoreText}>{t("premium.restore_purchases")}</Text>
       </TouchableOpacity>
 
       {/* Legal */}
@@ -210,9 +213,9 @@ export const Paywall: React.FC<PaywallProps> = ({
         <TouchableOpacity
           onPress={() => Linking.openURL("https://truguide.app/privacy-policy")}
         >
-          <Text style={styles.linkText}>Privacy Policy</Text>
+          <Text style={styles.linkText}>{t("premium.privacy_policy")}</Text>
         </TouchableOpacity>
-        <Text style={styles.legalText}> • </Text>
+        <Text style={styles.legalText}>{t("premium.unknown")}</Text>
         <TouchableOpacity
           onPress={() =>
             Linking.openURL(
@@ -220,7 +223,7 @@ export const Paywall: React.FC<PaywallProps> = ({
             )
           }
         >
-          <Text style={styles.linkText}>Terms of Use</Text>
+          <Text style={styles.linkText}>{t("premium.terms_of_use")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

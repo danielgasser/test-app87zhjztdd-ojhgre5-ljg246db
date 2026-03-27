@@ -83,6 +83,7 @@ import MapFiltersModal, {
   DEFAULT_FILTERS,
 } from "@/components/MapFiltersModal";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -109,6 +110,8 @@ interface SearchResult {
 }
 
 export default function MapScreen() {
+  const { t } = useTranslation();
+
   // ============= STATE VARIABLES =============
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState({
@@ -564,7 +567,7 @@ export default function MapScreen() {
     );
     console.log("Address data for long press:", addressData);
     if (!addressData) {
-      notify.error("Unable to get address for this location");
+      notify.error(t("map.unable_to_get_address_for_this_location"));
       return;
     }
 
@@ -624,7 +627,7 @@ export default function MapScreen() {
       }
     } catch (error) {
       logger.error("Danger zones error:", error);
-      notify.error("Could not load danger zones");
+      notify.error(t("map.could_not_load_danger_zones"));
       // Revert the toggle if fetch failed
       dispatch(setDangerZonesVisible(false));
     }
@@ -653,7 +656,7 @@ export default function MapScreen() {
       }
     } catch (error) {
       logger.error("Failed to get current location:", error);
-      notify.error("Could not get your location");
+      notify.error(t("map.could_not_get_your_location"));
     }
   };
 
@@ -866,7 +869,7 @@ export default function MapScreen() {
 
   const handleStartNavigationFromMap = () => {
     if (!selectedRoute) {
-      notify.error("No route selected");
+      notify.error(t("map.no_route_selected"));
       return;
     }
 
@@ -1217,8 +1220,7 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <Text style={commonStyles.textError}>
-          Location permission is required to use this feature
-        </Text>
+          {t('map.location_permission_is_required_to_use')}</Text>
       </View>
     );
   }
@@ -1228,8 +1230,7 @@ export default function MapScreen() {
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={commonStyles.loadingText}>
-          Loading nearby locations...
-        </Text>
+          {t('map.loading_nearby_locations')}</Text>
       </View>
     );
   }
@@ -1237,7 +1238,9 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={commonStyles.loadingText}>Getting your location...</Text>
+        <Text style={commonStyles.loadingText}>
+          {t("map.getting_your_location")}
+        </Text>
       </View>
     );
   }
@@ -1245,7 +1248,7 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text>Initializing TruGuide...</Text>
+        <Text>{t("map.initializing_truguide")}</Text>
       </View>
     );
   }
@@ -1419,8 +1422,7 @@ export default function MapScreen() {
                           confident
                         </Text>
                         <Text style={styles.calloutNote}>
-                          Based on similar locations and user demographics
-                        </Text>
+                          {t('map.based_on_similar_locations_and_user')}</Text>
                       </View>
                     </Callout>
                   </Marker>
@@ -1472,7 +1474,7 @@ export default function MapScreen() {
           <Marker
             coordinate={routeOrigin}
             pinColor={APP_CONFIG.ROUTE_DISPLAY.MARKERS.START_COLOR}
-            title="Origin"
+            title={t("map.origin")}
             description="Route starting point"
           />
         )}
@@ -1480,7 +1482,7 @@ export default function MapScreen() {
           <Marker
             coordinate={routeDestination}
             pinColor={APP_CONFIG.ROUTE_DISPLAY.MARKERS.END_COLOR}
-            title="Destination"
+            title={t("map.destination")}
             description="Route ending point"
           />
         )}
@@ -1584,7 +1586,7 @@ export default function MapScreen() {
           style={styles.filterButton}
           onPress={() => setFiltersModalVisible(true)}
         >
-          <Text style={styles.filterButtonLabel}>Filters</Text>
+          <Text style={styles.filterButtonLabel}>{t("map.filters")}</Text>
           <Ionicons
             style={styles.filterButtonIcon}
             name="options"
@@ -1650,7 +1652,7 @@ export default function MapScreen() {
               size={22}
               color={theme.colors.textSecondary}
             />
-            <Text style={styles.clearRouteText}>Clear Route</Text>
+            <Text style={styles.clearRouteText}>{t("map.clear_route")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -1686,7 +1688,9 @@ export default function MapScreen() {
               size={22}
               color={theme.colors.error}
             />
-            <Text style={styles.deleteRouteText}>Delete from History</Text>
+            <Text style={styles.deleteRouteText}>
+              {t("map.delete_from_history")}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -1694,7 +1698,9 @@ export default function MapScreen() {
       {Object.values(mlPredictionsLoading).some((loading) => loading) && (
         <View style={styles.mlLoadingContainer}>
           <ActivityIndicator size="small" color={theme.colors.primary} />
-          <Text style={styles.mlLoadingText}>Getting AI predictions...</Text>
+          <Text style={styles.mlLoadingText}>
+            {t("map.getting_ai_predictions")}
+          </Text>
         </View>
       )}
       {/* Danger Zones Legend */}
@@ -1707,10 +1713,9 @@ export default function MapScreen() {
         >
           {dangerZones.length > 0 ? (
             <>
-              <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
+              <Text style={styles.legendTitle}>{t("map.danger_zones")}</Text>
               <Text style={styles.legendSubtitle}>
-                Areas with reported discrimination
-              </Text>
+                {t('map.areas_with_reported_discrimination')}</Text>
               <View style={styles.legendItems}>
                 <View style={styles.legendItem}>
                   <View
@@ -1719,7 +1724,7 @@ export default function MapScreen() {
                       { backgroundColor: theme.colors.error },
                     ]}
                   />
-                  <Text style={styles.legendText}>High Risk</Text>
+                  <Text style={styles.legendText}>{t("map.high_risk")}</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View
@@ -1728,7 +1733,7 @@ export default function MapScreen() {
                       { backgroundColor: theme.colors.accent },
                     ]}
                   />
-                  <Text style={styles.legendText}>Medium Risk</Text>
+                  <Text style={styles.legendText}>{t("map.medium_risk")}</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View
@@ -1737,16 +1742,15 @@ export default function MapScreen() {
                       { backgroundColor: theme.colors.mixedYellow },
                     ]}
                   />
-                  <Text style={styles.legendText}>Low Risk</Text>
+                  <Text style={styles.legendText}>{t("map.low_risk")}</Text>
                 </View>
               </View>
             </>
           ) : (
             <>
-              <Text style={styles.legendTitle}>✓ No Danger Zones</Text>
+              <Text style={styles.legendTitle}>{t("map.no_danger_zones")}</Text>
               <Text style={styles.legendSubtitle}>
-                No reported danger in this area
-              </Text>
+                {t('map.no_reported_danger_in_this_area')}</Text>
             </>
           )}
         </View>
@@ -1762,7 +1766,7 @@ export default function MapScreen() {
               size={24}
               color={theme.colors.background}
             />
-            <Text style={styles.routeButtonText}>Plan Route</Text>
+            <Text style={styles.routeButtonText}>{t("map.plan_route")}</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.routeModeControls}>
@@ -1808,13 +1812,13 @@ export default function MapScreen() {
                   1,
                 ) ?? "3.0"}
               </Text>
-              <Text style={styles.statLabel}>Safety Score</Text>
+              <Text style={styles.statLabel}>{t("map.safety_score")}</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
                 {formatDuration(selectedRoute.estimated_duration_minutes)}
               </Text>
-              <Text style={styles.statLabel}>Duration</Text>
+              <Text style={styles.statLabel}>{t("map.duration")}</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
@@ -1824,7 +1828,7 @@ export default function MapScreen() {
                   distanceUnit,
                 )}
               </Text>
-              <Text style={styles.statLabel}>Distance</Text>
+              <Text style={styles.statLabel}>{t("map.distance")}</Text>
             </View>
           </View>
 
@@ -1837,7 +1841,9 @@ export default function MapScreen() {
               size={24}
               color={theme.colors.background}
             />
-            <Text style={styles.startNavButtonText}>Start Navigation</Text>
+            <Text style={styles.startNavButtonText}>
+              {t("map.start_navigation")}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -1858,7 +1864,9 @@ export default function MapScreen() {
               })
             }
           >
-            <Text style={styles.routeDetailsButtonText}>View Details</Text>
+            <Text style={styles.routeDetailsButtonText}>
+              {t("map.view_details")}
+            </Text>
           </TouchableOpacity>
         </View>
       )}

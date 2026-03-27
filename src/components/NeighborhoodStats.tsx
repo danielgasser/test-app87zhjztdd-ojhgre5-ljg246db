@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { NeighborhoodStats as NeighborhoodStatsType } from "@/store/locationsSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface NeighborhoodStatsProps {
   stats: NeighborhoodStatsType | null;
@@ -20,10 +21,14 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
   stats,
   loading,
 }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <View style={commonStyles.container}>
-        <Text style={commonStyles.loadingText}>Loading census data...</Text>
+        <Text style={commonStyles.loadingText}>
+          {t("map.loading_census_data")}
+        </Text>
       </View>
     );
   }
@@ -32,8 +37,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
     return (
       <View style={commonStyles.container}>
         <Text style={styles.emptyText}>
-          No census data available for this area.
-        </Text>
+          {t('map.no_census_data_available_for_this_area')}</Text>
       </View>
     );
   }
@@ -52,25 +56,27 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
           <Text style={styles.statValue}>
             {stats.population.toLocaleString()}
           </Text>
-          <Text style={styles.statLabel}>Population</Text>
+          <Text style={styles.statLabel}>{t("map.population")}</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={[styles.statValue, { color: crimeLevel.color }]}>
             {crimeLevel.label}
           </Text>
-          <Text style={styles.statLabel}>Crime Level</Text>
+          <Text style={styles.statLabel}>{t("map.crime_level")}</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statValue}>
             {(stats.diversity_index * 100).toFixed(0)}%
           </Text>
-          <Text style={styles.statLabel}>Diversity</Text>
+          <Text style={styles.statLabel}>{t("map.diversity")}</Text>
         </View>
       </View>
 
       {/* Crime Breakdown */}
       <View style={styles.section}>
-        <Text style={commonStyles.sectionTitle}>Crime Rates (per 1,000)</Text>
+        <Text style={commonStyles.sectionTitle}>
+          {t("map.crime_rates_per_1000")}
+        </Text>
         <View style={styles.crimeRow}>
           <View style={styles.crimeItem}>
             <Ionicons
@@ -78,12 +84,12 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
               size={16}
               color={theme.colors.error}
             />
-            <Text style={styles.crimeLabel}>Violent</Text>
+            <Text style={styles.crimeLabel}>{t("map.violent")}</Text>
             <Text style={styles.crimeValue}>{stats.violent_crime_rate}</Text>
           </View>
           <View style={styles.crimeItem}>
             <Ionicons name="home" size={16} color={theme.colors.warning} />
-            <Text style={styles.crimeLabel}>Property</Text>
+            <Text style={styles.crimeLabel}>{t("map.property")}</Text>
             <Text style={styles.crimeValue}>{stats.property_crime_rate}</Text>
           </View>
           <View style={styles.crimeItem}>
@@ -92,7 +98,7 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
               size={16}
               color={theme.colors.error}
             />
-            <Text style={styles.crimeLabel}>Hate Crimes</Text>
+            <Text style={styles.crimeLabel}>{t("map.hate_crimes")}</Text>
             <Text style={styles.crimeValue}>{stats.hate_crime_incidents}</Text>
           </View>
         </View>

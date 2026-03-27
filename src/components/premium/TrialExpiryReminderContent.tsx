@@ -5,6 +5,7 @@ import { theme } from "@/styles/theme";
 import { premiumStyles } from "@/styles/premiumStyles";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { formatDateTime } from "@/utils/timeHelpers";
+import { useTranslation } from "react-i18next";
 
 interface TrialExpiryReminderContentProps {
   expiresAt: string;
@@ -19,6 +20,7 @@ export function TrialExpiryReminderContent({
   onClose,
   onUpgrade,
 }: TrialExpiryReminderContentProps) {
+  const { t } = useTranslation();
   const { timeFormat } = useUserPreferences();
 
   const msRemaining = new Date(expiresAt).getTime() - Date.now();
@@ -41,20 +43,26 @@ export function TrialExpiryReminderContent({
       <View style={premiumStyles.iconContainer}>
         <Ionicons name="time-outline" size={32} color={theme.colors.warning} />
       </View>
-      <Text style={premiumStyles.title}>Trial Expiring Soon</Text>
+      <Text style={premiumStyles.title}>
+        {t("premium.trial_expiring_soon")}
+      </Text>
       <Text style={premiumStyles.featureName}>{featureLabel}</Text>
       <Text style={premiumStyles.description}>
         {`Your free access expires in ${timeLabel} (${formatDateTime(expiresAt, timeFormat)}). Upgrade to keep it permanently.`}
       </Text>
       <View style={premiumStyles.buttons}>
         <TouchableOpacity style={premiumStyles.cancelButton} onPress={onClose}>
-          <Text style={premiumStyles.cancelButtonText}>Dismiss</Text>
+          <Text style={premiumStyles.cancelButtonText}>
+            {t("premium.dismiss")}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={premiumStyles.upgradeButton}
           onPress={onUpgrade}
         >
-          <Text style={premiumStyles.upgradeButtonText}>Upgrade</Text>
+          <Text style={premiumStyles.upgradeButtonText}>
+            {t("premium.upgrade")}
+          </Text>
         </TouchableOpacity>
       </View>
     </>

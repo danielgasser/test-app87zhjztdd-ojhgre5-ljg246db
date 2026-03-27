@@ -12,6 +12,8 @@ import { PremiumGate } from "./PremiumGate";
 import { formatDistance } from "@/utils/distanceHelpers";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
+
 interface RouteSafetyBreakdownProps {
   segmentScores: any[] | undefined;
   routeType: "original" | "optimized";
@@ -26,6 +28,8 @@ const getSafetyColor = (score: number): string => {
 export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
   segmentScores,
 }) => {
+  const { t } = useTranslation();
+
   const [isExpanded, setIsExpanded] = useState(false);
   const { distanceUnit } = useUserPreferences();
 
@@ -34,7 +38,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
   // Group segments by safety level for summary
   const safeSeg = segmentScores.filter((s) => s.safety_score >= 4.0).length;
   const mixedSeg = segmentScores.filter(
-    (s) => s.safety_score >= 3.0 && s.safety_score < 4.0
+    (s) => s.safety_score >= 3.0 && s.safety_score < 4.0,
   ).length;
   const unsafeSeg = segmentScores.filter((s) => s.safety_score < 3.0).length;
 
@@ -48,8 +52,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
         <View style={styles.headerLeft}>
           <Ionicons name="map" size={18} color={theme.colors.primary} />
           <Text style={[commonStyles.textBold, { fontSize: 16 }]}>
-            Route Breakdown
-          </Text>
+            {t('navigation.route_breakdown')}</Text>
           <View style={styles.segmentCount}>
             <Text style={styles.segmentCountText}>
               {segmentScores.length} segments
@@ -68,7 +71,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
           <View style={styles.content}>
             {/* Visual Route Timeline */}
             <View style={styles.timeline}>
-              <Text style={styles.timelineLabel}>Start</Text>
+              <Text style={styles.timelineLabel}>{t("navigation.start")}</Text>
               <View style={styles.timelineBar}>
                 {segmentScores.map((seg: any, idx: number) => (
                   <View
@@ -83,7 +86,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                   />
                 ))}
               </View>
-              <Text style={styles.timelineLabel}>End</Text>
+              <Text style={styles.timelineLabel}>{t("navigation.end")}</Text>
             </View>
 
             {/* Summary Stats */}
@@ -97,7 +100,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                       { backgroundColor: theme.colors.success },
                     ]}
                   />
-                  <Text style={styles.statLabel}>Safe</Text>
+                  <Text style={styles.statLabel}>{t("navigation.safe")}</Text>
                 </View>
               </View>
               <View style={styles.statItem}>
@@ -109,7 +112,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                       { backgroundColor: theme.colors.mixedYellow },
                     ]}
                   />
-                  <Text style={styles.statLabel}>Mixed</Text>
+                  <Text style={styles.statLabel}>{t("navigation.mixed")}</Text>
                 </View>
               </View>
               <View style={styles.statItem}>
@@ -121,7 +124,9 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                       { backgroundColor: theme.colors.error },
                     ]}
                   />
-                  <Text style={styles.statLabel}>Caution</Text>
+                  <Text style={styles.statLabel}>
+                    {t("navigation.caution")}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -129,28 +134,27 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
             {/* Distance by Safety Level */}
             <View style={styles.distanceBreakdown}>
               <Text style={commonStyles.sectionTitle}>
-                Distance by Safety Level
-              </Text>
+                {t('navigation.distance_by_safety_level')}</Text>
               {(() => {
                 const safeDistance = segmentScores
                   .filter((s: any) => s.safety_score >= 4.0)
                   .reduce(
                     (sum: number, s: any) => sum + (s.distance_meters || 0),
-                    0
+                    0,
                   );
                 const mixedDistance = segmentScores
                   .filter(
-                    (s: any) => s.safety_score >= 3.0 && s.safety_score < 4.0
+                    (s: any) => s.safety_score >= 3.0 && s.safety_score < 4.0,
                   )
                   .reduce(
                     (sum: number, s: any) => sum + (s.distance_meters || 0),
-                    0
+                    0,
                   );
                 const unsafeDistance = segmentScores
                   .filter((s: any) => s.safety_score < 3.0)
                   .reduce(
                     (sum: number, s: any) => sum + (s.distance_meters || 0),
-                    0
+                    0,
                   );
                 const totalDistance =
                   safeDistance + mixedDistance + unsafeDistance;
@@ -165,7 +169,9 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                             { backgroundColor: theme.colors.success },
                           ]}
                         />
-                        <Text style={styles.distanceText}>Safe areas</Text>
+                        <Text style={styles.distanceText}>
+                          {t("navigation.safe_areas")}
+                        </Text>
                       </View>
                       <Text style={styles.distanceValue}>
                         {formatDistance(safeDistance, distanceUnit)} (
@@ -183,7 +189,9 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                             { backgroundColor: theme.colors.mixedYellow },
                           ]}
                         />
-                        <Text style={styles.distanceText}>Mixed areas</Text>
+                        <Text style={styles.distanceText}>
+                          {t("navigation.mixed_areas")}
+                        </Text>
                       </View>
                       <Text style={styles.distanceValue}>
                         {formatDistance(mixedDistance, distanceUnit)} (
@@ -201,7 +209,9 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                             { backgroundColor: theme.colors.error },
                           ]}
                         />
-                        <Text style={styles.distanceText}>Caution areas</Text>
+                        <Text style={styles.distanceText}>
+                          {t("navigation.caution_areas")}
+                        </Text>
                       </View>
                       <Text style={styles.distanceValue}>
                         {formatDistance(unsafeDistance, distanceUnit)} (
@@ -225,8 +235,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                     { color: theme.colors.error },
                   ]}
                 >
-                  ⚠️ Areas Requiring Caution
-                </Text>
+                  {t('navigation.areas_requiring_caution')}</Text>
                 <ScrollView
                   style={styles.problemScroll}
                   nestedScrollEnabled={true}
@@ -240,7 +249,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                         .reduce(
                           (sum: number, s: any) =>
                             sum + (s.distance_meters || 0),
-                          0
+                          0,
                         ),
                     }))
                     .filter((s: any) => s.safety_score < 3.0)
@@ -253,7 +262,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                               styles.problemBadge,
                               {
                                 backgroundColor: getSafetyColor(
-                                  segment.safety_score
+                                  segment.safety_score,
                                 ),
                               },
                             ]}
@@ -266,14 +275,14 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                             <Text style={styles.problemDistance}>
                               {formatDistance(
                                 segment.distanceFromStart,
-                                distanceUnit
+                                distanceUnit,
                               )}{" "}
                               from start
                             </Text>
                             <Text style={styles.problemLength}>
                               {formatDistance(
                                 segment.distance_meters,
-                                distanceUnit
+                                distanceUnit,
                               )}{" "}
                               long
                             </Text>
@@ -308,8 +317,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                   color={theme.colors.success}
                 />
                 <Text style={styles.allClearText}>
-                  No high-risk areas detected on this route
-                </Text>
+                  {t('navigation.no_highrisk_areas_detected_on_this_route')}</Text>
               </View>
             )}
           </View>

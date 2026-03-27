@@ -23,8 +23,10 @@ import { passwordChecker } from "@/utils/passwordChecker";
 import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,12 +41,12 @@ export default function RegisterScreen() {
     const trimmedConfirmPassword = confirmPassword.trim();
 
     if (!trimmedEmail || !trimmedPassword || !trimmedConfirmPassword) {
-      notify.error("Please fill in all fields");
+      notify.error(t("auth.please_fill_in_all_fields"));
       return;
     }
 
     if (trimmedPassword !== trimmedConfirmPassword) {
-      notify.error("Passwords do not match");
+      notify.error(t("auth.passwords_do_not_match"));
       return;
     }
 
@@ -108,14 +110,16 @@ export default function RegisterScreen() {
             bounces={false}
           >
             <View style={commonStyles.subHeader}>
-              <Text style={styles.title}>Join TruGuide</Text>
-              <Text style={styles.subtitle}>Create your account</Text>
+              <Text style={styles.title}>{t("auth.join_truguide")}</Text>
+              <Text style={styles.subtitle}>
+                {t("auth.create_your_account")}
+              </Text>
             </View>
 
             <View style={commonStyles.form}>
               <TextInput
                 style={commonStyles.input}
-                placeholder="Email"
+                placeholder={t("auth.email")}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -125,7 +129,7 @@ export default function RegisterScreen() {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="Password"
+                  placeholder={t("auth.password")}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -145,7 +149,7 @@ export default function RegisterScreen() {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="Confirm Password"
+                  placeholder={t("auth.confirm_password")}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry={!showConfirmPassword}
@@ -176,8 +180,7 @@ export default function RegisterScreen() {
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
                   <Text style={commonStyles.primaryButtonText}>
-                    Create Account
-                  </Text>
+                    {t('auth.create_account')}</Text>
                 )}
               </TouchableOpacity>
 
@@ -187,7 +190,9 @@ export default function RegisterScreen() {
                 </Text>
                 <Link href="/(auth)/login" asChild>
                   <TouchableOpacity>
-                    <Text style={commonStyles.textPrimaryLink}>Sign In</Text>
+                    <Text style={commonStyles.textPrimaryLink}>
+                      {t("auth.sign_in")}
+                    </Text>
                   </TouchableOpacity>
                 </Link>
               </View>

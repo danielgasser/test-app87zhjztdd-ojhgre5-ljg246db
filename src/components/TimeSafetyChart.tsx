@@ -4,23 +4,40 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { TimeSafetyData } from "@/store/locationsSlice";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface TimeSafetyChartProps {
   data: TimeSafetyData | null;
   loading: boolean;
 }
 
-const TIME_PERIODS = [
-  { key: "morning", label: "Morning", icon: "sunny", hours: "6am-12pm" },
-  {
-    key: "afternoon",
-    label: "Afternoon",
-    icon: "partly-sunny",
-    hours: "12pm-6pm",
-  },
-  { key: "evening", label: "Evening", icon: "cloudy-night", hours: "6pm-10pm" },
-  { key: "night", label: "Night", icon: "moon", hours: "10pm-6am" },
-] as const;
+const getTimePeriods = (t: (key: string) => string) =>
+  [
+    {
+      key: "morning",
+      label: t("map.morning"),
+      icon: "sunny",
+      hours: t("map.morning_hours"),
+    },
+    {
+      key: "afternoon",
+      label: t("map.afternoon"),
+      icon: "partly-sunny",
+      hours: t("map.afternoon_hours"),
+    },
+    {
+      key: "evening",
+      label: t("map.evening"),
+      icon: "cloudy-night",
+      hours: t("map.evening_hours"),
+    },
+    {
+      key: "night",
+      label: t("map.night"),
+      icon: "moon",
+      hours: t("map.night_hours"),
+    },
+  ] as const;
 
 const getSafetyColor = (rating: number | null): string => {
   if (rating === null) return theme.colors.border;
@@ -30,10 +47,15 @@ const getSafetyColor = (rating: number | null): string => {
 };
 
 const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
+  const { t } = useTranslation();
+  const TIME_PERIODS = getTimePeriods(t);
+
   if (loading) {
     return (
       <View style={styles.specContainer}>
-        <Text style={commonStyles.loadingText}>Loading time data...</Text>
+        <Text style={commonStyles.loadingText}>
+          {t("map.loading_time_data")}
+        </Text>
       </View>
     );
   }
@@ -41,7 +63,9 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
   if (!data || data.total_with_time === 0) {
     return (
       <View style={styles.specContainer}>
-        <Text style={styles.emptyText}>No time-based safety data yet.</Text>
+        <Text style={styles.emptyText}>
+          {t("map.no_timebased_safety_data_yet")}
+        </Text>
       </View>
     );
   }
@@ -81,7 +105,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
                   </Text>
                 </>
               ) : (
-                <Text style={styles.noData}>No data</Text>
+                <Text style={styles.noData}>{t("map.no_data")}</Text>
               )}
             </View>
           );

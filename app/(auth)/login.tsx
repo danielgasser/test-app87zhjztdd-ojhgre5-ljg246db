@@ -23,10 +23,12 @@ import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/services/supabase";
 import { logger } from "@/utils/logger";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +37,7 @@ export default function LoginScreen() {
   const { setAppleName } = useAuth();
   const handleLogin = async () => {
     if (!email || !password) {
-      notify.error("Please fill in all fields");
+      notify.error(t("auth.please_fill_in_all_fields"));
       return;
     }
 
@@ -120,7 +122,7 @@ export default function LoginScreen() {
       }
 
       if (!data?.url) {
-        notify.error("No OAuth URL returned");
+        notify.error(t("auth.no_oauth_url_returned"));
         return;
       }
 
@@ -140,7 +142,7 @@ export default function LoginScreen() {
         const hashFragment = url.split("#")[1];
 
         if (!hashFragment) {
-          notify.error("Authentication failed - no response data");
+          notify.error(t("auth.authentication_failed_no_response_data"));
           return;
         }
 
@@ -173,7 +175,7 @@ export default function LoginScreen() {
             },
           } as any);
         } else {
-          notify.error("Authentication failed - no tokens received");
+          notify.error(t("auth.authentication_failed_no_tokens_received"));
         }
       }
       // OAuth callback will be handled by DeepLinkHandler -> callback.tsx
@@ -196,14 +198,16 @@ export default function LoginScreen() {
             bounces={false}
           >
             <View style={commonStyles.subHeader}>
-              <Text style={styles.title}>TruGuide</Text>
-              <Text style={styles.subtitle}>Travel with confidence</Text>
+              <Text style={styles.title}>{t("auth.truguide")}</Text>
+              <Text style={styles.subtitle}>
+                {t("auth.travel_with_confidence")}
+              </Text>
             </View>
 
             <View style={commonStyles.form}>
               <TextInput
                 style={commonStyles.input}
-                placeholder="Email"
+                placeholder={t("auth.email")}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -213,7 +217,7 @@ export default function LoginScreen() {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="Password"
+                  placeholder={t("auth.password")}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -234,7 +238,9 @@ export default function LoginScreen() {
                 onPress={() => router.push("/(auth)/forgot-password")}
                 style={styles.forgotPassword}
               >
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                <Text style={styles.forgotPasswordText}>
+                  {t("auth.forgot_password")}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -252,7 +258,7 @@ export default function LoginScreen() {
               {/* Social Login Divider */}
               <View style={styles.dividerContainer}>
                 <View style={commonStyles.divider} />
-                <Text style={styles.dividerText}>OR</Text>
+                <Text style={styles.dividerText}>{t("auth.or")}</Text>
                 <View style={commonStyles.divider} />
               </View>
 
@@ -270,13 +276,12 @@ export default function LoginScreen() {
                       style={{ marginRight: 8 }}
                     />
                     <Text style={styles.appleButtonText}>
-                      Sign in with Apple
-                    </Text>
+                      {t('auth.sign_in_with_apple')}</Text>
                   </TouchableOpacity>
 
                   <View style={styles.dividerContainer}>
                     <View style={commonStyles.divider} />
-                    <Text style={styles.dividerText}>OR</Text>
+                    <Text style={styles.dividerText}>{t("auth.or")}</Text>
                     <View style={commonStyles.divider} />
                   </View>
                 </>
@@ -293,7 +298,9 @@ export default function LoginScreen() {
                   color={theme.colors.background}
                   style={{ marginRight: 8 }}
                 />
-                <Text style={styles.googleButtonText}>Sign in with Google</Text>
+                <Text style={styles.googleButtonText}>
+                  {t("auth.sign_in_with_google")}
+                </Text>
               </TouchableOpacity>
 
               <View style={commonStyles.footer}>
@@ -302,7 +309,9 @@ export default function LoginScreen() {
                 </Text>
                 <Link href="/(auth)/register" asChild>
                   <TouchableOpacity>
-                    <Text style={commonStyles.textPrimaryLink}>Sign Up</Text>
+                    <Text style={commonStyles.textPrimaryLink}>
+                      {t("auth.sign_up")}
+                    </Text>
                   </TouchableOpacity>
                 </Link>
               </View>

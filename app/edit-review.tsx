@@ -30,6 +30,7 @@ import { APP_CONFIG } from "@/config/appConfig";
 import { validateVisitDateTime } from "@/utils/dateValidation";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -46,11 +47,16 @@ const RatingInput: React.FC<RatingProps> = ({
   onChange,
   required,
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={commonStyles.ratingContainer}>
       <Text style={commonStyles.ratingLabel}>
         {label}{" "}
-        {required && <Text style={commonStyles.requiredAsterisk}>*</Text>}
+        {required && (
+          <Text style={commonStyles.requiredAsterisk}>
+            {t("review.unknown")}
+          </Text>
+        )}
       </Text>
       <View style={commonStyles.stars}>
         {[1, 2, 3, 4, 5].map((star) => (
@@ -70,6 +76,8 @@ const RatingInput: React.FC<RatingProps> = ({
 };
 
 export default function EditReviewScreen() {
+  const { t } = useTranslation();
+
   const router = useRouter();
   const { user } = useAuth();
 
@@ -120,7 +128,7 @@ export default function EditReviewScreen() {
 
       if (review) {
         if (!review.created_at) {
-          notify.error("Invalid review timestamp");
+          notify.error(t("review.invalid_review_timestamp"));
           router.back();
           return;
         }
@@ -156,7 +164,7 @@ export default function EditReviewScreen() {
       }
     } catch (error: any) {
       logger.error("Failed to fetch review:", error);
-      notify.error("Failed to load review data. Please try again.");
+      notify.error(t("review.failed_to_load_review_data_please_try"));
       router.back();
     } finally {
       setLoadingReview(false);
@@ -165,23 +173,23 @@ export default function EditReviewScreen() {
 
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
-      notify.error("Please enter a title for your review");
+      notify.error(t("review.please_enter_a_title_for_your_review"));
       return;
     }
     if (!formData.content.trim()) {
-      notify.error("Please write your review");
+      notify.error(t("review.please_write_your_review"));
       return;
     }
     if (formData.overall_rating === 0) {
-      notify.error("Please provide an overall rating");
+      notify.error(t("review.please_provide_an_overall_rating"));
       return;
     }
     if (formData.safety_rating === 0) {
-      notify.error("Please provide a safety rating");
+      notify.error(t("review.please_provide_a_safety_rating"));
       return;
     }
     if (formData.comfort_rating === 0) {
-      notify.error("Please provide a comfort rating");
+      notify.error(t("review.please_provide_a_comfort_rating"));
       return;
     }
 
@@ -237,13 +245,14 @@ export default function EditReviewScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
           <Text style={commonStyles.textError}>
-            Please log in to edit reviews
-          </Text>
+            {t('review.please_log_in_to_edit_reviews')}</Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
           >
-            <Text style={commonStyles.primaryButtonText}>Go to Login</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("review.go_to_login")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -254,7 +263,9 @@ export default function EditReviewScreen() {
     return (
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
-          <Text style={commonStyles.loadingText}>Loading review...</Text>
+          <Text style={commonStyles.loadingText}>
+            {t("review.loading_review")}
+          </Text>
         </View>
       </View>
     );
@@ -265,13 +276,14 @@ export default function EditReviewScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
           <Text style={commonStyles.textError}>
-            Review not found or you don't have permission to edit it
-          </Text>
+            {t('review.review_not_found_or_you_dont_have')}</Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.back()}
           >
-            <Text style={commonStyles.primaryButtonText}>Go Back</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("review.go_back")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -293,7 +305,9 @@ export default function EditReviewScreen() {
               <TouchableOpacity onPress={handleCancel}>
                 <Ionicons name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
-              <Text style={commonStyles.headerTitle}>Edit Review</Text>
+              <Text style={commonStyles.headerTitle}>
+                {t("review.edit_review")}
+              </Text>
               <View style={{ width: 24 }} />
             </View>
 
@@ -302,11 +316,13 @@ export default function EditReviewScreen() {
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
                   Review Title{" "}
-                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                  <Text style={commonStyles.requiredAsterisk}>
+                    {t("review.unknown")}
+                  </Text>
                 </Text>
                 <TextInput
                   style={commonStyles.input}
-                  placeholder="Summarize your experience"
+                  placeholder={t("review.summarize_your_experience")}
                   value={formData.title}
                   onChangeText={(text) =>
                     setFormData({ ...formData, title: text })
@@ -363,11 +379,15 @@ export default function EditReviewScreen() {
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
                   Your Review{" "}
-                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                  <Text style={commonStyles.requiredAsterisk}>
+                    {t("review.unknown")}
+                  </Text>
                 </Text>
                 <TextInput
                   style={[commonStyles.input, commonStyles.textArea]}
-                  placeholder="Share your experience at this location..."
+                  placeholder={t(
+                    "review.share_your_experience_at_this_location",
+                  )}
                   value={formData.content}
                   onChangeText={(text) =>
                     setFormData({ ...formData, content: text })
@@ -384,7 +404,9 @@ export default function EditReviewScreen() {
 
               {/* Visit Details */}
               <View style={commonStyles.formField}>
-                <Text style={commonStyles.formLabel}>Visit Date</Text>
+                <Text style={commonStyles.formLabel}>
+                  {t("review.visit_date")}
+                </Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowDatePicker(true)}
@@ -446,7 +468,9 @@ export default function EditReviewScreen() {
               )}
 
               <View style={commonStyles.formField}>
-                <Text style={commonStyles.formLabel}>Visit Time</Text>
+                <Text style={commonStyles.formLabel}>
+                  {t("review.visit_time")}
+                </Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowTimePicker(true)}
@@ -479,7 +503,9 @@ export default function EditReviewScreen() {
 
                       // Check if the combined date+time is in the future
                       if (newDateTime > new Date()) {
-                        notify.error("Visit time cannot be in the future");
+                        notify.error(
+                          t("review.visit_time_cannot_be_in_the_future"),
+                        );
                         const now = new Date();
                         newDateTime.setHours(now.getHours());
                         newDateTime.setMinutes(now.getMinutes());
@@ -492,7 +518,9 @@ export default function EditReviewScreen() {
               )}
 
               <View style={commonStyles.formField}>
-                <Text style={commonStyles.formLabel}>Visit Type</Text>
+                <Text style={commonStyles.formLabel}>
+                  {t("review.visit_type")}
+                </Text>
                 <TouchableOpacity
                   style={styles.dateButton}
                   onPress={() => setShowVisitTypePicker(true)}
@@ -519,11 +547,15 @@ export default function EditReviewScreen() {
                 <View style={commonStyles.modalOverlay}>
                   <View style={commonStyles.modalContent}>
                     <View style={commonStyles.modalHeader}>
-                      <Text style={commonStyles.modalTitle}>Visit Type</Text>
+                      <Text style={commonStyles.modalTitle}>
+                        {t("review.visit_type")}
+                      </Text>
                       <TouchableOpacity
                         onPress={() => setShowVisitTypePicker(false)}
                       >
-                        <Text style={commonStyles.modalDone}>Done</Text>
+                        <Text style={commonStyles.modalDone}>
+                          {t("review.done")}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                     <Picker
@@ -553,7 +585,9 @@ export default function EditReviewScreen() {
                   ]}
                   onPress={handleCancel}
                 >
-                  <Text style={commonStyles.cancelButtonText}>Cancel</Text>
+                  <Text style={commonStyles.cancelButtonText}>
+                    {t("review.cancel")}
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity

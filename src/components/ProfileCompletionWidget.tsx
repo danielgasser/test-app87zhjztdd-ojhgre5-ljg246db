@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { FIELD_DISPLAY_NAMES } from "@/constants/profileRequirements";
 import { theme } from "@/styles/theme";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 interface ProfileCompletionWidgetProps {
   missingFields: string[];
@@ -14,6 +15,7 @@ export default function ProfileCompletionWidget({
   missingFields,
   completionPercentage,
 }: ProfileCompletionWidgetProps) {
+  const { t } = useTranslation();
   // Don't show if profile is complete
   if (completionPercentage === 100) {
     return (
@@ -23,7 +25,7 @@ export default function ProfileCompletionWidget({
           size={32}
           color={theme.colors.success}
         />
-        <Text style={styles.completeText}>Profile Complete! ✨</Text>
+        <Text style={styles.completeText}>{t("profile.profile_complete")}</Text>
       </View>
     );
   }
@@ -46,7 +48,7 @@ export default function ProfileCompletionWidget({
       {/* Header */}
       <View style={commonStyles.header}>
         <Ionicons name="person-circle" size={24} color={theme.colors.primary} />
-        <Text style={styles.title}>Profile Completion</Text>
+        <Text style={styles.title}>{t("profile.profile_completion")}</Text>
         <Text style={styles.percentage}>{completionPercentage}%</Text>
       </View>
 
@@ -80,7 +82,9 @@ export default function ProfileCompletionWidget({
         style={commonStyles.primaryButton}
         onPress={handleCompleteProfile}
       >
-        <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>
+        <Text style={commonStyles.primaryButtonText}>
+          {t("profile.complete_profile")}
+        </Text>
         <Ionicons name="arrow-forward" size={16} color={theme.colors.card} />
       </TouchableOpacity>
     </View>

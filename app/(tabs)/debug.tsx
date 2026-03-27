@@ -32,10 +32,12 @@ import * as Application from "expo-application";
 import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 const appConfig = require("../../app.config.js");
 
 export default function DebugScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -48,7 +50,7 @@ export default function DebugScreen() {
 
   useEffect(() => {
     if (!isAuthorized) {
-      notify.error("Access denied");
+      notify.error(t("debug.access_denied"));
       router.back();
       return;
     }
@@ -78,10 +80,10 @@ export default function DebugScreen() {
           onPress: async () => {
             await locationCache.clearCache();
             await loadDebugData();
-            notify.success("Cache cleared successfully");
+            notify.success(t("debug.cache_cleared_successfully"));
           },
         },
-      ]
+      ],
     );
   };
 
@@ -102,7 +104,7 @@ export default function DebugScreen() {
             color={theme.colors.textOnPrimary}
           />
         </TouchableOpacity>
-        <Text style={commonStyles.headerTitle}>🐛 Debug Console</Text>
+        <Text style={commonStyles.headerTitle}>{t("debug.debug_console")}</Text>
         <TouchableOpacity onPress={handleRefresh}>
           <Ionicons name="refresh" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
@@ -116,7 +118,9 @@ export default function DebugScreen() {
       >
         {/* Cache Statistics */}
         <View style={styles.section}>
-          <Text style={commonStyles.sectionTitle}>📦 Cache Statistics</Text>
+          <Text style={commonStyles.sectionTitle}>
+            {t("debug.cache_statistics")}
+          </Text>
           {cacheStats ? (
             <View style={commonStyles.cardBordered}>
               <InfoRow
@@ -142,13 +146,15 @@ export default function DebugScreen() {
               />
             </View>
           ) : (
-            <Text style={commonStyles.loadingText}>Loading...</Text>
+            <Text style={commonStyles.loadingText}>{t("debug.loading")}</Text>
           )}
         </View>
 
         {/* System Information */}
         <View style={styles.section}>
-          <Text style={commonStyles.sectionTitle}>📱 System Information</Text>
+          <Text style={commonStyles.sectionTitle}>
+            {t("debug.system_information")}
+          </Text>
           <View style={commonStyles.cardBordered}>
             <InfoRow
               label="App Version"
@@ -170,7 +176,9 @@ export default function DebugScreen() {
 
         {/* Environment */}
         <View style={styles.section}>
-          <Text style={commonStyles.sectionTitle}>⚙️ Environment</Text>
+          <Text style={commonStyles.sectionTitle}>
+            {t("debug.environment")}
+          </Text>
           <View style={commonStyles.cardBordered}>
             <InfoRow
               label="Supabase URL"
@@ -196,7 +204,9 @@ export default function DebugScreen() {
 
         {/* App Configuration */}
         <View style={styles.section}>
-          <Text style={commonStyles.sectionTitle}>🔧 App Configuration</Text>
+          <Text style={commonStyles.sectionTitle}>
+            {t("debug.app_configuration")}
+          </Text>
           <View style={commonStyles.cardBordered}>
             <InfoRow
               label="Default Search Radius"
@@ -214,7 +224,9 @@ export default function DebugScreen() {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={commonStyles.sectionTitle}>⚡ Quick Actions</Text>
+          <Text style={commonStyles.sectionTitle}>
+            {t("debug.quick_actions")}
+          </Text>
           <View style={styles.actionsContainer}>
             <TouchableOpacity
               style={styles.actionButton}
@@ -228,8 +240,7 @@ export default function DebugScreen() {
               <Text
                 style={[styles.actionButtonText, { color: theme.colors.error }]}
               >
-                Clear Cache
-              </Text>
+                {t('debug.clear_cache')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -243,7 +254,9 @@ export default function DebugScreen() {
                 size={20}
                 color={theme.colors.primary}
               />
-              <Text style={styles.actionButtonText}>View Raw Data</Text>
+              <Text style={styles.actionButtonText}>
+                {t("debug.view_raw_data")}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -257,7 +270,9 @@ export default function DebugScreen() {
                 size={20}
                 color={theme.colors.primary}
               />
-              <Text style={styles.actionButtonText}>Test Notification</Text>
+              <Text style={styles.actionButtonText}>
+                {t("debug.test_notification")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

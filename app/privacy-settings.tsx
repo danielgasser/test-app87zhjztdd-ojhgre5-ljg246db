@@ -25,8 +25,11 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { IubendaDocument } from "@/components/IubendaDocument";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function PrivacySettings() {
+  const { t } = useTranslation();
+
   const { user, signOut } = useAuth();
   const profile = useAppSelector((state: any) => state.user.profile);
   const userLocation = useAppSelector((state) => state.locations.userLocation);
@@ -81,7 +84,7 @@ export default function PrivacySettings() {
         );
       }
     } catch (error) {
-      notify.error("Failed to save setting. Please try again.");
+      notify.error(t("settings.failed_to_save_setting_please_try_again"));
     }
   };
 
@@ -255,7 +258,7 @@ export default function PrivacySettings() {
         );
       }
     } catch (error) {
-      notify.error("Failed to export data. Please try again.");
+      notify.error(t("settings.failed_to_export_data_please_try_again"));
       logger.error("Export error:", error);
     }
   };
@@ -269,7 +272,7 @@ export default function PrivacySettings() {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        notify.error("You must be logged in to delete your account.");
+        notify.error(t("settings.you_must_be_logged_in_to_delete_your"));
         return;
       }
 
@@ -326,12 +329,16 @@ export default function PrivacySettings() {
             style={commonStyles.backButtonText}
           />
         </TouchableOpacity>
-        <Text style={commonStyles.headerTitle}>Privacy Settings</Text>
+        <Text style={commonStyles.headerTitle}>
+          {t("settings.privacy_settings")}
+        </Text>
         <View style={commonStyles.headerPlaceholder} />
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={commonStyles.sectionTitle}>Demographic Privacy</Text>
+        <Text style={commonStyles.sectionTitle}>
+          {t("settings.demographic_privacy")}
+        </Text>
 
         <SettingToggle
           label="Show demographics on reviews"
@@ -345,8 +352,7 @@ export default function PrivacySettings() {
         />
 
         <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
-          Profile Privacy
-        </Text>
+          {t('settings.profile_privacy')}</Text>
 
         <SettingToggle
           label="Public profile"
@@ -363,8 +369,7 @@ export default function PrivacySettings() {
         />
         {/* Legal Documents Section */}
         <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
-          Legal Documents
-        </Text>
+          {t('settings.legal_documents')}</Text>
 
         <TouchableOpacity
           style={styles.actionButton}
@@ -376,10 +381,11 @@ export default function PrivacySettings() {
             color={theme.colors.text}
           />
           <View style={styles.actionTextContainer}>
-            <Text style={styles.actionTitle}>Terms of Service</Text>
-            <Text style={styles.actionDescription}>
-              View our terms and conditions
+            <Text style={styles.actionTitle}>
+              {t("settings.terms_of_service")}
             </Text>
+            <Text style={styles.actionDescription}>
+              {t('settings.view_our_terms_and_conditions')}</Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -398,10 +404,11 @@ export default function PrivacySettings() {
             color={theme.colors.text}
           />
           <View style={styles.actionTextContainer}>
-            <Text style={styles.actionTitle}>Privacy Policy</Text>
-            <Text style={styles.actionDescription}>
-              View how we handle your data
+            <Text style={styles.actionTitle}>
+              {t("settings.privacy_policy")}
             </Text>
+            <Text style={styles.actionDescription}>
+              {t('settings.view_how_we_handle_your_data')}</Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -412,8 +419,7 @@ export default function PrivacySettings() {
 
         {/* Account Management Section */}
         <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
-          Account Management
-        </Text>
+          {t('settings.account_management')}</Text>
 
         <TouchableOpacity
           style={styles.actionButton}
@@ -421,10 +427,9 @@ export default function PrivacySettings() {
         >
           <MaterialIcons name="folder" size={24} color={theme.colors.text} />
           <View style={styles.actionTextContainer}>
-            <Text style={styles.actionTitle}>View My Data</Text>
+            <Text style={styles.actionTitle}>{t("settings.view_my_data")}</Text>
             <Text style={styles.actionDescription}>
-              See what information TruGuide has collected
-            </Text>
+              {t('settings.see_what_information_truguide_has')}</Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -443,10 +448,11 @@ export default function PrivacySettings() {
             color={theme.colors.primary}
           />
           <View style={styles.actionTextContainer}>
-            <Text style={styles.actionTitle}>Export My Data</Text>
-            <Text style={styles.actionDescription}>
-              Download all your data in JSON format
+            <Text style={styles.actionTitle}>
+              {t("settings.export_my_data")}
             </Text>
+            <Text style={styles.actionDescription}>
+              {t('settings.download_all_your_data_in_json_format')}</Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -468,11 +474,9 @@ export default function PrivacySettings() {
           />
           <View style={styles.actionTextContainer}>
             <Text style={[styles.actionTitle, styles.dangerText]}>
-              Delete Account
-            </Text>
+              {t('settings.delete_account')}</Text>
             <Text style={styles.actionDescription}>
-              Permanently delete your account and all data
-            </Text>
+              {t('settings.permanently_delete_your_account_and_all')}</Text>
           </View>
           <MaterialIcons
             name="chevron-right"
@@ -489,14 +493,16 @@ export default function PrivacySettings() {
       >
         <SafeAreaView style={styles.modalContainer}>
           <View style={commonStyles.modalHeader}>
-            <Text style={commonStyles.modalTitle}>My Data</Text>
+            <Text style={commonStyles.modalTitle}>{t("settings.my_data")}</Text>
             <TouchableOpacity onPress={() => setViewDataModalVisible(false)}>
               <MaterialIcons name="close" size={28} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
           <ScrollView style={commonStyles.modalContent}>
-            <Text style={styles.dataSection}>Profile Information</Text>
+            <Text style={styles.dataSection}>
+              {t("settings.profile_information")}
+            </Text>
             <Text style={styles.dataText}>Email: {user?.email}</Text>
             <Text style={styles.dataText}>
               Name: {profile?.full_name || "Not set"}
@@ -505,7 +511,9 @@ export default function PrivacySettings() {
               Account Created:
               {new Date(profile.created_at).toLocaleDateString()}
             </Text>
-            <Text style={styles.dataSection}>Demographic Data</Text>
+            <Text style={styles.dataSection}>
+              {t("settings.demographic_data")}
+            </Text>
             <Text style={styles.dataText}>
               Race/Ethnicity: {profile?.race_ethnicity?.join(", ") || "Not set"}
             </Text>
@@ -525,14 +533,16 @@ export default function PrivacySettings() {
               Disability Status:
               {profile?.disability_status?.join(", ") || "None"}
             </Text>
-            <Text style={styles.dataSection}>Privacy Settings</Text>
+            <Text style={styles.dataSection}>
+              {t("settings.privacy_settings")}
+            </Text>
             <Text style={styles.dataText}>
               Privacy Level: {profile?.privacy_level || "public"}
             </Text>
             <Text style={styles.dataText}>
               Show Demographics: {profile?.show_demographics ? "Yes" : "No"}
             </Text>
-            <Text style={styles.dataSection}>Activity</Text>
+            <Text style={styles.dataSection}>{t("settings.activity")}</Text>
             {loadingStats ? (
               <ActivityIndicator size="small" color={theme.colors.primary} />
             ) : activityStats ? (
@@ -546,8 +556,12 @@ export default function PrivacySettings() {
               </>
             ) : (
               <>
-                <Text style={styles.dataText}>Reviews Posted: 0</Text>
-                <Text style={styles.dataText}>Routes Planned: 0</Text>
+                <Text style={styles.dataText}>
+                  {t("settings.reviews_posted_0")}
+                </Text>
+                <Text style={styles.dataText}>
+                  {t("settings.routes_planned_0")}
+                </Text>
               </>
             )}
           </ScrollView>
@@ -562,7 +576,9 @@ export default function PrivacySettings() {
               size={48}
               color={theme.colors.error}
             />
-            <Text style={styles.deleteTitle}>Delete Account?</Text>
+            <Text style={styles.deleteTitle}>
+              {t("settings.delete_account")}
+            </Text>
             <Text style={styles.deleteMessage}>
               This will permanently delete your account and all associated data
               including your profile, reviews, and settings.
@@ -573,7 +589,9 @@ export default function PrivacySettings() {
                 style={styles.cancelButton}
                 onPress={() => setDeleteConfirmVisible(false)}
               >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>
+                  {t("settings.cancel")}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmDeleteButton}
@@ -581,7 +599,9 @@ export default function PrivacySettings() {
                   handleDeleteAccount();
                 }}
               >
-                <Text style={styles.confirmDeleteText}>Delete Forever</Text>
+                <Text style={styles.confirmDeleteText}>
+                  {t("settings.delete_forever")}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -592,7 +612,7 @@ export default function PrivacySettings() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showPrivacy}
         onClose={() => setShowPrivacy(false)}
-        title="Privacy Policy"
+        title={t("settings.privacy_policy")}
       />
 
       <IubendaDocument
@@ -600,7 +620,7 @@ export default function PrivacySettings() {
         publicId={IUBENDA_PUBLIC_ID}
         visible={showTerms}
         onClose={() => setShowTerms(false)}
-        title="Terms of Service"
+        title={t("settings.terms_of_service")}
       />
     </SafeAreaView>
   );

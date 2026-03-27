@@ -15,6 +15,7 @@ import { formatDuration } from "@/utils/timeHelpers";
 import { ProactiveWarnings } from "./ProactiveWarnings";
 import { RouteSafetyBreakdown } from "./RouteSafetyBreakdown";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 interface RouteComparisonCardProps {
   comparison: SmartRouteComparison;
   onSelectOriginal: () => void;
@@ -43,7 +44,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     improvement_summary,
     waypoints_added,
   } = comparison;
-
+  const { t } = useTranslation();
   // Helper function to get safety score color
   const getSafetyColor = (score: number): string => {
     if (score >= 4.0) return theme.colors.success; // Green
@@ -51,7 +52,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
     return theme.colors.error; // Red
   };
   const selectedRoute = useAppSelector(
-    (state) => state.locations.selectedRoute
+    (state) => state.locations.selectedRoute,
   );
   const isOriginalSelected = selectedRoute?.id === original_route.id;
   const isOptimizedSelected = selectedRoute?.id === optimized_route.id;
@@ -60,7 +61,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
       {/* Header */}
       <View style={commonStyles.header}>
         <Ionicons name="analytics" size={24} color={theme.colors.primary} />
-        <Text style={commonStyles.headerTitle}>Safer Route Found!</Text>
+        <Text style={commonStyles.headerTitle}>
+          {t("navigation.safer_route_found")}
+        </Text>
       </View>
 
       {/* Improvement Summary */}
@@ -88,17 +91,21 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
         >
           {isOriginalSelected && ( // Show badge if selected
             <View style={styles.recommendedBadge}>
-              <Text style={styles.recommendedText}>Selected</Text>
+              <Text style={styles.recommendedText}>
+                {t("navigation.selected")}
+              </Text>
             </View>
           )}
           <View style={styles.routeCardHeader}>
-            <Text style={styles.routeLabel}>Fastest Route</Text>
+            <Text style={styles.routeLabel}>
+              {t("navigation.fastest_route")}
+            </Text>
             <View
               style={[
                 styles.safetyBadge,
                 {
                   backgroundColor: getSafetyColor(
-                    improvement_summary.original_safety_score
+                    improvement_summary.original_safety_score,
                   ),
                 },
               ]}
@@ -138,7 +145,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             segmentScores={original_route.safety_analysis?.segment_scores}
             routeType="original"
           />
-          <Text style={styles.selectButtonText}>Use Fastest</Text>
+          <Text style={styles.selectButtonText}>
+            {t("navigation.use_fastest")}
+          </Text>
         </TouchableOpacity>
 
         {/* Optimized Route */}
@@ -151,20 +160,24 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
         >
           {isOptimizedSelected && ( // Show badge if selected
             <View style={styles.recommendedBadge}>
-              <Text style={styles.recommendedText}>Selected</Text>
+              <Text style={styles.recommendedText}>
+                {t("navigation.selected")}
+              </Text>
             </View>
           )}
           <View style={styles.recommendedBadgeRed}>
-            <Text style={styles.recommendedTextRed}>RECOMMENDED</Text>
+            <Text style={styles.recommendedTextRed}>
+              {t("navigation.recommended")}
+            </Text>
           </View>
           <View style={styles.routeCardHeader}>
-            <Text style={styles.routeLabel}>Safer Route</Text>
+            <Text style={styles.routeLabel}>{t("navigation.safer_route")}</Text>
             <View
               style={[
                 styles.safetyBadge,
                 {
                   backgroundColor: getSafetyColor(
-                    improvement_summary.optimized_safety_score
+                    improvement_summary.optimized_safety_score,
                   ),
                 },
               ]}
@@ -211,7 +224,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             segmentScores={optimized_route.safety_analysis?.segment_scores}
             routeType="optimized"
           />
-          <Text style={styles.selectButtonText}>Use Safer Route</Text>
+          <Text style={styles.selectButtonText}>
+            {t("navigation.use_safer_route")}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -252,12 +267,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           <Ionicons name="alert-circle" size={24} color={theme.colors.accent} />
           <View style={styles.warningContent}>
             <Text style={styles.warningTitle}>
-              ⚠️ Limited reviews available for this route!
-            </Text>
+              {t('navigation.limited_reviews_available_for_this_route')}</Text>
             <Text style={styles.warningText}>
-              Help improve safety. Be the first to review locations along the
-              way during your trip.
-            </Text>
+              {t('navigation.help_improve_safety_be_the_first_to')}</Text>
           </View>
         </View>
       )}

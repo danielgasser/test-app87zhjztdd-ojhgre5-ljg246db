@@ -19,8 +19,10 @@ import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import { recordLocationDisclosureAcceptance } from "@/services/consentService";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function LocationDisclosureScreen() {
+  const { t } = useTranslation();
   const { user, refreshOnboardingStatus } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,7 +63,7 @@ export default function LocationDisclosureScreen() {
       // NavigationController will handle routing to onboarding
     } catch (error) {
       logger.error("Failed to save location disclosure:", error);
-      notify.error("Something went wrong. Please try again.");
+      notify.error(t("legal.something_went_wrong_please_try_again"));
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +76,9 @@ export default function LocationDisclosureScreen() {
           <Ionicons name="location" size={64} color={theme.colors.primary} />
         </View>
 
-        <Text style={styles.title}>Location Access</Text>
+        <Text style={styles.title}>{t("legal.location_access")}</Text>
         <Text style={styles.subtitle}>
-          TruGuide needs location access to keep you safe
-        </Text>
+          {t('legal.truguide_needs_location_access_to_keep')}</Text>
 
         <View style={styles.featureList}>
           <View style={styles.featureItem}>
@@ -89,10 +90,11 @@ export default function LocationDisclosureScreen() {
               />
             </View>
             <View style={styles.featureText}>
-              <Text style={styles.featureTitle}>Turn-by-Turn Navigation</Text>
-              <Text style={styles.featureDescription}>
-                Get directions with real-time safety ratings along your route
+              <Text style={styles.featureTitle}>
+                {t("legal.turnbyturn_navigation")}
               </Text>
+              <Text style={styles.featureDescription}>
+                {t('legal.get_directions_with_realtime_safety')}</Text>
             </View>
           </View>
 
@@ -101,11 +103,11 @@ export default function LocationDisclosureScreen() {
               <Ionicons name="warning" size={24} color={theme.colors.warning} />
             </View>
             <View style={styles.featureText}>
-              <Text style={styles.featureTitle}>Safety Alerts</Text>
-              <Text style={styles.featureDescription}>
-                Receive notifications when approaching areas with low safety
-                ratings
+              <Text style={styles.featureTitle}>
+                {t("legal.safety_alerts")}
               </Text>
+              <Text style={styles.featureDescription}>
+                {t('legal.receive_notifications_when_approaching')}</Text>
             </View>
           </View>
 
@@ -118,10 +120,11 @@ export default function LocationDisclosureScreen() {
               />
             </View>
             <View style={styles.featureText}>
-              <Text style={styles.featureTitle}>Smart Rerouting</Text>
-              <Text style={styles.featureDescription}>
-                Get automatic suggestions for safer alternative routes
+              <Text style={styles.featureTitle}>
+                {t("legal.smart_rerouting")}
               </Text>
+              <Text style={styles.featureDescription}>
+                {t('legal.get_automatic_suggestions_for_safer')}</Text>
             </View>
           </View>
         </View>
@@ -133,18 +136,13 @@ export default function LocationDisclosureScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.infoText}>
-            Background location is used only during active navigation to provide
-            safety alerts. Your location data is never sold or shared with third
-            parties.
-          </Text>
+            {t('legal.background_location_is_used_only_during')}</Text>
         </View>
 
         {Platform.OS === "android" && (
           <View style={styles.androidNote}>
             <Text style={styles.androidNoteText}>
-              On the next screen, select "Allow all the time" for the best
-              experience with navigation and safety alerts.
-            </Text>
+              {t('legal.on_the_next_screen_select_allow_all_the')}</Text>
           </View>
         )}
       </ScrollView>
@@ -159,7 +157,9 @@ export default function LocationDisclosureScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.colors.textOnPrimary} />
           ) : (
-            <Text style={commonStyles.primaryButtonText}>Continue</Text>
+            <Text style={commonStyles.primaryButtonText}>
+              {t("legal.continue")}
+            </Text>
           )}
         </TouchableOpacity>
       </View>
