@@ -1,3 +1,4 @@
+import "@/i18n";
 import "@/tasks/navigationLocationTask";
 import React, { useEffect } from "react";
 import { Stack, useRouter } from "expo-router";

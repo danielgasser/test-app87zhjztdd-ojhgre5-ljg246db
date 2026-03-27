@@ -1,4 +1,5 @@
 {
+  "terminal.integrated.fontSize": 20,
   "files.associations": {
     "supabase/functions/**/*.ts": "plaintext"
   },

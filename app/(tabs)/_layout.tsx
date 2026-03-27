@@ -10,6 +10,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import Constants from "expo-constants";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
+import { useTranslation } from "react-i18next";
 
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
@@ -32,6 +33,7 @@ function ProfileTabIcon({ color }: { color: string }) {
 }
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   console.log(
@@ -129,7 +131,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: t("profile.title"),
           tabBarIcon: ({ color }) => <ProfileTabIcon color={color} />,
         }}
       />

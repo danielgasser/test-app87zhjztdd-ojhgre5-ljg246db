@@ -67,6 +67,7 @@ module.exports = () => {
       plugins: [
         "expo-router",
         "expo-secure-store",
+        "expo-localization",
         "expo-web-browser",
         [
           "react-native-google-mobile-ads",

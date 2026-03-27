@@ -1,0 +1,1282 @@
+app/(auth)/callback.tsx:120:                                                     <Text style={commonStyles.primaryButtonText}>Sign Out</Text>
+app/(auth)/forgot-password.tsx:100:                                                       <Text style={commonStyles.formLabel}>Email Address</Text>
+app/(auth)/forgot-password.tsx:103:                    placeholder="Enter your email"
+app/(auth)/forgot-password.tsx:126:                                                         <Text style={styles.resetButtonText}>Send Reset Link</Text>
+app/(auth)/forgot-password.tsx:140:                                                   <Text style={styles.successText}>
+                    Check your email at{" "}
+                    <Text style={styles.emailText}>{email}</Text>
+                  </Text>
+app/(auth)/forgot-password.tsx:144:                                                      <Text style={styles.successSubtext}>
+                    Click the link in the email to reset your password. The link
+                    will expire in 1 hour.
+                  </Text>
+app/(auth)/forgot-password.tsx:155:                                                        <Text style={styles.resendButtonText}>
+                    Didn't receive the email? Try again
+                  </Text>
+app/(auth)/forgot-password.tsx:165:                                                       <Text style={styles.backToLoginText}>Back to Sign In</Text>
+app/(auth)/forgot-password.tsx:181:                                                   <Text style={styles.loginLinkText}>Back to Login</Text>
+app/(auth)/forgot-password.tsx:31:      notify.error("Please enter your email address");
+app/(auth)/forgot-password.tsx:38:      notify.error("Please enter a valid email address");
+app/(auth)/forgot-password.tsx:57:      notify.success(
+app/(auth)/forgot-password.tsx:63:      notify.error(
+app/(auth)/forgot-password.tsx:88:                                         <Text style={styles.title}>Forgot Password?</Text>
+app/(auth)/login.tsx:103:      notify.error(error.message || "Failed to sign in with Apple");
+app/(auth)/login.tsx:118:        notify.error(error?.message);
+app/(auth)/login.tsx:123:        notify.error("No OAuth URL returned");
+app/(auth)/login.tsx:143:          notify.error("Authentication failed - no response data");
+app/(auth)/login.tsx:162:          notify.error(error_description || "Authentication failed");
+app/(auth)/login.tsx:176:          notify.error("Authentication failed - no tokens received");
+app/(auth)/login.tsx:182:      notify.error(error.message);
+app/(auth)/login.tsx:199:                                         <Text style={styles.title}>TruGuide</Text>
+app/(auth)/login.tsx:200:                                            <Text style={styles.subtitle}>Travel with confidence</Text>
+app/(auth)/login.tsx:206:                placeholder="Email"
+app/(auth)/login.tsx:216:                  placeholder="Password"
+app/(auth)/login.tsx:237:                                                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+app/(auth)/login.tsx:272:                                                         <Text style={styles.appleButtonText}>
+                      Sign in with Apple
+                    </Text>
+app/(auth)/login.tsx:296:                                                      <Text style={styles.googleButtonText}>Sign in with Google</Text>
+app/(auth)/login.tsx:300:                                                      <Text style={commonStyles.footerText}>
+                  Don't have an account?{" "}
+                </Text>
+app/(auth)/login.tsx:305:                                                               <Text style={commonStyles.textPrimaryLink}>Sign Up</Text>
+app/(auth)/login.tsx:38:      notify.error("Please fill in all fields");
+app/(auth)/login.tsx:59:      notify.error(err.message || "Invalid credentials", "Login Failed");
+app/(auth)/register.tsx:111:                                         <Text style={styles.title}>Join TruGuide</Text>
+app/(auth)/register.tsx:112:                                            <Text style={styles.subtitle}>Create your account</Text>
+app/(auth)/register.tsx:118:                placeholder="Email"
+app/(auth)/register.tsx:128:                  placeholder="Password"
+app/(auth)/register.tsx:148:                  placeholder="Confirm Password"
+app/(auth)/register.tsx:178:                                                               <Text style={commonStyles.primaryButtonText}>
+                    Create Account
+                  </Text>
+app/(auth)/register.tsx:185:                                                      <Text style={commonStyles.footerText}>
+                  Already have an account?{" "}
+                </Text>
+app/(auth)/register.tsx:190:                                                               <Text style={commonStyles.textPrimaryLink}>Sign In</Text>
+app/(auth)/register.tsx:42:      notify.error("Please fill in all fields");
+app/(auth)/register.tsx:47:      notify.error("Passwords do not match");
+app/(auth)/register.tsx:69:        Alert.alert(
+app/(auth)/register.tsx:92:      notify.error(err.message || "Please try again", "Registration Failed");
+app/(auth)/reset-password.tsx:101:      notify.success("Your password has been reset successfully!", "Success");
+app/(auth)/reset-password.tsx:111:      notify.error(
+app/(auth)/reset-password.tsx:146:                                             <Text style={styles.title}>Create New Password</Text>
+app/(auth)/reset-password.tsx:147:                                                <Text style={styles.subtitle}>
+                    Your new password must be different from previously used
+                    passwords
+                  </Text>
+app/(auth)/reset-password.tsx:156:                                                       <Text style={commonStyles.formLabel}>New Password</Text>
+app/(auth)/reset-password.tsx:160:                      placeholder="Enter new password"
+app/(auth)/reset-password.tsx:182:                                                       <Text style={commonStyles.formLabel}>Confirm Password</Text>
+app/(auth)/reset-password.tsx:186:                      placeholder="Confirm new password"
+app/(auth)/reset-password.tsx:215:                                                           <Text style={styles.requirementsTitle}>
+                      Password must contain:
+                    </Text>
+app/(auth)/reset-password.tsx:218:                                                     <Text style={styles.requirement}>
+                      • At least 8 characters
+                    </Text>
+app/(auth)/reset-password.tsx:221:                                                     <Text style={styles.requirement}>
+                      • Uppercase and lowercase letters
+                    </Text>
+app/(auth)/reset-password.tsx:224:                                                     <Text style={styles.requirement}>
+                      • At least one number
+                    </Text>
+app/(auth)/reset-password.tsx:227:                                                     <Text style={styles.requirement}>
+                      • At least one special character (!@#$%^&*)
+                    </Text>
+app/(auth)/reset-password.tsx:245:                                                         <Text style={styles.resetButtonText}>Reset Password</Text>
+app/(auth)/reset-password.tsx:259:                                                     <Text style={styles.loginLinkText}>Back to Login</Text>
+app/(auth)/reset-password.tsx:60:        notify.error("Invalid or expired reset link.");
+app/(auth)/reset-password.tsx:79:      notify.error("Please fill in all fields");
+app/(auth)/reset-password.tsx:84:      notify.error("Passwords do not match");
+app/(tabs)/community.tsx:350:                                                                              <Text style={[styles.demographicsText, styles.clickableName]}>
+                  Review by {review.user_demographics.full_name}
+                </Text>
+app/(tabs)/community.tsx:370:                                                 <Text style={styles.anonymousText}>Anonymous Reviewer</Text>
+app/(tabs)/community.tsx:410:                                                      <Text style={styles.trendingStats}>{reviews} reviews this week</Text>
+app/(tabs)/community.tsx:460:                                           <Text style={styles.screenTitle}>Community</Text>
+app/(tabs)/community.tsx:461:                                              <Text style={styles.screenSubtitle}>
+            Recent reviews and safety updates from travelers like you
+          </Text>
+app/(tabs)/community.tsx:488:               <Text
+                style={[
+                  styles.modeButtonText,
+                  communityFeedMode === "near_me" &&
+                    styles.modeButtonTextActive,
+                ]}
+              >
+                Within my Search Radius
+              </Text>
+app/(tabs)/community.tsx:515:               <Text
+                style={[
+                  styles.modeButtonText,
+                  communityFeedMode === "map_area" &&
+                    styles.modeButtonTextActive,
+                ]}
+              >
+                Visible Map Area
+              </Text>
+app/(tabs)/community.tsx:530:                                                 <Text style={styles.noLocationTitle}>Location Required</Text>
+app/(tabs)/community.tsx:550:                                            <Text style={styles.emptyTitle}>No Reviews Nearby</Text>
+app/(tabs)/community.tsx:551:                                           <Text style={styles.emptyText}>
+              Be the first to review a location in this area!
+            </Text>
+app/(tabs)/community.tsx:560:                                                    <Text style={commonStyles.sectionTitle}>Safety Insights</Text>
+app/(tabs)/community.tsx:564:                  notify.info("Full insights view coming soon!", "Coming Soon")
+app/(tabs)/community.tsx:567:                                                <Text style={styles.seeAllText}>See all</Text>
+app/(tabs)/community.tsx:576:                                           <Text style={styles.emptyText}>No safety alerts at this time</Text>
+app/(tabs)/community.tsx:583:                                                    <Text style={commonStyles.sectionTitle}>
+              Community Awareness This Week
+            </Text>
+app/(tabs)/community.tsx:590:                  notify.info("Full list view coming soon!", "Coming Soon")
+app/(tabs)/community.tsx:593:                                                <Text style={styles.seeAllText}>See all</Text>
+app/(tabs)/community.tsx:609:                                           <Text style={styles.emptyText}>
+              No significant activity this week
+            </Text>
+app/(tabs)/community.tsx:618:                                                    <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
+app/(tabs)/community.tsx:630:                                                         <Text style={commonStyles.primaryButtonText}>Filter Reviews</Text>
+app/(tabs)/community.tsx:635:                                           <Text style={styles.emptyText}>
+              No reviews yet. Be the first to share your experience!
+            </Text>
+app/(tabs)/debug.tsx:105:                                               <Text style={commonStyles.headerTitle}>🐛 Debug Console</Text>
+app/(tabs)/debug.tsx:119:                                                  <Text style={commonStyles.sectionTitle}>📦 Cache Statistics</Text>
+app/(tabs)/debug.tsx:151:                                                  <Text style={commonStyles.sectionTitle}>📱 System Information</Text>
+app/(tabs)/debug.tsx:173:                                                  <Text style={commonStyles.sectionTitle}>⚙️ Environment</Text>
+app/(tabs)/debug.tsx:199:                                                  <Text style={commonStyles.sectionTitle}>🔧 App Configuration</Text>
+app/(tabs)/debug.tsx:217:                                                  <Text style={commonStyles.sectionTitle}>⚡ Quick Actions</Text>
+app/(tabs)/debug.tsx:230:               <Text
+                style={[styles.actionButtonText, { color: theme.colors.error }]}
+              >
+                Clear Cache
+              </Text>
+app/(tabs)/debug.tsx:238:                Alert.alert("Debug Info", JSON.stringify(cacheStats, null, 2));
+app/(tabs)/debug.tsx:246:                                                    <Text style={styles.actionButtonText}>View Raw Data</Text>
+app/(tabs)/debug.tsx:252:                notify.success("Test notification sent!", "Debug");
+app/(tabs)/debug.tsx:260:                                                    <Text style={styles.actionButtonText}>Test Notification</Text>
+app/(tabs)/debug.tsx:51:      notify.error("Access denied");
+app/(tabs)/debug.tsx:70:    Alert.alert(
+app/(tabs)/debug.tsx:81:            notify.success("Cache cleared successfully");
+app/(tabs)/index.tsx:1219:                                             <Text style={commonStyles.textError}>
+          Location permission is required to use this feature
+        </Text>
+app/(tabs)/index.tsx:1414:                                                               <Text style={styles.calloutPrediction}>
+                          🤖 AI Prediction: {markerProps.score.toFixed(1)}/5
+                        </Text>
+app/(tabs)/index.tsx:1418:                                                                           <Text style={styles.calloutConfidence}>
+                          {Math.round((markerProps.confidence || 0) * 100)}%
+                          confident
+                        </Text>
+app/(tabs)/index.tsx:1421:                                                         <Text style={styles.calloutNote}>
+                          Based on similar locations and user demographics
+                        </Text>
+app/(tabs)/index.tsx:1475:            title="Origin"
+app/(tabs)/index.tsx:1483:            title="Destination"
+app/(tabs)/index.tsx:1587:                                                 <Text style={styles.filterButtonLabel}>Filters</Text>
+app/(tabs)/index.tsx:1653:                                                <Text style={styles.clearRouteText}>Clear Route</Text>
+app/(tabs)/index.tsx:1689:                                                 <Text style={styles.deleteRouteText}>Delete from History</Text>
+app/(tabs)/index.tsx:1710:                                               <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>
+app/(tabs)/index.tsx:1711:                                                  <Text style={styles.legendSubtitle}>
+                Areas with reported discrimination
+              </Text>
+app/(tabs)/index.tsx:1722:                                                  <Text style={styles.legendText}>High Risk</Text>
+app/(tabs)/index.tsx:1731:                                                  <Text style={styles.legendText}>Medium Risk</Text>
+app/(tabs)/index.tsx:1740:                                                  <Text style={styles.legendText}>Low Risk</Text>
+app/(tabs)/index.tsx:1746:                                               <Text style={styles.legendTitle}>✓ No Danger Zones</Text>
+app/(tabs)/index.tsx:1747:                                                  <Text style={styles.legendSubtitle}>
+                No reported danger in this area
+              </Text>
+app/(tabs)/index.tsx:1765:                                                 <Text style={styles.routeButtonText}>Plan Route</Text>
+app/(tabs)/index.tsx:1799:                                                     <Text style={styles.segmentToggleText}>
+                {showRouteSegments ? "Hide" : "Show"} Segments
+              </Text>
+app/(tabs)/index.tsx:1811:                                             <Text style={styles.statLabel}>Safety Score</Text>
+app/(tabs)/index.tsx:1817:                                             <Text style={styles.statLabel}>Duration</Text>
+app/(tabs)/index.tsx:1827:                                             <Text style={styles.statLabel}>Distance</Text>
+app/(tabs)/index.tsx:1840:                                                    <Text style={styles.startNavButtonText}>Start Navigation</Text>
+app/(tabs)/index.tsx:1861:                                                        <Text style={styles.routeDetailsButtonText}>View Details</Text>
+app/(tabs)/index.tsx:567:      notify.error("Unable to get address for this location");
+app/(tabs)/index.tsx:627:      notify.error("Could not load danger zones");
+app/(tabs)/index.tsx:656:      notify.error("Could not get your location");
+app/(tabs)/index.tsx:869:      notify.error("No route selected");
+app/(tabs)/index.tsx:982:        notify.error(
+app/(tabs)/profile.tsx:153:      notify.error("Failed to sign out");
+app/(tabs)/profile.tsx:237:      notify.success("Profile picture updated!", "Success");
+app/(tabs)/profile.tsx:240:      notify.error("Failed to upload image. Please try again.", "Upload Error");
+app/(tabs)/profile.tsx:261:      notify.success("Profile picture removed!");
+app/(tabs)/profile.tsx:264:      notify.error("Failed to remove profile picture.");
+app/(tabs)/profile.tsx:350:                                                <Text style={styles.noDemographicsText}>No demographics added yet</Text>
+app/(tabs)/profile.tsx:368:      notify.success("Location removed");
+app/(tabs)/profile.tsx:370:      notify.error("Failed to remove location");
+app/(tabs)/profile.tsx:400:                                               <Text style={styles.notLoggedInText}>
+            Please sign in to view your profile
+          </Text>
+app/(tabs)/profile.tsx:407:                                                  <Text style={styles.signInButtonText}>Sign In</Text>
+app/(tabs)/profile.tsx:417:                                               <Text style={styles.onboardingTitle}>Complete Your Profile</Text>
+app/(tabs)/profile.tsx:418:                                              <Text style={styles.onboardingText}>
+            Add your demographic information to get personalized safety
+            recommendations
+          </Text>
+app/(tabs)/profile.tsx:426:                                                           <Text style={styles.completeProfileButtonText}>
+              Complete Profile
+            </Text>
+app/(tabs)/profile.tsx:448:                                                          <Text style={styles.upgradeBannerTitle}>
+                    Upgrade to Premium
+                  </Text>
+app/(tabs)/profile.tsx:451:                                                             <Text style={styles.upgradeBannerSubtitle}>
+                    Unlock all features & go ad-free
+                  </Text>
+app/(tabs)/profile.tsx:491:                                             <Text style={styles.memberSince}>
+              Member since{" "}
+              {new Date(profile?.created_at || Date.now()).toLocaleDateString()}
+            </Text>
+app/(tabs)/profile.tsx:505:              title="My Activity"
+app/(tabs)/profile.tsx:518:                                                 <Text style={styles.statLabel}>Reviews Posted</Text>
+app/(tabs)/profile.tsx:524:                                                 <Text style={styles.statLabel}>Helpful Votes</Text>
+app/(tabs)/profile.tsx:531:                                                 <Text style={styles.statLabel}>Unhelpful Votes</Text>
+app/(tabs)/profile.tsx:537:              title="Route History"
+app/(tabs)/profile.tsx:556:                                                    <Text style={styles.noRoutesText}>No routes</Text>
+app/(tabs)/profile.tsx:593:                                                            <Text style={styles.routeHistoryMetaText}>
+                              {route.distance_km.toFixed(1)} km
+                            </Text>
+app/(tabs)/profile.tsx:597:                                                      <Text style={styles.routeHistoryMetaText}>
+                              {route.duration_minutes} min
+                            </Text>
+app/(tabs)/profile.tsx:600:                                                                      <Text style={styles.routeHistoryMetaText}>
+                              Safety: {route.safety_score?.toFixed(1) || "N/A"}
+                            </Text>
+app/(tabs)/profile.tsx:632:                                                            <Text style={styles.loadMoreText}>Load More</Text>
+app/(tabs)/profile.tsx:642:              title="Saved Locations"
+app/(tabs)/profile.tsx:657:                                                    <Text style={styles.noRoutesText}>No saved locations</Text>
+app/(tabs)/profile.tsx:687:                                                                 <Text style={styles.savedLocationDate}>
+                            Saved{" "}
+                            {new Date(location.created_at).toLocaleDateString()}
+                          </Text>
+app/(tabs)/profile.tsx:710:              title="Recently Viewed"
+app/(tabs)/profile.tsx:725:                                                    <Text style={styles.noRoutesText}>
+                    No recently viewed locations
+                  </Text>
+app/(tabs)/profile.tsx:756:                                                                 <Text style={styles.savedLocationDate}>
+                            Viewed{" "}
+                            {new Date(location.viewed_at).toLocaleDateString()}
+                          </Text>
+app/(tabs)/profile.tsx:769:              title="Demographics"
+app/(tabs)/profile.tsx:788:                                                          <Text style={styles.editDemographicsText}>
+                  Edit Demographics
+                </Text>
+app/(tabs)/profile.tsx:795:              title="Map Settings"
+app/(tabs)/profile.tsx:807:              title="Alerts & Privacy Settings"
+app/(tabs)/profile.tsx:824:                                                 <Text style={styles.settingText}>Privacy Settings</Text>
+app/(tabs)/profile.tsx:841:                                                 <Text style={styles.settingText}>Notifications</Text>
+app/(tabs)/profile.tsx:857:                                                 <Text style={styles.settingText}>Display Preferences</Text>
+app/(tabs)/profile.tsx:867:              title="Account"
+app/(tabs)/profile.tsx:884:                                                 <Text style={styles.accountText}>Edit Profile</Text>
+app/(tabs)/profile.tsx:895:                   <Text
+                    style={[styles.accountText, { color: theme.colors.error }]}
+                  >
+                    Remove Profile Picture
+                  </Text>
+app/(tabs)/profile.tsx:910:                                                   <Text style={styles.accountText}>Admin Panel</Text>
+app/(tabs)/profile.tsx:922:                                                 <Text style={styles.accountText}>Sign Out</Text>
+app/admin/index.tsx:1006:            placeholder="Add a word to block..."
+app/admin/index.tsx:1038:                                             <Text style={adminStyles.countLabel}>
+          Custom ({filteredCustom.length})
+        </Text>
+app/admin/index.tsx:1065:                                                                                <Text style={[adminStyles.countLabel, { marginTop: theme.spacing.md }]}>
+          Built-in ({filteredBuiltIn.length})
+        </Text>
+app/admin/index.tsx:1112:                                              <Text style={adminStyles.headerTitle}>Admin Panel</Text>
+app/admin/index.tsx:152:              notify.success("Role updated");
+app/admin/index.tsx:154:              notify.error("Failed to update role");
+app/admin/index.tsx:184:              notify.success("Subscription updated");
+app/admin/index.tsx:186:              notify.error("Failed to update subscription");
+app/admin/index.tsx:208:              notify.success("User deleted");
+app/admin/index.tsx:210:              notify.error(e.message || "Failed to delete user");
+app/admin/index.tsx:232:              notify.success("Tester removed");
+app/admin/index.tsx:234:              notify.error("Failed to remove tester");
+app/admin/index.tsx:250:      notify.error("Failed to update status");
+app/admin/index.tsx:293:                  <Text
+                style={{
+                  ...adminStyles.actionBtnTextActive,
+                  fontSize: 16,
+                  paddingHorizontal: 0,
+                  paddingBottom: 6,
+                  paddingTop: 2,
+                }}
+              >
+                <Ionicons
+                  name="add"
+                  size={22}
+                  color={theme.colors.textOnPrimary}
+                />
+                Add Test User
+              </Text>
+app/admin/index.tsx:308:            placeholder="Search by username, name or email…"
+app/admin/index.tsx:365:                  notify.error("Export failed"),
+app/admin/index.tsx:377:                                                              <Text style={adminStyles.countLabel}>{filtered.length} results</Text>
+app/admin/index.tsx:414:                                                   <Text style={adminStyles.cardMeta}>
+                  Reviews: {item.total_reviews ?? 0} · Tier:{" "}
+                  {item.subscription_tier ?? "free"}
+                </Text>
+app/admin/index.tsx:415:                                                    <Text style={adminStyles.cardMeta}>
+                  Reviews: {item.total_reviews ?? 0} · Tier:{" "}
+                  {item.subscription_tier ?? "free"}
+                </Text>
+app/admin/index.tsx:478:                   <Text
+                    style={[
+                      adminStyles.actionBtnText,
+                      adminStyles.actionBtnTextActive,
+                    ]}
+                  >
+                    Delete
+                  </Text>
+app/admin/index.tsx:493:          notify.success("Tester added");
+app/admin/index.tsx:514:      notify.error("Failed to load locations");
+app/admin/index.tsx:531:      notify.success(`Location ${!loc.active ? "activated" : "deactivated"}`);
+app/admin/index.tsx:533:      notify.error("Failed to update location");
+app/admin/index.tsx:550:              notify.success("Location deleted");
+app/admin/index.tsx:552:              notify.error("Failed to delete location");
+app/admin/index.tsx:585:          placeholder="Search by name or city…"
+app/admin/index.tsx:590:                                                              <Text style={adminStyles.countLabel}>{filtered.length} locations</Text>
+app/admin/index.tsx:619:                                                 <Text style={adminStyles.cardMeta}>
+                Reviews: {loc.review_count ?? 0} · Score:{" "}
+                {loc.avg_overall_score?.toFixed(1) ?? "—"}
+              </Text>
+app/admin/index.tsx:620:                                                <Text style={adminStyles.cardMeta}>
+                Reviews: {loc.review_count ?? 0} · Score:{" "}
+                {loc.avg_overall_score?.toFixed(1) ?? "—"}
+              </Text>
+app/admin/index.tsx:670:                 <Text
+                  style={[
+                    adminStyles.actionBtnText,
+                    adminStyles.actionBtnTextActive,
+                  ]}
+                >
+                  Delete
+                </Text>
+app/admin/index.tsx:700:      notify.error("Failed to load reviews");
+app/admin/index.tsx:720:      notify.success("Status updated");
+app/admin/index.tsx:722:      notify.error("Failed to update review");
+app/admin/index.tsx:739:              notify.success("Review deleted");
+app/admin/index.tsx:741:              notify.error("Failed to delete review");
+app/admin/index.tsx:781:          placeholder="Search by location, user or comment…"
+app/admin/index.tsx:814:                                                              <Text style={adminStyles.countLabel}>{filtered.length} reviews</Text>
+app/admin/index.tsx:841:                                                     <Text style={adminStyles.cardSubtitle}>
+                By: {review.username ?? review.user_id.slice(0, 8)}… · Rating:{" "}
+                {review.overall_rating}/5
+              </Text>
+app/admin/index.tsx:842:                                                                   <Text style={adminStyles.cardSubtitle}>
+                By: {review.username ?? review.user_id.slice(0, 8)}… · Rating:{" "}
+                {review.overall_rating}/5
+              </Text>
+app/admin/index.tsx:883:                 <Text
+                  style={[
+                    adminStyles.actionBtnText,
+                    adminStyles.actionBtnTextActive,
+                  ]}
+                >
+                  Delete
+                </Text>
+app/admin/index.tsx:912:      notify.error("Failed to load blocked words");
+app/admin/index.tsx:926:      notify.error(`"${trimmed}" is already in your custom list`);
+app/admin/index.tsx:930:      notify.error(`"${trimmed}" is already covered by the built-in filter`);
+app/admin/index.tsx:938:      notify.success(`"${trimmed}" added`);
+app/admin/index.tsx:940:      notify.error("Failed to add word");
+app/admin/index.tsx:94:      notify.error("Failed to load users");
+app/admin/index.tsx:959:              notify.success(`"${word.word}" removed`);
+app/admin/index.tsx:961:              notify.error("Failed to remove word");
+app/admin/index.tsx:996:          placeholder="Search words..."
+app/display-settings.tsx:101:                                               <Text style={commonStyles.headerTitle}>Display Preferences</Text>
+app/display-settings.tsx:106:                                                <Text style={styles.sectionDescription}>
+          Customize how times and distances are displayed throughout the app
+        </Text>
+app/display-settings.tsx:70:      notify.success("Preference saved");
+app/display-settings.tsx:72:      notify.error("Failed to save preference. Please try again.");
+app/edit-profile.tsx:115:      notify.success(
+app/edit-profile.tsx:127:        notify.error(
+app/edit-profile.tsx:131:        notify.error("Failed to update email. Please try again later.");
+app/edit-profile.tsx:140:      notify.error("Cannot change password for OAuth accounts");
+app/edit-profile.tsx:145:      notify.error("Please fill in all password fields");
+app/edit-profile.tsx:154:      notify.error("New passwords do not match");
+app/edit-profile.tsx:177:      notify.success(
+app/edit-profile.tsx:191:      notify.error(error.message || "Failed to update password");
+app/edit-profile.tsx:215:                                                 <Text style={commonStyles.headerTitle}>Edit Profile</Text>
+app/edit-profile.tsx:232:                                             <Text style={styles.oauthText}>
+                Signed in with {oauthProvider}
+              </Text>
+app/edit-profile.tsx:240:                                                    <Text style={commonStyles.sectionTitle}>Name or Nickname</Text>
+app/edit-profile.tsx:245:              placeholder="Enter your name or a nickname"
+app/edit-profile.tsx:260:                                                             <Text style={commonStyles.primaryButtonText}>Update Name</Text>
+app/edit-profile.tsx:268:                                                      <Text style={commonStyles.sectionTitle}>Email Address</Text>
+app/edit-profile.tsx:269:                                              <Text style={styles.helperText}>
+                You'll need to confirm the your new email address.
+              </Text>
+app/edit-profile.tsx:276:                placeholder="Enter your email"
+app/edit-profile.tsx:293:                                                               <Text style={commonStyles.primaryButtonText}>
+                    Update Email
+                  </Text>
+app/edit-profile.tsx:304:                                                      <Text style={commonStyles.sectionTitle}>Email Address</Text>
+app/edit-profile.tsx:312:                         <Text style={styles.oauthInfoText}>
+                  {email} (managed by {oauthProvider})
+                </Text>
+app/edit-profile.tsx:315:                                              <Text style={styles.helperText}>
+                Email is managed by your {oauthProvider} account and cannot be
+                changed here
+              </Text>
+app/edit-profile.tsx:316:                                                        <Text style={styles.helperText}>
+                Email is managed by your {oauthProvider} account and cannot be
+                changed here
+              </Text>
+app/edit-profile.tsx:325:                                                      <Text style={commonStyles.sectionTitle}>Change Password</Text>
+app/edit-profile.tsx:326:                                              <Text style={styles.helperText}>
+                Password must be at least 8 characters
+              </Text>
+app/edit-profile.tsx:334:                placeholder="Current password"
+app/edit-profile.tsx:344:                placeholder="New password"
+app/edit-profile.tsx:354:                placeholder="Confirm new password"
+app/edit-profile.tsx:371:                                                               <Text style={commonStyles.primaryButtonText}>
+                    Update Password
+                  </Text>
+app/edit-profile.tsx:382:                                                      <Text style={commonStyles.sectionTitle}>Password</Text>
+app/edit-profile.tsx:389:                                                   <Text style={styles.oauthInfoText}>
+                  Password managed by {oauthProvider}
+                </Text>
+app/edit-profile.tsx:393:                                              <Text style={styles.helperText}>
+                Your password is managed by your {oauthProvider} account
+              </Text>
+app/edit-profile.tsx:394:                                                                <Text style={styles.helperText}>
+                Your password is managed by your {oauthProvider} account
+              </Text>
+app/edit-profile.tsx:63:      notify.error("Please enter your full name");
+app/edit-profile.tsx:76:      notify.success("Name updated successfully");
+app/edit-profile.tsx:79:      notify.error(error.message || "Failed to update name");
+app/edit-profile.tsx:87:      notify.error("Cannot change email for OAuth accounts");
+app/edit-profile.tsx:92:      notify.error("Please enter your email");
+app/edit-profile.tsx:97:      notify.error("This is already your current email");
+app/edit-review.tsx:123:          notify.error("Invalid review timestamp");
+app/edit-review.tsx:135:          notify.error(
+app/edit-review.tsx:159:      notify.error("Failed to load review data. Please try again.");
+app/edit-review.tsx:168:      notify.error("Please enter a title for your review");
+app/edit-review.tsx:172:      notify.error("Please write your review");
+app/edit-review.tsx:176:      notify.error("Please provide an overall rating");
+app/edit-review.tsx:180:      notify.error("Please provide a safety rating");
+app/edit-review.tsx:184:      notify.error("Please provide a comfort rating");
+app/edit-review.tsx:218:      notify.error(
+app/edit-review.tsx:239:                                               <Text style={commonStyles.textError}>
+            Please log in to edit reviews
+          </Text>
+app/edit-review.tsx:246:                                                         <Text style={commonStyles.primaryButtonText}>Go to Login</Text>
+app/edit-review.tsx:267:                                               <Text style={commonStyles.textError}>
+            Review not found or you don't have permission to edit it
+          </Text>
+app/edit-review.tsx:274:                                                         <Text style={commonStyles.primaryButtonText}>Go Back</Text>
+app/edit-review.tsx:296:                                                     <Text style={commonStyles.headerTitle}>Edit Review</Text>
+app/edit-review.tsx:303:                                                     <Text style={commonStyles.formLabel}>
+                  Review Title{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                </Text>
+app/edit-review.tsx:309:                  placeholder="Summarize your experience"
+app/edit-review.tsx:364:                                                     <Text style={commonStyles.formLabel}>
+                  Your Review{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                </Text>
+app/edit-review.tsx:370:                  placeholder="Share your experience at this location..."
+app/edit-review.tsx:387:                                                     <Text style={commonStyles.formLabel}>Visit Date</Text>
+app/edit-review.tsx:418:                        notify.error(result.errorMessage || "Invalid date");
+app/edit-review.tsx:440:                        notify.error(result.errorMessage || "Invalid date");
+app/edit-review.tsx:449:                                                     <Text style={commonStyles.formLabel}>Visit Time</Text>
+app/edit-review.tsx:482:                        notify.error("Visit time cannot be in the future");
+app/edit-review.tsx:495:                                                     <Text style={commonStyles.formLabel}>Visit Type</Text>
+app/edit-review.tsx:522:                                                            <Text style={commonStyles.modalTitle}>Visit Type</Text>
+app/edit-review.tsx:526:                                                             <Text style={commonStyles.modalDone}>Done</Text>
+app/edit-review.tsx:556:                                                              <Text style={commonStyles.cancelButtonText}>Cancel</Text>
+app/legal-acceptance.tsx:120:                                               <Text style={styles.checkboxLabel}>
+              I have read the{" "}
+              <Text
+                style={commonStyles.textPrimaryLink}
+                onPress={() => setShowPrivacy(true)}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+app/legal-acceptance.tsx:125:               <Text
+                style={commonStyles.textPrimaryLink}
+                onPress={() => setShowPrivacy(true)}
+              >
+                Privacy Policy
+              </Text>
+app/legal-acceptance.tsx:138:                                        <Text style={styles.infoText}>
+            Your privacy matters. We only collect data necessary to provide
+            personalized safety recommendations. You control what demographic
+            information you share.
+          </Text>
+app/legal-acceptance.tsx:159:                                                         <Text style={commonStyles.primaryButtonText}>Continue</Text>
+app/legal-acceptance.tsx:169:        title="Privacy Policy"
+app/legal-acceptance.tsx:177:        title="Terms of Service"
+app/legal-acceptance.tsx:52:      notify.error("Something went wrong. Please try again.");
+app/legal-acceptance.tsx:68:                                   <Text style={styles.title}>Terms & Privacy</Text>
+app/legal-acceptance.tsx:69:                                      <Text style={styles.subtitle}>
+          Please review and accept our terms to continue
+        </Text>
+app/legal-acceptance.tsx:90:                                               <Text style={styles.checkboxLabel}>
+              I agree to the{" "}
+              <Text
+                style={commonStyles.textPrimaryLink}
+                onPress={() => setShowTerms(true)}
+              >
+                Terms of Service
+              </Text>
+            </Text>
+app/legal-acceptance.tsx:95:               <Text
+                style={commonStyles.textPrimaryLink}
+                onPress={() => setShowTerms(true)}
+              >
+                Terms of Service
+              </Text>
+app/location-disclosure.tsx:104:                                                <Text style={styles.featureTitle}>Safety Alerts</Text>
+app/location-disclosure.tsx:105:                                                      <Text style={styles.featureDescription}>
+                Receive notifications when approaching areas with low safety
+                ratings
+              </Text>
+app/location-disclosure.tsx:121:                                                <Text style={styles.featureTitle}>Smart Rerouting</Text>
+app/location-disclosure.tsx:122:                                                      <Text style={styles.featureDescription}>
+                Get automatic suggestions for safer alternative routes
+              </Text>
+app/location-disclosure.tsx:135:                                        <Text style={styles.infoText}>
+            Background location is used only during active navigation to provide
+            safety alerts. Your location data is never sold or shared with third
+            parties.
+          </Text>
+app/location-disclosure.tsx:144:                                                 <Text style={styles.androidNoteText}>
+              On the next screen, select "Allow all the time" for the best
+              experience with navigation and safety alerts.
+            </Text>
+app/location-disclosure.tsx:162:                                                         <Text style={commonStyles.primaryButtonText}>Continue</Text>
+app/location-disclosure.tsx:64:      notify.error("Something went wrong. Please try again.");
+app/location-disclosure.tsx:77:                                   <Text style={styles.title}>Location Access</Text>
+app/location-disclosure.tsx:78:                                      <Text style={styles.subtitle}>
+          TruGuide needs location access to keep you safe
+        </Text>
+app/location-disclosure.tsx:92:                                                <Text style={styles.featureTitle}>Turn-by-Turn Navigation</Text>
+app/location-disclosure.tsx:93:                                                      <Text style={styles.featureDescription}>
+                Get directions with real-time safety ratings along your route
+              </Text>
+app/notification-settings.tsx:105:                                               <Text style={commonStyles.headerTitle}>Notifications</Text>
+app/notification-settings.tsx:76:      notify.error("Failed to save setting. Please try again.");
+app/onboarding.tsx:1004:                                                  <Text style={styles.backButtonText}>Back</Text>
+app/onboarding.tsx:119:        notify.error(
+app/onboarding.tsx:128:        notify.error(
+app/onboarding.tsx:138:        notify.error(
+app/onboarding.tsx:272:      notify.error("User session not found. Please log in again.");
+app/onboarding.tsx:358:        notify.error("Failed to save profile. Please try again.");
+app/onboarding.tsx:371:        notify.error("Failed to complete onboarding. Please try again.");
+app/onboarding.tsx:379:      notify.success(
+app/onboarding.tsx:401:      notify.error("Failed to save profile. Please try again.");
+app/onboarding.tsx:411:      notify.info(
+app/onboarding.tsx:472:                                     <Text style={styles.stepTitle}>Welcome to TruGuide!</Text>
+app/onboarding.tsx:473:                                           <Text style={styles.stepDescription}>
+        To provide personalized safety information, we need to understand your
+        travel preferences and needs.
+      </Text>
+app/onboarding.tsx:482:       <Text
+        style={[
+          styles.stepDescription,
+          { fontWeight: "600", color: theme.colors.text },
+        ]}
+      >
+        This setup is required to access TruGuide's core features.
+      </Text>
+app/onboarding.tsx:490:                                                      <Text style={styles.welcomeBannerTitle}>Email Confirmed!</Text>
+app/onboarding.tsx:491:                                                         <Text style={styles.welcomeBannerSubtitle}>
+                Welcome to TruGuide. Let's personalize your experience.
+              </Text>
+app/onboarding.tsx:505:                                          <Text style={styles.bulletText}>
+            Get safety ratings personalized for your demographic
+          </Text>
+app/onboarding.tsx:511:                                          <Text style={styles.bulletText}>
+            See location safety from your perspective
+          </Text>
+app/onboarding.tsx:517:                                          <Text style={styles.bulletText}>
+            Connect with travelers who share your experiences
+          </Text>
+app/onboarding.tsx:523:                                          <Text style={styles.bulletText}>Your data is private and secure</Text>
+app/onboarding.tsx:530:                                     <Text style={styles.stepTitle}>
+        What's your name? <Text style={commonStyles.requiredAsterisk}>*</Text>
+      </Text>
+app/onboarding.tsx:533:                                           <Text style={styles.stepDescription}>
+        This helps personalize your experience. You can control who sees this in
+        privacy settings.
+      </Text>
+app/onboarding.tsx:537:                                    <Text style={styles.helpText}>
+        💡 Help others recognise your profile and reviews
+      </Text>
+app/onboarding.tsx:542:        placeholder="Enter your name or a nickname"
+app/onboarding.tsx:552:                                     <Text style={styles.stepTitle}>
+        Race & Ethnicity <Text style={commonStyles.requiredAsterisk}>*</Text>
+      </Text>
+app/onboarding.tsx:555:                                           <Text style={styles.stepDescription}>
+        Select all that apply. This helps us show you safety ratings from people
+        with similar experiences.
+      </Text>
+app/onboarding.tsx:559:                                    <Text style={styles.helpText}>
+        💡 See safety ratings from people like you
+      </Text>
+app/onboarding.tsx:590:                                               <Text style={styles.otherInputLabel}>Please specify:</Text>
+app/onboarding.tsx:593:            placeholder="Enter your race/ethnicity"
+app/onboarding.tsx:607:                                     <Text style={styles.stepTitle}>
+        Gender Identity <Text style={commonStyles.requiredAsterisk}>*</Text>
+      </Text>
+app/onboarding.tsx:610:                                           <Text style={styles.stepDescription}>
+        How do you identify? This helps us provide relevant safety information.
+      </Text>
+app/onboarding.tsx:613:                                    <Text style={styles.helpText}>💡 Find routes safe for your gender</Text>
+app/onboarding.tsx:643:                                               <Text style={styles.otherInputLabel}>Please specify:</Text>
+app/onboarding.tsx:646:            placeholder="Enter your gender identity"
+app/onboarding.tsx:660:                                     <Text style={styles.stepTitle}>
+        LGBTQ+ Identity <Text style={commonStyles.requiredAsterisk}>*</Text>
+      </Text>
+app/onboarding.tsx:663:                                           <Text style={styles.stepDescription}>
+        Do you identify as LGBTQ+? This helps us show you safety information
+        from other LGBTQ+ travelers.
+      </Text>
+app/onboarding.tsx:667:                                    <Text style={styles.helpText}>
+        💡 Discover LGBTQ+ friendly businesses
+      </Text>
+app/onboarding.tsx:683:           <Text
+            style={[
+              styles.toggleText,
+              !formData.lgbtq_status && styles.toggleTextSelected,
+            ]}
+          >
+            No
+          </Text>
+app/onboarding.tsx:699:           <Text
+            style={[
+              styles.toggleText,
+              formData.lgbtq_status && styles.toggleTextSelected,
+            ]}
+          >
+            Yes
+          </Text>
+app/onboarding.tsx:709:                                     <Text style={styles.stepTitle}>
+        Disability Status Status
+        <Text style={styles.optionalBadge}>(Optional)</Text>
+      </Text>
+app/onboarding.tsx:711:                                           <Text style={styles.optionalBadge}>(Optional)</Text>
+app/onboarding.tsx:713:                                           <Text style={styles.stepDescription}>
+        Select any that apply. This helps us show accessibility information
+        relevant to your needs.
+      </Text>
+app/onboarding.tsx:717:                                    <Text style={styles.helpText}>
+        ⭐ See accessibility ratings relevant to your needs
+      </Text>
+app/onboarding.tsx:755:                                               <Text style={styles.otherInputLabel}>Please specify:</Text>
+app/onboarding.tsx:758:            placeholder="Enter your disability status"
+app/onboarding.tsx:772:                                     <Text style={styles.stepTitle}>
+        Religious Identity <Text style={styles.optionalBadge}>(Optional)</Text>
+      </Text>
+app/onboarding.tsx:773:                                                              <Text style={styles.optionalBadge}>(Optional)</Text>
+app/onboarding.tsx:775:                                           <Text style={styles.stepDescription}>
+        What is your religious or spiritual identity?
+      </Text>
+app/onboarding.tsx:778:                                    <Text style={styles.helpText}>
+        ⭐ Unlock prayer-friendly recommendations
+      </Text>
+app/onboarding.tsx:801:                                               <Text style={styles.otherInputLabel}>Please specify:</Text>
+app/onboarding.tsx:804:            placeholder="Enter your religious identity"
+app/onboarding.tsx:818:                                     <Text style={styles.stepTitle}>
+        Age Range <Text style={styles.optionalBadge}>(Optional)</Text>
+      </Text>
+app/onboarding.tsx:819:                                                     <Text style={styles.optionalBadge}>(Optional)</Text>
+app/onboarding.tsx:821:                                           <Text style={styles.stepDescription}>Select your age range.</Text>
+app/onboarding.tsx:822:                                    <Text style={styles.helpText}>
+        ⭐ See ratings from travelers in your age group
+      </Text>
+app/onboarding.tsx:847:                                     <Text style={styles.stepTitle}>Privacy Settings</Text>
+app/onboarding.tsx:848:                                           <Text style={styles.stepDescription}>
+        Choose how your demographic information is shown to others.
+      </Text>
+app/onboarding.tsx:861:                                              <Text style={styles.privacyTitle}>Public</Text>
+app/onboarding.tsx:863:                                                  <Text style={styles.privacyDescription}>
+            Other users can see your demographic information with your reviews
+          </Text>
+app/onboarding.tsx:880:                                              <Text style={styles.privacyTitle}>Anonymous</Text>
+app/onboarding.tsx:882:                                                  <Text style={styles.privacyDescription}>
+            Your reviews are visible but without personal demographic details
+          </Text>
+app/onboarding.tsx:897:                                              <Text style={styles.privacyTitle}>Private</Text>
+app/onboarding.tsx:899:                                                  <Text style={styles.privacyDescription}>
+            Only you can see your demographic information
+          </Text>
+app/onboarding.tsx:906:                                         <Text style={styles.toggleLabel}>Show demographics on reviews</Text>
+app/onboarding.tsx:972:                           <Text style={styles.progressText}>
+          {currentStep + 1} of {ONBOARDING_STEPS.length}
+        </Text>
+app/onboarding.tsx:994:                                                <Text style={styles.skipButtonText}>Cancel</Text>
+app/privacy-settings.tsx:258:      notify.error("Failed to export data. Please try again.");
+app/privacy-settings.tsx:272:        notify.error("You must be logged in to delete your account.");
+app/privacy-settings.tsx:302:      notify.error(`Failed to delete account: `);
+app/privacy-settings.tsx:329:                                               <Text style={commonStyles.headerTitle}>Privacy Settings</Text>
+app/privacy-settings.tsx:334:                                                <Text style={commonStyles.sectionTitle}>Demographic Privacy</Text>
+app/privacy-settings.tsx:347:                                                                             <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
+          Profile Privacy
+        </Text>
+app/privacy-settings.tsx:365:                                                                             <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
+          Legal Documents
+        </Text>
+app/privacy-settings.tsx:379:                                             <Text style={styles.actionTitle}>Terms of Service</Text>
+app/privacy-settings.tsx:380:                                                   <Text style={styles.actionDescription}>
+              View our terms and conditions
+            </Text>
+app/privacy-settings.tsx:401:                                             <Text style={styles.actionTitle}>Privacy Policy</Text>
+app/privacy-settings.tsx:402:                                                   <Text style={styles.actionDescription}>
+              View how we handle your data
+            </Text>
+app/privacy-settings.tsx:414:                                                                             <Text style={[commonStyles.sectionTitle, styles.sectionTitleSpaced]}>
+          Account Management
+        </Text>
+app/privacy-settings.tsx:424:                                             <Text style={styles.actionTitle}>View My Data</Text>
+app/privacy-settings.tsx:425:                                                   <Text style={styles.actionDescription}>
+              See what information TruGuide has collected
+            </Text>
+app/privacy-settings.tsx:446:                                             <Text style={styles.actionTitle}>Export My Data</Text>
+app/privacy-settings.tsx:447:                                                   <Text style={styles.actionDescription}>
+              Download all your data in JSON format
+            </Text>
+app/privacy-settings.tsx:470:                                                                  <Text style={[styles.actionTitle, styles.dangerText]}>
+              Delete Account
+            </Text>
+app/privacy-settings.tsx:473:                                                   <Text style={styles.actionDescription}>
+              Permanently delete your account and all data
+            </Text>
+app/privacy-settings.tsx:492:                                                  <Text style={commonStyles.modalTitle}>My Data</Text>
+app/privacy-settings.tsx:499:                                             <Text style={styles.dataSection}>Profile Information</Text>
+app/privacy-settings.tsx:500:                                          <Text style={styles.dataText}>Email: {user?.email}</Text>
+app/privacy-settings.tsx:501:                                          <Text style={styles.dataText}>
+              Name: {profile?.full_name || "Not set"}
+            </Text>
+app/privacy-settings.tsx:504:                                          <Text style={styles.dataText}>
+              Account Created:
+              {new Date(profile.created_at).toLocaleDateString()}
+            </Text>
+app/privacy-settings.tsx:508:                                             <Text style={styles.dataSection}>Demographic Data</Text>
+app/privacy-settings.tsx:509:                                          <Text style={styles.dataText}>
+              Race/Ethnicity: {profile?.race_ethnicity?.join(", ") || "Not set"}
+            </Text>
+app/privacy-settings.tsx:512:                                          <Text style={styles.dataText}>
+              Gender: {profile?.gender || "Not set"}
+            </Text>
+app/privacy-settings.tsx:515:                                          <Text style={styles.dataText}>
+              LGBTQ+: {profile?.lgbtq_status ? "Yes" : "No"}
+            </Text>
+app/privacy-settings.tsx:518:                                          <Text style={styles.dataText}>
+              Religion: {profile?.religion || "Not set"}
+            </Text>
+app/privacy-settings.tsx:521:                                          <Text style={styles.dataText}>
+              Age Range: {profile?.age_range || "Not set"}
+            </Text>
+app/privacy-settings.tsx:524:                                          <Text style={styles.dataText}>
+              Disability Status:
+              {profile?.disability_status?.join(", ") || "None"}
+            </Text>
+app/privacy-settings.tsx:528:                                             <Text style={styles.dataSection}>Privacy Settings</Text>
+app/privacy-settings.tsx:529:                                          <Text style={styles.dataText}>
+              Privacy Level: {profile?.privacy_level || "public"}
+            </Text>
+app/privacy-settings.tsx:532:                                          <Text style={styles.dataText}>
+              Show Demographics: {profile?.show_demographics ? "Yes" : "No"}
+            </Text>
+app/privacy-settings.tsx:535:                                             <Text style={styles.dataSection}>Activity</Text>
+app/privacy-settings.tsx:540:                                              <Text style={styles.dataText}>
+                  Reviews Posted: {activityStats.review_count}
+                </Text>
+app/privacy-settings.tsx:543:                                              <Text style={styles.dataText}>
+                  Routes Planned: {activityStats.route_count}
+                </Text>
+app/privacy-settings.tsx:549:                                              <Text style={styles.dataText}>Reviews Posted: 0</Text>
+app/privacy-settings.tsx:550:                                              <Text style={styles.dataText}>Routes Planned: 0</Text>
+app/privacy-settings.tsx:565:                                             <Text style={styles.deleteTitle}>Delete Account?</Text>
+app/privacy-settings.tsx:566:                                               <Text style={styles.deleteMessage}>
+              This will permanently delete your account and all associated data
+              including your profile, reviews, and settings.
+              {"\n\n"}This action cannot be undone.
+            </Text>
+app/privacy-settings.tsx:569:                      <Text style={styles.deleteMessage}>
+              This will permanently delete your account and all associated data
+              including your profile, reviews, and settings.
+              {"\n\n"}This action cannot be undone.
+            </Text>
+app/privacy-settings.tsx:576:                                                      <Text style={styles.cancelButtonText}>Cancel</Text>
+app/privacy-settings.tsx:584:                                                       <Text style={styles.confirmDeleteText}>Delete Forever</Text>
+app/privacy-settings.tsx:595:        title="Privacy Policy"
+app/privacy-settings.tsx:603:        title="Terms of Service"
+app/privacy-settings.tsx:84:      notify.error("Failed to save setting. Please try again.");
+app/review.tsx:109:      notify.error("No location specified");
+app/review.tsx:115:      notify.error("No location data provided");
+app/review.tsx:126:      notify.error("Please enter a review title");
+app/review.tsx:131:      notify.error("Please enter a name for this location");
+app/review.tsx:136:      notify.error("Please enter review content");
+app/review.tsx:141:      notify.error("Please provide both overall and safety ratings");
+app/review.tsx:194:        notify.success("Review saved - will sync when online");
+app/review.tsx:196:        notify.success("Review submitted successfully!");
+app/review.tsx:223:        notify.success(
+app/review.tsx:230:      notify.error(
+app/review.tsx:241:                                               <Text style={commonStyles.textError}>
+            Please log in to submit a review
+          </Text>
+app/review.tsx:248:                                                         <Text style={commonStyles.primaryButtonText}>Go to Login</Text>
+app/review.tsx:277:                                                     <Text style={commonStyles.headerTitle}>Write a Review</Text>
+app/review.tsx:291:                                                       <Text style={commonStyles.formLabel}>
+                    📍 What is this place called?
+                    <Text style={commonStyles.requiredAsterisk}>*</Text>
+                  </Text>
+app/review.tsx:297:                    placeholder='e.g., "Joe&apos;s Pizza" or "Central Park"'
+app/review.tsx:303:                                                  <Text style={styles.helperText}>
+                    Give this location a name so others can find it
+                  </Text>
+app/review.tsx:313:                                                     <Text style={commonStyles.formLabel}>
+                  Review Title{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                </Text>
+app/review.tsx:319:                  placeholder="Summarize your experience"
+app/review.tsx:368:                                                     <Text style={commonStyles.formLabel}>
+                  Your Review{" "}
+                  <Text style={commonStyles.requiredAsterisk}>*</Text>
+                </Text>
+app/review.tsx:374:                  placeholder="Share your experience at this location..."
+app/review.tsx:390:                                                     <Text style={commonStyles.formLabel}>Visit Date</Text>
+app/review.tsx:421:                        notify.error(result.errorMessage || "Invalid date");
+app/review.tsx:429:                                                     <Text style={commonStyles.formLabel}>Visit Time</Text>
+app/review.tsx:461:                        notify.error("Visit time cannot be in the future");
+app/review.tsx:473:                                                     <Text style={commonStyles.formLabel}>Visit Type</Text>
+app/review.tsx:503:                                                            <Text style={commonStyles.modalTitle}>
+                        Select Visit Type
+                      </Text>
+app/review.tsx:509:                                                             <Text style={commonStyles.modalDone}>Done</Text>
+app/review.tsx:535:                                              <Text style={styles.noteText}>
+                  Your demographic profile will be attached to this review to
+                  help others who share similar identities make informed
+                  decisions.
+                </Text>
+src/components/DangerZoneOverlay.tsx:103:                                                          <Text style={commonStyles.sectionTitle}>
+                    Affected Groups:
+                  </Text>
+src/components/DangerZoneOverlay.tsx:115:                                                          <Text style={commonStyles.sectionTitle}>Reasons:</Text>
+src/components/DangerZoneOverlay.tsx:125:                                                       <Text style={styles.timeWarning}>
+                        ⏰ Higher risk during: {zone.active_times?.join(", ")}
+                      </Text>
+src/components/DangerZoneOverlay.tsx:94:                                                    <Text style={styles.calloutTitle}>
+                    ⚠️ {zone.location_name}
+                  </Text>
+src/components/DangerZoneOverlay.tsx:98:                                                     <Text style={[styles.dangerLevel, { color: colors.stroke }]}>
+                    {zone.danger_level.toUpperCase()} RISK AREA
+                  </Text>
+src/components/DemographicBreakdown.tsx:114:                                              <Text style={commonStyles.textBold}>Safety by Demographics</Text>
+src/components/DemographicBreakdown.tsx:134:                                              <Text style={styles.noDataText}>
+                No demographic breakdown available yet. Be the first to review!
+              </Text>
+src/components/DemographicBreakdown.tsx:85:                                      <Text style={styles.reviewCount}>
+            ({score.review_count || 0} review
+            {score.review_count !== 1 ? "s" : ""})
+          </Text>
+src/components/IubendaDocument.tsx:136:                                                           <Text style={commonStyles.primaryButtonText}>Retry</Text>
+src/components/LocationDetailsModal.tsx:469:                                                   <Text style={commonStyles.headerTitle}>Location Details</Text>
+src/components/LocationDetailsModal.tsx:612:                                                         <Text style={styles.reviewCountText}>
+                      Based on {selectedLocation.review_count} review
+                      {selectedLocation.review_count !== 1 ? "s" : ""}
+                    </Text>
+src/components/LocationDetailsModal.tsx:613:                                                              <Text style={styles.reviewCountText}>
+                      Based on {selectedLocation.review_count} review
+                      {selectedLocation.review_count !== 1 ? "s" : ""}
+                    </Text>
+src/components/LocationDetailsModal.tsx:704:                                                       <Text style={styles.writeReviewText}>Write a Review</Text>
+src/components/LocationDetailsModal.tsx:714:                                                           <Text style={styles.alreadyReviewedText}>
+                    You've reviewed this location
+                  </Text>
+src/components/LocationDetailsModal.tsx:726:                                                    <Text style={commonStyles.subtitle}>Neighborhood Stats</Text>
+src/components/LocationDetailsModal.tsx:737:                                                    <Text style={commonStyles.subtitle}>Safety by Time of Day</Text>
+src/components/LocationDetailsModal.tsx:748:                                                          <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
+src/components/LocationDetailsModal.tsx:780:                                                                  <Text style={styles.editButtonText}>
+                                Edit Review
+                              </Text>
+src/components/LocationDetailsModal.tsx:804:                                                                <Text style={styles.reviewerName}>Anonymous</Text>
+src/components/LocationDetailsModal.tsx:817:                                                                   <Text style={commonStyles.ratingLabel}>
+                              Safety:
+                            </Text>
+src/components/LocationDetailsModal.tsx:830:                                                                   <Text style={commonStyles.ratingLabel}>
+                              Comfort:
+                            </Text>
+src/components/LocationDetailsModal.tsx:846:                                                                     <Text style={commonStyles.ratingLabel}>
+                                Access:
+                              </Text>
+src/components/LocationDetailsModal.tsx:878:                                                       <Text style={styles.noReviewsText}>
+                      No reviews yet. Be the first to review this location!
+                    </Text>
+src/components/MapFiltersModal.tsx:172:                                                   <Text style={commonStyles.headerTitle}>Filter Locations</Text>
+src/components/MapFiltersModal.tsx:184:                                                    <Text style={styles.specSectionTitle}>Minimum Safety Rating</Text>
+src/components/MapFiltersModal.tsx:220:                                                    <Text style={styles.specSectionTitle}>Reviews</Text>
+src/components/MapFiltersModal.tsx:227:                                                  <Text style={styles.toggleText}>Has reviews</Text>
+src/components/MapFiltersModal.tsx:257:                                                  <Text style={styles.toggleText}>
+                    Reviewed by my demographic
+                  </Text>
+src/components/MapFiltersModal.tsx:288:                                                  <Text style={styles.toggleText}>
+                    Use my demographic safety scores
+                  </Text>
+src/components/MapFiltersModal.tsx:320:                                                    <Text style={styles.toggleText}>My reviews only</Text>
+src/components/MapFiltersModal.tsx:342:                                                      <Text style={commonStyles.sectionTitle}>Place Type</Text>
+src/components/MapFiltersModal.tsx:398:               <Text
+                style={[
+                  styles.resetButtonText,
+                  !hasActiveFilters && styles.resetButtonTextDisabled,
+                ]}
+              >
+                Reset
+              </Text>
+src/components/MapFiltersModal.tsx:404:                                                   <Text style={styles.applyButtonText}>Apply Filters</Text>
+src/components/NavigationMode.tsx:566:        notify.error(
+src/components/NavigationMode.tsx:577:        notify.error(
+src/components/NavigationMode.tsx:600:      notify.error("Could not start navigation");
+src/components/NavigationMode.tsx:768:                                            <Text style={styles.distanceText}>
+            In {formatDistance(distanceToNextTurn, distanceUnit)}{" "}
+            {showInstructionText && currentInstruction}
+          </Text>
+src/components/NavigationMode.tsx:787:                                          <Text style={styles.thenText}>Then</Text>
+src/components/NavigationMode.tsx:805:                                           <Text style={styles.statLabel}>Arrival</Text>
+src/components/NavigationMode.tsx:811:                                           <Text style={styles.statLabel}>Distance</Text>
+src/components/NavigationMode.tsx:817:                                           <Text style={styles.statLabel}>Safety</Text>
+src/components/NavigationMode.tsx:829:                                             <Text style={styles.endButtonText}>End Navigation</Text>
+src/components/NeighborhoodStats.tsx:34:                                       <Text style={styles.emptyText}>
+          No census data available for this area.
+        </Text>
+src/components/NeighborhoodStats.tsx:55:                                         <Text style={styles.statLabel}>Population</Text>
+src/components/NeighborhoodStats.tsx:61:                                         <Text style={styles.statLabel}>Crime Level</Text>
+src/components/NeighborhoodStats.tsx:67:                                         <Text style={styles.statLabel}>Diversity</Text>
+src/components/NeighborhoodStats.tsx:73:                                                <Text style={commonStyles.sectionTitle}>Crime Rates (per 1,000)</Text>
+src/components/NeighborhoodStats.tsx:81:                                            <Text style={styles.crimeLabel}>Violent</Text>
+src/components/NeighborhoodStats.tsx:86:                                            <Text style={styles.crimeLabel}>Property</Text>
+src/components/NeighborhoodStats.tsx:95:                                            <Text style={styles.crimeLabel}>Hate Crimes</Text>
+src/components/PredictionBadge.tsx:135:                                                         <Text style={styles.voteText}>
+              {prediction.vote_validation.accurate_votes} of
+              {prediction.vote_validation.total_votes} users confirmed this
+              prediction
+            </Text>
+src/components/PredictionBadge.tsx:136:                                                      <Text style={styles.voteText}>
+              {prediction.vote_validation.accurate_votes} of
+              {prediction.vote_validation.total_votes} users confirmed this
+              prediction
+            </Text>
+src/components/PredictionVoteButtons.tsx:141:      notify.error("Failed to submit vote");
+src/components/PredictionVoteButtons.tsx:149:                                           <Text style={commonStyles.formLabel}>Was this prediction accurate?</Text>
+src/components/PredictionVoteButtons.tsx:63:      notify.error("Please log in to vote");
+src/components/PredictionVoteButtons.tsx:74:        notify.error("Please log in to vote");
+src/components/PremiumGate.tsx:53:                                             <Text style={styles.blurText}>
+                <Ionicons name="star" size={24} color={theme.colors.accent} />
+                {requiredTier.charAt(0).toUpperCase() +
+                  requiredTier.slice(1)}{" "}
+                Feature
+              </Text>
+src/components/PremiumGate.tsx:56:                                                <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>
+src/components/PremiumGate.tsx:76:                                                  <Text style={styles.promptSubtitle}>
+                Upgrade to {requiredTier} to unlock
+              </Text>
+src/components/PremiumGate.tsx:77:                                         <Text style={styles.promptSubtitle}>
+                Upgrade to {requiredTier} to unlock
+              </Text>
+src/components/ProactiveWarnings.tsx:109:                                                  <Text style={styles.summaryText}>
+                    {safety_summary.safe_segments} safe
+                  </Text>
+src/components/ProactiveWarnings.tsx:120:                                                   <Text style={styles.summaryText}>
+                    {safety_summary.mixed_segments} mixed
+                  </Text>
+src/components/ProactiveWarnings.tsx:131:                                                    <Text style={styles.summaryText}>
+                    {safety_summary.unsafe_segments} unsafe
+                  </Text>
+src/components/ProactiveWarnings.tsx:156:                                               <Text style={styles.riskTitle}>Risk Factors</Text>
+src/components/ProactiveWarnings.tsx:81:                                                       <Text style={commonStyles.primaryButtonText}>Route Warnings</Text>
+src/components/ProfileBanner.tsx:108:                                                    <Text style={styles.missingFieldsLabel}>Missing:</Text>
+src/components/ProfileBanner.tsx:123:                                                         <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>
+src/components/ProfileCompletionWidget.tsx:26:                                          <Text style={styles.completeText}>Profile Complete! ✨</Text>
+src/components/ProfileCompletionWidget.tsx:49:                                   <Text style={styles.title}>Profile Completion</Text>
+src/components/ProfileCompletionWidget.tsx:66:                                                  <Text style={styles.missingFieldsLabel}>
+            Add {missingFields.length} more field
+            {missingFields.length !== 1 ? "s" : ""}:
+          </Text>
+src/components/ProfileCompletionWidget.tsx:67:                                      <Text style={styles.missingFieldsLabel}>
+            Add {missingFields.length} more field
+            {missingFields.length !== 1 ? "s" : ""}:
+          </Text>
+src/components/ProfileCompletionWidget.tsx:83:                                                     <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>
+src/components/RouteComparisonCard.tsx:125:                                                                                    <Text style={styles.metricText}>
+                {original_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
+                danger zone
+                {original_route.safety_analysis?.danger_zones_intersected === 1
+                  ? ""
+                  : "s"}
+              </Text>
+src/components/RouteComparisonCard.tsx:141:                                                <Text style={styles.selectButtonText}>Use Fastest</Text>
+src/components/RouteComparisonCard.tsx:154:                                                   <Text style={styles.recommendedText}>Selected</Text>
+src/components/RouteComparisonCard.tsx:161:                                            <Text style={styles.routeLabel}>Safer Route</Text>
+src/components/RouteComparisonCard.tsx:198:                                                                                     <Text style={styles.metricText}>
+                {optimized_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
+                danger zone
+                {optimized_route.safety_analysis?.danger_zones_intersected === 1
+                  ? ""
+                  : "s"}
+              </Text>
+src/components/RouteComparisonCard.tsx:214:                                                <Text style={styles.selectButtonText}>Use Safer Route</Text>
+src/components/RouteComparisonCard.tsx:226:              <Text style={styles.waypointsTitle}>
+            <Ionicons
+              name="navigate-circle"
+              size={16}
+              color={theme.colors.primary}
+            />
+            Safe Detours Added
+          </Text>
+src/components/RouteComparisonCard.tsx:254:                                              <Text style={styles.warningTitle}>
+              ⚠️ Limited reviews available for this route!
+            </Text>
+src/components/RouteComparisonCard.tsx:257:                                             <Text style={styles.warningText}>
+              Help improve safety. Be the first to review locations along the
+              way during your trip.
+            </Text>
+src/components/RouteComparisonCard.tsx:63:                                               <Text style={commonStyles.headerTitle}>Safer Route Found!</Text>
+src/components/RouteComparisonCard.tsx:73:                                             <Text style={styles.improvementText}>
+          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
+          points
+        </Text>
+src/components/RouteComparisonCard.tsx:74:                                                                                     <Text style={styles.improvementText}>
+          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
+          points
+        </Text>
+src/components/RouteComparisonCard.tsx:91:                                                   <Text style={styles.recommendedText}>Selected</Text>
+src/components/RouteComparisonCard.tsx:95:                                            <Text style={styles.routeLabel}>Fastest Route</Text>
+src/components/RoutePlanningModal.tsx:1001:                                                    <Text style={styles.routeType}>
+                          {selectedRoute.route_type} route
+                        </Text>
+src/components/RoutePlanningModal.tsx:1031:                                                                    <Text style={styles.metricText}>
+                          {selectedRoute.estimated_duration_minutes} min
+                        </Text>
+src/components/RoutePlanningModal.tsx:1041:                                                             <Text style={styles.metricText}>
+                          {selectedRoute.distance_kilometers} km
+                        </Text>
+src/components/RoutePlanningModal.tsx:291:        notify.error("Profile not loaded. Please try again.", "Not Ready");
+src/components/RoutePlanningModal.tsx:303:        notify.error("No route selected for navigation");
+src/components/RoutePlanningModal.tsx:518:        notify.error("Unable to get location details. Please try again.");
+src/components/RoutePlanningModal.tsx:522:      notify.error("Unable to get location details. Please try again.");
+src/components/RoutePlanningModal.tsx:553:      notify.error(
+src/components/RoutePlanningModal.tsx:561:      notify.error(
+src/components/RoutePlanningModal.tsx:641:      notify.error(
+src/components/RoutePlanningModal.tsx:650:        notify.error("Unable to generate route. Please try again.");
+src/components/RoutePlanningModal.tsx:750:                                   <Text style={styles.title}>Plan Safe Route</Text>
+src/components/RoutePlanningModal.tsx:760:                                                      <Text style={styles.dangerWarningTitle}>
+                Route passes through danger zones
+              </Text>
+src/components/RoutePlanningModal.tsx:781:              placeholder={`Search for ${
+src/components/RoutePlanningModal.tsx:802:                                                      <Text style={styles.recentHeaderText}>Recent Searches</Text>
+src/components/RoutePlanningModal.tsx:865:                                                       <Text style={styles.noResultsText}>No results found</Text>
+src/components/RoutePlanningModal.tsx:883:                                                        <Text style={commonStyles.sectionTitle}>Route Details</Text>
+src/components/RoutePlanningModal.tsx:896:                                                        <Text style={commonStyles.sectionTitle}>
+                  Safety Preferences
+                </Text>
+src/components/RoutePlanningModal.tsx:901:                                                   <Text style={styles.toggleLabel}>Avoid evening dangers</Text>
+src/components/RoutePlanningModal.tsx:949:                                                            <Text style={styles.generateButtonText}>
+                      Generate Safe Route
+                    </Text>
+src/components/RoutePlanningModal.tsx:993:                                                          <Text style={commonStyles.sectionTitle}>Your Route</Text>
+src/components/RouteSafetyBreakdown.tsx:100:                                                 <Text style={styles.statLabel}>Safe</Text>
+src/components/RouteSafetyBreakdown.tsx:112:                                                 <Text style={styles.statLabel}>Mixed</Text>
+src/components/RouteSafetyBreakdown.tsx:124:                                                 <Text style={styles.statLabel}>Caution</Text>
+src/components/RouteSafetyBreakdown.tsx:131:                                                      <Text style={commonStyles.sectionTitle}>
+                Distance by Safety Level
+              </Text>
+src/components/RouteSafetyBreakdown.tsx:168:                                                          <Text style={styles.distanceText}>Safe areas</Text>
+src/components/RouteSafetyBreakdown.tsx:186:                                                          <Text style={styles.distanceText}>Mixed areas</Text>
+src/components/RouteSafetyBreakdown.tsx:204:                                                          <Text style={styles.distanceText}>Caution areas</Text>
+src/components/RouteSafetyBreakdown.tsx:227:                 <Text
+                  style={[
+                    commonStyles.sectionTitle,
+                    { color: theme.colors.error },
+                  ]}
+                >
+                  ⚠️ Areas Requiring Caution
+                </Text>
+src/components/RouteSafetyBreakdown.tsx:270:                                     <Text style={styles.problemDistance}>
+                              {formatDistance(
+                                segment.distanceFromStart,
+                                distanceUnit
+                              )}{" "}
+                              from start
+                            </Text>
+src/components/RouteSafetyBreakdown.tsx:277:                                     <Text style={styles.problemLength}>
+                              {formatDistance(
+                                segment.distance_meters,
+                                distanceUnit
+                              )}{" "}
+                              long
+                            </Text>
+src/components/RouteSafetyBreakdown.tsx:310:                                                  <Text style={styles.allClearText}>
+                  No high-risk areas detected on this route
+                </Text>
+src/components/RouteSafetyBreakdown.tsx:50:                                                                  <Text style={[commonStyles.textBold, { fontSize: 16 }]}>
+            Route Breakdown
+          </Text>
+src/components/RouteSafetyBreakdown.tsx:55:                                    <Text style={styles.segmentCountText}>
+              {segmentScores.length} segments
+            </Text>
+src/components/RouteSafetyBreakdown.tsx:71:                                                 <Text style={styles.timelineLabel}>Start</Text>
+src/components/RouteSafetyBreakdown.tsx:86:                                                 <Text style={styles.timelineLabel}>End</Text>
+src/components/SaveLocationButton.tsx:100:        notify.success("Location saved!");
+src/components/SaveLocationButton.tsx:104:        notify.info("Location already saved");
+src/components/SaveLocationButton.tsx:106:        notify.error("Failed to save location");
+src/components/SaveLocationButton.tsx:63:      notify.info("Please sign in to save locations");
+src/components/SaveLocationButton.tsx:85:        notify.success("Location removed from saved");
+src/components/SearchBar.tsx:168:      notify.info("Loading profile...");
+src/components/SearchBar.tsx:175:        notify.error("Profile not loaded. Please try again.");
+src/components/SearchBar.tsx:238:        notify.error("Unable to get location details. Please try again.");
+src/components/SearchBar.tsx:242:      notify.error("Unable to get location details. Please try again.");
+src/components/SearchBar.tsx:287:                                              <Text style={styles.hasReviewsText}>• Has reviews</Text>
+src/components/SearchBar.tsx:307:              placeholder="Search for places..."
+src/components/SearchBar.tsx:355:                                                      <Text style={styles.recentHeaderText}>Recent Searches</Text>
+src/components/SearchBar.tsx:423:                                                 <Text style={styles.noResultsText}>
+                No places found for "{searchText}"
+              </Text>
+src/components/SearchBar.tsx:426:                                                    <Text style={styles.noResultsSubtext}>
+                Try a different search term
+              </Text>
+src/components/SearchRadiusSelector.tsx:100:                                    <Text style={styles.subtitle}>How far to search for locations</Text>
+src/components/SearchRadiusSelector.tsx:88:                                   <Text style={styles.title}>Search Radius</Text>
+src/components/SearchRadiusSelector.tsx:96:                                           <Text style={styles.savedText}>Saved</Text>
+src/components/TimeSafetyChart.tsx:44:                                       <Text style={styles.emptyText}>No time-based safety data yet.</Text>
+src/components/TimeSafetyChart.tsx:76:                                                       <Text style={[styles.rating, { color: safetyColor }]}>
+                    {periodData.avg_safety?.toFixed(1)}★
+                  </Text>
+src/components/TimeSafetyChart.tsx:79:                                             <Text style={styles.reviewCount}>
+                    {periodData.review_count} review
+                    {periodData.review_count !== 1 ? "s" : ""}
+                  </Text>
+src/components/TimeSafetyChart.tsx:84:                                            <Text style={styles.noData}>No data</Text>
+src/components/TimeSafetyChart.tsx:91:                                     <Text style={styles.totalText}>
+        Based on {data.total_with_time} review
+        {data.total_with_time !== 1 ? "s" : ""} with time data
+      </Text>
+src/components/TimeSafetyChart.tsx:92:                                       <Text style={styles.totalText}>
+        Based on {data.total_with_time} review
+        {data.total_with_time !== 1 ? "s" : ""} with time data
+      </Text>
+src/components/TimeSafetyChart.tsx:93:                                               <Text style={styles.totalText}>
+        Based on {data.total_with_time} review
+        {data.total_with_time !== 1 ? "s" : ""} with time data
+      </Text>
+src/components/UserProfileModal.tsx:107:                                                <Text style={styles.noReviewsText}>No reviews yet</Text>
+src/components/UserProfileModal.tsx:146:                                                   <Text style={commonStyles.headerTitle}>User Profile</Text>
+src/components/UserProfileModal.tsx:171:                                                               <Text style={commonStyles.primaryButtonText}>Close</Text>
+src/components/UserProfileModal.tsx:181:                                                  <Text style={styles.privateTitle}>Private Profile</Text>
+src/components/UserProfileModal.tsx:182:                                                 <Text style={styles.privateText}>
+                  This user has set their profile to private.
+                </Text>
+src/components/UserProfileModal.tsx:208:                                                   <Text style={styles.memberSince}>
+                    Member since{" "}
+                    {new Date(publicProfile.created_at).toLocaleDateString()}
+                  </Text>
+src/components/UserProfileModal.tsx:220:                                                   <Text style={styles.statLabel}>Reviews</Text>
+src/components/UserProfileModal.tsx:229:                                                          <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>
+src/components/UserProfileModal.tsx:85:                                                <Text style={commonStyles.sectionTitle}>Demographics</Text>
+src/components/VoteButtons.tsx:128:      notify.error("Failed to vote. Please try again.", "Error");
+src/components/VoteButtons.tsx:51:      notify.error("Please log in to vote on reviews", "Login Required");
+src/components/VoteButtons.tsx:63:        notify.error(
+src/components/WelcomeScreen.tsx:118:                                         <Text style={styles.heroTitle}>
+            Travel Safely &{"\n"} Belong Everywhere
+          </Text>
+src/components/WelcomeScreen.tsx:119:                                 <Text style={styles.heroTitle}>
+            Travel Safely &{"\n"} Belong Everywhere
+          </Text>
+src/components/WelcomeScreen.tsx:122:                                            <Text style={styles.heroSubtitle}>
+            The first GPS app that shows you how safe places are for people like
+            you
+          </Text>
+src/components/WelcomeScreen.tsx:151:                                            <Text style={styles.pinLabel}>Safe</Text>
+src/components/WelcomeScreen.tsx:160:                                            <Text style={styles.pinLabel}>Caution</Text>
+src/components/WelcomeScreen.tsx:166:                                            <Text style={styles.pinLabel}>Avoid</Text>
+src/components/WelcomeScreen.tsx:175:                                             <Text style={styles.benefitText}>
+              Demographic-aware safety ratings
+            </Text>
+src/components/WelcomeScreen.tsx:181:                                             <Text style={styles.benefitText}>
+              Community-powered recommendations
+            </Text>
+src/components/WelcomeScreen.tsx:187:                                             <Text style={styles.benefitText}>AI-powered travel insights</Text>
+src/components/WelcomeScreen.tsx:213:                                                   <Text style={styles.primaryButtonText}>Get Started</Text>
+src/components/WelcomeScreen.tsx:222:                                                   <Text style={styles.secondaryButtonText}>Sign In</Text>
+src/components/admin/AddTesterModal.tsx:101:                                                      <Text style={commonStyles.modalTitle}>Add Tester</Text>
+src/components/admin/AddTesterModal.tsx:109:                                                       <Text style={commonStyles.formLabel}>Email *</Text>
+src/components/admin/AddTesterModal.tsx:114:                    placeholder="tester@example.com"
+src/components/admin/AddTesterModal.tsx:122:                                                       <Text style={commonStyles.formLabel}>Name</Text>
+src/components/admin/AddTesterModal.tsx:127:                    placeholder="Optional"
+src/components/admin/AddTesterModal.tsx:133:                                                       <Text style={commonStyles.formLabel}>Platform</Text>
+src/components/admin/AddTesterModal.tsx:160:                                                       <Text style={commonStyles.formLabel}>Source</Text>
+src/components/admin/AddTesterModal.tsx:165:                    placeholder="e.g. linkedin, reddit, personal"
+src/components/admin/AddTesterModal.tsx:171:                                                       <Text style={commonStyles.formLabel}>Notes</Text>
+src/components/admin/AddTesterModal.tsx:179:                    placeholder="Optional"
+src/components/admin/AddTesterModal.tsx:191:                                                              <Text style={commonStyles.cancelButtonText}>Cancel</Text>
+src/components/admin/AddTesterModal.tsx:208:                                                                 <Text style={commonStyles.primaryButtonText}>
+                      Add Tester
+                    </Text>
+src/components/admin/TestUserCard.tsx:64:                                                           <Text style={adminStyles.actionBtnTextOutline}>→ Sign user up</Text>
+src/components/admin/TestUserCard.tsx:74:           <Text
+            style={[adminStyles.actionBtnText, adminStyles.actionBtnTextActive]}
+          >
+            Remove
+          </Text>
+src/components/premium/PremiumPromptContent.tsx:32:                                        <Text style={premiumStyles.title}>Premium Feature</Text>
+src/components/premium/PremiumPromptContent.tsx:39:                                                       <Text style={premiumStyles.cancelButtonText}>Not Now</Text>
+src/components/premium/PremiumPromptContent.tsx:46:                                                        <Text style={premiumStyles.upgradeButtonText}>Upgrade</Text>
+src/components/premium/PremiumPromptContent.tsx:60:                                                          <Text style={premiumStyles.watchAdButtonText}>
+              Watch Ad ({APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS}h free)
+            </Text>
+src/components/premium/PremiumPromptContent.tsx:61:                                                                     <Text style={premiumStyles.watchAdButtonText}>
+              Watch Ad ({APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS}h free)
+            </Text>
+src/components/premium/RewardSuccessContent.tsx:31:                                        <Text style={premiumStyles.title}>Access Granted!</Text>
+src/components/premium/TrialExpiryReminderContent.tsx:44:                                        <Text style={premiumStyles.title}>Trial Expiring Soon</Text>
+src/components/premium/TrialExpiryReminderContent.tsx:51:                                                       <Text style={premiumStyles.cancelButtonText}>Dismiss</Text>
+src/components/premium/TrialExpiryReminderContent.tsx:57:                                                        <Text style={premiumStyles.upgradeButtonText}>Upgrade</Text>
+src/components/subscription/Paywall.tsx:126:                                   <Text style={styles.title}>Upgrade to Premium</Text>
+src/components/subscription/Paywall.tsx:127:                                      <Text style={styles.subtitle}>
+          Unlock all features and travel with confidence
+        </Text>
+src/components/subscription/Paywall.tsx:192:                                                  <Text style={styles.purchaseButtonText}>Subscribe Now</Text>
+src/components/subscription/Paywall.tsx:198:                                         <Text style={styles.restoreText}>Restore Purchases</Text>
+src/components/subscription/Paywall.tsx:202:                                     <Text style={styles.legalText}>
+        Payment will be charged to your{" "}
+        {Platform.OS === "ios" ? "Apple ID" : "Google Play"} account.
+        Subscription automatically renews unless canceled at least 24 hours
+        before the end of the current period.
+      </Text>
+src/components/subscription/Paywall.tsx:204:                                                            <Text style={styles.legalText}>
+        Payment will be charged to your{" "}
+        {Platform.OS === "ios" ? "Apple ID" : "Google Play"} account.
+        Subscription automatically renews unless canceled at least 24 hours
+        before the end of the current period.
+      </Text>
+src/components/subscription/Paywall.tsx:213:                                        <Text style={styles.linkText}>Privacy Policy</Text>
+src/components/subscription/Paywall.tsx:223:                                        <Text style={styles.linkText}>Terms of Use</Text>
+src/components/subscription/Paywall.tsx:60:      notify.success("Welcome to TruGuide Premium!");
+src/components/subscription/Paywall.tsx:63:      notify.error(result.error || "Purchase failed");
+src/components/subscription/Paywall.tsx:73:      notify.success("Purchases restored!");
+src/components/subscription/Paywall.tsx:76:      notify.info("No previous purchases found");
+src/components/subscription/Paywall.tsx:78:      notify.error(result.error || "Restore failed");
+src/providers/NavigationManager.ts:123:      notify.error("Failed to restore route. Please try again.");
+src/providers/NavigationManager.ts:40:        notify.error("Invalid route data format");
+src/providers/NavigationManager.ts:45:      notify.info("Recalculating route safety...");
+src/providers/NavigationManager.ts:51:        notify.error("Profile required to calculate route safety");
+src/store/locationsSlice.ts:1777:    notify.info(
+src/store/locationsSlice.ts:1825:            notify.info(
+src/store/locationsSlice.ts:1830:            notify.info(
+src/store/locationsSlice.ts:1906:            notify.success(
+src/store/locationsSlice.ts:2586:        notify.error("Failed to save route: " + action.payload);
+src/utils/debugUtils.ts:19:        notify.success('Session cleared! Restart app.');
+src/utils/debugUtils.ts:23:        notify.error('Failed to clear session');
+src/utils/debugUtils.ts:45:        Alert.alert("CLEARED! Force close app now (swipe up), then reopen");
+src/utils/locationHelpers.ts:33:        notify.error('❌ We couldn\'t get your country:');
+src/utils/locationImportHelper.ts:33:        notify.error('❌ We couldn\'t get your country:');
+src/utils/passwordChecker.ts:10:        notify.error("New password must be at least 8 characters");
+src/utils/passwordChecker.ts:20:        notify.error(
+src/utils/passwordChecker.ts:5:        notify.error("Please enter a password");

@@ -40,8 +40,10 @@ import {
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 import { PremiumGate } from "@/components/PremiumGate";
 import { commonStyles } from "@/styles/common";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { user, signOut } = useAuth();
   const { profile, voteStats } = useAppSelector((state) => state.user);
@@ -489,7 +491,7 @@ export default function ProfileScreen() {
               {profile?.full_name || "TruGuide User"}
             </Text>
             <Text style={styles.memberSince}>
-              Member since{" "}
+              {t("profile.member_since")}{" "}
               {new Date(profile?.created_at || Date.now()).toLocaleDateString()}
             </Text>
           </View>
@@ -515,7 +517,9 @@ export default function ProfileScreen() {
                   <Text style={styles.statNumber}>
                     {profile?.total_reviews || 0}
                   </Text>
-                  <Text style={styles.statLabel}>Reviews Posted</Text>
+                  <Text style={styles.statLabel}>
+                    {t("profile.reviews_posted")}
+                  </Text>
                 </View>
                 <View style={styles.statBox}>
                   <Text style={styles.statNumber}>

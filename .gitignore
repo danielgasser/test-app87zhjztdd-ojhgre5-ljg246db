@@ -66,7 +66,10 @@ src/scripts/neighborhood_stats_data.json
 
 *.apk
 *.aab
+*.py
 
 safepath-e097a-2db8782709cf.json
 
 credential.json
+
+eslint_output.json
