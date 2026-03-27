@@ -1,106 +1,325 @@
-
-/Users/danielgasser/Sites/SafePath/src/__mocks__/profanity.ts
-  6:5  warning  Useless constructor  @typescript-eslint/no-useless-constructor
-
-/Users/danielgasser/Sites/SafePath/src/components/DangerZoneOverlay.tsx
-   94:53  warning  disallow literal string: <Text style={styles.calloutTitle}>
-                    ⚠️ {zone.location_name}
-                  </Text>                                                 i18next/no-literal-string
-   98:54  warning  disallow literal string: <Text style={[styles.dangerLevel, { color: colors.stroke }]}>
-                    {zone.danger_level.toUpperCase()} RISK AREA
+  120:54  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Sign Out</Text>  i18next/no-literal-string
+   88:42  warning  disallow literal string: <Text style={styles.title}>Forgot Password?</Text>                                                                                                                                          i18next/no-literal-string
+  100:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>Email Address</Text>                                                                                                                                   i18next/no-literal-string
+  126:58  warning  disallow literal string: <Text style={styles.resetButtonText}>Send Reset Link</Text>                                                                                                                                 i18next/no-literal-string
+                  </Text>                  i18next/no-literal-string
                   </Text>  i18next/no-literal-string
-  103:59  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>
-                    Affected Groups:
+                  </Text>                                                                    i18next/no-literal-string
+  165:56  warning  disallow literal string: <Text style={styles.backToLoginText}>Back to Sign In</Text>                                                                                                                                 i18next/no-literal-string
+  181:52  warning  disallow literal string: <Text style={styles.loginLinkText}>Back to Login</Text>                                                                                                                                     i18next/no-literal-string
+  199:42  warning  disallow literal string: <Text style={styles.title}>TruGuide</Text>                                                                    i18next/no-literal-string
+  200:45  warning  disallow literal string: <Text style={styles.subtitle}>Travel with confidence</Text>                                                   i18next/no-literal-string
+  237:57  warning  disallow literal string: <Text style={styles.forgotPasswordText}>Forgot Password?</Text>                                               i18next/no-literal-string
+                    </Text>    i18next/no-literal-string
+  296:55  warning  disallow literal string: <Text style={styles.googleButtonText}>Sign in with Google</Text>                                              i18next/no-literal-string
+                </Text>  i18next/no-literal-string
+  305:64  warning  disallow literal string: <Text style={commonStyles.textPrimaryLink}>Sign Up</Text>                                                     i18next/no-literal-string
+  111:42  warning  disallow literal string: <Text style={styles.title}>Join TruGuide</Text>                                                                 i18next/no-literal-string
+  112:45  warning  disallow literal string: <Text style={styles.subtitle}>Create your account</Text>                                                        i18next/no-literal-string
+                  </Text>      i18next/no-literal-string
+                </Text>  i18next/no-literal-string
+  190:64  warning  disallow literal string: <Text style={commonStyles.textPrimaryLink}>Sign In</Text>                                                       i18next/no-literal-string
+  146:46  warning  disallow literal string: <Text style={styles.title}>Create New Password</Text>                                                                                                                i18next/no-literal-string
+                  </Text>  i18next/no-literal-string
+  156:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>New Password</Text>                                                                                                             i18next/no-literal-string
+  182:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>Confirm Password</Text>                                                                                                         i18next/no-literal-string
+                    </Text>                                                     i18next/no-literal-string
+                    </Text>                                                          i18next/no-literal-string
+                    </Text>                                                i18next/no-literal-string
+                    </Text>                                                            i18next/no-literal-string
+                    </Text>                                      i18next/no-literal-string
+  245:58  warning  disallow literal string: <Text style={styles.resetButtonText}>Reset Password</Text>                                                                                                           i18next/no-literal-string
+  259:54  warning  disallow literal string: <Text style={styles.loginLinkText}>Back to Login</Text>                                                                                                              i18next/no-literal-string
+                </Text>                                                                                                                         i18next/no-literal-string
+  370:50  warning  disallow literal string: <Text style={styles.anonymousText}>Anonymous Reviewer</Text>                                                                                                                                                                                                                    i18next/no-literal-string
+  410:55  warning  disallow literal string: <Text style={styles.trendingStats}>{reviews} reviews this week</Text>                                                                                                                                                                                                           i18next/no-literal-string
+  460:44  warning  disallow literal string: <Text style={styles.screenTitle}>Community</Text>                                                                                                                                                                                                                               i18next/no-literal-string
+          </Text>                                                                                                                                                    i18next/no-literal-string
+              </Text>  i18next/no-literal-string
+              </Text>        i18next/no-literal-string
+  530:50  warning  disallow literal string: <Text style={styles.noLocationTitle}>Location Required</Text>                                                                                                                                                                                                                   i18next/no-literal-string
+  550:45  warning  disallow literal string: <Text style={styles.emptyTitle}>No Reviews Nearby</Text>                                                                                                                                                                                                                        i18next/no-literal-string
+            </Text>                                                                                                                                                               i18next/no-literal-string
+  560:53  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Safety Insights</Text>                                                                                                                                                                                                                  i18next/no-literal-string
+  567:49  warning  disallow literal string: <Text style={styles.seeAllText}>See all</Text>                                                                                                                                                                                                                                  i18next/no-literal-string
+  576:44  warning  disallow literal string: <Text style={styles.emptyText}>No safety alerts at this time</Text>                                                                                                                                                                                                             i18next/no-literal-string
+            </Text>                                                                                                                                                                        i18next/no-literal-string
+  593:49  warning  disallow literal string: <Text style={styles.seeAllText}>See all</Text>                                                                                                                                                                                                                                  i18next/no-literal-string
+            </Text>                                                                                                                                                                             i18next/no-literal-string
+  618:53  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>                                                                                                                                                                                                                   i18next/no-literal-string
+  630:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Filter Reviews</Text>                                                                                                                                                                                                              i18next/no-literal-string
+            </Text>                                                                                                                                                        i18next/no-literal-string
+  105:48  warning  disallow literal string: <Text style={commonStyles.headerTitle}>🐛 Debug Console</Text>                                                                                            i18next/no-literal-string
+  119:51  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>📦 Cache Statistics</Text>                                                                                        i18next/no-literal-string
+  151:51  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>📱 System Information</Text>                                                                                      i18next/no-literal-string
+  173:51  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>⚙️ Environment</Text>                                                                                             i18next/no-literal-string
+  199:51  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>🔧 App Configuration</Text>                                                                                       i18next/no-literal-string
+  217:51  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>⚡ Quick Actions</Text>                                                                                            i18next/no-literal-string
+              </Text>  i18next/no-literal-string
+  246:53  warning  disallow literal string: <Text style={styles.actionButtonText}>View Raw Data</Text>                                                                                                i18next/no-literal-string
+  260:53  warning  disallow literal string: <Text style={styles.actionButtonText}>Test Notification</Text>                                                                                            i18next/no-literal-string
+        </Text>                                                                       i18next/no-literal-string
+                        </Text>                                      i18next/no-literal-string
+                        </Text>  i18next/no-literal-string
+                        </Text>                                              i18next/no-literal-string
+  1587:50  warning  disallow literal string: <Text style={styles.filterButtonLabel}>Filters</Text>                                                                                                                                     i18next/no-literal-string
+  1653:49  warning  disallow literal string: <Text style={styles.clearRouteText}>Clear Route</Text>                                                                                                                                    i18next/no-literal-string
+  1689:50  warning  disallow literal string: <Text style={styles.deleteRouteText}>Delete from History</Text>                                                                                                                           i18next/no-literal-string
+  1710:48  warning  disallow literal string: <Text style={styles.legendTitle}>⚠️ Danger Zones</Text>                                                                                                                                   i18next/no-literal-string
+              </Text>                                                                             i18next/no-literal-string
+  1722:51  warning  disallow literal string: <Text style={styles.legendText}>High Risk</Text>                                                                                                                                          i18next/no-literal-string
+  1731:51  warning  disallow literal string: <Text style={styles.legendText}>Medium Risk</Text>                                                                                                                                        i18next/no-literal-string
+  1740:51  warning  disallow literal string: <Text style={styles.legendText}>Low Risk</Text>                                                                                                                                           i18next/no-literal-string
+  1746:48  warning  disallow literal string: <Text style={styles.legendTitle}>✓ No Danger Zones</Text>                                                                                                                                 i18next/no-literal-string
+              </Text>                                                                                i18next/no-literal-string
+  1765:50  warning  disallow literal string: <Text style={styles.routeButtonText}>Plan Route</Text>                                                                                                                                    i18next/no-literal-string
+              </Text>                                                              i18next/no-literal-string
+  1811:46  warning  disallow literal string: <Text style={styles.statLabel}>Safety Score</Text>                                                                                                                                        i18next/no-literal-string
+  1817:46  warning  disallow literal string: <Text style={styles.statLabel}>Duration</Text>                                                                                                                                            i18next/no-literal-string
+  1827:46  warning  disallow literal string: <Text style={styles.statLabel}>Distance</Text>                                                                                                                                            i18next/no-literal-string
+  1840:53  warning  disallow literal string: <Text style={styles.startNavButtonText}>Start Navigation</Text>                                                                                                                           i18next/no-literal-string
+  1861:57  warning  disallow literal string: <Text style={styles.routeDetailsButtonText}>View Details</Text>                                                                                                                           i18next/no-literal-string
+  350:49  warning  disallow literal string: <Text style={styles.noDemographicsText}>No demographics added yet</Text>                                                                                                                           i18next/no-literal-string
+          </Text>                                                                                            i18next/no-literal-string
+  407:51  warning  disallow literal string: <Text style={styles.signInButtonText}>Sign In</Text>                                                                                                                                               i18next/no-literal-string
+  417:48  warning  disallow literal string: <Text style={styles.onboardingTitle}>Complete Your Profile</Text>                                                                                                                                  i18next/no-literal-string
+          </Text>                                         i18next/no-literal-string
+            </Text>                                                                                                 i18next/no-literal-string
+                  </Text>                                                                                          i18next/no-literal-string
+                  </Text>                                                                         i18next/no-literal-string
+            </Text>                             i18next/no-literal-string
+  518:50  warning  disallow literal string: <Text style={styles.statLabel}>Reviews Posted</Text>                                                                                                                                               i18next/no-literal-string
+  524:50  warning  disallow literal string: <Text style={styles.statLabel}>Helpful Votes</Text>                                                                                                                                                i18next/no-literal-string
+  531:50  warning  disallow literal string: <Text style={styles.statLabel}>Unhelpful Votes</Text>                                                                                                                                              i18next/no-literal-string
+  556:53  warning  disallow literal string: <Text style={styles.noRoutesText}>No routes</Text>                                                                                                                                                 i18next/no-literal-string
+                            </Text>                                                     i18next/no-literal-string
+                            </Text>                                                          i18next/no-literal-string
+                            </Text>                                     i18next/no-literal-string
+  632:61  warning  disallow literal string: <Text style={styles.loadMoreText}>Load More</Text>                                                                                                                                                 i18next/no-literal-string
+  657:53  warning  disallow literal string: <Text style={styles.noRoutesText}>No saved locations</Text>                                                                                                                                        i18next/no-literal-string
+                          </Text>  i18next/no-literal-string
+                  </Text>                                                                                      i18next/no-literal-string
+                          </Text>  i18next/no-literal-string
+                </Text>                                                                                             i18next/no-literal-string
+  824:50  warning  disallow literal string: <Text style={styles.settingText}>Privacy Settings</Text>                                                                                                                                           i18next/no-literal-string
+  841:50  warning  disallow literal string: <Text style={styles.settingText}>Notifications</Text>                                                                                                                                              i18next/no-literal-string
+  857:50  warning  disallow literal string: <Text style={styles.settingText}>Display Preferences</Text>                                                                                                                                        i18next/no-literal-string
+  884:50  warning  disallow literal string: <Text style={styles.accountText}>Edit Profile</Text>                                                                                                                                               i18next/no-literal-string
+                  </Text>                     i18next/no-literal-string
+  910:52  warning  disallow literal string: <Text style={styles.accountText}>Admin Panel</Text>                                                                                                                                                i18next/no-literal-string
+  922:50  warning  disallow literal string: <Text style={styles.accountText}>Sign Out</Text>                                                                                                                                                   i18next/no-literal-string
+              </Text>  i18next/no-literal-string
+   377:63  warning  disallow literal string: <Text style={adminStyles.countLabel}>{filtered.length} results</Text>                                                                                                                                                                                                                                                                                                                                                                                                                i18next/no-literal-string
+                </Text>                                                                                                                                                                                                                                                                                                   i18next/no-literal-string
+                </Text>                                                                                                                                                                                                                                                                                                   i18next/no-literal-string
+                  </Text>                                                                                                                                                                                                                                           i18next/no-literal-string
+   590:63  warning  disallow literal string: <Text style={adminStyles.countLabel}>{filtered.length} locations</Text>                                                                                                                                                                                                                                                                                                                                                                                                              i18next/no-literal-string
+              </Text>                                                                                                                                                                                                                                                                                                  i18next/no-literal-string
+              </Text>                                                                                                                                                                                                                                                                                                  i18next/no-literal-string
+                </Text>                                                                                                                                                                                                                                                         i18next/no-literal-string
+   814:63  warning  disallow literal string: <Text style={adminStyles.countLabel}>{filtered.length} reviews</Text>                                                                                                                                                                                                                                                                                                                                                                                                                i18next/no-literal-string
+              </Text>                                                                                                                                                                                                                                                                                          i18next/no-literal-string
+              </Text>                                                                                                                                                                                                                                                                                          i18next/no-literal-string
+                </Text>                                                                                                                                                                                                                                                         i18next/no-literal-string
+        </Text>                                                                                                                                                                                                                                                                                                                                                                                     i18next/no-literal-string
+        </Text>                                                                                                                                                                                                                                                                                                                                               i18next/no-literal-string
+  1112:47  warning  disallow literal string: <Text style={adminStyles.headerTitle}>Admin Panel</Text>                                                                                                                                                                                                                                                                                                                                                                                                                             i18next/no-literal-string
+  101:48  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Display Preferences</Text>                                                                      i18next/no-literal-string
+        </Text>  i18next/no-literal-string
+  215:50  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Edit Profile</Text>                                                                                                          i18next/no-literal-string
+              </Text>                                                                i18next/no-literal-string
+  240:53  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Name or Nickname</Text>                                                                                                     i18next/no-literal-string
+  260:62  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Update Name</Text>                                                                                                     i18next/no-literal-string
+  268:55  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Email Address</Text>                                                                                                        i18next/no-literal-string
+              </Text>                                           i18next/no-literal-string
+                  </Text>                                                            i18next/no-literal-string
+  304:55  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Email Address</Text>                                                                                                        i18next/no-literal-string
+                </Text>                                                  i18next/no-literal-string
+              </Text>  i18next/no-literal-string
+              </Text>  i18next/no-literal-string
+  325:55  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Change Password</Text>                                                                                                      i18next/no-literal-string
+              </Text>                                                       i18next/no-literal-string
+                  </Text>                                                         i18next/no-literal-string
+  382:55  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Password</Text>                                                                                                             i18next/no-literal-string
+                </Text>                                                   i18next/no-literal-string
+              </Text>                                     i18next/no-literal-string
+              </Text>                                     i18next/no-literal-string
+          </Text>                                                                         i18next/no-literal-string
+  246:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Go to Login</Text>                                                                                                           i18next/no-literal-string
+          </Text>                                              i18next/no-literal-string
+  274:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Go Back</Text>                                                                                                               i18next/no-literal-string
+  296:54  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Edit Review</Text>                                                                                                                 i18next/no-literal-string
+                </Text>  i18next/no-literal-string
+                </Text>   i18next/no-literal-string
+  387:54  warning  disallow literal string: <Text style={commonStyles.formLabel}>Visit Date</Text>                                                                                                                    i18next/no-literal-string
+  449:54  warning  disallow literal string: <Text style={commonStyles.formLabel}>Visit Time</Text>                                                                                                                    i18next/no-literal-string
+  495:54  warning  disallow literal string: <Text style={commonStyles.formLabel}>Visit Type</Text>                                                                                                                    i18next/no-literal-string
+  522:61  warning  disallow literal string: <Text style={commonStyles.modalTitle}>Visit Type</Text>                                                                                                                   i18next/no-literal-string
+  526:62  warning  disallow literal string: <Text style={commonStyles.modalDone}>Done</Text>                                                                                                                          i18next/no-literal-string
+  556:63  warning  disallow literal string: <Text style={commonStyles.cancelButtonText}>Cancel</Text>                                                                                                                 i18next/no-literal-string
+   68:36  warning  disallow literal string: <Text style={styles.title}>Terms & Privacy</Text>                                                                                                                                                                                                                                              i18next/no-literal-string
+        </Text>                                                                                                                                                                                        i18next/no-literal-string
+            </Text>   i18next/no-literal-string
+              </Text>                                                                                                           i18next/no-literal-string
+            </Text>  i18next/no-literal-string
+              </Text>                                                                                                           i18next/no-literal-string
+          </Text>                                                  i18next/no-literal-string
+  159:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Continue</Text>                                                                                                                                                                                                                                   i18next/no-literal-string
+   77:36  warning  disallow literal string: <Text style={styles.title}>Location Access</Text>                                                                                                                                                                                        i18next/no-literal-string
+        </Text>                                                                                                                                 i18next/no-literal-string
+   92:49  warning  disallow literal string: <Text style={styles.featureTitle}>Turn-by-Turn Navigation</Text>                                                                                                                                                                         i18next/no-literal-string
+              </Text>                                                                                             i18next/no-literal-string
+  104:49  warning  disallow literal string: <Text style={styles.featureTitle}>Safety Alerts</Text>                                                                                                                                                                                   i18next/no-literal-string
+              </Text>                                                                      i18next/no-literal-string
+  121:49  warning  disallow literal string: <Text style={styles.featureTitle}>Smart Rerouting</Text>                                                                                                                                                                                 i18next/no-literal-string
+              </Text>                                                                                                    i18next/no-literal-string
+          </Text>  i18next/no-literal-string
+            </Text>                                         i18next/no-literal-string
+  162:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Continue</Text>                                                                                                                                                                             i18next/no-literal-string
+  105:48  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Notifications</Text>  i18next/no-literal-string
+   472:38  warning  disallow literal string: <Text style={styles.stepTitle}>Welcome to TruGuide!</Text>                                                                                                                                                               i18next/no-literal-string
+      </Text>                                                 i18next/no-literal-string
+      </Text>  i18next/no-literal-string
+   490:55  warning  disallow literal string: <Text style={styles.welcomeBannerTitle}>Email Confirmed!</Text>                                                                                                                                                          i18next/no-literal-string
+              </Text>                                                                                i18next/no-literal-string
+          </Text>                                                                                                      i18next/no-literal-string
+          </Text>                                                                                                                 i18next/no-literal-string
+          </Text>                                                                                                         i18next/no-literal-string
+   523:43  warning  disallow literal string: <Text style={styles.bulletText}>Your data is private and secure</Text>                                                                                                                                                   i18next/no-literal-string
+      </Text>                                                                                             i18next/no-literal-string
+      </Text>                                                           i18next/no-literal-string
+      </Text>                                                                                                                   i18next/no-literal-string
+      </Text>                                                                                              i18next/no-literal-string
+      </Text>                                                   i18next/no-literal-string
+      </Text>                                                                                                                          i18next/no-literal-string
+   590:48  warning  disallow literal string: <Text style={styles.otherInputLabel}>Please specify:</Text>                                                                                                                                                              i18next/no-literal-string
+      </Text>                                                                                               i18next/no-literal-string
+      </Text>                                                                                      i18next/no-literal-string
+   613:37  warning  disallow literal string: <Text style={styles.helpText}>💡 Find routes safe for your gender</Text>                                                                                                                                                 i18next/no-literal-string
+   643:48  warning  disallow literal string: <Text style={styles.otherInputLabel}>Please specify:</Text>                                                                                                                                                              i18next/no-literal-string
+      </Text>                                                                                               i18next/no-literal-string
+      </Text>                                                    i18next/no-literal-string
+      </Text>                                                                                                                              i18next/no-literal-string
+          </Text>                               i18next/no-literal-string
+          </Text>                               i18next/no-literal-string
+      </Text>                                                                              i18next/no-literal-string
+   711:44  warning  disallow literal string: <Text style={styles.optionalBadge}>(Optional)</Text>                                                                                                                                                                     i18next/no-literal-string
+      </Text>                                                          i18next/no-literal-string
+      </Text>                                                                                                                  i18next/no-literal-string
+   755:48  warning  disallow literal string: <Text style={styles.otherInputLabel}>Please specify:</Text>                                                                                                                                                              i18next/no-literal-string
+      </Text>                                                                                            i18next/no-literal-string
+   773:63  warning  disallow literal string: <Text style={styles.optionalBadge}>(Optional)</Text>                                                                                                                                                                     i18next/no-literal-string
+      </Text>                                                                                                                i18next/no-literal-string
+      </Text>                                                                                                                            i18next/no-literal-string
+   801:48  warning  disallow literal string: <Text style={styles.otherInputLabel}>Please specify:</Text>                                                                                                                                                              i18next/no-literal-string
+      </Text>                                                                                                     i18next/no-literal-string
+   819:54  warning  disallow literal string: <Text style={styles.optionalBadge}>(Optional)</Text>                                                                                                                                                                     i18next/no-literal-string
+   821:44  warning  disallow literal string: <Text style={styles.stepDescription}>Select your age range.</Text>                                                                                                                                                       i18next/no-literal-string
+      </Text>                                                                                                                      i18next/no-literal-string
+   847:38  warning  disallow literal string: <Text style={styles.stepTitle}>Privacy Settings</Text>                                                                                                                                                                   i18next/no-literal-string
+      </Text>                                                                                                  i18next/no-literal-string
+   861:47  warning  disallow literal string: <Text style={styles.privacyTitle}>Public</Text>                                                                                                                                                                          i18next/no-literal-string
+          </Text>                                                                                i18next/no-literal-string
+   880:47  warning  disallow literal string: <Text style={styles.privacyTitle}>Anonymous</Text>                                                                                                                                                                       i18next/no-literal-string
+          </Text>                                                                                 i18next/no-literal-string
+   897:47  warning  disallow literal string: <Text style={styles.privacyTitle}>Private</Text>                                                                                                                                                                         i18next/no-literal-string
+          </Text>                                                                                                     i18next/no-literal-string
+   906:42  warning  disallow literal string: <Text style={styles.toggleLabel}>Show demographics on reviews</Text>                                                                                                                                                     i18next/no-literal-string
+        </Text>                                                                                                              i18next/no-literal-string
+   994:49  warning  disallow literal string: <Text style={styles.skipButtonText}>Cancel</Text>                                                                                                                                                                        i18next/no-literal-string
+  1004:51  warning  disallow literal string: <Text style={styles.backButtonText}>Back</Text>                                                                                                                                                                          i18next/no-literal-string
+  329:48  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Privacy Settings</Text>                                                                                                                                                                                            i18next/no-literal-string
+  334:49  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Demographic Privacy</Text>                                                                                                                                                                                        i18next/no-literal-string
+        </Text>                                                                                                                                           i18next/no-literal-string
+        </Text>                                                                                                                                           i18next/no-literal-string
+  379:46  warning  disallow literal string: <Text style={styles.actionTitle}>Terms of Service</Text>                                                                                                                                                                                                  i18next/no-literal-string
+            </Text>                                                                                                                                                   i18next/no-literal-string
+  401:46  warning  disallow literal string: <Text style={styles.actionTitle}>Privacy Policy</Text>                                                                                                                                                                                                    i18next/no-literal-string
+            </Text>                                                                                                                                                    i18next/no-literal-string
+        </Text>                                                                                                                                        i18next/no-literal-string
+  424:46  warning  disallow literal string: <Text style={styles.actionTitle}>View My Data</Text>                                                                                                                                                                                                      i18next/no-literal-string
+            </Text>                                                                                                                                     i18next/no-literal-string
+  446:46  warning  disallow literal string: <Text style={styles.actionTitle}>Export My Data</Text>                                                                                                                                                                                                    i18next/no-literal-string
+            </Text>                                                                                                                                           i18next/no-literal-string
+            </Text>                                                                                                                                                   i18next/no-literal-string
+            </Text>                                                                                                                                    i18next/no-literal-string
+  492:51  warning  disallow literal string: <Text style={commonStyles.modalTitle}>My Data</Text>                                                                                                                                                                                                      i18next/no-literal-string
+  499:46  warning  disallow literal string: <Text style={styles.dataSection}>Profile Information</Text>                                                                                                                                                                                               i18next/no-literal-string
+  500:43  warning  disallow literal string: <Text style={styles.dataText}>Email: {user?.email}</Text>                                                                                                                                                                                                 i18next/no-literal-string
+            </Text>                                                                                                                                                  i18next/no-literal-string
+            </Text>                                                                                                       i18next/no-literal-string
+  508:46  warning  disallow literal string: <Text style={styles.dataSection}>Demographic Data</Text>                                                                                                                                                                                                  i18next/no-literal-string
+            </Text>                                                                                                                       i18next/no-literal-string
+            </Text>                                                                                                                                                   i18next/no-literal-string
+            </Text>                                                                                                                                           i18next/no-literal-string
+            </Text>                                                                                                                                               i18next/no-literal-string
+            </Text>                                                                                                                                             i18next/no-literal-string
+            </Text>                                                                                                      i18next/no-literal-string
+  528:46  warning  disallow literal string: <Text style={styles.dataSection}>Privacy Settings</Text>                                                                                                                                                                                                  i18next/no-literal-string
+            </Text>                                                                                                                                      i18next/no-literal-string
+            </Text>                                                                                                                           i18next/no-literal-string
+  535:46  warning  disallow literal string: <Text style={styles.dataSection}>Activity</Text>                                                                                                                                                                                                          i18next/no-literal-string
+                </Text>                                                                                                                                     i18next/no-literal-string
+                </Text>                                                                                                                                      i18next/no-literal-string
+  549:47  warning  disallow literal string: <Text style={styles.dataText}>Reviews Posted: 0</Text>                                                                                                                                                                                                    i18next/no-literal-string
+  550:47  warning  disallow literal string: <Text style={styles.dataText}>Routes Planned: 0</Text>                                                                                                                                                                                                    i18next/no-literal-string
+  565:46  warning  disallow literal string: <Text style={styles.deleteTitle}>Delete Account?</Text>                                                                                                                                                                                                   i18next/no-literal-string
+            </Text>  i18next/no-literal-string
+            </Text>  i18next/no-literal-string
+  576:55  warning  disallow literal string: <Text style={styles.cancelButtonText}>Cancel</Text>                                                                                                                                                                                                       i18next/no-literal-string
+  584:56  warning  disallow literal string: <Text style={styles.confirmDeleteText}>Delete Forever</Text>                                                                                                                                                                                              i18next/no-literal-string
+          </Text>                                                                                                                                        i18next/no-literal-string
+  248:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Go to Login</Text>                                                                                                                                                                             i18next/no-literal-string
+  277:54  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Write a Review</Text>                                                                                                                                                                                i18next/no-literal-string
+                  </Text>                                                  i18next/no-literal-string
+                  </Text>                                                                                                              i18next/no-literal-string
+                </Text>                                                                    i18next/no-literal-string
+                </Text>                                                                     i18next/no-literal-string
+  390:54  warning  disallow literal string: <Text style={commonStyles.formLabel}>Visit Date</Text>                                                                                                                                                                                      i18next/no-literal-string
+  429:54  warning  disallow literal string: <Text style={commonStyles.formLabel}>Visit Time</Text>                                                                                                                                                                                      i18next/no-literal-string
+  473:54  warning  disallow literal string: <Text style={commonStyles.formLabel}>Visit Type</Text>                                                                                                                                                                                      i18next/no-literal-string
+                      </Text>                                                                                                                              i18next/no-literal-string
+  509:62  warning  disallow literal string: <Text style={commonStyles.modalDone}>Done</Text>                                                                                                                                                                                            i18next/no-literal-string
+                </Text>  i18next/no-literal-string
+                  </Text>                                                 i18next/no-literal-string
+                  </Text>  i18next/no-literal-string
                   </Text>                                                  i18next/no-literal-string
   115:59  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Reasons:</Text>                                                                                                  i18next/no-literal-string
-  125:56  warning  disallow literal string: <Text style={styles.timeWarning}>
-                        ⏰ Higher risk during: {zone.active_times?.join(", ")}
                       </Text>            i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/DemographicBreakdown.tsx
-   85:39  warning  disallow literal string: <Text style={styles.reviewCount}>
-            ({score.review_count || 0} review
-            {score.review_count !== 1 ? "s" : ""})
           </Text>  i18next/no-literal-string
   114:47  warning  disallow literal string: <Text style={commonStyles.textBold}>Safety by Demographics</Text>                                                                                     i18next/no-literal-string
-  134:47  warning  disallow literal string: <Text style={styles.noDataText}>
-                No demographic breakdown available yet. Be the first to review!
               </Text>                i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/IubendaDocument.tsx
   136:60  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Retry</Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/LocationDetailsModal.tsx
   469:52  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Location Details</Text>                                                                                                                                                  i18next/no-literal-string
-  612:58  warning  disallow literal string: <Text style={styles.reviewCountText}>
-                      Based on {selectedLocation.review_count} review
-                      {selectedLocation.review_count !== 1 ? "s" : ""}
                     </Text>  i18next/no-literal-string
-  613:63  warning  disallow literal string: <Text style={styles.reviewCountText}>
-                      Based on {selectedLocation.review_count} review
-                      {selectedLocation.review_count !== 1 ? "s" : ""}
                     </Text>  i18next/no-literal-string
   704:56  warning  disallow literal string: <Text style={styles.writeReviewText}>Write a Review</Text>                                                                                                                                                      i18next/no-literal-string
-  714:60  warning  disallow literal string: <Text style={styles.alreadyReviewedText}>
-                    You've reviewed this location
                   </Text>                                                                                           i18next/no-literal-string
   726:53  warning  disallow literal string: <Text style={commonStyles.subtitle}>Neighborhood Stats</Text>                                                                                                                                                   i18next/no-literal-string
   737:53  warning  disallow literal string: <Text style={commonStyles.subtitle}>Safety by Time of Day</Text>                                                                                                                                                i18next/no-literal-string
   748:59  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>                                                                                                                                                   i18next/no-literal-string
-  780:67  warning  disallow literal string: <Text style={styles.editButtonText}>
-                                Edit Review
                               </Text>                                                                                          i18next/no-literal-string
   804:65  warning  disallow literal string: <Text style={styles.reviewerName}>Anonymous</Text>                                                                                                                                                              i18next/no-literal-string
-  817:68  warning  disallow literal string: <Text style={commonStyles.ratingLabel}>
-                              Safety:
                             </Text>                                                                                               i18next/no-literal-string
-  830:68  warning  disallow literal string: <Text style={commonStyles.ratingLabel}>
-                              Comfort:
                             </Text>                                                                                              i18next/no-literal-string
-  846:70  warning  disallow literal string: <Text style={commonStyles.ratingLabel}>
-                                Access:
                               </Text>                                                                                           i18next/no-literal-string
-  878:56  warning  disallow literal string: <Text style={styles.noReviewsText}>
-                      No reviews yet. Be the first to review this location!
                     </Text>                                                                     i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/MapFiltersModal.tsx
   172:52  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Filter Locations</Text>                                                                                                                                                                  i18next/no-literal-string
   184:53  warning  disallow literal string: <Text style={styles.specSectionTitle}>Minimum Safety Rating</Text>                                                                                                                                                              i18next/no-literal-string
   220:53  warning  disallow literal string: <Text style={styles.specSectionTitle}>Reviews</Text>                                                                                                                                                                            i18next/no-literal-string
   227:51  warning  disallow literal string: <Text style={styles.toggleText}>Has reviews</Text>                                                                                                                                                                              i18next/no-literal-string
-  257:51  warning  disallow literal string: <Text style={styles.toggleText}>
-                    Reviewed by my demographic
                   </Text>                                                                                                                       i18next/no-literal-string
-  288:51  warning  disallow literal string: <Text style={styles.toggleText}>
-                    Use my demographic safety scores
                   </Text>                                                                                                                 i18next/no-literal-string
   320:53  warning  disallow literal string: <Text style={styles.toggleText}>My reviews only</Text>                                                                                                                                                                          i18next/no-literal-string
   342:55  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Place Type</Text>                                                                                                                                                                       i18next/no-literal-string
-  398:16  warning  disallow literal string: <Text
-                style={[
-                  styles.resetButtonText,
-                  !hasActiveFilters && styles.resetButtonTextDisabled,
-                ]}
-              >
-                Reset
               </Text>  i18next/no-literal-string
   404:52  warning  disallow literal string: <Text style={styles.applyButtonText}>Apply Filters</Text>                                                                                                                                                                       i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/NavigationMode.tsx
-  768:45  warning  disallow literal string: <Text style={styles.distanceText}>
-            In {formatDistance(distanceToNextTurn, distanceUnit)}{" "}
-            {showInstructionText && currentInstruction}
           </Text>  i18next/no-literal-string
   787:43  warning  disallow literal string: <Text style={styles.thenText}>Then</Text>                                                                                                                                            i18next/no-literal-string
   805:44  warning  disallow literal string: <Text style={styles.statLabel}>Arrival</Text>                                                                                                                                        i18next/no-literal-string
   811:44  warning  disallow literal string: <Text style={styles.statLabel}>Distance</Text>                                                                                                                                       i18next/no-literal-string
   817:44  warning  disallow literal string: <Text style={styles.statLabel}>Safety</Text>                                                                                                                                         i18next/no-literal-string
   829:46  warning  disallow literal string: <Text style={styles.endButtonText}>End Navigation</Text>                                                                                                                             i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/NeighborhoodStats.tsx
-  34:40  warning  disallow literal string: <Text style={styles.emptyText}>
-          No census data available for this area.
         </Text>  i18next/no-literal-string
   55:42  warning  disallow literal string: <Text style={styles.statLabel}>Population</Text>                                                   i18next/no-literal-string
   61:42  warning  disallow literal string: <Text style={styles.statLabel}>Crime Level</Text>                                                  i18next/no-literal-string
@@ -109,262 +328,100 @@
   81:45  warning  disallow literal string: <Text style={styles.crimeLabel}>Violent</Text>                                                     i18next/no-literal-string
   86:45  warning  disallow literal string: <Text style={styles.crimeLabel}>Property</Text>                                                    i18next/no-literal-string
   95:45  warning  disallow literal string: <Text style={styles.crimeLabel}>Hate Crimes</Text>                                                 i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/PredictionBadge.tsx
-  135:58  warning  disallow literal string: <Text style={styles.voteText}>
-              {prediction.vote_validation.accurate_votes} of
-              {prediction.vote_validation.total_votes} users confirmed this
-              prediction
             </Text>  i18next/no-literal-string
-  136:55  warning  disallow literal string: <Text style={styles.voteText}>
-              {prediction.vote_validation.accurate_votes} of
-              {prediction.vote_validation.total_votes} users confirmed this
-              prediction
             </Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/PredictionVoteButtons.tsx
   149:44  warning  disallow literal string: <Text style={commonStyles.formLabel}>Was this prediction accurate?</Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/PremiumGate.tsx
-  53:46  warning  disallow literal string: <Text style={styles.blurText}>
-                <Ionicons name="star" size={24} color={theme.colors.accent} />
-                {requiredTier.charAt(0).toUpperCase() +
-                  requiredTier.slice(1)}{" "}
-                Feature
               </Text>  i18next/no-literal-string
   56:49  warning  disallow literal string: <Text style={styles.tapToUpgrade}>Tap To Upgrade</Text>                                                                                                                                                                                                            i18next/no-literal-string
-  76:51  warning  disallow literal string: <Text style={styles.promptSubtitle}>
-                Upgrade to {requiredTier} to unlock
               </Text>                                                                                                                                                     i18next/no-literal-string
-  77:42  warning  disallow literal string: <Text style={styles.promptSubtitle}>
-                Upgrade to {requiredTier} to unlock
               </Text>                                                                                                                                                     i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/ProactiveWarnings.tsx
    81:56  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Route Warnings</Text>                                                       i18next/no-literal-string
-  109:51  warning  disallow literal string: <Text style={styles.summaryText}>
-                    {safety_summary.safe_segments} safe
                   </Text>      i18next/no-literal-string
-  120:52  warning  disallow literal string: <Text style={styles.summaryText}>
-                    {safety_summary.mixed_segments} mixed
                   </Text>    i18next/no-literal-string
-  131:53  warning  disallow literal string: <Text style={styles.summaryText}>
-                    {safety_summary.unsafe_segments} unsafe
                   </Text>  i18next/no-literal-string
   156:48  warning  disallow literal string: <Text style={styles.riskTitle}>Risk Factors</Text>                                                                       i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/ProfileBanner.tsx
   108:53  warning  disallow literal string: <Text style={styles.missingFieldsLabel}>Missing:</Text>               i18next/no-literal-string
   123:58  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/ProfileCompletionWidget.tsx
   26:43  warning  disallow literal string: <Text style={styles.completeText}>Profile Complete! ✨</Text>                                                                                                       i18next/no-literal-string
   49:36  warning  disallow literal string: <Text style={styles.title}>Profile Completion</Text>                                                                                                               i18next/no-literal-string
-  66:51  warning  disallow literal string: <Text style={styles.missingFieldsLabel}>
-            Add {missingFields.length} more field
-            {missingFields.length !== 1 ? "s" : ""}:
           </Text>  i18next/no-literal-string
-  67:39  warning  disallow literal string: <Text style={styles.missingFieldsLabel}>
-            Add {missingFields.length} more field
-            {missingFields.length !== 1 ? "s" : ""}:
           </Text>  i18next/no-literal-string
   83:54  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Complete Profile</Text>                                                                                               i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/RouteComparisonCard.tsx
    63:48  warning  disallow literal string: <Text style={commonStyles.headerTitle}>Safer Route Found!</Text>                                                                                                                                                                                                                                           i18next/no-literal-string
-   73:46  warning  disallow literal string: <Text style={styles.improvementText}>
-          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
-          points
         </Text>                                                                                                                                               i18next/no-literal-string
-   74:86  warning  disallow literal string: <Text style={styles.improvementText}>
-          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
-          points
         </Text>                                                                                                                                               i18next/no-literal-string
    91:52  warning  disallow literal string: <Text style={styles.recommendedText}>Selected</Text>                                                                                                                                                                                                                                                       i18next/no-literal-string
    95:45  warning  disallow literal string: <Text style={styles.routeLabel}>Fastest Route</Text>                                                                                                                                                                                                                                                       i18next/no-literal-string
-  125:85  warning  disallow literal string: <Text style={styles.metricText}>
-                {original_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
-                danger zone
-                {original_route.safety_analysis?.danger_zones_intersected === 1
-                  ? ""
-                  : "s"}
               </Text>    i18next/no-literal-string
   141:49  warning  disallow literal string: <Text style={styles.selectButtonText}>Use Fastest</Text>                                                                                                                                                                                                                                                   i18next/no-literal-string
   154:52  warning  disallow literal string: <Text style={styles.recommendedText}>Selected</Text>                                                                                                                                                                                                                                                       i18next/no-literal-string
   161:45  warning  disallow literal string: <Text style={styles.routeLabel}>Safer Route</Text>                                                                                                                                                                                                                                                         i18next/no-literal-string
-  198:86  warning  disallow literal string: <Text style={styles.metricText}>
-                {optimized_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
-                danger zone
-                {optimized_route.safety_analysis?.danger_zones_intersected === 1
-                  ? ""
-                  : "s"}
               </Text>  i18next/no-literal-string
   214:49  warning  disallow literal string: <Text style={styles.selectButtonText}>Use Safer Route</Text>                                                                                                                                                                                                                                               i18next/no-literal-string
-  226:15  warning  disallow literal string: <Text style={styles.waypointsTitle}>
-            <Ionicons
-              name="navigate-circle"
-              size={16}
-              color={theme.colors.primary}
-            />
-            Safe Detours Added
           </Text>                                                                         i18next/no-literal-string
-  254:47  warning  disallow literal string: <Text style={styles.warningTitle}>
-              ⚠️ Limited reviews available for this route!
             </Text>                                                                                                                                                                                          i18next/no-literal-string
-  257:46  warning  disallow literal string: <Text style={styles.warningText}>
-              Help improve safety. Be the first to review locations along the
-              way during your trip.
             </Text>                                                                                                                                    i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/RoutePlanningModal.tsx
    750:36  warning  disallow literal string: <Text style={styles.title}>Plan Safe Route</Text>                                                                                          i18next/no-literal-string
-   760:55  warning  disallow literal string: <Text style={styles.dangerWarningTitle}>
-                Route passes through danger zones
               </Text>                           i18next/no-literal-string
    802:55  warning  disallow literal string: <Text style={styles.recentHeaderText}>Recent Searches</Text>                                                                               i18next/no-literal-string
    865:56  warning  disallow literal string: <Text style={styles.noResultsText}>No results found</Text>                                                                                 i18next/no-literal-string
    883:57  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Route Details</Text>                                                                               i18next/no-literal-string
-   896:57  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>
-                  Safety Preferences
                 </Text>                                      i18next/no-literal-string
    901:52  warning  disallow literal string: <Text style={styles.toggleLabel}>Avoid evening dangers</Text>                                                                              i18next/no-literal-string
-   949:61  warning  disallow literal string: <Text style={styles.generateButtonText}>
-                      Generate Safe Route
                     </Text>                             i18next/no-literal-string
    993:59  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Your Route</Text>                                                                                  i18next/no-literal-string
-  1001:53  warning  disallow literal string: <Text style={styles.routeType}>
-                          {selectedRoute.route_type} route
                         </Text>                 i18next/no-literal-string
-  1031:69  warning  disallow literal string: <Text style={styles.metricText}>
-                          {selectedRoute.estimated_duration_minutes} min
                         </Text>  i18next/no-literal-string
-  1041:62  warning  disallow literal string: <Text style={styles.metricText}>
-                          {selectedRoute.distance_kilometers} km
                         </Text>          i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/RouteSafetyBreakdown.tsx
-   50:67  warning  disallow literal string: <Text style={[commonStyles.textBold, { fontSize: 16 }]}>
-            Route Breakdown
           </Text>                                                                                                                                                                                                           i18next/no-literal-string
-   55:37  warning  disallow literal string: <Text style={styles.segmentCountText}>
-              {segmentScores.length} segments
             </Text>                                                                                                                                                                                                         i18next/no-literal-string
    71:50  warning  disallow literal string: <Text style={styles.timelineLabel}>Start</Text>                                                                                                                                                                                                                                                                  i18next/no-literal-string
    86:50  warning  disallow literal string: <Text style={styles.timelineLabel}>End</Text>                                                                                                                                                                                                                                                                    i18next/no-literal-string
   100:50  warning  disallow literal string: <Text style={styles.statLabel}>Safe</Text>                                                                                                                                                                                                                                                                       i18next/no-literal-string
   112:50  warning  disallow literal string: <Text style={styles.statLabel}>Mixed</Text>                                                                                                                                                                                                                                                                      i18next/no-literal-string
   124:50  warning  disallow literal string: <Text style={styles.statLabel}>Caution</Text>                                                                                                                                                                                                                                                                    i18next/no-literal-string
-  131:55  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>
-                Distance by Safety Level
               </Text>                                                                                                                                                                                                          i18next/no-literal-string
   168:59  warning  disallow literal string: <Text style={styles.distanceText}>Safe areas</Text>                                                                                                                                                                                                                                                              i18next/no-literal-string
   186:59  warning  disallow literal string: <Text style={styles.distanceText}>Mixed areas</Text>                                                                                                                                                                                                                                                             i18next/no-literal-string
   204:59  warning  disallow literal string: <Text style={styles.distanceText}>Caution areas</Text>                                                                                                                                                                                                                                                           i18next/no-literal-string
-  227:18  warning  disallow literal string: <Text
-                  style={[
-                    commonStyles.sectionTitle,
-                    { color: theme.colors.error },
-                  ]}
-                >
-                  ⚠️ Areas Requiring Caution
                 </Text>                                                                   i18next/no-literal-string
-  270:38  warning  disallow literal string: <Text style={styles.problemDistance}>
-                              {formatDistance(
-                                segment.distanceFromStart,
-                                distanceUnit
-                              )}{" "}
-                              from start
                             </Text>  i18next/no-literal-string
-  277:38  warning  disallow literal string: <Text style={styles.problemLength}>
-                              {formatDistance(
-                                segment.distance_meters,
-                                distanceUnit
-                              )}{" "}
-                              long
                             </Text>            i18next/no-literal-string
-  310:51  warning  disallow literal string: <Text style={styles.allClearText}>
-                  No high-risk areas detected on this route
                 </Text>                                                                                                                                                                                           i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/SearchBar.tsx
   287:47  warning  disallow literal string: <Text style={styles.hasReviewsText}>• Has reviews</Text>                                                      i18next/no-literal-string
   355:55  warning  disallow literal string: <Text style={styles.recentHeaderText}>Recent Searches</Text>                                                  i18next/no-literal-string
-  423:50  warning  disallow literal string: <Text style={styles.noResultsText}>
-                No places found for "{searchText}"
               </Text>  i18next/no-literal-string
-  426:53  warning  disallow literal string: <Text style={styles.noResultsSubtext}>
-                Try a different search term
               </Text>      i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/SearchRadiusSelector.tsx
    88:36  warning  disallow literal string: <Text style={styles.title}>Search Radius</Text>                       i18next/no-literal-string
    96:44  warning  disallow literal string: <Text style={styles.savedText}>Saved</Text>                           i18next/no-literal-string
   100:37  warning  disallow literal string: <Text style={styles.subtitle}>How far to search for locations</Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/TimeSafetyChart.tsx
   44:40  warning  disallow literal string: <Text style={styles.emptyText}>No time-based safety data yet.</Text>                                                                                                             i18next/no-literal-string
-  76:56  warning  disallow literal string: <Text style={[styles.rating, { color: safetyColor }]}>
-                    {periodData.avg_safety?.toFixed(1)}★
                   </Text>                                        i18next/no-literal-string
-  79:46  warning  disallow literal string: <Text style={styles.reviewCount}>
-                    {periodData.review_count} review
-                    {periodData.review_count !== 1 ? "s" : ""}
                   </Text>  i18next/no-literal-string
   84:45  warning  disallow literal string: <Text style={styles.noData}>No data</Text>                                                                                                                                       i18next/no-literal-string
-  91:38  warning  disallow literal string: <Text style={styles.totalText}>
-        Based on {data.total_with_time} review
-        {data.total_with_time !== 1 ? "s" : ""} with time data
       </Text>                      i18next/no-literal-string
-  92:40  warning  disallow literal string: <Text style={styles.totalText}>
-        Based on {data.total_with_time} review
-        {data.total_with_time !== 1 ? "s" : ""} with time data
       </Text>                      i18next/no-literal-string
-  93:48  warning  disallow literal string: <Text style={styles.totalText}>
-        Based on {data.total_with_time} review
-        {data.total_with_time !== 1 ? "s" : ""} with time data
       </Text>                      i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/UserProfileModal.tsx
    85:49  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Demographics</Text>                                                                                                                      i18next/no-literal-string
   107:49  warning  disallow literal string: <Text style={styles.noReviewsText}>No reviews yet</Text>                                                                                                                         i18next/no-literal-string
   146:52  warning  disallow literal string: <Text style={commonStyles.headerTitle}>User Profile</Text>                                                                                                                       i18next/no-literal-string
   171:64  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>Close</Text>                                                                                                                        i18next/no-literal-string
   181:51  warning  disallow literal string: <Text style={styles.privateTitle}>Private Profile</Text>                                                                                                                         i18next/no-literal-string
-  182:50  warning  disallow literal string: <Text style={styles.privateText}>
-                  This user has set their profile to private.
                 </Text>                                                          i18next/no-literal-string
-  208:52  warning  disallow literal string: <Text style={styles.memberSince}>
-                    Member since{" "}
-                    {new Date(publicProfile.created_at).toLocaleDateString()}
                   </Text>  i18next/no-literal-string
   220:52  warning  disallow literal string: <Text style={styles.statLabel}>Reviews</Text>                                                                                                                                    i18next/no-literal-string
   229:59  warning  disallow literal string: <Text style={commonStyles.sectionTitle}>Recent Reviews</Text>                                                                                                                    i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/WelcomeScreen.tsx
-  118:42  warning  disallow literal string: <Text style={styles.heroTitle}>
-            Travel Safely &{"\n"} Belong Everywhere
           </Text>                                                  i18next/no-literal-string
-  119:34  warning  disallow literal string: <Text style={styles.heroTitle}>
-            Travel Safely &{"\n"} Belong Everywhere
           </Text>                                                  i18next/no-literal-string
-  122:45  warning  disallow literal string: <Text style={styles.heroSubtitle}>
-            The first GPS app that shows you how safe places are for people like
-            you
           </Text>  i18next/no-literal-string
   151:45  warning  disallow literal string: <Text style={styles.pinLabel}>Safe</Text>                                                                                                              i18next/no-literal-string
   160:45  warning  disallow literal string: <Text style={styles.pinLabel}>Caution</Text>                                                                                                           i18next/no-literal-string
   166:45  warning  disallow literal string: <Text style={styles.pinLabel}>Avoid</Text>                                                                                                             i18next/no-literal-string
-  175:46  warning  disallow literal string: <Text style={styles.benefitText}>
-              Demographic-aware safety ratings
             </Text>                                                   i18next/no-literal-string
-  181:46  warning  disallow literal string: <Text style={styles.benefitText}>
-              Community-powered recommendations
             </Text>                                                  i18next/no-literal-string
   187:46  warning  disallow literal string: <Text style={styles.benefitText}>AI-powered travel insights</Text>                                                                                     i18next/no-literal-string
   213:52  warning  disallow literal string: <Text style={styles.primaryButtonText}>Get Started</Text>                                                                                              i18next/no-literal-string
   222:52  warning  disallow literal string: <Text style={styles.secondaryButtonText}>Sign In</Text>                                                                                                i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/admin/AddTesterModal.tsx
   101:55  warning  disallow literal string: <Text style={commonStyles.modalTitle}>Add Tester</Text>                                                     i18next/no-literal-string
   109:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>Email *</Text>                                                         i18next/no-literal-string
   122:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>Name</Text>                                                            i18next/no-literal-string
@@ -372,99 +429,23 @@
   160:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>Source</Text>                                                          i18next/no-literal-string
   171:56  warning  disallow literal string: <Text style={commonStyles.formLabel}>Notes</Text>                                                           i18next/no-literal-string
   191:63  warning  disallow literal string: <Text style={commonStyles.cancelButtonText}>Cancel</Text>                                                   i18next/no-literal-string
-  208:66  warning  disallow literal string: <Text style={commonStyles.primaryButtonText}>
-                      Add Tester
                     </Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/admin/TestUserCard.tsx
   64:60  warning  disallow literal string: <Text style={adminStyles.actionBtnTextOutline}>→ Sign user up</Text>                                                                     i18next/no-literal-string
-  74:12  warning  disallow literal string: <Text
-            style={[adminStyles.actionBtnText, adminStyles.actionBtnTextActive]}
-          >
-            Remove
           </Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/premium/PremiumPromptContent.tsx
   32:41  warning  disallow literal string: <Text style={premiumStyles.title}>Premium Feature</Text>                                                                                         i18next/no-literal-string
   39:56  warning  disallow literal string: <Text style={premiumStyles.cancelButtonText}>Not Now</Text>                                                                                      i18next/no-literal-string
   46:57  warning  disallow literal string: <Text style={premiumStyles.upgradeButtonText}>Upgrade</Text>                                                                                     i18next/no-literal-string
-  60:59  warning  disallow literal string: <Text style={premiumStyles.watchAdButtonText}>
-              Watch Ad ({APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS}h free)
             </Text>  i18next/no-literal-string
-  61:70  warning  disallow literal string: <Text style={premiumStyles.watchAdButtonText}>
-              Watch Ad ({APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS}h free)
             </Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/premium/RewardSuccessContent.tsx
   31:41  warning  disallow literal string: <Text style={premiumStyles.title}>Access Granted!</Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/premium/TrialExpiryReminderContent.tsx
   44:41  warning  disallow literal string: <Text style={premiumStyles.title}>Trial Expiring Soon</Text>  i18next/no-literal-string
   51:56  warning  disallow literal string: <Text style={premiumStyles.cancelButtonText}>Dismiss</Text>   i18next/no-literal-string
   57:57  warning  disallow literal string: <Text style={premiumStyles.upgradeButtonText}>Upgrade</Text>  i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/components/subscription/Paywall.tsx
   126:36  warning  disallow literal string: <Text style={styles.title}>Upgrade to Premium</Text>                                                                                                                                                                                                                                        i18next/no-literal-string
-  127:39  warning  disallow literal string: <Text style={styles.subtitle}>
-          Unlock all features and travel with confidence
         </Text>                                                                                                                                                                                     i18next/no-literal-string
   192:51  warning  disallow literal string: <Text style={styles.purchaseButtonText}>Subscribe Now</Text>                                                                                                                                                                                                                                i18next/no-literal-string
   198:42  warning  disallow literal string: <Text style={styles.restoreText}>Restore Purchases</Text>                                                                                                                                                                                                                                   i18next/no-literal-string
-  202:38  warning  disallow literal string: <Text style={styles.legalText}>
-        Payment will be charged to your{" "}
-        {Platform.OS === "ios" ? "Apple ID" : "Google Play"} account.
-        Subscription automatically renews unless canceled at least 24 hours
-        before the end of the current period.
       </Text>  i18next/no-literal-string
-  204:61  warning  disallow literal string: <Text style={styles.legalText}>
-        Payment will be charged to your{" "}
-        {Platform.OS === "ios" ? "Apple ID" : "Google Play"} account.
-        Subscription automatically renews unless canceled at least 24 hours
-        before the end of the current period.
       </Text>  i18next/no-literal-string
   213:41  warning  disallow literal string: <Text style={styles.linkText}>Privacy Policy</Text>                                                                                                                                                                                                                                         i18next/no-literal-string
   223:41  warning  disallow literal string: <Text style={styles.linkText}>Terms of Use</Text>                                                                                                                                                                                                                                           i18next/no-literal-string
-
-/Users/danielgasser/Sites/SafePath/src/services/__tests__/adminService.test.ts
-   5:1  warning  Import in body of module; reorder to top                                    import/first
-   6:1  warning  Import in body of module; reorder to top                                    import/first
-  11:5  warning  'TestUser' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/services/__tests__/locationCache.test.ts
-  117:15  warning  'key2' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/services/__tests__/offlineQueue.test.ts
-   8:1  warning  Import in body of module; reorder to top  import/first
-   9:1  warning  Import in body of module; reorder to top  import/first
-  10:1  warning  Import in body of module; reorder to top  import/first
-
-/Users/danielgasser/Sites/SafePath/src/store/__tests__/checkForReroute.test.ts
-  1:10  warning  'configureStore' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
-  2:8   warning  'locationsReducer' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-  4:5   warning  'setSelectedRoute' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-  5:5   warning  'setRouteRequest' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/store/__tests__/fetchDangerZones.test.ts
-  7:5  warning  'mockAuthGetSession' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/store/__tests__/fetchMLPredictions.test.ts
-  1:8  warning  'locationsReducer' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/store/__tests__/navigation.test.ts
-  15:7  warning  'getNavState' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/store/__tests__/profileBannerSlice.test.ts
-  25:7  warning  'hoursFromNow' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-/Users/danielgasser/Sites/SafePath/src/utils/__tests__/contentFilter.test.ts
-  2:1  warning  Import in body of module; reorder to top  import/first
-  3:1  warning  Import in body of module; reorder to top  import/first
-  4:1  warning  Import in body of module; reorder to top  import/first
-  5:1  warning  Import in body of module; reorder to top  import/first
-
-/Users/danielgasser/Sites/SafePath/src/utils/contentFilter.ts
-  5:10  warning  'useState' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
-
-✖ 189 problems (0 errors, 189 warnings)
-  0 errors and 9 warnings potentially fixable with the `--fix` option.
-
