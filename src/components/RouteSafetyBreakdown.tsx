@@ -52,10 +52,11 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
         <View style={styles.headerLeft}>
           <Ionicons name="map" size={18} color={theme.colors.primary} />
           <Text style={[commonStyles.textBold, { fontSize: 16 }]}>
-            {t('navigation.route_breakdown')}</Text>
+            {t("navigation.route_breakdown")}
+          </Text>
           <View style={styles.segmentCount}>
             <Text style={styles.segmentCountText}>
-              {segmentScores.length} segments
+              {segmentScores.length} {t("navigation.segments")}
             </Text>
           </View>
         </View>
@@ -124,9 +125,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                       { backgroundColor: theme.colors.error },
                     ]}
                   />
-                  <Text style={styles.statLabel}>
-                    {t("common.caution")}
-                  </Text>
+                  <Text style={styles.statLabel}>{t("common.caution")}</Text>
                 </View>
               </View>
             </View>
@@ -134,7 +133,8 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
             {/* Distance by Safety Level */}
             <View style={styles.distanceBreakdown}>
               <Text style={commonStyles.sectionTitle}>
-                {t('navigation.distance_by_safety_level')}</Text>
+                {t("navigation.distance_by_safety_level")}
+              </Text>
               {(() => {
                 const safeDistance = segmentScores
                   .filter((s: any) => s.safety_score >= 4.0)
@@ -235,7 +235,8 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                     { color: theme.colors.error },
                   ]}
                 >
-                  {t('navigation.areas_requiring_caution')}</Text>
+                  {t("navigation.areas_requiring_caution")}
+                </Text>
                 <ScrollView
                   style={styles.problemScroll}
                   nestedScrollEnabled={true}
@@ -317,7 +318,8 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                   color={theme.colors.success}
                 />
                 <Text style={styles.allClearText}>
-                  {t('navigation.no_highrisk_areas_detected_on_this_route')}</Text>
+                  {t("navigation.no_highrisk_areas_detected_on_this_route")}
+                </Text>
               </View>
             )}
           </View>

@@ -108,10 +108,10 @@ export default function SearchRadiusSelector() {
       <View style={styles.segmentedControl}>
         {options.map((option) => {
           // Convert display values for imperial
-          let displayLabel: string = option.label;
+          let displayLabel: string = t(option.label);
           if (distanceUnit === "imperial" && option.value < 999999) {
             const miles = Math.round(option.value * 0.621371);
-            displayLabel = `${miles} mi`;
+            displayLabel = `${miles} ${t("map.unit_miles")}`;
           }
 
           return (
@@ -147,7 +147,7 @@ export default function SearchRadiusSelector() {
               selectedRadius === option.value && styles.labelActive,
             ]}
           >
-            {option.description}
+            {t(option.description)}
           </Text>
         ))}
       </View>
@@ -161,12 +161,14 @@ export default function SearchRadiusSelector() {
         />
         <Text style={styles.infoText}>
           {selectedRadius >= 999999
-            ? "Searching globally - all countries"
+            ? t("map.searching_globally")
             : distanceUnit === "imperial"
-              ? `Currently showing locations within ${Math.round(
-                  selectedRadius * 0.621371,
-                )} miles of map center`
-              : `Currently showing locations within ${selectedRadius} km of map center`}
+              ? t("map.showing_locations_within_miles", {
+                  distance: Math.round(selectedRadius * 0.621371),
+                })
+              : t("map.showing_locations_within_km", {
+                  distance: selectedRadius,
+                })}
         </Text>
       </View>
     </View>

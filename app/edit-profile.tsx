@@ -278,7 +278,8 @@ export default function EditProfileScreen() {
                 {t("common.email_address")}
               </Text>
               <Text style={styles.helperText}>
-                {t('settings.youll_need_to_confirm_the_your_new')}</Text>
+                {t("settings.youll_need_to_confirm_the_your_new")}
+              </Text>
               <TextInput
                 style={commonStyles.input}
                 value={email}
@@ -301,7 +302,8 @@ export default function EditProfileScreen() {
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
                   <Text style={commonStyles.primaryButtonText}>
-                    {t('settings.update_email')}</Text>
+                    {t("settings.update_email")}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -320,12 +322,11 @@ export default function EditProfileScreen() {
                   color={theme.colors.textSecondary}
                 />
                 <Text style={styles.oauthInfoText}>
-                  {email} (managed by {oauthProvider})
+                  {email} ({t("profile.account_managed_by")} {oauthProvider})
                 </Text>
               </View>
               <Text style={styles.helperText}>
-                Email is managed by your {oauthProvider} account and cannot be
-                changed here
+                {t("profile.account_managed_by_text", { text: oauthProvider })}
               </Text>
             </View>
           )}
@@ -337,7 +338,8 @@ export default function EditProfileScreen() {
                 {t("settings.change_password")}
               </Text>
               <Text style={styles.helperText}>
-                {t('settings.password_must_be_at_least_8_characters')}</Text>
+                {t("settings.password_must_be_at_least_8_characters")}
+              </Text>
 
               <TextInput
                 style={commonStyles.input}
@@ -381,7 +383,8 @@ export default function EditProfileScreen() {
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
                   <Text style={commonStyles.primaryButtonText}>
-                    {t('settings.update_password')}</Text>
+                    {t("settings.update_password")}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -400,11 +403,11 @@ export default function EditProfileScreen() {
                   color={theme.colors.textSecondary}
                 />
                 <Text style={styles.oauthInfoText}>
-                  Password managed by {oauthProvider}
+                  ({t("profile.password_managed_by")} {oauthProvider}){" "}
                 </Text>
               </View>
               <Text style={styles.helperText}>
-                Your password is managed by your {oauthProvider} account
+                {t("profile.password_managed_by_text", { text: oauthProvider })}
               </Text>
             </View>
           )}

@@ -34,20 +34,28 @@ export const DEFAULT_FILTERS: MapFilters = {
   showMyReviewsOnly: false,
 };
 
-const PLACE_TYPE_OPTIONS = [
-  { value: "restaurant", label: "Restaurants", icon: "restaurant" },
-  { value: "gas_station", label: "Gas Stations", icon: "car" },
-  { value: "hotel", label: "Hotels", icon: "bed" },
-  { value: "store", label: "Stores", icon: "storefront" },
-  { value: "bar", label: "Bars & Nightlife", icon: "wine" },
-  { value: "cafe", label: "Cafes", icon: "cafe" },
+const getPlaceTypeOptions = (t: (key: string) => string) => [
+  {
+    value: "restaurant",
+    label: t("map.place_type_restaurants"),
+    icon: "restaurant",
+  },
+  {
+    value: "gas_station",
+    label: t("map.place_type_gas_stations"),
+    icon: "car",
+  },
+  { value: "hotel", label: t("map.place_type_hotels"), icon: "bed" },
+  { value: "store", label: t("map.place_type_stores"), icon: "storefront" },
+  { value: "bar", label: t("map.place_type_bars"), icon: "wine" },
+  { value: "cafe", label: t("map.place_type_cafes"), icon: "cafe" },
 ];
 
-const RATING_OPTIONS = [
-  { value: null, label: "Show All" },
-  { value: 2, label: "2+ Stars" },
-  { value: 3, label: "3+ Stars" },
-  { value: 4, label: "4+ Stars" },
+const getRatingOptions = (t: (key: string) => string) => [
+  { value: null, label: t("map.rating_show_all") },
+  { value: 2, label: t("map.rating_2_plus") },
+  { value: 3, label: t("map.rating_3_plus") },
+  { value: 4, label: t("map.rating_4_plus") },
 ];
 
 interface MapFiltersModalProps {
@@ -66,7 +74,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
   showMyReviewsFilter = false,
 }) => {
   const { t } = useTranslation();
-
+  const PLACE_TYPE_OPTIONS = getPlaceTypeOptions(t);
+  const RATING_OPTIONS = getRatingOptions(t);
   const dispatch = useAppDispatch();
   const { hasAccess } = useFeatureAccess("advancedFilters");
   const { hasAccess: hasDemographicAccess } =
@@ -262,7 +271,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
               >
                 <View style={styles.toggleLabel}>
                   <Text style={styles.toggleText}>
-                    {t('map.reviewed_by_my_demographic')}</Text>
+                    {t("map.reviewed_by_my_demographic")}
+                  </Text>
                   {!hasDemographicAccess && (
                     <Ionicons
                       name="lock-closed"
@@ -292,7 +302,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
               >
                 <View style={styles.toggleLabel}>
                   <Text style={styles.toggleText}>
-                    {t('map.use_my_demographic_safety_scores')}</Text>
+                    {t("map.use_my_demographic_safety_scores")}
+                  </Text>
                   {!hasAccess && (
                     <Ionicons
                       name="lock-closed"
@@ -405,7 +416,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
                   !hasActiveFilters && styles.resetButtonTextDisabled,
                 ]}
               >
-                {t('common.reset')}</Text>
+                {t("common.reset")}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.applyButton} onPress={handleApply}>

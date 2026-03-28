@@ -11,11 +11,10 @@ export const APP_CONFIG = {
     DANGER_ZONES_MAX_RADIUS_METERS: 100000,
     // Search radius options (in kilometers)
     SEARCH_RADIUS_OPTIONS: [
-      { label: '100 km', value: 100, description: 'Regional' },
-      { label: '1000 km', value: 1000, description: 'Country-wide' },
-      { label: '∞', value: 999999, description: 'Global' },
+      { label: '100 km', value: 100, description: 'map.radius_regional' },
+      { label: '1000 km', value: 1000, description: 'map.radius_country_wide' },
+      { label: '∞', value: 999999, description: 'map.radius_global' },
     ],
-
     MIN_SEARCH_RADIUS_KM: 1,
     MAX_SEARCH_RADIUS_KM: 999999,
   },

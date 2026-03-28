@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { fetchUserProfile } from "src/store/userSlice";
-import { DEMOGRAPHIC_OPTIONS } from "@/constants/demographicOptions";
+import { getDemographicOptions } from "@/constants/demographicOptions";
 import { notificationService } from "src/services/notificationService";
 import { supabase } from "@/services/supabase";
 import { notify } from "@/utils/notificationService";
@@ -27,16 +27,16 @@ import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
 
-const ONBOARDING_STEPS = [
-  { id: "welcome", title: "Welcome to TruGuide" },
-  { id: "name", title: "What's your name?" },
-  { id: "race", title: "Race & Ethnicity" },
-  { id: "gender", title: "Gender Identity" },
-  { id: "lgbtq", title: "LGBTQ+ Identity" },
-  { id: "disability", title: "Disability Status" },
-  { id: "religion", title: "Religious Identity" },
-  { id: "age", title: "Age Range" },
-  { id: "privacy", title: "Privacy Settings" },
+const getOnboardingSteps = (t: (key: string) => string) => [
+  { id: "welcome", title: t("onboarding.welcome_to_truguide") },
+  { id: "name", title: t("onboarding.whats_your_name") },
+  { id: "race", title: t("onboarding.race_ethnicity") },
+  { id: "gender", title: t("onboarding.gender_identity") },
+  { id: "lgbtq", title: t("onboarding.lgbtq_identity") },
+  { id: "disability", title: t("onboarding.disability_status") },
+  { id: "religion", title: t("onboarding.religious_identity") },
+  { id: "age", title: t("onboarding.age_range") },
+  { id: "privacy", title: t("onboarding.privacy") },
 ];
 
 const FIELD_TO_STEP_MAP: { [key: string]: number } = {
@@ -52,6 +52,8 @@ const FIELD_TO_STEP_MAP: { [key: string]: number } = {
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
+  const ONBOARDING_STEPS = getOnboardingSteps(t);
+
   const dispatch = useAppDispatch();
   const { user, refreshOnboardingStatus, appleUserName, setAppleName } =
     useAuth();
@@ -444,13 +446,13 @@ export default function OnboardingScreen() {
         // Select only "None" and clear everything else
         setFormData({
           ...formData,
-          disability_status: ["None"],
+          disability_status: [t("onboarding.disability_none")],
         });
       }
     } else {
       // For any other disability, remove "None" if it exists and toggle the selection
       const updatedStatus = formData.disability_status.filter(
-        (d) => d !== "None",
+        (d) => d !== t("onboarding.disability_none"),
       );
 
       if (updatedStatus.includes(disability)) {
@@ -475,14 +477,16 @@ export default function OnboardingScreen() {
         {t("onboarding.welcome_to_truguide")}
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.to_provide_personalized_safety')}</Text>
+        {t("onboarding.to_provide_personalized_safety")}
+      </Text>
       <Text
         style={[
           styles.stepDescription,
           { fontWeight: "600", color: theme.colors.text },
         ]}
       >
-        {t('onboarding.this_setup_is_required_to_access')}</Text>
+        {t("onboarding.this_setup_is_required_to_access")}
+      </Text>
       {showWelcomeBanner && currentStep === 0 && (
         <View style={styles.welcomeBanner}>
           <View style={styles.welcomeBannerContent}>
@@ -494,7 +498,8 @@ export default function OnboardingScreen() {
                 {t("onboarding.email_confirmed")}
               </Text>
               <Text style={styles.welcomeBannerSubtitle}>
-                {t('onboarding.welcome_to_truguide_lets_personalize')}</Text>
+                {t("onboarding.welcome_to_truguide_lets_personalize")}
+              </Text>
             </View>
           </View>
         </View>
@@ -507,17 +512,20 @@ export default function OnboardingScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.bulletText}>
-            {t('onboarding.get_safety_ratings_personalized_for')}</Text>
+            {t("onboarding.get_safety_ratings_personalized_for")}
+          </Text>
         </View>
         <View style={styles.bulletPoint}>
           <Ionicons name="map" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>
-            {t('onboarding.see_location_safety_from_your')}</Text>
+            {t("onboarding.see_location_safety_from_your")}
+          </Text>
         </View>
         <View style={styles.bulletPoint}>
           <Ionicons name="people" size={20} color={theme.colors.primary} />
           <Text style={styles.bulletText}>
-            {t('onboarding.connect_with_travelers_who_share_your')}</Text>
+            {t("onboarding.connect_with_travelers_who_share_your")}
+          </Text>
         </View>
         <View style={styles.bulletPoint}>
           <Ionicons name="lock-closed" size={20} color={theme.colors.primary} />
@@ -531,15 +539,15 @@ export default function OnboardingScreen() {
   const renderNameStep = () => (
     <View style={styles.otherInputContainer}>
       <Text style={styles.stepTitle}>
-        What's your name?{" "}
-        <Text style={commonStyles.requiredAsterisk}>
-          {t("common.unknown")}
-        </Text>
+        {t("onboarding.what_is_your_name")}{" "}
+        <Text style={commonStyles.requiredAsterisk}>{t("common.unknown")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.this_helps_personalize_your_experience')}</Text>
+        {t("onboarding.this_helps_personalize_your_experience")}
+      </Text>
       <Text style={styles.helpText}>
-        {t('onboarding.help_others_recognise_your_profile_and')}</Text>
+        {t("onboarding.help_others_recognise_your_profile_and")}
+      </Text>
       <TextInput
         style={styles.nameInput}
         placeholder={t("common.enter_your_name_or_a_nickname")}
@@ -550,20 +558,21 @@ export default function OnboardingScreen() {
       />
     </View>
   );
+
   const renderRaceStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Race & Ethnicity{" "}
-        <Text style={commonStyles.requiredAsterisk}>
-          {t("common.unknown")}
-        </Text>
+        {t("onboarding.race_ethnicity")}{" "}
+        <Text style={commonStyles.requiredAsterisk}>{t("common.unknown")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.select_all_that_apply_this_helps_us')}</Text>
+        {t("onboarding.select_all_that_apply_this_helps_us")}
+      </Text>
       <Text style={styles.helpText}>
-        {t('onboarding.see_safety_ratings_from_people_like_you')}</Text>
+        {t("onboarding.see_safety_ratings_from_people_like_you")}
+      </Text>
       <View style={styles.optionsContainer}>
-        {DEMOGRAPHIC_OPTIONS.race.map((race) => (
+        {getDemographicOptions(t).race.map((race) => (
           <TouchableOpacity
             key={race}
             style={[
@@ -610,13 +619,12 @@ export default function OnboardingScreen() {
   const renderGenderStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Gender Identity{" "}
-        <Text style={commonStyles.requiredAsterisk}>
-          {t("common.unknown")}
-        </Text>
+        {t("onboarding.gender_identity")}{" "}
+        <Text style={commonStyles.requiredAsterisk}>{t("common.unknown")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.how_do_you_identify_this_helps_us')}</Text>
+        {t("onboarding.how_do_you_identify_this_helps_us")}
+      </Text>
       <Text style={styles.helpText}>
         {t("onboarding.find_routes_safe_for_your_gender")}
       </Text>
@@ -632,11 +640,11 @@ export default function OnboardingScreen() {
           mode="dropdown"
         >
           <Picker.Item
-            label="Select gender identity"
+            label={t("onboarding.select_gender_identity")}
             value=""
             color={theme.colors.textSecondary}
           />
-          {DEMOGRAPHIC_OPTIONS.gender.map((gender) => (
+          {getDemographicOptions(t).gender.map((gender) => (
             <Picker.Item
               key={gender}
               label={gender}
@@ -669,15 +677,15 @@ export default function OnboardingScreen() {
   const renderLGBTQStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        LGBTQ+ Identity{" "}
-        <Text style={commonStyles.requiredAsterisk}>
-          {t("common.unknown")}
-        </Text>
+        {t("onboarding.lgbtq_identity")}{" "}
+        <Text style={commonStyles.requiredAsterisk}>{t("common.unknown")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.do_you_identify_as_lgbtq_this_helps_us')}</Text>
+        {t("onboarding.do_you_identify_as_lgbtq_this_helps_us")}
+      </Text>
       <Text style={styles.helpText}>
-        {t('onboarding.discover_lgbtq_friendly_businesses')}</Text>
+        {t("onboarding.discover_lgbtq_friendly_businesses")}
+      </Text>
       <View style={styles.toggleContainer}>
         <TouchableOpacity
           style={[
@@ -692,7 +700,8 @@ export default function OnboardingScreen() {
               !formData.lgbtq_status && styles.toggleTextSelected,
             ]}
           >
-            {t('common.no')}</Text>
+            {t("common.no")}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -707,7 +716,8 @@ export default function OnboardingScreen() {
               formData.lgbtq_status && styles.toggleTextSelected,
             ]}
           >
-            {t('common.yes')}</Text>
+            {t("common.yes")}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -716,44 +726,40 @@ export default function OnboardingScreen() {
   const renderDisabilityStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Disability Status Status
+        {t("onboarding.disability_status")}
         <Text style={styles.optionalBadge}>{t("onboarding.optional")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.select_any_that_apply_this_helps_us')}</Text>
+        {t("onboarding.select_any_that_apply_this_helps_us")}
+      </Text>
       <Text style={styles.helpText}>
-        {t('onboarding.see_accessibility_ratings_relevant_to')}</Text>
+        {t("onboarding.see_accessibility_ratings_relevant_to")}
+      </Text>
       <View style={styles.optionsContainer}>
-        {["None", "Mobility", "Visual", "Hearing", "Cognitive", "Other"].map(
-          (disability) => (
-            <TouchableOpacity
-              key={disability}
+        {getDemographicOptions(t).disability.map((disability) => (
+          <TouchableOpacity
+            key={disability}
+            style={[
+              styles.optionButton,
+              formData.disability_status.includes(disability) &&
+                styles.optionSelected,
+            ]}
+            onPress={() => toggleDisability(disability)}
+          >
+            <Text
               style={[
-                styles.optionButton,
+                styles.optionText,
                 formData.disability_status.includes(disability) &&
-                  styles.optionSelected,
+                  styles.optionTextSelected,
               ]}
-              onPress={() => toggleDisability(disability)}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  formData.disability_status.includes(disability) &&
-                    styles.optionTextSelected,
-                ]}
-              >
-                {disability}
-              </Text>
-              {formData.disability_status.includes(disability) && (
-                <Ionicons
-                  name="checkmark"
-                  size={20}
-                  color={theme.colors.card}
-                />
-              )}
-            </TouchableOpacity>
-          ),
-        )}
+              {disability}
+            </Text>
+            {formData.disability_status.includes(disability) && (
+              <Ionicons name="checkmark" size={20} color={theme.colors.card} />
+            )}
+          </TouchableOpacity>
+        ))}
       </View>
 
       {formData.disability_status.includes("Other") && (
@@ -778,13 +784,15 @@ export default function OnboardingScreen() {
   const renderReligionStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Religious Identity{" "}
+        {t("onboarding.religious_identity")}{" "}
         <Text style={styles.optionalBadge}>{t("onboarding.optional")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.what_is_your_religious_or_spiritual')}</Text>
+        {t("onboarding.what_is_your_religious_or_spiritual")}
+      </Text>
       <Text style={styles.helpText}>
-        {t('onboarding.unlock_prayerfriendly_recommendations')}</Text>
+        {t("onboarding.unlock_prayerfriendly_recommendations")}
+      </Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.religion}
@@ -796,8 +804,11 @@ export default function OnboardingScreen() {
           }
           itemStyle={Platform.OS === "ios" ? styles.iosPickerItem : undefined}
         >
-          <Picker.Item label="Select religious identity" value="" />
-          {DEMOGRAPHIC_OPTIONS.religion.map((religion) => (
+          <Picker.Item
+            label={t("onboarding.select_religious_identity")}
+            value=""
+          />
+          {getDemographicOptions(t).religion.map((religion) => (
             <Picker.Item key={religion} label={religion} value={religion} />
           ))}
         </Picker>
@@ -825,14 +836,15 @@ export default function OnboardingScreen() {
   const renderAgeStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
-        Age Range{" "}
+        {t("onboarding.age_range")}{" "}
         <Text style={styles.optionalBadge}>{t("onboarding.optional")}</Text>
       </Text>
       <Text style={styles.stepDescription}>
         {t("onboarding.select_your_age_range")}
       </Text>
       <Text style={styles.helpText}>
-        {t('onboarding.see_ratings_from_travelers_in_your_age')}</Text>
+        {t("onboarding.see_ratings_from_travelers_in_your_age")}
+      </Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={formData.age_range}
@@ -844,8 +856,8 @@ export default function OnboardingScreen() {
           }
           itemStyle={Platform.OS === "ios" ? styles.iosPickerItem : undefined}
         >
-          <Picker.Item label="Select age range" value="" />
-          {DEMOGRAPHIC_OPTIONS.age_group.map((age) => (
+          <Picker.Item label={t("onboarding.select_your_age_range")} value="" />
+          {getDemographicOptions(t).age_group.map((age) => (
             <Picker.Item key={age} label={age} value={age} />
           ))}
         </Picker>
@@ -857,7 +869,8 @@ export default function OnboardingScreen() {
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>{t("common.privacy_settings")}</Text>
       <Text style={styles.stepDescription}>
-        {t('onboarding.choose_how_your_demographic_information')}</Text>
+        {t("onboarding.choose_how_your_demographic_information")}
+      </Text>
       <View style={styles.privacyOptions}>
         <TouchableOpacity
           style={[
@@ -871,7 +884,8 @@ export default function OnboardingScreen() {
             <Text style={styles.privacyTitle}>{t("onboarding.public")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
-            {t('onboarding.other_users_can_see_your_demographic')}</Text>
+            {t("onboarding.other_users_can_see_your_demographic")}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -889,7 +903,8 @@ export default function OnboardingScreen() {
             <Text style={styles.privacyTitle}>{t("common.anonymous")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
-            {t('onboarding.your_reviews_are_visible_but_without')}</Text>
+            {t("onboarding.your_reviews_are_visible_but_without")}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -905,7 +920,8 @@ export default function OnboardingScreen() {
             <Text style={styles.privacyTitle}>{t("onboarding.private")}</Text>
           </View>
           <Text style={styles.privacyDescription}>
-            {t('onboarding.only_you_can_see_your_demographic')}</Text>
+            {t("onboarding.only_you_can_see_your_demographic")}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -978,7 +994,7 @@ export default function OnboardingScreen() {
           />
         </View>
         <Text style={styles.progressText}>
-          {currentStep + 1} of {ONBOARDING_STEPS.length}
+          {currentStep + 1} {t("common.of")} {ONBOARDING_STEPS.length}
         </Text>
       </View>
 
@@ -1025,12 +1041,12 @@ export default function OnboardingScreen() {
           >
             <Text style={styles.nextButtonText}>
               {loading
-                ? "Saving..."
+                ? t("onboarding.saving")
                 : currentStep === ONBOARDING_STEPS.length - 1
                   ? isEditing
-                    ? "Update Profile"
-                    : "Travel Safely"
-                  : "Next"}
+                    ? t("onboarding.update_profile")
+                    : t("onboarding.travel_safely")
+                  : t("common.next")}
             </Text>
           </TouchableOpacity>
         </View>

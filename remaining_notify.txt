@@ -1,0 +1,165 @@
+src/utils/debugUtils.ts:19:        notify.success('Session cleared! Restart app.');
+src/utils/debugUtils.ts:23:        notify.error('Failed to clear session');
+src/utils/locationHelpers.ts:33:        notify.error('❌ We couldn\'t get your country:');
+src/utils/locationImportHelper.ts:33:        notify.error('❌ We couldn\'t get your country:');
+src/utils/passwordChecker.ts:23:        notify.error(
+src/components/RoutePlanningModal.tsx:294:        notify.error("Profile not loaded. Please try again.", "Not Ready");
+src/components/RoutePlanningModal.tsx:306:        notify.error(t("navigation.no_route_selected_for_navigation"));
+src/components/RoutePlanningModal.tsx:521:        notify.error(t("navigation.unable_to_get_location_details_please"));
+src/components/RoutePlanningModal.tsx:525:      notify.error(t("navigation.unable_to_get_location_details_please"));
+src/components/RoutePlanningModal.tsx:564:      notify.error(
+src/components/RoutePlanningModal.tsx:572:      notify.error(
+src/components/RoutePlanningModal.tsx:652:      notify.error(
+src/components/RoutePlanningModal.tsx:661:        notify.error(t("navigation.unable_to_generate_route_please_try"));
+src/components/PredictionVoteButtons.tsx:65:      notify.error(t("community.please_log_in_to_vote"));
+src/components/PredictionVoteButtons.tsx:76:        notify.error(t("community.please_log_in_to_vote"));
+src/components/PredictionVoteButtons.tsx:143:      notify.error(t("community.failed_to_submit_vote"));
+src/components/SearchBar.tsx:171:      notify.info(t("common.loading_profile"));
+src/components/SearchBar.tsx:178:        notify.error(t("navigation.profile_not_loaded_please_try_again"));
+src/components/SearchBar.tsx:241:        notify.error(t("navigation.unable_to_get_location_details_please"));
+src/components/SearchBar.tsx:245:      notify.error(t("navigation.unable_to_get_location_details_please"));
+src/components/subscription/Paywall.tsx:62:      notify.success(t("premium.welcome_to_truguide_premium"));
+src/components/subscription/Paywall.tsx:65:      notify.error(result.error || "Purchase failed");
+src/components/subscription/Paywall.tsx:75:      notify.success(t("premium.purchases_restored"));
+src/components/subscription/Paywall.tsx:78:      notify.info(t("premium.no_previous_purchases_found"));
+src/components/subscription/Paywall.tsx:80:      notify.error(result.error || "Restore failed");
+src/components/VoteButtons.tsx:51:      notify.error("Please log in to vote on reviews", "Login Required");
+src/components/VoteButtons.tsx:63:        notify.error(
+src/components/VoteButtons.tsx:128:      notify.error("Failed to vote. Please try again.", "Error");
+src/components/NavigationMode.tsx:569:        notify.error(
+src/components/NavigationMode.tsx:580:        notify.error(
+src/components/NavigationMode.tsx:603:      notify.error(t("navigation.could_not_start_navigation"));
+src/components/SaveLocationButton.tsx:66:      notify.info(t("map.please_sign_in_to_save_locations"));
+src/components/SaveLocationButton.tsx:88:        notify.success(t("map.location_removed_from_saved"));
+src/components/SaveLocationButton.tsx:103:        notify.success(t("map.location_saved"));
+src/components/SaveLocationButton.tsx:107:        notify.info(t("map.location_already_saved"));
+src/components/SaveLocationButton.tsx:109:        notify.error(t("map.failed_to_save_location"));
+src/store/userSlice.ts:183:      //   notify.info(`Search radius updated to ${clampedRadius}km`);
+src/store/locationsSlice.ts:1777:    notify.info(
+src/store/locationsSlice.ts:1825:            notify.info(
+src/store/locationsSlice.ts:1830:            notify.info(
+src/store/locationsSlice.ts:1906:            notify.success(
+src/store/locationsSlice.ts:2586:        notify.error("Failed to save route: " + action.payload);
+app/privacy-settings.tsx:87:      notify.error(t("settings.failed_to_save_setting_please_try_again"));
+app/privacy-settings.tsx:261:      notify.error(t("settings.failed_to_export_data_please_try_again"));
+app/privacy-settings.tsx:275:        notify.error(t("settings.you_must_be_logged_in_to_delete_your"));
+app/privacy-settings.tsx:305:      notify.error(`Failed to delete account: `);
+app/edit-review.tsx:131:          notify.error(t("review.invalid_review_timestamp"));
+app/edit-review.tsx:143:          notify.error(
+app/edit-review.tsx:167:      notify.error(t("review.failed_to_load_review_data_please_try"));
+app/edit-review.tsx:176:      notify.error(t("review.please_enter_a_title_for_your_review"));
+app/edit-review.tsx:180:      notify.error(t("review.please_write_your_review"));
+app/edit-review.tsx:184:      notify.error(t("review.please_provide_an_overall_rating"));
+app/edit-review.tsx:188:      notify.error(t("review.please_provide_a_safety_rating"));
+app/edit-review.tsx:192:      notify.error(t("review.please_provide_a_comfort_rating"));
+app/edit-review.tsx:226:      notify.error(
+app/edit-review.tsx:440:                        notify.error(result.errorMessage || "Invalid date");
+app/edit-review.tsx:462:                        notify.error(result.errorMessage || "Invalid date");
+app/edit-review.tsx:506:                        notify.error(
+app/(tabs)/index.tsx:570:      notify.error(t("map.unable_to_get_address_for_this_location"));
+app/(tabs)/index.tsx:630:      notify.error(t("map.could_not_load_danger_zones"));
+app/(tabs)/index.tsx:659:      notify.error(t("map.could_not_get_your_location"));
+app/(tabs)/index.tsx:872:      notify.error(t("map.no_route_selected"));
+app/(tabs)/index.tsx:985:        notify.error(
+app/(tabs)/debug.tsx:53:      notify.error(t("debug.access_denied"));
+app/(tabs)/debug.tsx:83:            notify.success(t("debug.cache_cleared_successfully"));
+app/(tabs)/debug.tsx:265:                notify.success("Test notification sent!", "Debug");
+app/(tabs)/community.tsx:570:                  notify.info("Full insights view coming soon!", "Coming Soon")
+app/(tabs)/community.tsx:597:                  notify.info("Full list view coming soon!", "Coming Soon")
+app/(tabs)/profile.tsx:155:      notify.error(t("profile.failed_to_sign_out"));
+app/(tabs)/profile.tsx:239:      notify.success("Profile picture updated!", "Success");
+app/(tabs)/profile.tsx:242:      notify.error("Failed to upload image. Please try again.", "Upload Error");
+app/(tabs)/profile.tsx:263:      notify.success(t("profile.profile_picture_removed"));
+app/(tabs)/profile.tsx:266:      notify.error(t("profile.failed_to_remove_profile_picture"));
+app/(tabs)/profile.tsx:372:      notify.success(t("profile.location_removed"));
+app/(tabs)/profile.tsx:374:      notify.error(t("profile.failed_to_remove_location"));
+app/admin/index.tsx:94:      notify.error("Failed to load users");
+app/admin/index.tsx:152:              notify.success("Role updated");
+app/admin/index.tsx:154:              notify.error("Failed to update role");
+app/admin/index.tsx:184:              notify.success("Subscription updated");
+app/admin/index.tsx:186:              notify.error("Failed to update subscription");
+app/admin/index.tsx:208:              notify.success("User deleted");
+app/admin/index.tsx:210:              notify.error(e.message || "Failed to delete user");
+app/admin/index.tsx:232:              notify.success("Tester removed");
+app/admin/index.tsx:234:              notify.error("Failed to remove tester");
+app/admin/index.tsx:250:      notify.error("Failed to update status");
+app/admin/index.tsx:365:                  notify.error("Export failed"),
+app/admin/index.tsx:493:          notify.success("Tester added");
+app/admin/index.tsx:514:      notify.error("Failed to load locations");
+app/admin/index.tsx:531:      notify.success(`Location ${!loc.active ? "activated" : "deactivated"}`);
+app/admin/index.tsx:533:      notify.error("Failed to update location");
+app/admin/index.tsx:550:              notify.success("Location deleted");
+app/admin/index.tsx:552:              notify.error("Failed to delete location");
+app/admin/index.tsx:700:      notify.error("Failed to load reviews");
+app/admin/index.tsx:720:      notify.success("Status updated");
+app/admin/index.tsx:722:      notify.error("Failed to update review");
+app/admin/index.tsx:739:              notify.success("Review deleted");
+app/admin/index.tsx:741:              notify.error("Failed to delete review");
+app/admin/index.tsx:912:      notify.error("Failed to load blocked words");
+app/admin/index.tsx:926:      notify.error(`"${trimmed}" is already in your custom list`);
+app/admin/index.tsx:930:      notify.error(`"${trimmed}" is already covered by the built-in filter`);
+app/admin/index.tsx:938:      notify.success(`"${trimmed}" added`);
+app/admin/index.tsx:940:      notify.error("Failed to add word");
+app/admin/index.tsx:959:              notify.success(`"${word.word}" removed`);
+app/admin/index.tsx:961:              notify.error("Failed to remove word");
+app/location-disclosure.tsx:66:      notify.error(t("common.something_went_wrong_please_try_again"));
+app/review.tsx:118:      notify.error(t("review.no_location_specified"));
+app/review.tsx:124:      notify.error(t("review.no_location_data_provided"));
+app/review.tsx:135:      notify.error(t("review.please_enter_a_review_title"));
+app/review.tsx:140:      notify.error(t("review.please_enter_a_name_for_this_location"));
+app/review.tsx:145:      notify.error(t("review.please_enter_review_content"));
+app/review.tsx:150:      notify.error(t("review.please_provide_both_overall_and_safety"));
+app/review.tsx:203:        notify.success(t("review.review_saved_will_sync_when_online"));
+app/review.tsx:205:        notify.success(t("review.review_submitted_successfully"));
+app/review.tsx:232:        notify.success(
+app/review.tsx:239:      notify.error(
+app/review.tsx:442:                        notify.error(result.errorMessage || "Invalid date");
+app/review.tsx:484:                        notify.error(
+app/legal-acceptance.tsx:53:      notify.error(t("common.something_went_wrong_please_try_again"));
+app/display-settings.tsx:73:      notify.success(t("settings.preference_saved"));
+app/display-settings.tsx:75:      notify.error(t("settings.failed_to_save_preference_please_try"));
+app/edit-profile.tsx:66:      notify.error(t("settings.please_enter_your_full_name"));
+app/edit-profile.tsx:79:      notify.success(t("settings.name_updated_successfully"));
+app/edit-profile.tsx:82:      notify.error(error.message || "Failed to update name");
+app/edit-profile.tsx:90:      notify.error(t("settings.cannot_change_email_for_oauth_accounts"));
+app/edit-profile.tsx:95:      notify.error(t("settings.please_enter_your_email"));
+app/edit-profile.tsx:100:      notify.error(t("settings.this_is_already_your_current_email"));
+app/edit-profile.tsx:118:      notify.success(
+app/edit-profile.tsx:130:        notify.error(
+app/edit-profile.tsx:134:        notify.error(t("settings.failed_to_update_email_please_try_again"));
+app/edit-profile.tsx:143:      notify.error(t("settings.cannot_change_password_for_oauth"));
+app/edit-profile.tsx:148:      notify.error(t("settings.please_fill_in_all_password_fields"));
+app/edit-profile.tsx:157:      notify.error(t("settings.new_passwords_do_not_match"));
+app/edit-profile.tsx:180:      notify.success(
+app/edit-profile.tsx:194:      notify.error(error.message || "Failed to update password");
+app/onboarding.tsx:123:        notify.error(
+app/onboarding.tsx:132:        notify.error(
+app/onboarding.tsx:142:        notify.error(
+app/onboarding.tsx:276:      notify.error(t("onboarding.user_session_not_found_please_log_in"));
+app/onboarding.tsx:362:        notify.error(t("onboarding.failed_to_save_profile_please_try_again"));
+app/onboarding.tsx:375:        notify.error(t("onboarding.failed_to_complete_onboarding_please"));
+app/onboarding.tsx:383:      notify.success(
+app/onboarding.tsx:405:      notify.error(t("onboarding.failed_to_save_profile_please_try_again"));
+app/onboarding.tsx:415:      notify.info(
+app/(auth)/login.tsx:40:      notify.error(t("auth.please_fill_in_all_fields"));
+app/(auth)/login.tsx:61:      notify.error(err.message || "Invalid credentials", "Login Failed");
+app/(auth)/login.tsx:105:      notify.error(error.message || "Failed to sign in with Apple");
+app/(auth)/login.tsx:120:        notify.error(error?.message);
+app/(auth)/login.tsx:125:        notify.error(t("auth.no_oauth_url_returned"));
+app/(auth)/login.tsx:145:          notify.error(t("auth.authentication_failed_no_response_data"));
+app/(auth)/login.tsx:164:          notify.error(error_description || "Authentication failed");
+app/(auth)/login.tsx:178:          notify.error(t("auth.authentication_failed_no_tokens_received"));
+app/(auth)/login.tsx:184:      notify.error(error.message);
+app/(auth)/register.tsx:44:      notify.error(t("auth.please_fill_in_all_fields"));
+app/(auth)/register.tsx:49:      notify.error(t("auth.passwords_do_not_match"));
+app/(auth)/register.tsx:94:      notify.error(err.message || "Please try again", "Registration Failed");
+app/(auth)/reset-password.tsx:63:        notify.error(t("auth.invalid_or_expired_reset_link"));
+app/(auth)/reset-password.tsx:82:      notify.error(t("auth.please_fill_in_all_fields"));
+app/(auth)/reset-password.tsx:87:      notify.error(t("auth.passwords_do_not_match"));
+app/(auth)/reset-password.tsx:104:      notify.success("Your password has been reset successfully!", "Success");
+app/(auth)/reset-password.tsx:114:      notify.error(
+app/(auth)/forgot-password.tsx:34:      notify.error(t("auth.please_enter_your_email_address"));
+app/(auth)/forgot-password.tsx:41:      notify.error(t("auth.please_enter_a_valid_email_address"));
+app/(auth)/forgot-password.tsx:60:      notify.success(
+app/(auth)/forgot-password.tsx:66:      notify.error(
+app/notification-settings.tsx:78:      notify.error(t("settings.failed_to_save_setting_please_try_again"));

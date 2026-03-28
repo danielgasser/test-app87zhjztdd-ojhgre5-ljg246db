@@ -1220,7 +1220,8 @@ export default function MapScreen() {
     return (
       <View style={styles.centerContainer}>
         <Text style={commonStyles.textError}>
-          {t('map.location_permission_is_required_to_use')}</Text>
+          {t("map.location_permission_is_required_to_use")}
+        </Text>
       </View>
     );
   }
@@ -1230,7 +1231,8 @@ export default function MapScreen() {
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={commonStyles.loadingText}>
-          {t('map.loading_nearby_locations')}</Text>
+          {t("map.loading_nearby_locations")}
+        </Text>
       </View>
     );
   }
@@ -1422,7 +1424,8 @@ export default function MapScreen() {
                           confident
                         </Text>
                         <Text style={styles.calloutNote}>
-                          {t('map.based_on_similar_locations_and_user')}</Text>
+                          {t("map.based_on_similar_locations_and_user")}
+                        </Text>
                       </View>
                     </Callout>
                   </Marker>
@@ -1632,7 +1635,7 @@ export default function MapScreen() {
               dangerZonesVisible && styles.controlButtonTextActive,
             ]}
           >
-            {dangerZonesLoading ? "Loading..." : "Danger Zones"}
+            {dangerZonesLoading ? t("common.loading") : t("map.danger_zones")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -1715,7 +1718,8 @@ export default function MapScreen() {
             <>
               <Text style={styles.legendTitle}>{t("map.danger_zones")}</Text>
               <Text style={styles.legendSubtitle}>
-                {t('map.areas_with_reported_discrimination')}</Text>
+                {t("map.areas_with_reported_discrimination")}
+              </Text>
               <View style={styles.legendItems}>
                 <View style={styles.legendItem}>
                   <View
@@ -1750,7 +1754,8 @@ export default function MapScreen() {
             <>
               <Text style={styles.legendTitle}>{t("map.no_danger_zones")}</Text>
               <Text style={styles.legendSubtitle}>
-                {t('map.no_reported_danger_in_this_area')}</Text>
+                {t("map.no_reported_danger_in_this_area")}
+              </Text>
             </>
           )}
         </View>
@@ -1842,7 +1847,7 @@ export default function MapScreen() {
               color={theme.colors.background}
             />
             <Text style={styles.startNavButtonText}>
-              {t("map.start_navigation")}
+              {t("navigation.start_navigation")}
             </Text>
           </TouchableOpacity>
 

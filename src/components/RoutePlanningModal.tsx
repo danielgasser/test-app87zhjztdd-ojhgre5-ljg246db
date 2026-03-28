@@ -50,6 +50,7 @@ import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -155,7 +156,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
 
   const [dangerMessage, setDangerMessage] = useState<string>("");
   const [routeLoadingMessage, setRouteLoadingMessage] = useState(
-    "Finding safe route...",
+    t("navigation.find_safe_route"),
   );
 
   // Initialize from location with current location
@@ -163,8 +164,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     if (visible && userLocation && !fromLocation) {
       setFromLocation({
         id: "current_location",
-        name: "Current Location",
-        address: "Your current location",
+        name: t("navigation.current_location"),
+        address: t("navigation.your_current_location"),
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
         source: "current_location",
@@ -539,6 +540,14 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     }
   };
 
+  const getLoadingMessages = (t: (key: string) => string) => [
+    t("navigation.analyzing_route_segments"),
+    t("navigation.checking_danger_zones"),
+    t("navigation.finding_safer_alternatives"),
+    t("navigation.calculating_safety_scores"),
+    t("navigation.optimizing_your_route"),
+  ];
+
   // Handle route generation
   const handleGenerateRoute = async () => {
     if (!hasRoutePlanningAccess) {
@@ -590,24 +599,23 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         max_detour_minutes: routePreferences.maxDetourMinutes || 30,
       },
     };
-
+    const messages = getLoadingMessages(t);
+    let messageIndex = 0;
+    let intervalId: NodeJS.Timeout;
     try {
-      const messages = [
-        "Analyzing route segments...",
-        "Checking danger zones...",
-        "Finding safer alternatives...",
-        "Calculating safety scores...",
-        "Optimizing your route...",
-      ];
+      setRouteLoadingMessage(messages[0]);
 
-      let messageIndex = 0;
-      setInterval(() => {
+      intervalId = setInterval(() => {
         if (messageIndex < messages.length) {
           setRouteLoadingMessage(messages[messageIndex]);
           messageIndex++;
+        } else {
+          clearInterval(intervalId);
         }
-      }, 2000);
+      }, 1500);
+
       const result = await dispatch(generateSmartRoute(routeRequest)).unwrap();
+      clearInterval(intervalId);
 
       const originalSafety =
         result.original_safety || result.original_route?.safety_analysis;
@@ -639,6 +647,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         );
       }
     } catch (error) {
+      clearInterval(intervalId!);
       logger.error("Route generation error:", error);
       notify.error(
         error instanceof Error ? error.message : "Failed to generate route",
@@ -760,7 +769,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             <Ionicons name="warning" size={24} color={theme.colors.accent} />
             <View style={styles.dangerWarningContent}>
               <Text style={styles.dangerWarningTitle}>
-                {t('navigation.route_passes_through_danger_zones')}</Text>
+                {t("navigation.route_passes_through_danger_zones")}
+              </Text>
               <Text style={styles.dangerWarningText}>{dangerMessage}</Text>
             </View>
           </View>
@@ -779,9 +789,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder={`Search for ${
-                activeInput === "from" ? "starting point" : "destination"
-              }`}
+              placeholder={
+                activeInput === "from"
+                  ? t("navigation.search_for_starting_point")
+                  : t("navigation.search_for_destination")
+              }
               autoFocus
             />
             {searchLoading && (
@@ -894,14 +906,19 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     fromLocation,
                     "Choose starting point",
                   )}
-                  {renderLocationInput("to", toLocation, "Choose destination")}
+                  {renderLocationInput(
+                    "to",
+                    toLocation,
+                    t("navigation.choose_destination"),
+                  )}
                 </View>
               </View>
 
               {/* Safety Preferences */}
               <View style={styles.section}>
                 <Text style={commonStyles.sectionTitle}>
-                  {t('navigation.safety_preferences')}</Text>
+                  {t("navigation.safety_preferences")}
+                </Text>
 
                 <View style={styles.toggleRow}>
                   <Text style={styles.toggleLabel}>
@@ -943,10 +960,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                 disabled={routeLoading || !fromLocation || !toLocation}
               >
                 {routeLoading ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={theme.colors.background}
-                  />
+                  <>
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.colors.background}
+                    />
+                    <Text style={styles.generateButtonText}>
+                      {routeLoadingMessage ||
+                        t("navigation.generate_safe_route")}
+                    </Text>
+                  </>
                 ) : !hasRoutePlanningAccess ? (
                   <>
                     <Ionicons
@@ -955,7 +978,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                       color={theme.colors.background}
                     />
                     <Text style={styles.generateButtonText}>
-                      {t('navigation.generate_safe_route')}</Text>
+                      {t("navigation.generate_safe_route")}
+                    </Text>
                   </>
                 ) : (
                   <>
@@ -965,7 +989,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                       color={theme.colors.background}
                     />
                     <Text style={styles.generateButtonText}>
-                      {routeLoadingMessage || "Generate Safe Route"}
+                      {smartRouteComparison
+                        ? t("navigation.safe_route_found")
+                        : t("navigation.generate_safe_route")}
                     </Text>
                   </>
                 )}

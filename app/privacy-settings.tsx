@@ -407,9 +407,7 @@ export default function PrivacySettings() {
             color={theme.colors.text}
           />
           <View style={styles.actionTextContainer}>
-            <Text style={styles.actionTitle}>
-              {t("common.privacy_policy")}
-            </Text>
+            <Text style={styles.actionTitle}>{t("common.privacy_policy")}</Text>
             <Text style={styles.actionDescription}>
               {t("settings.view_how_we_handle_your_data")}
             </Text>
@@ -512,44 +510,53 @@ export default function PrivacySettings() {
             <Text style={styles.dataSection}>
               {t("settings.profile_information")}
             </Text>
-            <Text style={styles.dataText}>Email: {user?.email}</Text>
             <Text style={styles.dataText}>
-              Name: {profile?.full_name || "Not set"}
+              {t("common.email_address")}: {user?.email}
             </Text>
             <Text style={styles.dataText}>
-              Account Created:
+              {t("common.name")}: {profile?.full_name || t("common.not_set")}
+            </Text>
+            <Text style={styles.dataText}>
+              {t("settings.account_created")}:{" "}
               {new Date(profile.created_at).toLocaleDateString()}
             </Text>
             <Text style={styles.dataSection}>
               {t("settings.demographic_data")}
             </Text>
             <Text style={styles.dataText}>
-              Race/Ethnicity: {profile?.race_ethnicity?.join(", ") || "Not set"}
+              {t("onboarding.race_ethnicity")}:{" "}
+              {profile?.race_ethnicity?.join(", ") || t("common.not_set")}
             </Text>
             <Text style={styles.dataText}>
-              Gender: {profile?.gender || "Not set"}
+              {t("onboarding.gender_identity")}:{" "}
+              {profile?.gender || t("common.not_set")}
             </Text>
             <Text style={styles.dataText}>
-              LGBTQ+: {profile?.lgbtq_status ? "Yes" : "No"}
+              {t("onboarding.lgbtq_identity")}:{" "}
+              {profile?.lgbtq_status ? "Yes" : "No"}
             </Text>
             <Text style={styles.dataText}>
-              Religion: {profile?.religion || "Not set"}
+              {t("onboarding.religious_identity")}:{" "}
+              {profile?.religion || t("common.not_set")}
             </Text>
             <Text style={styles.dataText}>
-              Age Range: {profile?.age_range || "Not set"}
+              {t("onboarding.age_range")}:{" "}
+              {profile?.age_range || t("common.not_set")}
             </Text>
             <Text style={styles.dataText}>
-              Disability Status:
-              {profile?.disability_status?.join(", ") || "None"}
+              {t("onboarding.disability_status")}:{" "}
+              {profile?.disability_status?.join(", ") || t("common.none")}
             </Text>
             <Text style={styles.dataSection}>
               {t("common.privacy_settings")}
             </Text>
             <Text style={styles.dataText}>
-              Privacy Level: {profile?.privacy_level || "public"}
+              {t("settings.privacy_level")}:{" "}
+              {profile?.privacy_level || "public"}
             </Text>
             <Text style={styles.dataText}>
-              Show Demographics: {profile?.show_demographics ? "Yes" : "No"}
+              {t("settings.show_demographics")}:{" "}
+              {profile?.show_demographics ? t("common.yes") : t("common.no")}
             </Text>
             <Text style={styles.dataSection}>{t("settings.activity")}</Text>
             {loadingStats ? (
@@ -597,9 +604,7 @@ export default function PrivacySettings() {
               {t("settings.delete_account")}
             </Text>
             <Text style={styles.deleteMessage}>
-              This will permanently delete your account and all associated data
-              including your profile, reviews, and settings.
-              {"\n\n"}This action cannot be undone.
+              {t("settings.delete_account_warning")}
             </Text>
             <View style={styles.deleteButtons}>
               <TouchableOpacity

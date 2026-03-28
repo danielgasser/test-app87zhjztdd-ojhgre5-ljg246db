@@ -267,9 +267,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           <Ionicons name="alert-circle" size={24} color={theme.colors.accent} />
           <View style={styles.warningContent}>
             <Text style={styles.warningTitle}>
-              {t('navigation.limited_reviews_available_for_this_route')}</Text>
+              {t("navigation.limited_reviews_available_for_this_route")}
+            </Text>
             <Text style={styles.warningText}>
-              {t('navigation.help_improve_safety_be_the_first_to')}</Text>
+              {t("navigation.help_improve_safety_be_the_first_to")}
+            </Text>
           </View>
         </View>
       )}
@@ -292,7 +294,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             />
           )}
           <Text style={styles.startNavigationText}>
-            {isStartingNavigation ? "Starting..." : "Start Navigation"}
+            {isStartingNavigation
+              ? t("navigation.before_start_navigation")
+              : t("navigation.start_navigation")}
           </Text>
           {!isStartingNavigation && (
             <Ionicons
