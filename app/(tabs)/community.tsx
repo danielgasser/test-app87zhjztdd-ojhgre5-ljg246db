@@ -351,7 +351,9 @@ export default function CommunityScreen() {
                 onPress={() => handleUserProfilePress(review.user_id)}
               >
                 <Text style={[styles.demographicsText, styles.clickableName]}>
-                  Review by {review.user_demographics.full_name}
+                  {t("community.review_by", {
+                    name: review.user_demographics.full_name,
+                  })}
                 </Text>
               </TouchableOpacity>
             )}
@@ -412,7 +414,9 @@ export default function CommunityScreen() {
       >
         <View>
           <Text style={styles.trendingName}>{name}</Text>
-          <Text style={styles.trendingStats}>{reviews} reviews this week</Text>
+          <Text style={styles.trendingStats}>
+            {t("community.reviews_this_week", { count: reviews })}
+          </Text>
         </View>
         <View style={styles.trendBadge}>
           <Ionicons
@@ -433,7 +437,8 @@ export default function CommunityScreen() {
         <View style={commonStyles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={commonStyles.loadingText}>
-            {t('community.loading_community_updates')}</Text>
+            {t("community.loading_community_updates")}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -463,7 +468,8 @@ export default function CommunityScreen() {
         <View style={commonStyles.subHeader}>
           <Text style={styles.screenTitle}>{t("community.community")}</Text>
           <Text style={styles.screenSubtitle}>
-            {t('community.recent_reviews_and_safety_updates_from')}</Text>
+            {t("community.recent_reviews_and_safety_updates_from")}
+          </Text>
 
           <View style={styles.modeToggleContainer}>
             <TouchableOpacity
@@ -489,7 +495,8 @@ export default function CommunityScreen() {
                     styles.modeButtonTextActive,
                 ]}
               >
-                {t('community.within_my_search_radius')}</Text>
+                {t("community.within_my_search_radius")}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -515,7 +522,8 @@ export default function CommunityScreen() {
                     styles.modeButtonTextActive,
                 ]}
               >
-                {t('community.visible_map_area')}</Text>
+                {t("community.visible_map_area")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -554,7 +562,8 @@ export default function CommunityScreen() {
               {t("community.no_reviews_nearby")}
             </Text>
             <Text style={styles.emptyText}>
-              {t('community.be_the_first_to_review_a_location_in')}</Text>
+              {t("community.be_the_first_to_review_a_location_in")}
+            </Text>
           </View>
         ) : null}
 
@@ -567,7 +576,10 @@ export default function CommunityScreen() {
             {safetyInsights.length > 0 && (
               <TouchableOpacity
                 onPress={() =>
-                  notify.info("Full insights view coming soon!", "Coming Soon")
+                  notify.info(
+                    t("community.safety_updates_soon"),
+                    t("common.coming_soon"),
+                  )
                 }
               >
                 <Text style={styles.seeAllText}>{t("common.see_all")}</Text>
@@ -589,12 +601,16 @@ export default function CommunityScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.sectionTitle}>
-              {t('community.community_awareness_this_week')}</Text>
+              {t("community.community_awareness_this_week")}
+            </Text>
             {/* Only show "See all" if there are trending locations */}
             {trendingLocations.length > 0 && (
               <TouchableOpacity
                 onPress={() =>
-                  notify.info("Full list view coming soon!", "Coming Soon")
+                  notify.info(
+                    t("community.trending_locations_soon"),
+                    t("common.coming_soon"),
+                  )
                 }
               >
                 <Text style={styles.seeAllText}>{t("common.see_all")}</Text>
@@ -614,7 +630,8 @@ export default function CommunityScreen() {
             )
           ) : (
             <Text style={styles.emptyText}>
-              {t('community.no_significant_activity_this_week')}</Text>
+              {t("community.no_significant_activity_this_week")}
+            </Text>
           )}
         </View>
 
@@ -643,7 +660,8 @@ export default function CommunityScreen() {
             filteredReviews.map(renderReviewItem)
           ) : (
             <Text style={styles.emptyText}>
-              {t('community.no_reviews_yet_be_the_first_to_share')}</Text>
+              {t("community.no_reviews_yet_be_the_first_to_share")}
+            </Text>
           )}
         </View>
         <AdBanner />

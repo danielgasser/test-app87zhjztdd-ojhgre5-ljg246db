@@ -293,7 +293,7 @@ async function analyzeSegmentSafety(
       confidence: 0.1,
       danger_zones: 0,
       danger_zone_ids: [],
-      risk_factors: ['Analysis unavailable'],
+      risk_factors: ['navigation.route_note_analysis_unavailable'],
       distance_meters: segment.distance_meters,
       duration_seconds: segment.duration_seconds
     };
@@ -372,18 +372,18 @@ function generateSafetySummary(segmentScores: RouteSegmentScore[]): {
   const unsafePercentage = Math.round((unsafeSegments / totalSegments) * 100);
 
   if (safePercentage >= 80) {
-    notes.push('This route is predominantly through safe areas');
+    notes.push('navigation.route_note_predominantly_safe');
   } else if (safePercentage >= 60) {
-    notes.push('This route has mostly safe areas with some mixed zones');
+    notes.push('navigation.route_note_mostly_safe');
   } else if (unsafePercentage >= 30) {
-    notes.push('This route passes through several areas requiring caution');
+    notes.push('navigation.route_note_caution_areas');
   } else {
-    notes.push('This route has mixed safety characteristics');
+    notes.push('navigation.route_note_mixed');
   }
 
   // Add specific warnings
   if (unsafeSegments > 0) {
-    notes.push(`${unsafeSegments} segment(s) require extra caution`);
+    notes.push(`navigation.route_note_segments_caution:${unsafeSegments}`);
   }
 
   // Get unique danger zone count
@@ -396,7 +396,7 @@ function generateSafetySummary(segmentScores: RouteSegmentScore[]): {
   const totalDangerZones = uniqueZoneIds.size;  // ← Use unique count
 
   if (totalDangerZones > 0) {
-    notes.push(`${totalDangerZones} danger zone(s) on this route`);
+    notes.push(`navigation.route_note_danger_zones:${totalDangerZones}`);
   }
   // Check for specific risk patterns
   const commonRisks = segmentScores
@@ -411,7 +411,7 @@ function generateSafetySummary(segmentScores: RouteSegmentScore[]): {
     .map(([risk, _]) => risk);
 
   if (frequentRisks.length > 0) {
-    notes.push(`Common concerns: ${frequentRisks.slice(0, 2).join(', ')}`);
+    notes.push(`navigation.route_note_common_concerns:${frequentRisks.slice(0, 2).join(', ')}`);
   }
 
   return {

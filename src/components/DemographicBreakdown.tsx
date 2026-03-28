@@ -87,8 +87,7 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
             {displayValue || "Unknown"}
           </Text>
           <Text style={styles.reviewCount}>
-            ({score.review_count || 0} review
-            {score.review_count !== 1 ? "s" : ""})
+            {t("community.review_count", { count: score.review_count })}
           </Text>
         </View>
         <View style={styles.scoreBarContainer}>
@@ -134,11 +133,13 @@ export const DemographicBreakdown: React.FC<DemographicBreakdownProps> = ({
               <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="small" color={theme.colors.primary} />
                 <Text style={commonStyles.loadingText}>
-                  {t('map.loading_insights')}</Text>
+                  {t("map.loading_insights")}
+                </Text>
               </View>
             ) : Object.keys(groupedScores).length === 0 ? (
               <Text style={styles.noDataText}>
-                {t('map.no_demographic_breakdown_available_yet')}</Text>
+                {t("map.no_demographic_breakdown_available_yet")}
+              </Text>
             ) : (
               Object.entries(groupedScores).map(([type, typeScores]) => (
                 <View key={type} style={styles.demographicGroup}>

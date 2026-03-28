@@ -1,5 +1,6 @@
 import { notify } from "./notificationService";
 import { logger } from '@/utils/logger';
+import i18n from '@/i18n';
 
 /**
  * Get the user's country code from their coordinates using reverse geocoding
@@ -9,7 +10,6 @@ export const getUserCountry = async (
     userLocation: { latitude: number; longitude: number } | null
 ): Promise<string> => {
     const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-
     if (!googleApiKey || !userLocation) {
         return 'us';
     }
@@ -30,7 +30,7 @@ export const getUserCountry = async (
         return 'us';
     } catch (error) {
         logger.error('no user country found', error)
-        notify.error('❌ We couldn\'t get your country:');
+        notify.error(i18n.t('location.country_not_found') + ': ');
         return 'us';
     }
 };

@@ -13,6 +13,7 @@ import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers";
 import { fetchUserVoteStats } from "@/store/userSlice";
 import { useAppDispatch } from "@/store/hooks";
+import { t } from "i18next";
 
 interface VoteButtonsProps {
   reviewId: string;
@@ -34,7 +35,7 @@ export default function VoteButtons({
   const [helpfulCount, setHelpfulCount] = useState(initialHelpfulCount);
   const [unhelpfulCount, setUnhelpfulCount] = useState(initialUnhelpfulCount);
   const [userVote, setUserVote] = useState<"helpful" | "unhelpful" | null>(
-    currentUserVote || null
+    currentUserVote || null,
   );
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
@@ -48,7 +49,10 @@ export default function VoteButtons({
 
   const handleVote = async (voteType: "helpful" | "unhelpful") => {
     if (!userId) {
-      notify.error("Please log in to vote on reviews", "Login Required");
+      notify.error(
+        t("community.login_to_vote_review"),
+        t("auth.login_required"),
+      );
       return;
     }
 
@@ -60,10 +64,7 @@ export default function VoteButtons({
       } = await supabase.auth.getSession();
 
       if (!session) {
-        notify.error(
-          "Session expired. Please log in again.",
-          "Authentication Error"
-        );
+        notify.error(t("auth.session_expired"), t("auth.auth_error"));
         return;
       }
 
@@ -79,7 +80,7 @@ export default function VoteButtons({
             review_id: reviewId,
             vote_type: voteType,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -125,7 +126,7 @@ export default function VoteButtons({
       }
     } catch (error) {
       console.error("Vote error:", error);
-      notify.error("Failed to vote. Please try again.", "Error");
+      notify.error(t("community.error_vote"), t("common.error"));
     } finally {
       setLoading(false);
     }

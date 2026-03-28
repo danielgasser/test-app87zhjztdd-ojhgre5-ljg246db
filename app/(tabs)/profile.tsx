@@ -162,11 +162,11 @@ export default function ProfileScreen() {
     if (status !== "granted") {
       notify.confirm(
         "We need camera roll access to upload profile pictures. Would you like to open settings?",
-        "Permission Denied",
+        t("common.permission_denied"),
         [
-          { text: "Cancel", style: "cancel", onPress: () => {} },
+          { text: t("common.cancel"), style: "cancel", onPress: () => {} },
           {
-            text: "Open Settings",
+            text: t("common.open_settings"),
             style: "default",
             onPress: () => Linking.openSettings(),
           },
@@ -236,10 +236,10 @@ export default function ProfileScreen() {
 
       // Refresh the profile to ensure we have the latest data
       await dispatch(fetchUserProfile(user!.id));
-      notify.success("Profile picture updated!", "Success");
+      notify.success(t("profile.profile_picture_updated"), t("common.success"));
     } catch (error: any) {
       logger.error("Upload error:", error);
-      notify.error("Failed to upload image. Please try again.", "Upload Error");
+      notify.error(t("profile.failed_to_upload_image"), t("common.error"));
     } finally {
       setUploading(false);
     }
@@ -271,11 +271,15 @@ export default function ProfileScreen() {
 
   const handleRemoveProfilePicture = () => {
     notify.confirm(
-      "Are you sure you want to remove your profile picture?",
-      "Remove Profile Picture",
+      t("profile.remove_profile_picture_question"),
+      t("profile.remove_profile_picture"),
       [
-        { text: "Cancel", style: "cancel", onPress: () => {} },
-        { text: "Remove", style: "destructive", onPress: removeProfilePicture },
+        { text: t("common.cancel"), style: "cancel", onPress: () => {} },
+        {
+          text: t("profile.remove"),
+          style: "destructive",
+          onPress: removeProfilePicture,
+        },
       ],
       "warning",
     );
@@ -291,12 +295,12 @@ export default function ProfileScreen() {
 
   const handleDeleteRoute = (routeId: string) => {
     notify.confirm(
-      "Are you sure you want to delete this route from your history?",
+      t("profile.remove_route_history_question"),
       "",
       [
-        { text: "Cancel", style: "cancel", onPress: () => {} },
+        { text: t("common.cancel"), style: "cancel", onPress: () => {} },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
           onPress: () => {
             dispatch(deleteRouteFromHistory(routeId));
@@ -603,19 +607,20 @@ export default function ProfileScreen() {
                           </View>
                           <View style={styles.routeHistoryMeta}>
                             <Text style={styles.routeHistoryMetaText}>
-                              {route.distance_km.toFixed(1)} km
+                              {route.distance_km.toFixed(1)} {t("map.km")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
                               {t("common.unknown")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
-                              {route.duration_minutes} min
+                              {route.duration_minutes} {t("map.minutes")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
                               {t("common.unknown")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
-                              Safety: {route.safety_score?.toFixed(1) || "N/A"}
+                              {t("navigation.safety")}:{" "}
+                              {route.safety_score?.toFixed(1) || "N/A"}
                             </Text>
                           </View>
                           <Text style={styles.routeHistoryDate}>
@@ -703,10 +708,10 @@ export default function ProfileScreen() {
                             style={styles.savedLocationAddress}
                             numberOfLines={1}
                           >
-                            {location.address || "No address"}
+                            {location.address || t("location.no_address")}
                           </Text>
                           <Text style={styles.savedLocationDate}>
-                            Saved{" "}
+                            {t("navigation.saved")}{" "}
                             {new Date(location.created_at).toLocaleDateString()}
                           </Text>
                         </TouchableOpacity>
@@ -772,10 +777,10 @@ export default function ProfileScreen() {
                             style={styles.savedLocationAddress}
                             numberOfLines={1}
                           >
-                            {location.address || "No address"}
+                            {location.address || t("location.no_address")}
                           </Text>
                           <Text style={styles.savedLocationDate}>
-                            Viewed{" "}
+                            {t("location.viewed")}{" "}
                             {new Date(location.viewed_at).toLocaleDateString()}
                           </Text>
                         </View>

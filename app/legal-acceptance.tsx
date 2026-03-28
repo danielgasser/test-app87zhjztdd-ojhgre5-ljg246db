@@ -68,7 +68,8 @@ export default function LegalAcceptanceScreen() {
         </View>
         <Text style={styles.title}>{t("legal.terms_privacy")}</Text>
         <Text style={styles.subtitle}>
-          {t('legal.please_review_and_accept_our_terms_to')}</Text>
+          {t("legal.please_review_and_accept_our_terms_to")}
+        </Text>
 
         <View style={styles.checkboxContainer}>
           <TouchableOpacity
@@ -88,12 +89,12 @@ export default function LegalAcceptanceScreen() {
               )}
             </View>
             <Text style={styles.checkboxLabel}>
-              I agree to the{" "}
+              {t("legal.i_agree_terms_0")}{" "}
               <Text
                 style={commonStyles.textPrimaryLink}
                 onPress={() => setShowTerms(true)}
               >
-                Terms of Service
+                {t("legal.i_agree_terms_1")}
               </Text>
             </Text>
           </TouchableOpacity>
@@ -118,12 +119,12 @@ export default function LegalAcceptanceScreen() {
               )}
             </View>
             <Text style={styles.checkboxLabel}>
-              I have read the{" "}
+              {t("legal.i_agree_privacy_0")}{" "}
               <Text
                 style={commonStyles.textPrimaryLink}
                 onPress={() => setShowPrivacy(true)}
               >
-                Privacy Policy
+                {t("legal.i_agree_privacy_1")}
               </Text>
             </Text>
           </TouchableOpacity>
@@ -136,7 +137,8 @@ export default function LegalAcceptanceScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.infoText}>
-            {t('legal.your_privacy_matters_we_only_collect')}</Text>
+            {t("legal.your_privacy_matters_we_only_collect")}
+          </Text>
         </View>
       </ScrollView>
 

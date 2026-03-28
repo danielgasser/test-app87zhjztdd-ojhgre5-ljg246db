@@ -64,7 +64,9 @@ export function PremiumPromptContent({
               color={theme.colors.primary}
             />
             <Text style={premiumStyles.watchAdButtonText}>
-              Watch Ad ({APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS}h free)
+              {t("premium.watch_ad_to_unlock", {
+                time: APP_CONFIG.PREMIUM.AD_REWARD_DURATION_HOURS,
+              })}
             </Text>
           </TouchableOpacity>
         </View>

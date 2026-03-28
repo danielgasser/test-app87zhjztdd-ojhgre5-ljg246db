@@ -94,16 +94,21 @@ export default function DangerZoneOverlay({
               <Callout tooltip>
                 <View style={styles.calloutContainer}>
                   <Text style={styles.calloutTitle}>
-                    ⚠️ {zone.location_name}
+                    {t("navigation.dangeer_zone_symbol", {
+                      zone: zone.location_name,
+                    })}
                   </Text>
                   <Text style={[styles.dangerLevel, { color: colors.stroke }]}>
-                    {zone.danger_level.toUpperCase()} RISK AREA
+                    {t("navigation.danger_zones_risk_area", {
+                      zone: zone.danger_level.toUpperCase(),
+                    })}
                   </Text>
 
                   <View style={commonStyles.divider} />
 
                   <Text style={commonStyles.sectionTitle}>
-                    {t('navigation.affected_groups')}</Text>
+                    {t("navigation.affected_groups")}
+                  </Text>
                   {zone.affected_demographics.map((demo, idx) => (
                     <Text key={idx} style={styles.demographicItem}>
                       {demo.charAt(0).toUpperCase() +
@@ -126,7 +131,9 @@ export default function DangerZoneOverlay({
                     <>
                       <View style={commonStyles.divider} />
                       <Text style={styles.timeWarning}>
-                        ⏰ Higher risk during: {zone.active_times?.join(", ")}
+                        {t("navigation.higher_risk_during", {
+                          time: zone.active_times?.join(", "),
+                        })}
                       </Text>
                     </>
                   )}

@@ -97,11 +97,12 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
               {hasData ? (
                 <>
                   <Text style={[styles.rating, { color: safetyColor }]}>
-                    {periodData.avg_safety?.toFixed(1)}★
+                    {periodData.avg_safety?.toFixed(1)} {t("common.astserix")}
                   </Text>
                   <Text style={styles.reviewCount}>
-                    {periodData.review_count} review
-                    {periodData.review_count !== 1 ? "s" : ""}
+                    {t("community.review_count", {
+                      count: periodData.review_count,
+                    })}
                   </Text>
                 </>
               ) : (
@@ -113,8 +114,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
       </View>
 
       <Text style={styles.totalText}>
-        Based on {data.total_with_time} review
-        {data.total_with_time !== 1 ? "s" : ""} with time data
+        {t("map.based_on_reviews_with_time", { count: data.total_with_time })}
       </Text>
     </View>
   );

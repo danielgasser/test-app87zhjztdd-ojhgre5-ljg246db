@@ -136,9 +136,10 @@ const PredictionBadge: React.FC<PredictionBadgeProps> = ({
               }
             />
             <Text style={styles.voteText}>
-              {prediction.vote_validation.accurate_votes} of
-              {prediction.vote_validation.total_votes} users confirmed this
-              prediction
+              {t("community.users_confirmed_prediction", {
+                accurate: prediction.vote_validation.accurate_votes,
+                total: prediction.vote_validation.total_votes,
+              })}
             </Text>
           </View>
         )}

@@ -66,8 +66,7 @@ export default function ProfileCompletionWidget({
       {missingFields.length > 0 && (
         <View style={styles.missingFieldsContainer}>
           <Text style={styles.missingFieldsLabel}>
-            Add {missingFields.length} more field
-            {missingFields.length !== 1 ? "s" : ""}:
+            {t("profile.add_more_fields", { count: missingFields.length })}
           </Text>
           <Text style={styles.missingFieldsList}>
             {missingFields

@@ -20,9 +20,7 @@ export const passwordChecker = (password: string | null | undefined): boolean =>
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     if (!hasUpperCase || !hasLowerCase || !hasDigit || !hasSpecialChar) {
-        notify.error(
-            "Password must contain uppercase, lowercase, number, and special character"
-        );
+        notify.error(t('common.new_password_must_contain'));
         return false;
     }
     return true;

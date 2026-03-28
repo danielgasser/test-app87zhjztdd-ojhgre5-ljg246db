@@ -55,6 +55,17 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
     danger_zones_intersected,
   } = safetyAnalysis || {};
 
+  const translateNote = (note: string): string => {
+    if (note.includes(":")) {
+      const [key, value] = note.split(":");
+      const param = isNaN(Number(value))
+        ? { concerns: value }
+        : { count: Number(value) };
+      return t(key, param);
+    }
+    return t(note);
+  };
+
   // Collect unique risk factors from segments
   const uniqueRiskFactors = new Set<string>();
   segment_scores?.forEach((seg: any) => {
@@ -111,7 +122,8 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
                     ]}
                   />
                   <Text style={styles.summaryText}>
-                    {safety_summary.safe_segments} safe
+                    {safety_summary.safe_segments}{" "}
+                    {t("navigation.safe_segments")}
                   </Text>
                 </View>
                 <View style={styles.summaryItem}>
@@ -122,7 +134,8 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
                     ]}
                   />
                   <Text style={styles.summaryText}>
-                    {safety_summary.mixed_segments} mixed
+                    {safety_summary.mixed_segments}{" "}
+                    {t("navigation.mixed_segments")}
                   </Text>
                 </View>
                 <View style={styles.summaryItem}>
@@ -133,7 +146,8 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
                     ]}
                   />
                   <Text style={styles.summaryText}>
-                    {safety_summary.unsafe_segments} unsafe
+                    {safety_summary.unsafe_segments}{" "}
+                    {t("navigation.unsafe_segments")}
                   </Text>
                 </View>
               </View>
@@ -149,7 +163,7 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
                       size={16}
                       color={getWarningColor(note)}
                     />
-                    <Text style={styles.noteText}>{note}</Text>
+                    <Text style={styles.noteText}>{translateNote(note)}</Text>
                   </View>
                 ))}
               </View>
@@ -170,7 +184,7 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
                         size={14}
                         color={theme.colors.textSecondary}
                       />
-                      <Text style={styles.riskText}>{risk}</Text>
+                      <Text style={styles.riskText}>{translateNote(risk)}</Text>
                     </View>
                   ))}
               </View>

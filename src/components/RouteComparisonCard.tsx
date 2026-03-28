@@ -74,8 +74,9 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
           color={theme.colors.secondary}
         />
         <Text style={styles.improvementText}>
-          Safety improved by {improvement_summary.safety_improvement.toFixed(1)}{" "}
-          points
+          {t("navigation.safety_improved_by_points", {
+            points: improvement_summary.safety_improvement.toFixed(1),
+          })}
         </Text>
       </View>
 
@@ -129,11 +130,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
             <View style={styles.metric}>
               <Ionicons name="warning" size={16} color={theme.colors.error} />
               <Text style={styles.metricText}>
-                {original_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
-                danger zone
-                {original_route.safety_analysis?.danger_zones_intersected === 1
-                  ? ""
-                  : "s"}
+                {t("navigation.danger_zone_count", {
+                  count:
+                    original_route.safety_analysis?.danger_zones_intersected ??
+                    0,
+                })}
               </Text>
             </View>
           </View>
@@ -208,11 +209,11 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
                 color={theme.colors.secondary}
               />
               <Text style={styles.metricText}>
-                {optimized_route.safety_analysis?.danger_zones_intersected ?? 0}{" "}
-                danger zone
-                {optimized_route.safety_analysis?.danger_zones_intersected === 1
-                  ? ""
-                  : "s"}
+                {t("navigation.danger_zone_count", {
+                  count:
+                    optimized_route.safety_analysis?.danger_zones_intersected ??
+                    0,
+                })}
               </Text>
             </View>
           </View>
@@ -239,7 +240,7 @@ const RouteComparisonCard: React.FC<RouteComparisonCardProps> = ({
               size={16}
               color={theme.colors.primary}
             />
-            Safe Detours Added
+            {t("navigation.safe_detour_added")}
           </Text>
           {waypoints_added.map((waypoint, index) => (
             <View key={index} style={styles.waypointItem}>

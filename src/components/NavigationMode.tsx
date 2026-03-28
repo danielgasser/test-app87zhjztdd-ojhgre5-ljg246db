@@ -373,11 +373,13 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           .join(", ");
 
         notify.confirm(
-          "⚠️ SAFETY ALERT ON YOUR ROUTE",
-          `Your route passes through areas with safety concerns: ${locationNames}\n\nWould you like to find a safer route?`,
+          t("navigation.safety_alert"),
+          t("navigation.safety_alert_text_0", { loc: locationNames }) +
+            "\n\n" +
+            t("navigation.safety_alert_text_1"),
           [
             {
-              text: "Find Safer Route",
+              text: t("navigation.find_safer_route"),
               onPress: async () => {
                 alertShownRef.current = false;
                 const currentRouteId = selectedRoute?.databaseId;
@@ -567,8 +569,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         await Location.requestForegroundPermissionsAsync();
       if (foregroundStatus !== "granted") {
         notify.error(
-          "Location permission is required for navigation",
-          "Permission needed",
+          t("navigation.location_permission_required"),
+          t("common.permission_needed"),
         );
         onExit();
         return;
@@ -578,8 +580,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         await Location.requestBackgroundPermissionsAsync();
       if (backgroundStatus !== "granted") {
         notify.error(
-          "Background location is required for navigation",
-          "Permission needed",
+          t("navigation.background_location_permission_required"),
+          t("common.permission_needed"),
         );
         onExit();
         return;
@@ -769,7 +771,8 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             color={theme.colors.card}
           />
           <Text style={styles.distanceText}>
-            In {formatDistance(distanceToNextTurn, distanceUnit)}{" "}
+            {t("navigation.in_c")}{" "}
+            {formatDistance(distanceToNextTurn, distanceUnit)}{" "}
             {showInstructionText && currentInstruction}
           </Text>
 

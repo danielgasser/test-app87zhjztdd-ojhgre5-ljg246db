@@ -127,7 +127,8 @@ export const Paywall: React.FC<PaywallProps> = ({
         </View>
         <Text style={styles.title}>{t("common.upgrade_to_premium")}</Text>
         <Text style={styles.subtitle}>
-          {t('premium.unlock_all_features_and_travel_with')}</Text>
+          {t("premium.unlock_all_features_and_travel_with")}
+        </Text>
       </View>
 
       {/* Features */}
@@ -203,10 +204,11 @@ export const Paywall: React.FC<PaywallProps> = ({
 
       {/* Legal */}
       <Text style={styles.legalText}>
-        Payment will be charged to your{" "}
-        {Platform.OS === "ios" ? "Apple ID" : "Google Play"} account.
-        Subscription automatically renews unless canceled at least 24 hours
-        before the end of the current period.
+        {t(
+          Platform.OS === "ios"
+            ? "premium.payment_legal_ios"
+            : "premium.payment_legal_android",
+        )}
       </Text>
       {/* Links */}
       <View style={styles.legalLinks}>

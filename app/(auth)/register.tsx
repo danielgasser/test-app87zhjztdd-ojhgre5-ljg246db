@@ -180,13 +180,14 @@ export default function RegisterScreen() {
                   <ActivityIndicator color={theme.colors.textOnPrimary} />
                 ) : (
                   <Text style={commonStyles.primaryButtonText}>
-                    {t('auth.create_account')}</Text>
+                    {t("auth.create_account")}
+                  </Text>
                 )}
               </TouchableOpacity>
 
               <View style={commonStyles.footer}>
                 <Text style={commonStyles.footerText}>
-                  Already have an account?{" "}
+                  {t("auth.already_have_account")}
                 </Text>
                 <Link href="/(auth)/login" asChild>
                   <TouchableOpacity>

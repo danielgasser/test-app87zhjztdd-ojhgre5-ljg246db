@@ -23,6 +23,7 @@ import { determineBestRouteName, determineRouteType } from '@/utils/routeHelpers
 import { findCorrectStepForPosition } from '@/utils/navigationHelpers';
 import NetInfo from '@react-native-community/netinfo';
 import { offlineQueue } from '../services/offlineQueue';
+import i18n from '@/i18n';
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -1310,15 +1311,15 @@ export const calculateRouteSafety = createAsyncThunk(
       const overallScore = validPoints > 0 ? totalSafety / validPoints : 3.0;
 
       if (overallScore >= 4.0) {
-        safetyNotes.push("This route is generally considered safe");
+        safetyNotes.push('navigation.route_note_generally_safe');
       } else if (overallScore >= 3.0) {
-        safetyNotes.push("This route has mixed safety characteristics");
+        safetyNotes.push('navigation.route_note_mixed');
       } else {
-        safetyNotes.push("This route may have safety concerns");
+        safetyNotes.push('navigation.route_note_safety_concerns');
       }
 
       if (highRiskSegments > 0) {
-        safetyNotes.push(`${highRiskSegments} area(s) require extra caution`);
+        safetyNotes.push(`navigation.route_note_areas_caution:${highRiskSegments}`);
       }
 
       return {
@@ -1775,8 +1776,8 @@ export const checkForReroute = createAsyncThunk(
 
     // Show alert
     notify.info(
-      "Finding a new & safer route...",
-      "Recalculating Route"
+      i18n.t("navigation.finding_safe_route"),
+      i18n.t("navigation.recalculating_route")
     );
     try {
       // Create new route request from current position to original destination
@@ -1823,13 +1824,13 @@ export const checkForReroute = createAsyncThunk(
 
           if (hasImprovement) {
             notify.info(
-              `Safer route found! Avoiding ${result.improvement_summary.danger_zones_avoided} danger zone(s).`,
-              "Route Updated"
+              i18n.t("navigation.safe_route_found_text", { count: result.improvement_summary.danger_zones_avoided }),
+              i18n.t("navigation.route_updated")
             );
           } else {
             notify.info(
-              "Route recalculated from your current position.",
-              "Route Updated"
+              i18n.t("navigation.route_recalculated"),
+              i18n.t("navigation.route_updated")
             );
           }
         } else {
@@ -1850,8 +1851,8 @@ export const checkForReroute = createAsyncThunk(
         if (errorMessage.includes("No safer alternative available")) {
           // Don't try fallback - inform user directly
           notify.confirm(
-            "No Safer Route Available",
-            "There's no way to avoid this danger zone. You can continue with caution or stop navigation.",
+            i18n.t("navigation.no_safer_route_available"),
+            i18n.t("navigation.no_safer_route_available_text_danger"),
             [
               {
                 text: "Continue Current Route",
@@ -1904,8 +1905,8 @@ export const checkForReroute = createAsyncThunk(
 
           if (distanceDiff >= 0.5) {
             notify.success(
-              "New route calculated from your current position",
-              "Route Updated"
+              i18n.t("navigation.route_updated_current_position"),
+              i18n.t("navigation.route_updated")
             );
           }
 
@@ -1928,8 +1929,8 @@ export const checkForReroute = createAsyncThunk(
       if (errorMessage === "NO_ALTERNATIVE_ROUTE") {
         // No safer route exists - give user clear options
         notify.confirm(
-          "No Safer Route Available",
-          "There are no safer alternative routes in this area. You can continue with your current route or cancel navigation.",
+          i18n.t("navigation.no_safer_route_available"),
+          i18n.t("navigation.no_safer_route_available_text"),
           [
             {
               text: "Continue Current Route",
@@ -1948,8 +1949,8 @@ export const checkForReroute = createAsyncThunk(
         // Other routing errors
         logger.error("❌ Rerouting failed:", error);
         notify.confirm(
-          "Rerouting Failed",
-          "Could not calculate new route. Please try planning again.",
+          i18n.t("navigation.rerouting_failed"),
+          i18n.t("navigation.rerouting_failed_text"),
           [
             {
               text: "Stop Navigation",
@@ -2583,7 +2584,7 @@ const locationsSlice = createSlice({
       })
       .addCase(saveRouteToDatabase.rejected, (_state, action) => {
         console.error("❌ Failed to save route to database:", action.payload);
-        notify.error("Failed to save route: " + action.payload);
+        notify.error(i18n.t("navigation.saving_route_failed", { number: action.payload }));
       })
       // Submit Review
       .addCase(submitReview.pending, (state) => {

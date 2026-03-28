@@ -101,7 +101,7 @@ export default function ResetPasswordScreen() {
 
       if (error) throw error;
 
-      notify.success("Your password has been reset successfully!", "Success");
+      notify.success(t("auth.reset_password_success"), t("common.success"));
 
       // Sign out and redirect to login
       await supabase.auth.signOut();
@@ -111,10 +111,7 @@ export default function ResetPasswordScreen() {
       }, 1500);
     } catch (error: any) {
       logger.error("Password reset error:", error);
-      notify.error(
-        error.message || "Failed to reset password. Please try again.",
-        "Error",
-      );
+      notify.error(error.message || t("auth.reset_password_failed"), "Error");
     } finally {
       setLoading(false);
     }
@@ -133,7 +130,8 @@ export default function ResetPasswordScreen() {
               <View style={commonStyles.centerContainer}>
                 <ActivityIndicator size="large" color={theme.colors.primary} />
                 <Text style={commonStyles.loadingText}>
-                  {t('auth.validating_reset_link')}</Text>
+                  {t("auth.validating_reset_link")}
+                </Text>
               </View>
             ) : (
               <>
@@ -149,7 +147,8 @@ export default function ResetPasswordScreen() {
                     {t("auth.create_new_password")}
                   </Text>
                   <Text style={styles.subtitle}>
-                    {t('auth.your_new_password_must_be_different')}</Text>
+                    {t("auth.your_new_password_must_be_different")}
+                  </Text>
                 </View>
 
                 {/* Form */}
@@ -219,15 +218,20 @@ export default function ResetPasswordScreen() {
                   {/* Password Requirements */}
                   <View style={styles.requirementsBox}>
                     <Text style={styles.requirementsTitle}>
-                      {t('auth.password_must_contain')}</Text>
+                      {t("auth.password_must_contain")}
+                    </Text>
                     <Text style={styles.requirement}>
-                      {t('auth.at_least_8_characters')}</Text>
+                      {t("auth.at_least_8_characters")}
+                    </Text>
                     <Text style={styles.requirement}>
-                      {t('auth.uppercase_and_lowercase_letters')}</Text>
+                      {t("auth.uppercase_and_lowercase_letters")}
+                    </Text>
                     <Text style={styles.requirement}>
-                      {t('auth.at_least_one_number')}</Text>
+                      {t("auth.at_least_one_number")}
+                    </Text>
                     <Text style={styles.requirement}>
-                      {t('auth.at_least_one_special_character')}</Text>
+                      {t("auth.at_least_one_special_character")}
+                    </Text>
                   </View>
                 </View>
 

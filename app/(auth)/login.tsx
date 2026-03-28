@@ -276,7 +276,8 @@ export default function LoginScreen() {
                       style={{ marginRight: 8 }}
                     />
                     <Text style={styles.appleButtonText}>
-                      {t('auth.sign_in_with_apple')}</Text>
+                      {t("auth.sign_in_with_apple")}
+                    </Text>
                   </TouchableOpacity>
 
                   <View style={styles.dividerContainer}>
@@ -305,7 +306,7 @@ export default function LoginScreen() {
 
               <View style={commonStyles.footer}>
                 <Text style={commonStyles.footerText}>
-                  Don't have an account?{" "}
+                  {t("auth.no_account_yet")}
                 </Text>
                 <Link href="/(auth)/register" asChild>
                   <TouchableOpacity>

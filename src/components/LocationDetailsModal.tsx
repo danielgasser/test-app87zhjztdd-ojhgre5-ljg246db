@@ -616,8 +616,9 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                       </Text>
                     </View>
                     <Text style={styles.reviewCountText}>
-                      Based on {selectedLocation.review_count} review
-                      {selectedLocation.review_count !== 1 ? "s" : ""}
+                      {t("map.based_on_reviews", {
+                        count: selectedLocation.review_count,
+                      })}
                     </Text>
                   </View>
                 )}
@@ -720,7 +721,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     color={theme.colors.secondary}
                   />
                   <Text style={styles.alreadyReviewedText}>
-                    {t('map.youve_reviewed_this_location')}</Text>
+                    {t("map.youve_reviewed_this_location")}
+                  </Text>
                 </View>
               )}
               {/* Neighborhood Stats - Premium */}
@@ -791,7 +793,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                                 color={theme.colors.card}
                               />
                               <Text style={styles.editButtonText}>
-                                {t('common.edit_review')}</Text>
+                                {t("common.edit_review")}
+                              </Text>
                             </TouchableOpacity>
                           )}
                         <View style={styles.reviewHeader}>
@@ -829,7 +832,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                         <View style={styles.reviewRatings}>
                           <View style={styles.ratingItem}>
                             <Text style={commonStyles.ratingLabel}>
-                              {t('map.safety')}</Text>
+                              {t("map.safety")}
+                            </Text>
                             <Text
                               style={[
                                 styles.ratingValue,
@@ -841,7 +845,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           </View>
                           <View style={styles.ratingItem}>
                             <Text style={commonStyles.ratingLabel}>
-                              {t('map.comfort')}</Text>
+                              {t("map.comfort")}
+                            </Text>
                             <Text
                               style={[
                                 styles.ratingValue,
@@ -856,7 +861,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                           {review.accessibility_rating && (
                             <View style={styles.ratingItem}>
                               <Text style={commonStyles.ratingLabel}>
-                                {t('map.access')}</Text>
+                                {t("map.access")}
+                              </Text>
                               <Text
                                 style={[
                                   styles.ratingValue,
@@ -887,7 +893,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                     ))
                   ) : (
                     <Text style={styles.noReviewsText}>
-                      {t('map.no_reviews_yet_be_the_first_to_review')}</Text>
+                      {t("map.no_reviews_yet_be_the_first_to_review")}
+                    </Text>
                   )}
                 </View>
               )}

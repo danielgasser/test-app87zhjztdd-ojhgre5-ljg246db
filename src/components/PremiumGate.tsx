@@ -54,7 +54,7 @@ export function PremiumGate({
                 <Ionicons name="star" size={24} color={theme.colors.accent} />
                 {requiredTier.charAt(0).toUpperCase() +
                   requiredTier.slice(1)}{" "}
-                Feature
+                {t("premium.feature")}
               </Text>
               <Text style={styles.tapToUpgrade}>
                 {t("premium.tap_to_upgrade")}
@@ -79,7 +79,9 @@ export function PremiumGate({
             <View style={styles.promptTextContainer}>
               <Text style={styles.promptTitle}>{featureLabel}</Text>
               <Text style={styles.promptSubtitle}>
-                Upgrade to {requiredTier} to unlock
+                {t("premium.upgrade_to_access", {
+                  required_tier: requiredTier,
+                })}
               </Text>
             </View>
             <Ionicons

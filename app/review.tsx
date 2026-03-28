@@ -204,41 +204,45 @@ export default function ReviewScreen() {
       } else {
         notify.success(t("review.review_submitted_successfully"));
       }
-      notify.confirm("Success", "Review submitted successfully!", [
-        {
-          text: "OK",
-          onPress: () => {
-            showInterstitialWithCooldown();
-            if (isCreatingNew && finalLocationId) {
-              // Pass the real location ID back
-              router.replace({
-                pathname: "/(tabs)",
-                params: {
-                  tab: "map",
-                  openLocationId: finalLocationId,
-                  refresh: Date.now().toString(),
-                },
-              });
-            } else {
-              router.back();
-            }
+      notify.confirm(
+        t("common.success"),
+        t("review.review_submitted_successfully"),
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              showInterstitialWithCooldown();
+              if (isCreatingNew && finalLocationId) {
+                // Pass the real location ID back
+                router.replace({
+                  pathname: "/(tabs)",
+                  params: {
+                    tab: "map",
+                    openLocationId: finalLocationId,
+                    refresh: Date.now().toString(),
+                  },
+                });
+              } else {
+                router.back();
+              }
+            },
           },
-        },
-      ]);
+        ],
+      );
     } catch (error: any) {
       logger.error("🚨 Review submission error:", error);
 
       if (error.code === "23505") {
         notify.success(
-          "You have already reviewed this location. You can edit your existing review instead.",
-          "Already Reviewed",
+          t("review.already_reviewed_text"),
+          t("review.already_reviewed"),
         );
         return;
       }
 
       notify.error(
-        "Error",
-        error?.message || "Failed to submit review. Please try again.",
+        t("common.error"),
+        error?.message || t("review.failed_to_submit_review"),
       );
     }
   };
@@ -248,7 +252,8 @@ export default function ReviewScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
           <Text style={commonStyles.textError}>
-            {t('review.please_log_in_to_submit_a_review')}</Text>
+            {t("review.please_log_in_to_submit_a_review")}
+          </Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
@@ -301,7 +306,7 @@ export default function ReviewScreen() {
               <View style={styles.newLocationSection}>
                 <View style={commonStyles.formField}>
                   <Text style={commonStyles.formLabel}>
-                    📍 What is this place called?
+                    {t("review.location_name")}{" "}
                     <Text style={commonStyles.requiredAsterisk}>
                       {t("common.unknown")}
                     </Text>
@@ -315,7 +320,8 @@ export default function ReviewScreen() {
                     autoCapitalize="words"
                   />
                   <Text style={styles.helperText}>
-                    {t('review.give_this_location_a_name_so_others_can')}</Text>
+                    {t("review.give_this_location_a_name_so_others_can")}
+                  </Text>
                 </View>
               </View>
             )}
@@ -324,7 +330,7 @@ export default function ReviewScreen() {
               {/* Title */}
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
-                  Review Title{" "}
+                  {t("review.review_title")}{" "}
                   <Text style={commonStyles.requiredAsterisk}>
                     {t("common.unknown")}
                   </Text>
@@ -381,7 +387,7 @@ export default function ReviewScreen() {
               {/* Review Content */}
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
-                  Your Review{" "}
+                  {t("review.your_review")}{" "}
                   <Text style={commonStyles.requiredAsterisk}>
                     {t("common.unknown")}
                   </Text>
@@ -439,7 +445,9 @@ export default function ReviewScreen() {
                       // Check if the combined date+time is in the future
                       const result = validateVisitDateTime(newDateTime);
                       if (!result.isValid) {
-                        notify.error(result.errorMessage || "Invalid date");
+                        notify.error(
+                          result.errorMessage || t("common.invalid_date"),
+                        );
                       }
                       setVisitDateTime(result.validatedDate);
                     }
@@ -528,7 +536,8 @@ export default function ReviewScreen() {
                   <View style={commonStyles.modalContent}>
                     <View style={commonStyles.modalHeader}>
                       <Text style={commonStyles.modalTitle}>
-                        {t('review.select_visit_type')}</Text>
+                        {t("review.select_visit_type")}
+                      </Text>
                       <TouchableOpacity
                         onPress={() => setShowVisitTypePicker(false)}
                       >
@@ -561,7 +570,8 @@ export default function ReviewScreen() {
                   color={theme.colors.textSecondary}
                 />
                 <Text style={styles.noteText}>
-                  {t('review.your_demographic_profile_will_be')}</Text>
+                  {t("review.your_demographic_profile_will_be")}
+                </Text>
               </View>
               {/* Submit Button */}
               <TouchableOpacity

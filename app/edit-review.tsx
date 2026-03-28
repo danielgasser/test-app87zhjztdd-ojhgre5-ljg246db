@@ -245,7 +245,8 @@ export default function EditReviewScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
           <Text style={commonStyles.textError}>
-            {t('review.please_log_in_to_edit_reviews')}</Text>
+            {t("review.please_log_in_to_edit_reviews")}
+          </Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.push("/(auth)/login")}
@@ -276,7 +277,8 @@ export default function EditReviewScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.centerContainer}>
           <Text style={commonStyles.textError}>
-            {t('review.review_not_found_or_you_dont_have')}</Text>
+            {t("review.review_not_found_or_you_dont_have")}
+          </Text>
           <TouchableOpacity
             style={commonStyles.primaryButton}
             onPress={() => router.back()}
@@ -315,7 +317,7 @@ export default function EditReviewScreen() {
               {/* Title */}
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
-                  Review Title{" "}
+                  {t("review.review_title")}{" "}
                   <Text style={commonStyles.requiredAsterisk}>
                     {t("common.unknown")}
                   </Text>
@@ -378,7 +380,7 @@ export default function EditReviewScreen() {
               {/* Review Content */}
               <View style={commonStyles.formField}>
                 <Text style={commonStyles.formLabel}>
-                  Your Review{" "}
+                  {t("review.your_review")}{" "}
                   <Text style={commonStyles.requiredAsterisk}>
                     {t("common.unknown")}
                   </Text>

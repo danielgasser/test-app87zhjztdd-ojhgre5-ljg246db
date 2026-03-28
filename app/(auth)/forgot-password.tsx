@@ -58,14 +58,14 @@ export default function ForgotPasswordScreen() {
 
       setEmailSent(true);
       notify.success(
-        "Password reset link sent! Please check your email.",
-        "Check Your Inbox",
+        t("auth.reset_link_sent"),
+        t("common.check_inbox") + " " + trimmedEmail,
       );
     } catch (error: any) {
       logger.error("Password reset error:", error);
       notify.error(
-        error.message || "Failed to send reset email. Please try again.",
-        "Error",
+        error.message || t("auth.send_reset_link_failed"),
+        t("common.error"),
       );
     } finally {
       setLoading(false);
@@ -149,7 +149,8 @@ export default function ForgotPasswordScreen() {
                     <Text style={styles.emailText}>{email}</Text>
                   </Text>
                   <Text style={styles.successSubtext}>
-                    {t('auth.click_the_link_in_the_email_to_reset')}</Text>
+                    {t("auth.click_the_link_in_the_email_to_reset")}
+                  </Text>
                 </View>
 
                 {/* Resend Button */}
@@ -158,7 +159,8 @@ export default function ForgotPasswordScreen() {
                   onPress={() => setEmailSent(false)}
                 >
                   <Text style={styles.resendButtonText}>
-                    {t('auth.didnt_receive_the_email_try_again')}</Text>
+                    {t("auth.didnt_receive_the_email_try_again")}
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Back to Login */}

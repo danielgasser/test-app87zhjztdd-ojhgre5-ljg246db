@@ -79,7 +79,7 @@ export default function EditProfileScreen() {
       notify.success(t("settings.name_updated_successfully"));
     } catch (error: any) {
       logger.error("Name update error:", error);
-      notify.error(error.message || "Failed to update name");
+      notify.error(error.message || t("settings.failed_to_update_name"));
     } finally {
       setLoading(false);
     }
@@ -115,9 +115,7 @@ export default function EditProfileScreen() {
       if (error) {
         throw error;
       }
-      notify.success(
-        "Confirmation email sent! Please confirm your new email address to confirm the change.",
-      );
+      notify.success(t("settings.confirmation_email_sent"));
       setEmail(user?.email || "");
     } catch (error: any) {
       logger.error("Email update error:", error);
@@ -127,9 +125,7 @@ export default function EditProfileScreen() {
         errorMessage.includes("already exists") ||
         errorMessage.includes("already been registered")
       ) {
-        notify.error(
-          "Unable to update email. Please try a different email address or contact support.",
-        );
+        notify.error(t("settings.email_already_exists"));
       } else {
         notify.error(t("settings.failed_to_update_email_please_try_again"));
       }
@@ -177,9 +173,7 @@ export default function EditProfileScreen() {
 
       if (updateError) throw updateError;
 
-      notify.success(
-        "Password updated successfully! Please sign in with your new password.",
-      );
+      notify.success(t("settings.password_updated_successfully"));
 
       await new Promise((resolve) => setTimeout(resolve as () => void, 1500));
       await supabase.auth.signOut();
@@ -235,7 +229,7 @@ export default function EditProfileScreen() {
                 color={theme.colors.primary}
               />
               <Text style={styles.oauthText}>
-                Signed in with {oauthProvider}
+                {t("profile.signed_in_with", { provider: oauthProvider })}
               </Text>
             </View>
           )}
@@ -249,7 +243,7 @@ export default function EditProfileScreen() {
               style={commonStyles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder={t("common.enter_your_name_or_a_nickname")}
+              placeholder={t("common.name_or_a_nickname")}
               placeholderTextColor={theme.colors.textSecondary}
               autoCapitalize="words"
             />

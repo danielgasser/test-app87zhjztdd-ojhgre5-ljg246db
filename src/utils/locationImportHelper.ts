@@ -1,3 +1,4 @@
+import i18n from "@/i18n";
 import { notify } from "./notificationService";
 import { logger } from '@/utils/logger';
 
@@ -30,7 +31,7 @@ export const getUserCountry = async (
         return 'us';
     } catch (error) {
         logger.error('no user country found', error)
-        notify.error('❌ We couldn\'t get your country:');
+        notify.error(i18n.t('location.country_not_found') + ': ');
         return 'us';
     }
 };

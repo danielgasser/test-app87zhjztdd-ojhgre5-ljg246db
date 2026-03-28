@@ -1417,11 +1417,15 @@ export default function MapScreen() {
                       <View style={styles.predictionCallout}>
                         <Text style={styles.calloutTitle}>{loc.name}</Text>
                         <Text style={styles.calloutPrediction}>
-                          🤖 AI Prediction: {markerProps.score.toFixed(1)}/5
+                          {t("navigation.ai_prediction")}:{" "}
+                          {markerProps.score.toFixed(1)}/5
                         </Text>
                         <Text style={styles.calloutConfidence}>
-                          {Math.round((markerProps.confidence || 0) * 100)}%
-                          confident
+                          {t("navigation.confident", {
+                            percent: Math.round(
+                              (markerProps.confidence || 0) * 100,
+                            ),
+                          })}
                         </Text>
                         <Text style={styles.calloutNote}>
                           {t("map.based_on_similar_locations_and_user")}
@@ -1805,7 +1809,7 @@ export default function MapScreen() {
               }}
             >
               <Text style={styles.segmentToggleText}>
-                {showRouteSegments ? "Hide" : "Show"} Segments
+                {showRouteSegments ? "Hide" : "Show"} {t("navigation.segments")}
               </Text>
             </TouchableOpacity>
           </View>

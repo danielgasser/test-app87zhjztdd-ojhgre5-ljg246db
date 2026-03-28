@@ -275,7 +275,7 @@ const userSlice = createSlice({
           state.searchRadiusKm = APP_CONFIG.DISTANCE.DEFAULT_SEARCH_RADIUS_METERS / 1000;
           return;
         }
-        state.profile = action.payload;
+        (state as any).profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
         const preferences = action.payload.preferences as any;
         if (preferences?.search?.radius_km) {
@@ -295,7 +295,7 @@ const userSlice = createSlice({
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = action.payload;
+        (state as any).profile = action.payload;
         state.onboardingComplete = isProfileComplete(action.payload);
       })
       .addCase(updateUserProfile.rejected, (state, action) => {
@@ -309,7 +309,7 @@ const userSlice = createSlice({
       })
       .addCase(updateSearchRadius.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = action.payload;
+        (state as any).profile = action.payload;
 
         // Update cached radius
         const preferences = action.payload.preferences as any;

@@ -121,8 +121,8 @@ export default function OnboardingScreen() {
     if (stepId === "name") {
       if (!formData.full_name || formData.full_name.trim() === "") {
         notify.error(
-          "Please enter your name or a nickname to continue.",
-          "Required Field",
+          t("onboarding.name_or_nickname"),
+          t("common.required_field"),
         );
         return false;
       }
@@ -130,8 +130,8 @@ export default function OnboardingScreen() {
     if (stepId === "race") {
       if (formData.race_ethnicity.length === 0) {
         notify.error(
-          "Please select at least one race/ethnicity option to continue.",
-          "Required Field",
+          t("onboarding.select_one_race_ethnicity"),
+          t("common.required_field"),
         );
         return false;
       }
@@ -140,8 +140,8 @@ export default function OnboardingScreen() {
     if (stepId === "gender") {
       if (!formData.gender || formData.gender === "") {
         notify.error(
-          "Please select your gender identity to continue.",
-          "Required Field",
+          t("onboarding.select_your_gender"),
+          t("common.required_field"),
         );
         return false;
       }
@@ -379,12 +379,14 @@ export default function OnboardingScreen() {
       // 4. Update Redux and refresh auth state
       await dispatch(fetchUserProfile(user.id)).unwrap();
       await refreshOnboardingStatus();
-
+      const AppName = "TruGuide";
       notify.success(
         isEditing
-          ? "Your profile has been updated successfully."
-          : "Your profile has been set up. You can now start using the app!",
-        isEditing ? "Profile Updated!" : "Welcome to TruGuide!",
+          ? t("onboarding.profile_updated_text")
+          : t("onboarding.profile_setup_complete"),
+        isEditing
+          ? t("onboarding.profile_updated")
+          : t("common.welcome", { appName: AppName }),
       );
 
       // 5. Register push notifications for new users
@@ -413,8 +415,8 @@ export default function OnboardingScreen() {
     } else {
       // If initial setup, show alert that profile is required
       notify.info(
-        "Setting up your profile is required to use TruGuide's personalized safety features. This helps us show you relevant safety information based on your travel needs.",
-        "Profile Required",
+        t("onboarding.profile_required_text"),
+        t("profile.profile_required"),
       );
     }
   };
@@ -550,7 +552,7 @@ export default function OnboardingScreen() {
       </Text>
       <TextInput
         style={styles.nameInput}
-        placeholder={t("common.enter_your_name_or_a_nickname")}
+        placeholder={t("common.name_or_nickname")}
         value={formData.full_name}
         onChangeText={(text) => setFormData({ ...formData, full_name: text })}
         autoCapitalize="words"

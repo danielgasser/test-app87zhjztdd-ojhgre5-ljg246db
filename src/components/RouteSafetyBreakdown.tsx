@@ -274,18 +274,20 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                           </View>
                           <View style={styles.problemInfo}>
                             <Text style={styles.problemDistance}>
-                              {formatDistance(
-                                segment.distanceFromStart,
-                                distanceUnit,
-                              )}{" "}
-                              from start
+                              {t("navigation.distance_from_start", {
+                                distance: formatDistance(
+                                  segment.distanceFromStart,
+                                  distanceUnit,
+                                ),
+                              })}
                             </Text>
                             <Text style={styles.problemLength}>
-                              {formatDistance(
-                                segment.distance_meters,
-                                distanceUnit,
-                              )}{" "}
-                              long
+                              {t("navigation.distance_long", {
+                                distance: formatDistance(
+                                  segment.distance_meters,
+                                  distanceUnit,
+                                ),
+                              })}
                             </Text>
                           </View>
                         </View>

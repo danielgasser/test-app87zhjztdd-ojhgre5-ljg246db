@@ -428,7 +428,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           !searchLoading && (
             <View style={styles.noResultsContainer}>
               <Text style={styles.noResultsText}>
-                No places found for "{searchText}"
+                {t("map.no_places_found_for", { query: searchText })}
               </Text>
               <Text style={styles.noResultsSubtext}>
                 {t("navigation.try_a_different_search_term")}

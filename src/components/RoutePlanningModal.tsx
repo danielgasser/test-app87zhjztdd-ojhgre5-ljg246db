@@ -50,7 +50,7 @@ import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import i18n from "@/i18n";
 interface RoutePlanningModalProps {
   visible: boolean;
   onClose: () => void;
@@ -291,7 +291,10 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     setIsStartingNavigation(true);
     try {
       if (!userProfile) {
-        notify.error("Profile not loaded. Please try again.", "Not Ready");
+        notify.error(
+          i18n.t("profile.profile_not_ready"),
+          i18n.t("common.not_ready"),
+        );
         return;
       }
       const navigationSessionId = Crypto.randomUUID();
@@ -554,24 +557,23 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       dispatch(
         showPremiumPrompt({
           feature: "routePlanning",
-          description:
-            "Route planning is a Premium feature. Upgrade to plan safe routes tailored to your demographics.",
+          description: t("premium.feature_route_planning_text"),
         }),
       );
       return;
     }
     if (!fromLocation || !toLocation) {
       notify.error(
-        "Please set both origin and destination",
-        "Missing Information",
+        t("navigation.missing_to_from_locations"),
+        t("common.missing_information"),
       );
       return;
     }
 
     if (!userProfile) {
       notify.error(
-        "Please complete your profile to get personalized safety routes",
-        "Profile Required",
+        t("navigation.profile_required_text"),
+        t("navigation.profile_required"),
       );
       return;
     }
@@ -1033,7 +1035,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                           {selectedRoute.name}
                         </Text>
                         <Text style={styles.routeType}>
-                          {selectedRoute.route_type} route
+                          {t("navigation.type_route", {
+                            type: selectedRoute.route_type,
+                          })}
                         </Text>
                       </View>
                       <View
@@ -1063,7 +1067,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                           color={theme.colors.textSecondary}
                         />
                         <Text style={styles.metricText}>
-                          {selectedRoute.estimated_duration_minutes} min
+                          {t("map.number_unit_minutes", {
+                            count: selectedRoute.estimated_duration_minutes,
+                          })}
                         </Text>
                       </View>
                       <View style={styles.metric}>
@@ -1073,7 +1079,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                           color={theme.colors.textSecondary}
                         />
                         <Text style={styles.metricText}>
-                          {selectedRoute.distance_kilometers} km
+                          {t("map.number_unit_km", {
+                            count: selectedRoute.distance_kilometers,
+                          })}
                         </Text>
                       </View>
                     </View>

@@ -194,7 +194,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {t("profile.private_profile")}
                 </Text>
                 <Text style={styles.privateText}>
-                  {t('profile.this_user_has_set_their_profile_to')}</Text>
+                  {t("profile.this_user_has_set_their_profile_to")}
+                </Text>
               </View>
             ) : publicProfile ? (
               <>
@@ -219,7 +220,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     {publicProfile.full_name || "TruGuide User"}
                   </Text>
                   <Text style={styles.memberSince}>
-                    Member since{" "}
+                    {t("profile.member_since")}{" "}
                     {new Date(publicProfile.created_at).toLocaleDateString()}
                   </Text>
                 </View>
