@@ -795,6 +795,7 @@ export type Database = {
           age_range: string | null
           avatar_url: string | null
           created_at: string | null
+          device_metadata: Json | null
           disability_status: string[] | null
           full_name: string | null
           gender: string | null
@@ -820,6 +821,7 @@ export type Database = {
           age_range?: string | null
           avatar_url?: string | null
           created_at?: string | null
+          device_metadata?: Json | null
           disability_status?: string[] | null
           full_name?: string | null
           gender?: string | null
@@ -845,6 +847,7 @@ export type Database = {
           age_range?: string | null
           avatar_url?: string | null
           created_at?: string | null
+          device_metadata?: Json | null
           disability_status?: string[] | null
           full_name?: string | null
           gender?: string | null

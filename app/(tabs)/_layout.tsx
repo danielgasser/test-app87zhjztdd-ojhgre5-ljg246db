@@ -11,6 +11,7 @@ import Constants from "expo-constants";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
 import { useSubscriptionTier } from "@/hooks/useFeatureAccess";
 import { useTranslation } from "react-i18next";
+import { logger } from "@/utils/logger";
 
 const getAppConfig = require("../../app.config.js");
 const appConfig = getAppConfig();
@@ -64,6 +65,43 @@ export default function TabLayout() {
       // Only fetch user_profiles if onboarding is complete
       if (profile?.onboarding_complete) {
         dispatch(fetchUserProfile(user.id));
+        // Sync device metadata (fire-and-forget)
+        const currentMetadata = {
+          platform: Platform.OS,
+          os_version: String(Platform.Version),
+          app_version: appConfig.expo?.version || "unknown",
+          build_number:
+            appConfig.expo?.ios?.buildNumber ||
+            appConfig.expo?.android?.versionCode ||
+            "unknown",
+        };
+        supabase
+          .from("user_profiles")
+          .select("device_metadata")
+          .eq("id", user.id)
+          .single()
+          .then(({ data }) => {
+            const existing = data?.device_metadata as Record<
+              string,
+              string
+            > | null;
+            const needsUpdate =
+              !existing ||
+              existing.platform !== currentMetadata.platform ||
+              existing.os_version !== currentMetadata.os_version ||
+              existing.app_version !== currentMetadata.app_version;
+
+            if (needsUpdate) {
+              supabase
+                .from("user_profiles")
+                .update({ device_metadata: currentMetadata })
+                .eq("id", user.id)
+                .then(({ error }) => {
+                  if (error)
+                    logger.error("Failed to sync device metadata:", error);
+                });
+            }
+          });
       }
     };
 
