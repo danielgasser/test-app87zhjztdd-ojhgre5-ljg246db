@@ -49,6 +49,7 @@ import {
 } from "@/components/admin/AddTesterModal";
 import { adminStyles } from "@/styles/adminStyles";
 import { TestUserCard } from "@/components/admin/TestUserCard";
+import { useTranslation } from "react-i18next";
 
 type Tab = "users" | "locations" | "reviews" | "content";
 
@@ -71,6 +72,7 @@ type UserListItem =
 type UserFilter = "all" | "user" | "admin" | "tester";
 
 function UsersTab() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [testUsers, setTestUsers] = useState<TestUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -291,7 +293,7 @@ function UsersTab() {
                   size={22}
                   color={theme.colors.textOnPrimary}
                 />
-                Add Test User
+                {t("admin.add_test_user")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -374,7 +376,9 @@ function UsersTab() {
             </TouchableOpacity>
           )}
         </ScrollView>
-        <Text style={adminStyles.countLabel}>{filtered.length} results</Text>
+        <Text style={adminStyles.countLabel}>
+          {t("admin.results", { count: filtered.length })}
+        </Text>
       </View>
 
       <ScrollView
@@ -412,8 +416,10 @@ function UsersTab() {
                   {item.id}
                 </Text>
                 <Text style={adminStyles.cardMeta}>
-                  Reviews: {item.total_reviews ?? 0} · Tier:{" "}
-                  {item.subscription_tier ?? "free"}
+                  {t("admin.reviews_tier", {
+                    reviews: item.total_reviews ?? 0,
+                    tier: item.subscription_tier ?? "free",
+                  })}
                 </Text>
                 <Text style={adminStyles.cardMeta}>
                   {item.created_at
@@ -476,7 +482,7 @@ function UsersTab() {
                       adminStyles.actionBtnTextActive,
                     ]}
                   >
-                    Delete
+                    {t("common.delete")}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -500,6 +506,7 @@ function UsersTab() {
 // ─── Locations tab ────────────────────────────────────────────────────────────
 
 function LocationsTab() {
+  const { t } = useTranslation();
   const [locations, setLocations] = useState<AdminLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -587,7 +594,9 @@ function LocationsTab() {
           value={search}
           onChangeText={setSearch}
         />
-        <Text style={adminStyles.countLabel}>{filtered.length} locations</Text>
+        <Text style={adminStyles.countLabel}>
+          {t("admin.location_count", { count: filtered.length })}
+        </Text>
       </View>
       <ScrollView
         refreshControl={
@@ -617,8 +626,10 @@ function LocationsTab() {
                 {loc.city}, {loc.state_province} · {loc.place_type}
               </Text>
               <Text style={adminStyles.cardMeta}>
-                Reviews: {loc.review_count ?? 0} · Score:{" "}
-                {loc.avg_overall_score?.toFixed(1) ?? "—"}
+                {t("admin.reviews_score", {
+                  reviews: loc.review_count ?? 0,
+                  score: loc.avg_overall_score?.toFixed(1) ?? "—",
+                })}
               </Text>
             </View>
 
@@ -668,7 +679,7 @@ function LocationsTab() {
                     adminStyles.actionBtnTextActive,
                   ]}
                 >
-                  Delete
+                  {t("common.delete")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -685,6 +696,7 @@ const REVIEW_STATUSES = ["active", "flagged", "hidden", "deleted"] as const;
 type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 
 function ReviewsTab() {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState<AdminReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -811,7 +823,10 @@ function ReviewsTab() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <Text style={adminStyles.countLabel}>{filtered.length} reviews</Text>
+        <Text style={adminStyles.countLabel}>
+          {" "}
+          {t("admin.review_count", { count: filtered.length })}
+        </Text>
       </View>
 
       <ScrollView
@@ -839,8 +854,10 @@ function ReviewsTab() {
                 />
               </View>
               <Text style={adminStyles.cardSubtitle}>
-                By: {review.username ?? review.user_id.slice(0, 8)}… · Rating:{" "}
-                {review.overall_rating}/5
+                {t("admin.by_rating", {
+                  user: `${review.username ?? review.user_id.slice(0, 8)}…`,
+                  rating: review.overall_rating,
+                })}
               </Text>
               {review.comment ? (
                 <Text style={adminStyles.cardComment} numberOfLines={2}>
@@ -881,7 +898,7 @@ function ReviewsTab() {
                     adminStyles.actionBtnTextActive,
                   ]}
                 >
-                  Delete
+                  {t("common.delete")}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -895,6 +912,7 @@ function ReviewsTab() {
 // ─── Content tab ─────────────────────────────────────────────────────────────
 
 function ContentTab() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [words, setWords] = useState<BlockedWord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1036,7 +1054,7 @@ function ContentTab() {
       <ScrollView contentContainerStyle={adminStyles.listContent}>
         {/* Custom words */}
         <Text style={adminStyles.countLabel}>
-          Custom ({filteredCustom.length})
+          {t("admin.custom_count_word", { count: filteredCustom.length })}
         </Text>
         {filteredCustom.map((word) => (
           <View key={word.id} style={adminStyles.card}>
@@ -1063,7 +1081,7 @@ function ContentTab() {
 
         {/* Built-in words */}
         <Text style={[adminStyles.countLabel, { marginTop: theme.spacing.md }]}>
-          Built-in ({filteredBuiltIn.length})
+          {t("admin.built_in_count_word", { count: filteredBuiltIn.length })}
         </Text>
         {filteredBuiltIn.map((word, i) => (
           <View key={i} style={[adminStyles.card, { opacity: 0.5 }]}>
@@ -1079,6 +1097,7 @@ function ContentTab() {
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function AdminScreen() {
+  const { t } = useTranslation();
   const { isAdmin, loading } = useAdminGuard();
   const [activeTab, setActiveTab] = useState<Tab>("users");
 
@@ -1109,7 +1128,7 @@ export default function AdminScreen() {
             color={theme.colors.textOnPrimary}
           />
         </TouchableOpacity>
-        <Text style={adminStyles.headerTitle}>Admin Panel</Text>
+        <Text style={adminStyles.headerTitle}>{t("admin.title")}</Text>
         <View style={{ width: 40 }} />
       </View>
 

@@ -5,6 +5,7 @@ import * as Localization from 'expo-localization';
 import de from './locales/de.json';
 import en from './locales/en.json';
 import es from './locales/es.json';
+import fr from './locales/fr.json';
 
 const deviceLocale = Localization.getLocales()[0]?.languageCode ?? 'en';
 console.log('Detected locale:', deviceLocale);
@@ -16,6 +17,7 @@ i18n
             de: { translation: de },
             en: { translation: en },
             es: { translation: es },
+            fr: { translation: fr },
         },
         lng: deviceLocale,
         fallbackLng: 'en',
