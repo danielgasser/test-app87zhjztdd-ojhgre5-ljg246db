@@ -13,7 +13,6 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -21,6 +20,7 @@ import {
   RefreshControl,
   Platform,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -240,7 +240,8 @@ export default function DebugScreen() {
               <Text
                 style={[styles.actionButtonText, { color: theme.colors.error }]}
               >
-                {t('debug.clear_cache')}</Text>
+                {t("debug.clear_cache")}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity

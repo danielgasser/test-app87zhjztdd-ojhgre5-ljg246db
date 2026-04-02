@@ -7,11 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  Text,
   ActivityIndicator,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
-
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import {

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
   Platform,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -78,7 +78,8 @@ export default function LocationDisclosureScreen() {
 
         <Text style={styles.title}>{t("legal.location_access")}</Text>
         <Text style={styles.subtitle}>
-          {t('legal.truguide_needs_location_access_to_keep')}</Text>
+          {t("legal.truguide_needs_location_access_to_keep")}
+        </Text>
 
         <View style={styles.featureList}>
           <View style={styles.featureItem}>
@@ -94,7 +95,8 @@ export default function LocationDisclosureScreen() {
                 {t("legal.turnbyturn_navigation")}
               </Text>
               <Text style={styles.featureDescription}>
-                {t('legal.get_directions_with_realtime_safety')}</Text>
+                {t("legal.get_directions_with_realtime_safety")}
+              </Text>
             </View>
           </View>
 
@@ -107,7 +109,8 @@ export default function LocationDisclosureScreen() {
                 {t("legal.safety_alerts")}
               </Text>
               <Text style={styles.featureDescription}>
-                {t('legal.receive_notifications_when_approaching')}</Text>
+                {t("legal.receive_notifications_when_approaching")}
+              </Text>
             </View>
           </View>
 
@@ -124,7 +127,8 @@ export default function LocationDisclosureScreen() {
                 {t("legal.smart_rerouting")}
               </Text>
               <Text style={styles.featureDescription}>
-                {t('legal.get_automatic_suggestions_for_safer')}</Text>
+                {t("legal.get_automatic_suggestions_for_safer")}
+              </Text>
             </View>
           </View>
         </View>
@@ -136,13 +140,15 @@ export default function LocationDisclosureScreen() {
             color={theme.colors.primary}
           />
           <Text style={styles.infoText}>
-            {t('legal.background_location_is_used_only_during')}</Text>
+            {t("legal.background_location_is_used_only_during")}
+          </Text>
         </View>
 
         {Platform.OS === "android" && (
           <View style={styles.androidNote}>
             <Text style={styles.androidNoteText}>
-              {t('legal.on_the_next_screen_select_allow_all_the')}</Text>
+              {t("legal.on_the_next_screen_select_allow_all_the")}
+            </Text>
           </View>
         )}
       </ScrollView>

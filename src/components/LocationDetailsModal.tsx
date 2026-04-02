@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   Modal,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
@@ -38,6 +38,7 @@ import NeighborhoodStats from "./NeighborhoodStats";
 import TimeSafetyChart from "./TimeSafetyChart";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import { DragHandle } from "./DragHandle";
 
 interface SearchResult {
   id: string;
@@ -468,6 +469,8 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     >
       <View style={commonStyles.modalSheetOverlay}>
         <View style={commonStyles.modalSheetContent}>
+          <DragHandle onPress={onClose} />
+
           {/* Header */}
           <View style={commonStyles.modalSheetHeader}>
             <Text style={commonStyles.headerTitle}>

@@ -8,12 +8,12 @@ import React, {
 import {
   View,
   StyleSheet,
-  Text,
   ActivityIndicator,
   TouchableOpacity,
   Keyboard,
   Platform,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,

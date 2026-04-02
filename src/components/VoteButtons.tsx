@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   TouchableOpacity,
-  Text,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { supabase } from "@/services/supabase";

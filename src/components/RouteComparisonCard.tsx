@@ -1,11 +1,11 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { SmartRouteComparison } from "../store/locationsSlice";
 import { theme } from "@/styles/theme";

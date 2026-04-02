@@ -2,7 +2,6 @@ import { supabase } from '@/services/supabase';
 import { profaneWords, Profanity, ProfanityOptions } from '@2toad/profanity';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from './logger';
-import { useState } from 'react';
 
 const options = new ProfanityOptions();
 options.wholeWord = true;

@@ -3,7 +3,6 @@ import { theme } from "src/styles/theme";
 
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -12,8 +11,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../src/components/AppTextInput";
-
 import { Picker } from "@react-native-picker/picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";

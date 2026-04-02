@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ActivityIndicator,
   Keyboard,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";

@@ -1,7 +1,8 @@
 import React from "react";
 import { TestUser } from "@/services/adminService";
 import { TesterMetadata } from "./AddTesterModal";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
 import { adminStyles } from "@/styles/adminStyles";
@@ -77,7 +78,8 @@ export function TestUserCard({
           <Text
             style={[adminStyles.actionBtnText, adminStyles.actionBtnTextActive]}
           >
-            {t('common.remove')}</Text>
+            {t("common.remove")}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

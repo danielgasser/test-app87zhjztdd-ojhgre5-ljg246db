@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -109,7 +109,8 @@ export default function DisplaySettings() {
 
       <ScrollView style={styles.content}>
         <Text style={styles.sectionDescription}>
-          {t('settings.customize_how_times_and_distances_are')}</Text>
+          {t("settings.customize_how_times_and_distances_are")}
+        </Text>
 
         <SettingToggle
           label="Time Format"

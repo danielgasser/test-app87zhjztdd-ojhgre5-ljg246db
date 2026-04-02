@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import MapView from "react-native-maps";
 
 import { Ionicons } from "@expo/vector-icons";

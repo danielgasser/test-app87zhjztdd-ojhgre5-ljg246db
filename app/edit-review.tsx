@@ -3,7 +3,6 @@ import { theme } from "src/styles/theme";
 
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
@@ -12,8 +11,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../src/components/AppTextInput";
-
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";

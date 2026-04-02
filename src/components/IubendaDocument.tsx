@@ -3,10 +3,10 @@ import {
   View,
   StyleSheet,
   ActivityIndicator,
-  Text,
   TouchableOpacity,
   Modal,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { WebView } from "react-native-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";

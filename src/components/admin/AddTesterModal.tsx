@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Modal,
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -12,6 +11,8 @@ import {
   Keyboard,
   ActivityIndicator,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
+
 import { Ionicons } from "@expo/vector-icons";
 import { commonStyles } from "@/styles/common";
 import { theme } from "@/styles/theme";
@@ -218,7 +219,8 @@ export function AddTesterModal({
                     />
                   ) : (
                     <Text style={commonStyles.primaryButtonText}>
-                      {t('admin.add_tester')}</Text>
+                      {t("admin.add_tester")}
+                    </Text>
                   )}
                 </TouchableOpacity>
               </View>

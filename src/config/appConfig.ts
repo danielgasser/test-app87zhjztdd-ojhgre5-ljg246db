@@ -236,6 +236,9 @@ export const APP_CONFIG = {
     DANGER_ZONES_PER_HOUR: 2000,                     // Rate limit for danger zone lookups
   },
 
+  APP_COMMON: {
+    DEFAULT_MAX_FONT_MULTIPLIER: 1.4,              // Default max font size multiplier for accessibility
+  },
   // Development & Testing
   DEVELOPMENT: {
     ENABLE_ROUTE_DEBUG_LOGS: true,                   // Enable detailed route calculation logging

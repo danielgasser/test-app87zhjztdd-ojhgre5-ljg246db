@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { NeighborhoodStats as NeighborhoodStatsType } from "@/store/locationsSlice";
@@ -37,7 +38,8 @@ const NeighborhoodStats: React.FC<NeighborhoodStatsProps> = ({
     return (
       <View style={commonStyles.container}>
         <Text style={styles.emptyText}>
-          {t('map.no_census_data_available_for_this_area')}</Text>
+          {t("map.no_census_data_available_for_this_area")}
+        </Text>
       </View>
     );
   }

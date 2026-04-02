@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import {
   View,
-  Text,
   Modal,
   TouchableOpacity,
   Animated,
   Dimensions,
   TouchableWithoutFeedback,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import {
   notificationStyles,

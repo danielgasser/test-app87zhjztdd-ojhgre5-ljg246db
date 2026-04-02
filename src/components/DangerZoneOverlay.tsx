@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Polygon, Callout, Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { DangerZone } from "../types/supabase";

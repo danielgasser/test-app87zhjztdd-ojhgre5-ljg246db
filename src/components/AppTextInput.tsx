@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { TextInput, TextInputProps, View, Text } from "react-native";
+import { TextInput, TextInputProps, View } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { isProfane } from "../utils/contentFilter";
 import { commonStyles } from "@/styles/common";
 

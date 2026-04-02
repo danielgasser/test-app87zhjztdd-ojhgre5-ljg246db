@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Animated, TouchableOpacity } from "react-native";
+import { View, Animated, TouchableOpacity } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import {

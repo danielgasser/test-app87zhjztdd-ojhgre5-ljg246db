@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { router, useLocalSearchParams } from "expo-router";
 import { supabase } from "@/services/supabase";
 import { useAuth } from "@/providers/AuthProvider";
@@ -120,7 +120,9 @@ export default function AuthCallback() {
           padding: 10,
         }}
       >
-        <Text style={commonStyles.primaryButtonText}>{t("common.sign_out")}</Text>
+        <Text style={commonStyles.primaryButtonText}>
+          {t("common.sign_out")}
+        </Text>
       </TouchableOpacity>
       <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.statusText}>{status}</Text>

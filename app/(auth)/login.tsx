@@ -3,7 +3,6 @@ import { theme } from "src/styles/theme";
 
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -12,6 +11,7 @@ import {
   ScrollView,
   Keyboard,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";

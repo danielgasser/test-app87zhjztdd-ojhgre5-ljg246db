@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   Modal,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/styles/theme";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
@@ -16,6 +16,7 @@ import { GlobalPremiumPromptModal } from "./PremiumGate";
 import { commonStyles } from "@/styles/common";
 import { ModalSnackbar } from "./ModalSnackbar";
 import { useTranslation } from "react-i18next";
+import { DragHandle } from "./DragHandle";
 export interface MapFilters {
   minSafetyRating: number | null; // null = show all, 2/3/4 = minimum rating
   hasReviews: boolean; // Only show locations with reviews
@@ -179,6 +180,8 @@ export const MapFiltersModal: React.FC<MapFiltersModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.specContainer}>
+          <DragHandle onPress={onClose} />
+
           {/* Header */}
           <View style={commonStyles.header}>
             <Text style={commonStyles.headerTitle}>

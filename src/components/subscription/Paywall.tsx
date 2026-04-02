@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -9,6 +8,7 @@ import {
   Platform,
   Linking,
 } from "react-native";
+import { AppText as Text } from "@/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import {
