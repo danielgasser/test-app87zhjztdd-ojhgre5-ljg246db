@@ -49,7 +49,11 @@
     },
     "production": {
       "ios": {
-        "appleTeamId": "9KVXT96KRA"
+        "ascAppId": "6753623462",
+        "appleTeamId": "9KVXT96KRA",
+        "ascApiKeyPath": "keys/asc-key.p8",
+        "ascApiKeyIssuerId": "feeaa7ff-076c-4eb7-8f9a-45745c7c395a",
+        "ascApiKeyId": "HJULJRS532"
       },
       "android": {
         "track": "production"

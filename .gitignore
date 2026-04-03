@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+keys/
 
 # Expo
 .expo/
@@ -73,3 +74,5 @@ safepath-e097a-2db8782709cf.json
 credential.json
 
 eslint_output.json
+
+build-and-submit.sh
