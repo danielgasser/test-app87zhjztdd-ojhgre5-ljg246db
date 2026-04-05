@@ -1,7 +1,7 @@
-// v4
+// v5
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
 
 const corsHeaders = {
@@ -16,7 +16,6 @@ serve(async (req: Request) => {
 
   try {
     // Extract and validate user from JWT
-    console.log('Function executing, method:', req.method);
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -33,14 +32,14 @@ serve(async (req: Request) => {
     );
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await anonClient.auth.getUser();
-    console.log('userError:', userError, 'user:', !!user);
+    const { data: { user }, error: userError } = await anonClient.auth.getUser(token);
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
 
     // Rate limit — 30 requests per hour per user
     const rateLimit = await checkRateLimit(anonClient, user.id, 'PLACE_DETAILS');
@@ -99,7 +98,7 @@ serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error('Place details error:', error);
+    console.error('Place details error:', JSON.stringify(error), error instanceof Error ? error.message : 'not an error object', error instanceof Error ? error.stack : '');
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

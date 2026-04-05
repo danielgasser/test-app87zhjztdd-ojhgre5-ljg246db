@@ -2,7 +2,6 @@ import i18n from "@/i18n";
 import { notify } from "./notificationService";
 import { logger } from '@/utils/logger';
 import { getGoogleApiKey } from "./googleAPIKeySelector";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 /**
  * Get the user's country code from their coordinates using reverse geocoding
  * Returns ISO 3166-1 alpha-2 country code (e.g., 'ch', 'us', 'de')

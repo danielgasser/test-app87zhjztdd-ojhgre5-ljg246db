@@ -136,6 +136,6 @@ export const EDGE_CONFIG = {
         SIMILARITY_CALCULATOR: { limit: 30, window_seconds: 3600 },
         LOCATION_RECOMMENDER: { limit: 60, window_seconds: 3600 },
         PATTERN_DETECTOR: { limit: 30, window_seconds: 3600 },
-        PLACE_DETAILS: { limit: 30, windowSeconds: 3600 },
+        PLACE_DETAILS: { limit: 30, window_seconds: 3600 },
     },
 }
