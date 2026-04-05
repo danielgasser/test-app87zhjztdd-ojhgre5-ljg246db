@@ -230,8 +230,6 @@ export async function getPlaceAutocomplete(
 
         return data.predictions || [];
     } catch (error) {
-        console.log('🔍 API ERROR:', error, "URL:", url);  // ← ADD
-
         logger.error('Autocomplete error:', error);
         return [];
     }
