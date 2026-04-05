@@ -134,7 +134,9 @@ export default function ProfileBanner({
             onPress={() => handleDismiss(isLastShow)}
           >
             <Text style={commonStyles.secondaryButtonText}>
-              {isLastShow ? "Don't Show Again" : "Maybe Later"}
+              {isLastShow
+                ? t("premium.dont_show_again")
+                : t("premium.maybe_later")}
             </Text>
           </TouchableOpacity>
         </View>

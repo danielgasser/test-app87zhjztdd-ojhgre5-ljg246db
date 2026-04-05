@@ -1,7 +1,8 @@
 import i18n from "@/i18n";
 import { notify } from "./notificationService";
 import { logger } from '@/utils/logger';
-
+import { getGoogleApiKey } from "./googleAPIKeySelector";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 /**
  * Get the user's country code from their coordinates using reverse geocoding
  * Returns ISO 3166-1 alpha-2 country code (e.g., 'ch', 'us', 'de')
@@ -9,7 +10,7 @@ import { logger } from '@/utils/logger';
 export const getUserCountry = async (
     userLocation: { latitude: number; longitude: number } | null
 ): Promise<string> => {
-    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const googleApiKey = getGoogleApiKey();
 
     if (!googleApiKey || !userLocation) {
         return 'us';
@@ -52,7 +53,7 @@ export const getAddressFromCoordinates = async (
     latitude: number,
     longitude: number
 ): Promise<string | null> => {
-    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const googleApiKey = getGoogleApiKey();
 
     if (!googleApiKey) {
         logger.error('Google Maps API key not configured');

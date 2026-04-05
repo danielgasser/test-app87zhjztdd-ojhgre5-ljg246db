@@ -152,11 +152,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
     const allowed = await canSearch(userTier);
     if (!allowed) {
       notify.confirm(
-        "Search Limit Reached",
-        `You've used all ${DAILY_LIMIT} free searches today. Upgrade to Premium for unlimited searches.`,
+        t("map.search_limit_reached"),
+        t("map.search_limit_reached_text", { daily_limit: DAILY_LIMIT }),
         [
-          { text: "Maybe Later", style: "cancel", onPress: () => {} },
-          { text: "Upgrade", onPress: () => router.push("/subscription") },
+          { text: t('premium.maybe_later'), style: "cancel", onPress: () => {} },
+          { text: t('premium.upgrade'), onPress: () => router.push("/subscription") },
         ],
       );
       return;

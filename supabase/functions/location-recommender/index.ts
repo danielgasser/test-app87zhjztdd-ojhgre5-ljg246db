@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
-import { APP_CONFIG } from "../../../src/config/appConfig.ts";
+import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,12 +24,40 @@ serve(async (req: Request) => {
   }
 
   try {
+    // Extract and validate user from JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const anonClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await anonClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Rate limit check — sliding window, 60 requests per hour per user
+    const rateLimit = await checkRateLimit(anonClient, user.id, 'LOCATION_RECOMMENDER');
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit);
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     const { user_id, limit = EDGE_CONFIG.ML_PARAMS.SIMILAR_USERS_FETCH_LIMIT, min_confidence = EDGE_CONFIG.ML_PARAMS.CONFIDENCE_SETTINGS.MIN_CONFIDENCE_THRESHOLD } = await req.json()
-
     if (!user_id) {
       throw new Error('user_id is required')
     }
@@ -41,7 +69,7 @@ serve(async (req: Request) => {
         'Authorization': `Bearer ${supabaseServiceKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ user_id, limit: APP_CONFIG.RECOMMENDATIONS.MAX_RECOMMENDATIONS }) // Get more similar users for better recommendations
+      body: JSON.stringify({ user_id, limit: EDGE_CONFIG.ML_PARAMS.SIMILAR_USERS_FETCH_LIMIT }) // Get more similar users for better recommendations
     })
 
     const { similar_users } = await similarUsersResponse.json()

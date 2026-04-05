@@ -1,4 +1,5 @@
 import Purchases, {
+    LOG_LEVEL,
     PurchasesOffering,
     CustomerInfo,
     PurchasesPackage,
@@ -30,7 +31,7 @@ export const initializeRevenueCat = async (userId?: string): Promise<void> => {
         if (!apiKey) {
             throw new Error('No API key for platform');
         }
-
+        Purchases.setLogLevel(LOG_LEVEL.ERROR);
         await Purchases.configure({
             apiKey,
             appUserID: userId,

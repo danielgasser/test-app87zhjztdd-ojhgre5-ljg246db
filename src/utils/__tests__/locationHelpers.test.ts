@@ -180,7 +180,8 @@ describe('getCompleteAddressFromCoordinates', () => {
 
     it('returns null when API key is not configured', async () => {
         delete process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-
+        delete process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS;
+        delete process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID;
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
 
         expect(result).toBeNull();

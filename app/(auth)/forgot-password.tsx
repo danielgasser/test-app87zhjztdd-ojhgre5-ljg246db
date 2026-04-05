@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -27,8 +27,25 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleResetPassword = async () => {
+    if (cooldown > 0) return;
+
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
       notify.error(t("auth.please_enter_your_email_address"));
@@ -57,6 +74,8 @@ export default function ForgotPasswordScreen() {
       if (error) throw error;
 
       setEmailSent(true);
+      setCooldown(60);
+
       notify.success(
         t("auth.reset_link_sent"),
         t("common.check_inbox") + " " + trimmedEmail,
@@ -159,7 +178,9 @@ export default function ForgotPasswordScreen() {
                   onPress={() => setEmailSent(false)}
                 >
                   <Text style={styles.resendButtonText}>
-                    {t("auth.didnt_receive_the_email_try_again")}
+                    {cooldown > 0
+                      ? t("auth.resend_cooldown", { seconds: cooldown })
+                      : t("auth.didnt_receive_the_email_try_again")}
                   </Text>
                 </TouchableOpacity>
 

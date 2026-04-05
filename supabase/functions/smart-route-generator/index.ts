@@ -4,6 +4,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { decodePolyline } from '../_shared/polyline-decoder.ts';
+import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
+
 // Import Deno global type for TypeScript
 /// <reference lib="deno.ns" />
 
@@ -136,7 +138,7 @@ async function getGoogleRoute(
   waypoints: RouteCoordinate[] = [],
   heading?: number
 ): Promise<any> {
-  const googleApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+  const googleApiKey = Deno.env.get('EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_EDGE');
   if (!googleApiKey) {
     throw new Error('Google Maps API key not configured');
   }
@@ -614,6 +616,35 @@ serve(async (req) => {
         JSON.stringify({ error: 'Method not allowed' }),
         { status: 405, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
       );
+    }
+
+    // Extract and validate user from JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      );
+    }
+
+    // Rate limit check — sliding window, 20 requests per hour per user
+    const rateLimit = await checkRateLimit(supabaseClient, user.id, 'SMART_ROUTE_GENERATOR');
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit);
     }
 
     const request: SmartRouteRequest = await req.json();

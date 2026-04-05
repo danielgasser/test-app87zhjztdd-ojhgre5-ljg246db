@@ -1,6 +1,8 @@
 process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://mock.supabase.co';
 process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = 'mock-anon-key';
 process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = 'test-key';
+process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS = 'test-key';
+process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID = 'test-key';
 
 jest.mock('@sentry/react-native', () => ({
     init: jest.fn(),

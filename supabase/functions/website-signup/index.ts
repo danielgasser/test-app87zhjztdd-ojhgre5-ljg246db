@@ -18,13 +18,17 @@ const DISPOSABLE_DOMAINS = [
 
 serve(async (req) => {
   // Handle CORS
+  const origin = req.headers.get('Origin') ?? '';
+  const allowedOrigin = origin === 'https://truguide.app' ? origin : 'null';
+
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': allowedOrigin,
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin',
       },
     });
   }
@@ -36,25 +40,25 @@ serve(async (req) => {
     if (RECAPTCHA_SECRET_KEY) {
       const isHuman = await verifyRecaptcha(recaptchaToken);
       if (!isHuman) {
-        return jsonResponse({ error: 'reCAPTCHA verification failed. Please try again.' }, 400);
+        return jsonResponse({ error: 'reCAPTCHA verification failed. Please try again.' }, 400, allowedOrigin);
       }
     }
 
     // 2. Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
-      return jsonResponse({ error: 'Invalid email format' }, 400);
+      return jsonResponse({ error: 'Invalid email format' }, 400, allowedOrigin);
     }
 
     // Validate first name (optional field, but if provided must be valid)
     if (firstName && (firstName.trim().length < 1 || firstName.trim().length > 50)) {
-      return jsonResponse({ error: 'First name must be between 1 and 50 characters' }, 400);
+      return jsonResponse({ error: 'First name must be between 1 and 50 characters' }, 400, allowedOrigin);
     }
 
     // 3. Check for disposable email domains
     const domain = email.split('@')[1].toLowerCase();
     if (DISPOSABLE_DOMAINS.includes(domain)) {
-      return jsonResponse({ error: 'Disposable email addresses are not allowed' }, 400);
+      return jsonResponse({ error: 'Disposable email addresses are not allowed' }, 400, allowedOrigin);
     }
 
     // 4. Rate limiting by IP
@@ -65,7 +69,7 @@ serve(async (req) => {
       return jsonResponse({
         error: 'Too many signups. Please try again later.',
         retryAfter: rateLimit.retryAfter
-      }, 429);
+      }, 429, allowedOrigin);
     }
 
     // 5. Check if email already exists
@@ -80,7 +84,7 @@ serve(async (req) => {
       return jsonResponse({
         success: true,
         message: 'Thank you for signing up!'
-      }, 200);
+      }, 200, allowedOrigin);
     }
 
     // 6. Insert email into database
@@ -95,7 +99,7 @@ serve(async (req) => {
 
     if (insertError) {
       console.error('Database insert error:', insertError);
-      return jsonResponse({ error: 'Failed to save email' }, 500);
+      return jsonResponse({ error: 'Failed to save email' }, 500, allowedOrigin);
     }
 
     // 7. Send welcome email via Resend
@@ -112,11 +116,11 @@ serve(async (req) => {
     return jsonResponse({
       success: true,
       message: 'Thank you for signing up! Check your email for updates.'
-    }, 201);
+    }, 201, allowedOrigin);
 
   } catch (error) {
     console.error('Website signup error:', error);
-    return jsonResponse({ error: 'Internal server error' }, 500);
+    return jsonResponse({ error: 'Internal server error' }, 500, allowedOrigin);
   }
 });
 
@@ -273,12 +277,13 @@ function buildWelcomeEmail(firstName?: string): string {
   `;
 }
 
-function jsonResponse(data: any, status: number) {
+function jsonResponse(data: any, status: number, allowedOrigin: string) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowedOrigin,
+      'Vary': 'Origin',
     },
   });
 }

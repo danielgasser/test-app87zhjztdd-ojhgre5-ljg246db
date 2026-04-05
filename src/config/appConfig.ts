@@ -228,14 +228,6 @@ export const APP_CONFIG = {
     },
   },
 
-  // External API Rate Limiting
-  API_RATE_LIMITS: {
-    MAPBOX_DIRECTIONS_PER_HOUR: 2000,                // Conservative rate limit for Mapbox Directions API
-    MAPBOX_DIRECTIONS_PER_MINUTE: 60,                // Per-minute rate limit
-    SAFETY_SCORER_PER_HOUR: 1000,                    // Rate limit for our safety scoring function
-    DANGER_ZONES_PER_HOUR: 2000,                     // Rate limit for danger zone lookups
-  },
-
   APP_COMMON: {
     DEFAULT_MAX_FONT_MULTIPLIER: 1.4,              // Default max font size multiplier for accessibility
   },

@@ -127,6 +127,15 @@ export const EDGE_CONFIG = {
             demographics: 0.40,
             mlExtrapolation: 0.20
         }
-    }
-
+    },
+    FUNCTION_RATE_LIMITS: {
+        SMART_ROUTE_GENERATOR: { limit: 20, window_seconds: 3600 },
+        ROUTE_SAFETY_SCORER: { limit: 60, window_seconds: 3600 },
+        DANGER_ZONES: { limit: 60, window_seconds: 3600 },
+        SAFETY_PREDICTOR: { limit: 100, window_seconds: 3600 },
+        SIMILARITY_CALCULATOR: { limit: 30, window_seconds: 3600 },
+        LOCATION_RECOMMENDER: { limit: 60, window_seconds: 3600 },
+        PATTERN_DETECTOR: { limit: 30, window_seconds: 3600 },
+        PLACE_DETAILS: { limit: 30, windowSeconds: 3600 },
+    },
 }

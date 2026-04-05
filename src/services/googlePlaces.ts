@@ -9,7 +9,8 @@
  */
 
 import { logger } from "@/utils/logger";
-
+import { Platform } from "react-native";
+import { supabase } from "@/services/supabase";
 
 // ================================
 // TYPES
@@ -128,12 +129,19 @@ class SessionTokenManager {
 
 const sessionTokenManager = new SessionTokenManager();
 
+// Debounce state for autocomplete — prevents firing on every keystroke
+let autocompleteDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
 // ================================
 // HELPER FUNCTIONS
 // ================================
 
 function getApiKey(): string {
-    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const apiKey = Platform.select({
+        ios: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS,
+        android: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID,
+        default: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID,
+    });
     if (!apiKey) {
         throw new Error('Google Maps API key not configured');
     }
@@ -181,6 +189,15 @@ export async function getPlaceAutocomplete(
     if (query.length < 2) {
         return [];
     }
+
+    // Debounce — cancel any pending request and wait 300ms
+    if (autocompleteDebounceTimer) {
+        clearTimeout(autocompleteDebounceTimer);
+    }
+
+    await new Promise<void>((resolve) => {
+        autocompleteDebounceTimer = setTimeout(resolve, 300);
+    });
 
     const apiKey = getApiKey();
     const sessionToken = sessionTokenManager.get();
@@ -235,6 +252,7 @@ export interface PlaceDetailsOptions {
  * Call this after user selects from autocomplete
  * Automatically clears session token after call (for billing)
  */
+/*
 export async function getPlaceDetails(
     options: PlaceDetailsOptions
 ): Promise<PlaceDetails | null> {
@@ -281,7 +299,41 @@ export async function getPlaceDetails(
         return null;
     }
 }
+*/
+export async function getPlaceDetails(
+    options: PlaceDetailsOptions
+): Promise<PlaceDetails | null> {
+    const { place_id, fields, clearSession = true } = options;
 
+    const sessionToken = sessionTokenManager.get();
+
+    try {
+        const { data, error } = await supabase.functions.invoke('place-details', {
+            body: {
+                place_id,
+                fields: fields || ['place_id', 'name', 'formatted_address', 'geometry', 'types'],
+                session_token: sessionToken,
+            },
+        });
+
+        if (error) {
+            logger.error('Place details Edge Function error:', error);
+            return null;
+        }
+
+        if (clearSession) {
+            sessionTokenManager.clear();
+        }
+
+        return data.result || null;
+    } catch (error) {
+        logger.error('Place details error:', error);
+        if (clearSession) {
+            sessionTokenManager.clear();
+        }
+        return null;
+    }
+}
 // ================================
 // NEARBY SEARCH
 // ================================

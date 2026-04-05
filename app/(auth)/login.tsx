@@ -203,7 +203,53 @@ export default function LoginScreen() {
                 {t("auth.travel_with_confidence")}
               </Text>
             </View>
+            {/* Apple Sign In Button */}
+            {Platform.OS === "ios" && (
+              <>
+                <TouchableOpacity
+                  style={styles.appleButton}
+                  onPress={handleAppleSignIn}
+                >
+                  <Ionicons
+                    name="logo-apple"
+                    size={20}
+                    color={theme.colors.background}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.appleButtonText}>
+                    {t("auth.sign_in_with_apple")}
+                  </Text>
+                </TouchableOpacity>
 
+                <View style={styles.dividerContainer}>
+                  <View style={commonStyles.divider} />
+                  <Text style={styles.dividerText}>{t("auth.or")}</Text>
+                  <View style={commonStyles.divider} />
+                </View>
+              </>
+            )}
+            {/* Google Sign In Button */}
+            <TouchableOpacity
+              style={styles.googleButton}
+              onPress={handleGoogleSignIn}
+            >
+              <Ionicons
+                name="logo-google"
+                size={20}
+                color={theme.colors.background}
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.googleButtonText}>
+                {t("auth.sign_in_with_google")}
+              </Text>
+            </TouchableOpacity>
+            <View style={styles.dividerContainer}>
+              <View style={commonStyles.divider} />
+              <Text style={styles.dividerText}>{t("auth.or")}</Text>
+              <View style={commonStyles.divider} />
+            </View>
+
+            {/* EMail Sign In Form */}
             <View style={commonStyles.form}>
               <TextInput
                 style={commonStyles.input}
@@ -234,14 +280,7 @@ export default function LoginScreen() {
                   />
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={() => router.push("/(auth)/forgot-password")}
-                style={styles.forgotPassword}
-              >
-                <Text style={styles.forgotPasswordText}>
-                  {t("auth.forgot_password")}
-                </Text>
-              </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   commonStyles.primaryButton,
@@ -251,59 +290,17 @@ export default function LoginScreen() {
                 disabled={isLoading}
               >
                 <Text style={commonStyles.primaryButtonText}>
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? t("common.signing_in") : t("common.sign_in")}
                 </Text>
               </TouchableOpacity>
-
-              {/* Social Login Divider */}
-              <View style={styles.dividerContainer}>
-                <View style={commonStyles.divider} />
-                <Text style={styles.dividerText}>{t("auth.or")}</Text>
-                <View style={commonStyles.divider} />
-              </View>
-
-              {/* Apple Sign In Button */}
-              {Platform.OS === "ios" && (
-                <>
-                  <TouchableOpacity
-                    style={styles.appleButton}
-                    onPress={handleAppleSignIn}
-                  >
-                    <Ionicons
-                      name="logo-apple"
-                      size={20}
-                      color={theme.colors.background}
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={styles.appleButtonText}>
-                      {t("auth.sign_in_with_apple")}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <View style={styles.dividerContainer}>
-                    <View style={commonStyles.divider} />
-                    <Text style={styles.dividerText}>{t("auth.or")}</Text>
-                    <View style={commonStyles.divider} />
-                  </View>
-                </>
-              )}
-
-              {/* Google Sign In Button */}
               <TouchableOpacity
-                style={styles.googleButton}
-                onPress={handleGoogleSignIn}
+                onPress={() => router.push("/(auth)/forgot-password")}
+                style={styles.forgotPassword}
               >
-                <Ionicons
-                  name="logo-google"
-                  size={20}
-                  color={theme.colors.background}
-                  style={{ marginRight: 8 }}
-                />
-                <Text style={styles.googleButtonText}>
-                  {t("auth.sign_in_with_google")}
+                <Text style={styles.forgotPasswordText}>
+                  {t("auth.forgot_password")}
                 </Text>
               </TouchableOpacity>
-
               <View style={commonStyles.footer}>
                 <Text style={commonStyles.footerText}>
                   {t("auth.no_account_yet")}
@@ -342,22 +339,20 @@ const styles = StyleSheet.create({
   },
 
   eyeButton: {
-    padding: theme.spacing.md,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing.md,
   },
   passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.sm,
+    position: "relative",
   },
   passwordInput: {
-    flex: 1,
-    padding: theme.spacing.md,
-    fontSize: 16,
-    color: theme.colors.text,
+    ...commonStyles.input,
+    paddingRight: 50,
+    marginBottom: theme.spacing.sm,
   },
   forgotPassword: {
     alignSelf: "flex-end",
@@ -371,7 +366,7 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
+    marginVertical: 10,
   },
   dividerText: {
     marginHorizontal: 10,

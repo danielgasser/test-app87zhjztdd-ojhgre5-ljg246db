@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_rate_limits: {
+        Row: {
+          function_name: string
+          id: string
+          requested_at: string
+          user_id: string
+        }
+        Insert: {
+          function_name: string
+          id?: string
+          requested_at?: string
+          user_id: string
+        }
+        Update: {
+          function_name?: string
+          id?: string
+          requested_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blocked_words: {
         Row: {
           created_at: string
@@ -1071,6 +1092,19 @@ export type Database = {
         Returns: undefined
       }
       calculate_time_of_day: { Args: { visit_time: string }; Returns: string }
+      check_and_record_rate_limit: {
+        Args: {
+          p_function_name: string
+          p_limit: number
+          p_user_id: string
+          p_window_seconds: number
+        }
+        Returns: {
+          allowed: boolean
+          current_count: number
+          limit_max: number
+        }[]
+      }
       cleanup_old_notification_logs: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       cleanup_search_history: { Args: never; Returns: undefined }

@@ -22,7 +22,7 @@ module.exports = () => {
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
         config: {
-          googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+          googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS,
         },
         infoPlist: {
           CFBundleDisplayName: "TruGuide",
@@ -44,7 +44,7 @@ module.exports = () => {
           process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
         config: {
           googleMaps: {
-            apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+            apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID,
           },
         },
         adaptiveIcon: {

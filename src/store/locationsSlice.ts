@@ -24,6 +24,7 @@ import { findCorrectStepForPosition } from '@/utils/navigationHelpers';
 import NetInfo from '@react-native-community/netinfo';
 import { offlineQueue } from '../services/offlineQueue';
 import i18n from '@/i18n';
+import { getGoogleApiKey } from "@/utils/googleAPIKeySelector";
 
 type Review = Database["public"]["Tables"]["reviews"]["Row"];
 
@@ -1102,6 +1103,10 @@ export const fetchDangerZones = createAsyncThunk(
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        if (response.status === 429) {
+          notify.error(i18n.t('common.rate_limit_error'));
+          return [];
+        }
         const errorText = await response.text();
         logger.error("🛡️ Danger zones API error:", errorText);
         return [];
@@ -1149,6 +1154,10 @@ export const fetchSimilarUsers = createAsyncThunk(
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          notify.error(i18n.t('common.rate_limit_error'));
+          return [];
+        }
         logger.error("Similar users API error:", response.status);
         return [];
       }
@@ -1218,6 +1227,10 @@ export const fetchMLPredictions = createAsyncThunk(
       );
 
       if (!response.ok) {
+        if (response.status === 429) {
+          notify.error(i18n.t('common.rate_limit_error'));
+          throw new Error('rate_limited');
+        }
         const errorText = await response.text();
         throw new Error(`ML API failed with status: ${response.status} - ${errorText}`);
       }
@@ -1355,7 +1368,7 @@ export const getGoogleRoute = createAsyncThunk(
   }) => {
     const { origin, destination, waypoints } = payload;
 
-    const googleApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const googleApiKey = getGoogleApiKey();
     if (!googleApiKey) {
       throw new Error("Google Maps API key not configured");
     }
@@ -1649,6 +1662,10 @@ export const generateSmartRoute = createAsyncThunk(
 
       if (error) {
         logger.error("❌ Smart route generation failed:", error);
+        if ((error as any).status === 429) {
+          notify.error(i18n.t('common.rate_limit_route_error'));
+          return rejectWithValue('rate_limited');
+        }
         throw error;
       }
 
@@ -1848,7 +1865,7 @@ export const checkForReroute = createAsyncThunk(
             ? smartRouteError.message
             : String(smartRouteError);
 
-        if (errorMessage.includes("No safer alternative available")) {
+        if (errorMessage.includes("No safer alternative available") || errorMessage === 'rate_limited') {
           // Don't try fallback - inform user directly
           notify.confirm(
             i18n.t("navigation.no_safer_route_available"),
