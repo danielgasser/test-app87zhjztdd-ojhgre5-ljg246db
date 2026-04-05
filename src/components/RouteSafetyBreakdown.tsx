@@ -46,7 +46,10 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
       >
         <View style={styles.headerLeft}>
           <Ionicons name="map" size={18} color={theme.colors.primary} />
-          <Text style={[commonStyles.textBold, { fontSize: 16 }]}>
+          <Text
+            style={[commonStyles.textBold, { fontSize: 14, flexShrink: 1 }]}
+            numberOfLines={2}
+          >
             {t("navigation.route_breakdown")}
           </Text>
           <View style={styles.segmentCount}>
@@ -294,7 +297,7 @@ export const RouteSafetyBreakdown: React.FC<RouteSafetyBreakdownProps> = ({
                                 .map((risk: string, rIdx: number) => (
                                   <View key={rIdx} style={styles.riskTag}>
                                     <Text style={styles.riskTagText}>
-                                      {risk}
+                                      {t(risk)}
                                     </Text>
                                   </View>
                                 ))}
@@ -348,6 +351,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    flex: 1,
+    flexShrink: 1,
   },
   segmentCount: {
     backgroundColor: theme.colors.primary,
@@ -542,6 +547,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.success,
     fontWeight: "600",
+    flex: 1,
   },
 });
 

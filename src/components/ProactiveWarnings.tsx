@@ -60,7 +60,7 @@ export const ProactiveWarnings: React.FC<ProactiveWarningsProps> = ({
     if (note.includes(":")) {
       const [key, value] = note.split(":");
       const param = isNaN(Number(value))
-        ? { concerns: value }
+        ? { concerns: t(value.trim()) }
         : { count: Number(value) };
       return t(key, param);
     }

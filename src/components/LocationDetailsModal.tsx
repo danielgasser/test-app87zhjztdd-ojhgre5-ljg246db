@@ -472,7 +472,7 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
           <DragHandle onPress={onClose} />
 
           {/* Header */}
-          <View style={commonStyles.modalSheetHeader}>
+          <View style={styles.locationDetailsHeader}>
             <Text style={commonStyles.headerTitle}>
               {t("map.location_details")}
             </Text>
@@ -499,9 +499,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
                 }
                 compact
               />
-              <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close" size={24} color={theme.colors.text} />
-              </TouchableOpacity>
             </View>
           </View>
 
@@ -920,6 +917,14 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  locationDetailsHeader: {
+    flexDirection: "column",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    gap: 8,
+  },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",

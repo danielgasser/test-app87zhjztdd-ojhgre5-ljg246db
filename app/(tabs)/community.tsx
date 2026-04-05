@@ -351,7 +351,7 @@ export default function CommunityScreen() {
                 onPress={() => handleUserProfilePress(review.user_id)}
               >
                 <Text style={[styles.demographicsText, styles.clickableName]}>
-                  {t("community.review_by", {
+                  {t("review.review_by", {
                     name: review.user_demographics.full_name,
                   })}
                 </Text>

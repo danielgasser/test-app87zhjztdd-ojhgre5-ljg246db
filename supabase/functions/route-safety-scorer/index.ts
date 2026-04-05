@@ -5,6 +5,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { EDGE_CONFIG } from '../_shared/config.ts';
 import { calculateDistanceBetweenPoints } from '../_shared/distance-helpers.ts';
+import { t } from 'i18next';
 
 // Types
 interface RouteCoordinate {
@@ -282,7 +283,6 @@ async function analyzeSegmentSafety(
 
   } catch (error) {
     console.error(`Error analyzing segment ${segmentIndex}:`, error);
-
     return {
       segment_index: segmentIndex,
       start_lat: segment.start.latitude,

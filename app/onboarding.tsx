@@ -1206,13 +1206,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.card,
   },
   iosPicker: {
-    height: 200,
+    height: 250,
   },
   androidPicker: {
     height: 50,
   },
   iosPickerItem: {
-    height: 200,
+    height: 250,
+    fontSize: 26,
   },
   toggleContainer: {
     flexDirection: "row",

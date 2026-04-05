@@ -607,13 +607,13 @@ export default function ProfileScreen() {
                           </View>
                           <View style={styles.routeHistoryMeta}>
                             <Text style={styles.routeHistoryMetaText}>
-                              {route.distance_km.toFixed(1)} {t("map.km")}
+                              {route.distance_km.toFixed(1)} {t("map.unit_km")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
                               {t("common.unknown")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
-                              {route.duration_minutes} {t("map.minutes")}
+                              {route.duration_minutes} {t("map.unit_minutes")}
                             </Text>
                             <Text style={styles.routeHistoryMetaText}>
                               {t("common.unknown")}
@@ -989,7 +989,9 @@ function CollapsibleSection({
       <TouchableOpacity style={styles.sectionHeader} onPress={onToggle}>
         <View style={styles.sectionHeaderLeft}>
           <Ionicons name={icon as any} size={24} color={theme.colors.primary} />
-          <Text style={commonStyles.collapsibleTitle}>{title}</Text>
+          <Text style={[commonStyles.collapsibleTitle, { flexShrink: 1 }]}>
+            {title}
+          </Text>
         </View>
         <Ionicons
           name={isExpanded ? "chevron-up" : "chevron-down"}
@@ -1148,6 +1150,7 @@ const styles = StyleSheet.create({
   sectionHeaderLeft: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
   sectionContent: {
     padding: theme.spacing.lg,

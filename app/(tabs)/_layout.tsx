@@ -113,6 +113,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: theme.colors.primary,
+        headerTitleAllowFontScaling: false,
         tabBarInactiveTintColor: theme.colors.textLight,
         tabBarStyle: {
           backgroundColor: theme.colors.card,
@@ -129,7 +130,7 @@ export default function TabLayout() {
         headerTintColor: theme.colors.textOnPrimary,
         headerTitleStyle: {
           fontWeight: "bold",
-          fontSize: 22,
+          fontSize: 28,
         },
       }}
       tabBar={(props) => (

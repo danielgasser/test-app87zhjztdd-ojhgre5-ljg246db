@@ -32,6 +32,8 @@ import { useTranslation } from "react-i18next";
 interface NavigationModeProps {
   onExit: () => void;
   mapRef: React.RefObject<MapView | null>;
+  onControlsLayout?: (height: number) => void;
+  userZoomRef?: React.RefObject<number>;
 }
 
 const getManeuverIcon = (maneuver?: string): string => {
@@ -68,7 +70,12 @@ const getManeuverIcon = (maneuver?: string): string => {
   }
 };
 
-const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
+const NavigationMode: React.FC<NavigationModeProps> = ({
+  onExit,
+  mapRef,
+  onControlsLayout,
+  userZoomRef,
+}) => {
   useRealtimeReviews();
   const { t } = useTranslation();
 
@@ -509,7 +516,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
           center: newPosition,
           heading: navigationPosition.heading || 0,
           pitch: 60,
-          zoom: 18,
+          zoom: userZoomRef?.current ?? 18,
         },
         { duration: 500 },
       );
@@ -768,14 +775,18 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
         >
           <Ionicons
             name={getManeuverIcon(currentManeuver) as any}
-            size={60}
+            size={40}
             color={theme.colors.card}
           />
-          <Text style={styles.distanceText}>
+          <Text style={styles.primaryDistance}>
             {t("navigation.in_c")}{" "}
             {formatDistance(distanceToNextTurn, distanceUnit)}{" "}
-            {showInstructionText && currentInstruction}
           </Text>
+          {showInstructionText && (
+            <Text style={styles.instructionText} numberOfLines={2}>
+              {currentInstruction}
+            </Text>
+          )}
 
           <TouchableOpacity
             style={styles.infoButton}
@@ -802,7 +813,10 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
       </View>
 
       {/* Bottom controls */}
-      <View style={styles.controls}>
+      <View
+        style={styles.controls}
+        onLayout={(e) => onControlsLayout?.(e.nativeEvent.layout.height)}
+      >
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>{t("navigation.eta")}</Text>
@@ -827,7 +841,6 @@ const NavigationMode: React.FC<NavigationModeProps> = ({ onExit, mapRef }) => {
             </Text>
           </View>
         </View>
-
         <TouchableOpacity
           style={styles.endButton}
           onPress={handleEndNavigation}
@@ -918,8 +931,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 4,
   },
-  distanceText: {
-    fontSize: 24,
+  primaryDistance: {
+    fontSize: 16,
     fontWeight: "bold",
     color: theme.colors.card,
     marginRight: 12,

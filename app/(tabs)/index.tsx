@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   Keyboard,
   Platform,
+  Animated,
 } from "react-native";
 import { AppText as Text } from "@/components/AppText";
 import MapView, {
@@ -154,6 +155,10 @@ export default function MapScreen() {
 
   const [filtersModalVisible, setFiltersModalVisible] = useState(false);
   const [mapFilters, setMapFilters] = useState<MapFilters>(DEFAULT_FILTERS);
+  const [navControlsHeight, setNavControlsHeight] = useState(0);
+  const [dangerZoneExpanded, setDangerZoneExpanded] = useState(false);
+  const dangerZoneAnim = useRef(new Animated.Value(155)).current;
+  const navUserZoomRef = useRef<number>(18);
   // ============= REDUX & HOOKS =============
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -747,6 +752,16 @@ export default function MapScreen() {
     });
   };
 
+  const toggleDangerZonePanel = () => {
+    const toValue = dangerZoneExpanded ? 155 : 0;
+    setDangerZoneExpanded(!dangerZoneExpanded);
+    Animated.timing(dangerZoneAnim, {
+      toValue,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
   /**
    * Split route_points into chunks matching segment boundaries
    */
@@ -1119,6 +1134,16 @@ export default function MapScreen() {
       }
     }
   }, [navigationIntent]);
+
+  useEffect(() => {
+    Animated.timing(dangerZoneAnim, {
+      toValue: navigationActive ? 155 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    setDangerZoneExpanded(!navigationActive);
+  }, [navigationActive]);
+
   // Refresh nearby locations on focus
   useFocusEffect(
     useCallback(() => {
@@ -1270,10 +1295,12 @@ export default function MapScreen() {
           />
         </View>
       )}
-      <SearchBar
-        onLocationSelect={handleLocationSelected}
-        userLocation={userLocation || undefined}
-      />
+      {!navigationActive && (
+        <SearchBar
+          onLocationSelect={handleLocationSelected}
+          userLocation={userLocation || undefined}
+        />
+      )}
       <MapView
         key={mapKey}
         ref={mapRef}
@@ -1293,6 +1320,12 @@ export default function MapScreen() {
         }}
         onPoiClick={handlePoiClick}
         onRegionChangeComplete={(newRegion) => {
+          if (navigationActive) {
+            const zoom = Math.round(
+              Math.log(360 / newRegion.latitudeDelta) / Math.log(2),
+            );
+            navUserZoomRef.current = zoom;
+          }
           setRegion(newRegion);
 
           // Check for position OR zoom changes
@@ -1577,7 +1610,7 @@ export default function MapScreen() {
       <View
         style={[
           styles.recenterButtonContainer,
-          { bottom: navigationActive ? 210 : 10 },
+          { bottom: navigationActive ? navControlsHeight + 16 : 10 },
         ]}
       >
         <TouchableOpacity
@@ -1609,40 +1642,79 @@ export default function MapScreen() {
         </TouchableOpacity>
       )}
       {/* Danger Zones Control */}
-      <View
-        style={[
-          styles.dangerZoneContainer,
-          { bottom: navigationActive ? 50 : -20 }, // ✅ Dynamic
-        ]}
-      >
-        <TouchableOpacity
+      {navigationActive ? (
+        <Animated.View
           style={[
-            styles.controlButton,
-            dangerZonesVisible && styles.controlButtonActive,
+            styles.dangerZoneNavContainer,
+            { transform: [{ translateX: dangerZoneAnim }] },
           ]}
-          onPress={() => {
-            handleToggleDangerZones();
-          }}
         >
-          <Ionicons
-            name={dangerZonesVisible ? "shield" : "shield-outline"}
-            size={24}
-            color={
-              dangerZonesVisible
-                ? theme.colors.textOnPrimary
-                : theme.colors.error
-            }
-          />
-          <Text
-            style={[
-              styles.controlButtonText,
-              dangerZonesVisible && styles.controlButtonTextActive,
-            ]}
+          <TouchableOpacity
+            style={styles.dangerZoneTab}
+            onPress={toggleDangerZonePanel}
           >
-            {dangerZonesLoading ? t("common.loading") : t("map.danger_zones")}
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Ionicons
+              name={dangerZoneExpanded ? "chevron-forward" : "chevron-back"}
+              size={22}
+              color={theme.colors.error}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              styles.dangerZoneButton,
+              dangerZonesVisible && styles.controlButtonActive,
+            ]}
+            onPress={handleToggleDangerZones}
+          >
+            <Ionicons
+              name={dangerZonesVisible ? "shield" : "shield-outline"}
+              size={24}
+              color={
+                dangerZonesVisible
+                  ? theme.colors.textOnPrimary
+                  : theme.colors.error
+              }
+            />
+            <Text
+              style={[
+                styles.controlButtonText,
+                dangerZonesVisible && styles.controlButtonTextActive,
+              ]}
+            >
+              {dangerZonesLoading ? t("common.loading") : t("map.danger_zones")}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      ) : (
+        <View style={[styles.dangerZoneContainer, { bottom: -20 }]}>
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              dangerZonesVisible && styles.controlButtonActive,
+            ]}
+            onPress={handleToggleDangerZones}
+          >
+            <Ionicons
+              name={dangerZonesVisible ? "shield" : "shield-outline"}
+              size={24}
+              color={
+                dangerZonesVisible
+                  ? theme.colors.textOnPrimary
+                  : theme.colors.error
+              }
+            />
+            <Text
+              style={[
+                styles.controlButtonText,
+                dangerZonesVisible && styles.controlButtonTextActive,
+              ]}
+            >
+              {dangerZonesLoading ? t("common.loading") : t("map.danger_zones")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       {selectedRoute && !navigationActive && (
         <View style={styles.routeActionButtons}>
           <TouchableOpacity
@@ -1890,7 +1962,12 @@ export default function MapScreen() {
       )}
       {/* Navigation Mode */}
       {navigationActive && (
-        <NavigationMode onExit={handleExitNavigation} mapRef={mapRef} />
+        <NavigationMode
+          onExit={handleExitNavigation}
+          mapRef={mapRef}
+          onControlsLayout={setNavControlsHeight}
+          userZoomRef={navUserZoomRef}
+        />
       )}
       <MapFiltersModal
         visible={filtersModalVisible}
@@ -2005,6 +2082,38 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 2,
     borderColor: theme.colors.primary,
+  },
+  dangerZoneNavContainer: {
+    position: "absolute",
+    right: -14,
+    top: "52%",
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 1000,
+    elevation: 10,
+  },
+  dangerZoneTab: {
+    width: 28,
+    height: 48,
+    backgroundColor: theme.colors.card,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: theme.colors.text,
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderRightWidth: 0,
+    borderColor: theme.colors.border,
+  },
+  dangerZoneButton: {
+    marginBottom: 0,
+    marginRight: 0,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
   },
   dangerZoneContainer: {
     position: "absolute",

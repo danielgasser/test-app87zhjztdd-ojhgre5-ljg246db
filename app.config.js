@@ -5,7 +5,7 @@ module.exports = () => {
     expo: {
       name: appName,
       slug: "safepath",
-      version: "0.9.66",
+      version: "0.9.67",
       // increase build number!!!
       scheme: "safepath",
       orientation: "portrait",
@@ -17,7 +17,7 @@ module.exports = () => {
         backgroundColor: "#ffffff",
       },
       ios: {
-        buildNumber: "146",
+        buildNumber: "147",
         supportsTablet: false,
         bundleIdentifier: "com.keradaniel.safepath.app",
         associatedDomains: ["applinks:safepath.app"],
@@ -37,7 +37,7 @@ module.exports = () => {
         },
       },
       android: {
-        versionCode: 11,
+        versionCode: 12,
         minSdkVersion: 24, // Android 7.0
         targetSdkVersion: 34, // Android 14
         googleServicesFile:
