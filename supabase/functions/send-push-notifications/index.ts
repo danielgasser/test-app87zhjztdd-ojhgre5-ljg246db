@@ -375,7 +375,7 @@ serve(async (req) => {
       }
 
       // Check if current review is relevant
-      if (minDistance > 500) {
+      if (minDistance > EDGE_CONFIG.NAVIGATION.BROADCAST_ROUTE_PROXIMITY_METERS) {
         console.log(`⏭️ Skipping user ${route.user_id}: Too far (${Math.round(minDistance)}m)`);
         continue;
       }

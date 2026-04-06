@@ -1,68 +1,43 @@
 import { useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { useAppDispatch } from '../store/hooks';
-import { addReviewToFeed, fetchTrendingLocations } from '../store/locationsSlice';
+import { addReviewToFeed } from '../store/locationsSlice';
 
-export const useRealtimeReviews = () => {
+export const useRealtimeReviews = (userId: string | null = null) => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        // Create a channel for reviews table
+        // No subscription without a userId
+        if (!userId) return;
+
         const channel = supabase
-            .channel('reviews-channel')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'reviews',
-                    filter: 'status=eq.active'
-                },
-                async (payload) => {
-                    // Check user's privacy setting
-                    const { data: userProfile } = await supabase
-                        .from('user_profiles')
-                        .select('privacy_level')
-                        .eq('id', payload.new.user_id)
-                        .single();
+            .channel(`navigation-alerts:${userId}`)
+            .on('broadcast', { event: 'dangerous-review' }, (payload) => {
+                console.log('📡 Received navigation review broadcast:', payload.payload?.id);
 
-                    // Skip if user has private reviews
-                    if (userProfile?.privacy_level === 'private') {
-                        return;
-                    }
-                    // Fetch the location name for the new review
-                    const { data: location } = await supabase
-                        .from('locations')
-                        .select('name, address')
-                        .eq('id', payload.new.location_id)
-                        .single();
+                const review = payload.payload;
+                if (!review) return;
 
-                    // Format the review to match our expected structure
-                    const formattedReview = {
-                        id: payload.new.id,
-                        user_id: payload.new.user_id,
-                        location_id: payload.new.location_id,
-                        title: payload.new.title,
-                        location_name: location?.name || 'Unknown Location',
-                        location_address: location?.address || '',
-                        safety_rating: payload.new.safety_rating,
-                        overall_rating: payload.new.overall_rating,
-                        content: payload.new.content,
-                        created_at: payload.new.created_at,
-                    };
-
-                    // Dispatch to Redux
-                    dispatch(addReviewToFeed(formattedReview));
-
-                    // Refetch trending locations since a new review affects trending
-                    dispatch(fetchTrendingLocations({}));
-                }
-            )
+                dispatch(addReviewToFeed({
+                    id: review.id,
+                    user_id: review.user_id,
+                    location_id: review.location_id,
+                    title: review.title,
+                    location_name: review.location_name,
+                    location_address: review.location_address,
+                    location_latitude: review.location_latitude,
+                    location_longitude: review.location_longitude,
+                    safety_rating: review.safety_rating,
+                    overall_rating: review.overall_rating,
+                    content: review.content,
+                    created_at: review.created_at,
+                }));
+            })
             .subscribe();
 
         // Cleanup: unsubscribe when component unmounts
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [dispatch]);
+    }, [userId, dispatch]);
 };

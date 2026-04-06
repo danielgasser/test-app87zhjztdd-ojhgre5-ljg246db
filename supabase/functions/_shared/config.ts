@@ -76,7 +76,7 @@ export const EDGE_CONFIG = {
         },
     },
     NAVIGATION: {
-
+        BROADCAST_ROUTE_PROXIMITY_METERS: 1000,
         SEVERITY_LEVELS: {
             CRITICAL: { min: 1.0, max: 1.9, emoji: "🚨", label: "CRITICAL", priority: 3 },
             WARNING: { min: 2.0, max: 2.4, emoji: "⚠️", label: "WARNING", priority: 2 },

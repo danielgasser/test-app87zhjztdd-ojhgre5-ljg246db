@@ -20,7 +20,6 @@ import {
   setNavigationIntent,
 } from "src/store/locationsSlice";
 import { theme } from "src/styles/theme";
-import { useRealtimeReviews } from "src/hooks/useRealtimeReviews";
 import { APP_CONFIG } from "@/config/appConfig";
 import { router } from "expo-router";
 import type { SafetyInsight } from "@/types/supabase";
@@ -130,8 +129,6 @@ export default function CommunityScreen() {
     }
     return userSearchRadiusKm * 1000; // Convert km to meters
   };
-
-  useRealtimeReviews();
 
   useEffect(() => {
     dispatch(loadCommunityFeedMode());

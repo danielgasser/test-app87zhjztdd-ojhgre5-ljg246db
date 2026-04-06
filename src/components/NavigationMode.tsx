@@ -28,6 +28,8 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { NAVIGATION_LOCATION_TASK } from "@/tasks/navigationLocationTask";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/providers/AuthProvider";
+import { EDGE_CONFIG } from "supabase/functions/_shared/config";
 
 interface NavigationModeProps {
   onExit: () => void;
@@ -76,7 +78,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({
   onControlsLayout,
   userZoomRef,
 }) => {
-  useRealtimeReviews();
+  const { user } = useAuth();
+
+  useRealtimeReviews(user?.id ?? null);
   const { t } = useTranslation();
 
   const { timeFormat, distanceUnit } = useUserPreferences();
@@ -350,7 +354,9 @@ const NavigationMode: React.FC<NavigationModeProps> = ({
             review.location_latitude,
             review.location_longitude,
           );
-          return distance < 500; // Within 500 meters of route
+          return (
+            distance < EDGE_CONFIG.NAVIGATION.BROADCAST_ROUTE_PROXIMITY_METERS
+          );
         });
         return isNearRoute;
       });
