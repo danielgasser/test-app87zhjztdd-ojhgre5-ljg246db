@@ -21,7 +21,6 @@ import {
 import { supabase } from "src/services/supabase";
 import { theme } from "src/styles/theme";
 import { router, useLocalSearchParams } from "expo-router";
-import { decode } from "base64-arraybuffer";
 import { notify } from "@/utils/notificationService";
 import { logger } from "@/utils/logger";
 import SearchRadiusSelector from "@/components/SearchRadiusSelector";
@@ -192,74 +191,89 @@ export default function ProfileScreen() {
     try {
       setUploading(true);
 
-      // Create file name
-      const fileName = `${user?.id}-${Date.now()}.jpg`;
-      const filePath = `avatars/${fileName}`;
-
-      // Fetch the image and convert to base64
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      // Create a FileReader to convert blob to base64
-      const fileReaderInstance = new FileReader();
-      fileReaderInstance.readAsDataURL(blob);
+      // Client-side guards (UX only — server enforces too)
+      if (blob.size > 5 * 1024 * 1024) {
+        notify.error("Image must be under 5MB.");
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(blob.type)) {
+        notify.error("Only JPEG, PNG and WebP images are allowed.");
+        return;
+      }
 
-      const base64data = await new Promise((resolve) => {
-        fileReaderInstance.onload = () => {
-          const base64String = fileReaderInstance.result as string;
-          const base64 = base64String.split(",")[1];
-          resolve(base64);
-        };
-      });
-
-      // Decode base64 string
-      const { error: uploadError } = await supabase.storage
-        .from("user-avatars")
-        .upload(filePath, decode(base64data as string), {
-          contentType: "image/jpeg",
-          upsert: true,
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
       const {
-        data: { publicUrl },
-      } = supabase.storage.from("user-avatars").getPublicUrl(filePath);
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      // Build old path from existing avatar URL
+      const oldPath = profile?.avatar_url
+        ? profile.avatar_url.split("/user-avatars/")[1]
+        : null;
+
+      const formData = new FormData();
+      formData.append(
+        "file",
+        blob,
+        `avatar.${blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg"}`,
+      );
+      if (oldPath) formData.append("old_path", oldPath);
+
+      const uploadResponse = await fetch(
+        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/upload-avatar`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: formData,
+        },
+      );
+
+      if (!uploadResponse.ok) {
+        const err = await uploadResponse.json();
+        throw new Error(err.error || "Upload failed");
+      }
+
+      const { public_url } = await uploadResponse.json();
 
       await dispatch(
         updateUserProfile({
           userId: user!.id,
-          profileData: { avatar_url: publicUrl },
+          profileData: { avatar_url: public_url },
         }),
       ).unwrap();
 
-      // Refresh the profile to ensure we have the latest data
       await dispatch(fetchUserProfile(user!.id));
-      notify.success(t("profile.profile_picture_updated"), t("common.success"));
+      notify.success("Profile picture updated!", "Success");
     } catch (error: any) {
       logger.error("Upload error:", error);
-      notify.error(t("profile.failed_to_upload_image"), t("common.error"));
+      notify.error("Failed to upload image. Please try again.", "Upload Error");
     } finally {
       setUploading(false);
     }
   };
-
   const removeProfilePicture = async () => {
     try {
       setUploading(true);
 
-      // Update profile to remove avatar_url
+      // Delete from Storage
+      if (profile?.avatar_url) {
+        const oldPath = profile.avatar_url.split("/user-avatars/")[1];
+        if (oldPath) {
+          await supabase.storage.from("user-avatars").remove([oldPath]);
+        }
+      }
+
       await dispatch(
         updateUserProfile({
           userId: user!.id,
-          profileData: { avatar_url: null }, // Changed from undefined to null
+          profileData: { avatar_url: null },
         }),
       ).unwrap();
 
-      // Refresh profile to get updated data
       await dispatch(fetchUserProfile(user!.id));
-
       notify.success(t("profile.profile_picture_removed"));
     } catch (error) {
       logger.error("Remove avatar error:", error);

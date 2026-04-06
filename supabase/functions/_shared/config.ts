@@ -137,5 +137,10 @@ export const EDGE_CONFIG = {
         LOCATION_RECOMMENDER: { limit: 60, window_seconds: 3600 },
         PATTERN_DETECTOR: { limit: 30, window_seconds: 3600 },
         PLACE_DETAILS: { limit: 30, window_seconds: 3600 },
+        UPLOAD_AVATAR: { limit: 5, window_seconds: 3600 },
+    },
+    UPLOAD: {
+        MAX_AVATAR_SIZE_BYTES: 2 * 1024 * 1024, // 2MB
+        ALLOWED_MIME_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
     },
 }
