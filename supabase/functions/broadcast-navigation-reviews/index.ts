@@ -44,9 +44,25 @@ serve(async (req) => {
     }
 
     const review = record;
+    const { data: verifiedReview, error: verifyError } = await supabaseClient
+      .from("reviews")
+      .select("id, safety_rating, location_id, user_id, created_at, title, content, overall_rating")
+      .eq("id", review.id)
+      .eq("status", "active")
+      .single();
 
+    if (verifyError || !verifiedReview) {
+      console.log("⚠️ Review not found in DB — ignoring potentially spoofed payload");
+      return new Response(
+        JSON.stringify({ message: "Review not verified" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
     // Only broadcast dangerous reviews (safety_rating < 3.0)
-    if (review.safety_rating >= 3.0) {
+    if (verifiedReview.safety_rating >= 3.0) {
       console.log("✅ Review not dangerous, no broadcast needed");
       return new Response(
         JSON.stringify({ message: "Review not dangerous enough for broadcast" }),
@@ -57,7 +73,7 @@ serve(async (req) => {
       );
     }
 
-    const severity = getSeverityLevel(review.safety_rating);
+    const severity = getSeverityLevel(verifiedReview.safety_rating);
     if (!severity) {
       return new Response(
         JSON.stringify({ message: "Invalid rating for severity" }),
@@ -75,7 +91,7 @@ serve(async (req) => {
     // Fetch review location coordinates
     const { data: reviewLocationArray, error: locationError } =
       await supabaseClient.rpc("get_location_with_coords", {
-        location_id: review.location_id,
+        location_id: verifiedReview.location_id,
       });
 
     if (locationError || !reviewLocationArray || reviewLocationArray.length === 0) {
@@ -100,7 +116,7 @@ serve(async (req) => {
       .select(
         "race_ethnicity, gender, lgbtq_status, disability_status, religion"
       )
-      .eq("id", review.user_id)
+      .eq("id", verifiedReview.user_id)
       .single();
 
     // Find ALL active navigation routes (no push_token filter)
@@ -146,7 +162,7 @@ serve(async (req) => {
 
     for (const route of activeRoutes) {
       // Skip reviewer's own route
-      if (route.user_id === review.user_id) {
+      if (route.user_id === verifiedReview.user_id) {
         console.log("⏭️ Skipping reviewer's own route");
         continue;
       }
@@ -204,18 +220,18 @@ serve(async (req) => {
         type: "broadcast",
         event: "dangerous-review",
         payload: {
-          id: review.id,
-          user_id: review.user_id,
-          location_id: review.location_id,
+          id: verifiedReview.id,
+          user_id: verifiedReview.user_id,
+          location_id: verifiedReview.location_id,
           location_name: reviewLocation.name,
           location_address: reviewLocation.address || "",
           location_latitude: reviewLocation.latitude,
           location_longitude: reviewLocation.longitude,
-          safety_rating: review.safety_rating,
-          overall_rating: review.overall_rating,
-          title: review.title,
-          content: review.content,
-          created_at: review.created_at,
+          safety_rating: verifiedReview.safety_rating,
+          overall_rating: verifiedReview.overall_rating,
+          title: verifiedReview.title,
+          content: verifiedReview.content,
+          created_at: verifiedReview.created_at,
           distance_to_route: Math.round(minDistance),
           severity: severity.label,
         },
