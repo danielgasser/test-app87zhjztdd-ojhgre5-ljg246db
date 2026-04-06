@@ -196,7 +196,8 @@ serve(async (req) => {
 
       // Broadcast via Supabase Realtime
       const channel = supabaseClient.channel(
-        `navigation-alerts:${route.user_id}`
+        `navigation-alerts:${route.user_id}`,
+        { config: { private: true } }
       );
 
       await channel.send({
