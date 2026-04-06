@@ -6,7 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { EDGE_CONFIG } from '../_shared/config.ts';
 import { calculateDistanceBetweenPoints } from '../_shared/distance-helpers.ts';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
-import { isValidDemographics, isValidRouteCoordinates, validationError } from '../_shared/validators.js';
+import { isValidDemographics, isValidRouteCoordinates, validationError } from '../_shared/validators.ts';
 
 // Types
 interface RouteCoordinate {
