@@ -9,7 +9,6 @@ import { useAuth } from "@/providers/AuthProvider";
 import { DeepLinkHandler } from "@/providers/DeepLinkHandler";
 import NotificationProvider from "@/components/NotificationProvider";
 import { theme } from "@/styles/theme";
-import * as Sentry from "@sentry/react-native";
 import { NavigationController } from "@/providers/NavigationController";
 import { AuthProvider } from "@/providers/AuthProvider";
 import logoImage from "assets/images/TruGuideLogoTransparent1024x1024.png";
@@ -27,12 +26,11 @@ import { GlobalPremiumPromptModal } from "@/components/PremiumGate";
 import { useLocationTriggers } from "@/hooks/useLocationTriggers";
 import { PortalHost, PortalProvider } from "@gorhom/portal";
 import { APP_CONFIG } from "@/config/appConfig";
-// Initialize Sentry
-Sentry.init({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  debug: false,
-  tracesSampleRate: __DEV__ ? 0 : 0.1,
-});
+import Bugsnag from "@bugsnag/expo";
+import BugsnagPerformance from "@bugsnag/expo-performance";
+Bugsnag.start({ apiKey: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY! });
+BugsnagPerformance.start({ apiKey: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY! });
+Bugsnag.notify(new Error("Test error"));
 
 // Loading screen
 function SplashScreen() {
@@ -154,4 +152,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Sentry.wrap(RootLayout);
+export default RootLayout;

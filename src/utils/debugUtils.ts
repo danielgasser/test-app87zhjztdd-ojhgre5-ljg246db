@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/services/supabase';
 import { notify } from './notificationService';
 import { Alert } from 'react-native';
-import { logger } from '@sentry/react-native';
+import { logger } from '@/utils/logger';
 
 export const clearAllSessions = async () => {
     try {

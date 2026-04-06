@@ -6,6 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { EDGE_CONFIG } from '../_shared/config.ts';
 import { calculateDistanceBetweenPoints } from '../_shared/distance-helpers.ts';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
+import { isValidDemographics, isValidRouteCoordinates, validationError } from '../_shared/validators.js';
 
 // Types
 interface RouteCoordinate {
@@ -563,6 +564,13 @@ serve(async (req) => {
           }
         }
       );
+    }
+
+    if (!isValidRouteCoordinates(request.route_coordinates)) {
+      return validationError('route_coordinates must be 1-500 valid lat/lng objects');
+    }
+    if (request.user_demographics && !isValidDemographics(request.user_demographics)) {
+      return validationError('Invalid user_demographics');
     }
 
     if (request.route_coordinates.length < 2) {

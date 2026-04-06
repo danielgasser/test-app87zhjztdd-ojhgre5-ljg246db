@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
+import { isValidLatitude, isValidLongitude, isValidDemographics, validationError } from '../_shared/validators.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,6 +65,19 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     const { user_id, user_demographics, radius_miles = EDGE_CONFIG.DANGER_ZONES.SEARCH_RADIUS_MILES, latitude, longitude } = await req.json()
+
+    if (latitude !== undefined && !isValidLatitude(latitude)) {
+      return validationError('Invalid latitude');
+    }
+    if (longitude !== undefined && !isValidLongitude(longitude)) {
+      return validationError('Invalid longitude');
+    }
+    if (radius_miles !== undefined && (typeof radius_miles !== 'number' || radius_miles <= 0 || radius_miles > 500)) {
+      return validationError('radius_miles must be a number between 0 and 500');
+    }
+    if (user_demographics && !isValidDemographics(user_demographics)) {
+      return validationError('Invalid user_demographics');
+    }
     let userProfile: any;
 
     // Support both user_id and direct user_demographics

@@ -1,8 +1,7 @@
-// v5
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
+import { isValidPlaceId, validationError } from '../_shared/validators.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -54,6 +53,9 @@ serve(async (req: Request) => {
         JSON.stringify({ error: 'place_id is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+    if (!isValidPlaceId(place_id)) {
+      return validationError('Invalid place_id format');
     }
 
     const googleApiKey = Deno.env.get('EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_EDGE');

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
 import { EDGE_CONFIG } from '../_shared/config.ts';
+import { isValidLatitude, isValidLongitude, isValidDemographics, validationError } from '../_shared/validators.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -180,6 +181,15 @@ serve(async (req) => {
     // Must have either location_id OR coordinates
     if ((!location_id && (!latitude || !longitude)) || !user_demographics) {
       throw new Error('Either location_id or (latitude + longitude) and user_demographics are required');
+    }
+    if (latitude !== undefined && !isValidLatitude(latitude)) {
+      return validationError('Invalid latitude');
+    }
+    if (longitude !== undefined && !isValidLongitude(longitude)) {
+      return validationError('Invalid longitude');
+    }
+    if (!isValidDemographics(user_demographics)) {
+      return validationError('Invalid user_demographics');
     }
 
     // Get location details

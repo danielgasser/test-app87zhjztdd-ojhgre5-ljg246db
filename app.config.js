@@ -98,6 +98,9 @@ module.exports = () => {
         eas: {
           projectId: "667de704-dadd-4f11-b52a-176c9c6e4d9b",
         },
+        bugsnag: {
+          apiKey: "11f825fa348ac61140c8e8e86a0de3fb",
+        },
       },
       owner: "toesslab",
       notification: {

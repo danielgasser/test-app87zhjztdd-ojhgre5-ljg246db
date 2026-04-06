@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { EDGE_CONFIG } from '../_shared/config.ts';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
+import { validationError } from '../_shared/validators.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -61,7 +62,9 @@ serve(async (req: Request) => {
     if (!user_id) {
       throw new Error('user_id is required')
     }
-
+    if (typeof user_id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(user_id)) {
+      return validationError('Invalid user_id format');
+    }
     // Step 1: Get similar users using our similarity calculator
     const similarUsersResponse = await fetch(`${supabaseUrl}/functions/v1/similarity-calculator`, {
       method: 'POST',

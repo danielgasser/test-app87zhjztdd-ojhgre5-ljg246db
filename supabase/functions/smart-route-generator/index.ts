@@ -5,6 +5,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { decodePolyline } from '../_shared/polyline-decoder.ts';
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limiter.ts';
+import { isValidCoordinate, isValidDemographics, validationError } from '../_shared/validators.js';
 
 // Import Deno global type for TypeScript
 /// <reference lib="deno.ns" />
@@ -655,6 +656,16 @@ serve(async (req) => {
         JSON.stringify({ error: 'Missing required fields: origin, destination, user_demographics' }),
         { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
       );
+    }
+
+    if (!isValidCoordinate(request.origin)) {
+      return validationError('Invalid origin coordinates');
+    }
+    if (!isValidCoordinate(request.destination)) {
+      return validationError('Invalid destination coordinates');
+    }
+    if (!isValidDemographics(request.user_demographics)) {
+      return validationError('Invalid user_demographics');
     }
 
     // Generate optimized route

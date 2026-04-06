@@ -1,40 +1,36 @@
-import * as Sentry from "@sentry/react-native";
+import Bugsnag from "@bugsnag/expo";
 
 export const logger = {
     error: (message: string, error?: Error | unknown, context?: Record<string, any>) => {
-        // Log to console in development
-        /*
         if (__DEV__) {
-            console.error(message, error ? error : '', context ? JSON.stringify(context) : '');
-        }
-*/
-        // Always send to Sentry
-        if (context) {
-            Sentry.setContext("error_context", context);
+            console.error(message, error ?? '', context ? JSON.stringify(context) : '');
         }
 
         if (error instanceof Error) {
-            Sentry.captureException(error);
+            Bugsnag.notify(error, (event) => {
+                event.severity = 'error';
+                if (context) event.addMetadata('context', context);
+            });
         } else {
-            Sentry.captureMessage(message, "error");
+            Bugsnag.notify(new Error(message), (event) => {
+                event.severity = 'error';
+                if (context) event.addMetadata('context', context);
+            });
         }
     },
 
     warn: (message: string, context?: Record<string, any>) => {
-        // Log to console in development
         if (__DEV__) {
             console.warn(message, context);
         }
 
-        // Send to Sentry as warning
-        if (context) {
-            Sentry.setContext("warning_context", context);
-        }
-        Sentry.captureMessage(message, "warning");
+        Bugsnag.notify(new Error(message), (event) => {
+            event.severity = 'warning';
+            if (context) event.addMetadata('context', context);
+        });
     },
 
     info: (message: string, context?: Record<string, any>) => {
-        // Only log to console, not Sentry (unless you want to)
         if (__DEV__) {
             console.log(message, context);
         }
