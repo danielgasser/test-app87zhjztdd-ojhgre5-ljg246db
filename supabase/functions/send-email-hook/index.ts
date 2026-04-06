@@ -20,10 +20,6 @@ serve(async (req) => {
     const { user, email_data } = wh.verify(payload, headers);
     const { email_action_type, token, token_hash, redirect_to } = email_data;
 
-    console.log('📧 Action type:', email_action_type) // ← ADD THIS
-    console.log('👤 User email:', user.email) // ← ADD THIS // Build email content based on action type
-    console.log('🔍 Full user object:', JSON.stringify(user, null, 2))  // ← ADD THIS
-    console.log('🔍 Full email_data:', JSON.stringify(email_data, null, 2))
     let recipientEmail = user.email; // Default to current email
 
     if (email_action_type === 'email_change' && user.new_email) {

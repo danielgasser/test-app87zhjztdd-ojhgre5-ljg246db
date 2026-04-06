@@ -10,7 +10,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest --watchAll=false"
+    "test": "jest --watchAll=false",
+    "eas-build-on-success": "npx bugsnag-eas-build-on-success"
   },
   "jest": {
     "preset": "jest-expo",

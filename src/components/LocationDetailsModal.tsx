@@ -73,6 +73,10 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
   const { selectedLocation, loading } = useAppSelector(
     (state) => state.locations,
   );
+  const recentlyViewed = useAppSelector(
+    (state) => state.locations.recentlyViewed,
+  );
+
   const { user } = useAuth();
   const currentUser = user;
 
@@ -189,6 +193,20 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       placeDetails?.geometry?.location?.lng;
 
     if (!name || !latitude || !longitude) return;
+
+    // Skip if same location viewed within last 5 minutes
+    const locationKey = locationId || googlePlaceId;
+    if (locationKey) {
+      const existing = recentlyViewed.find(
+        (r) =>
+          r.location_id === locationId || r.google_place_id === googlePlaceId,
+      );
+      if (existing) {
+        const viewedAt = new Date(existing.viewed_at).getTime();
+        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+        if (viewedAt > fiveMinutesAgo) return;
+      }
+    }
 
     dispatch(
       addToRecentlyViewed({

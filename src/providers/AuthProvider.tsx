@@ -169,7 +169,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           dispatch({ type: "SET_SESSION", session: null });
           return;
         }
-        console.log("JWT:", session?.access_token);
 
         dispatch({ type: "SET_SESSION", session });
         // If we have a session, check onboarding status

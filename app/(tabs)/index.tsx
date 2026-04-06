@@ -574,7 +574,6 @@ export default function MapScreen() {
       latitude,
       longitude,
     );
-    console.log("Address data for long press:", addressData);
     if (!addressData) {
       notify.error(t("map.unable_to_get_address_for_this_location"));
       return;
@@ -600,8 +599,12 @@ export default function MapScreen() {
     setSelectedGooglePlaceId(newMarker.id);
     setModalVisible(true);
 
-    // Trigger ML prediction for this location
-    if (userProfile) {
+    // Trigger ML prediction for this location — only if not already fetched
+    if (
+      userProfile &&
+      !mlPredictions[newMarker.id] &&
+      !mlPredictionsLoading[newMarker.id]
+    ) {
       dispatch(
         fetchMLPredictions({
           locationId: newMarker.id,

@@ -29,7 +29,6 @@ export function TestUserCard({
   const { t } = useTranslation();
 
   const meta = item.metadata as TesterMetadata | null;
-  console.log("Rendering TestUserCard for", item.email, "with metadata", meta);
   return (
     <View style={commonStyles.card}>
       <View style={adminStyles.cardHeader}>
