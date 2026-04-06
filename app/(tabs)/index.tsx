@@ -114,6 +114,10 @@ export default function MapScreen() {
   const { t } = useTranslation();
 
   // ============= STATE VARIABLES =============
+  const fetchNearbyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState({
     latitude: 37.78825,
@@ -1338,7 +1342,6 @@ export default function MapScreen() {
             Math.abs(newRegion.longitudeDelta - region.longitudeDelta) > 0.02;
 
           if (positionChanged || zoomChanged) {
-            // Update map center for Community feed
             dispatch(
               setMapCenter({
                 latitude: newRegion.latitude,
@@ -1346,24 +1349,25 @@ export default function MapScreen() {
               }),
             );
 
-            // Calculate radius based on user preference
-            let fetchRadius: number;
-
-            if (userSearchRadiusKm >= 999999) {
-              // Infinite search - use a very large radius
-              fetchRadius = 999999000; // 999,999 km in meters
-            } else {
-              // Use user's preferred radius (convert km to meters)
-              fetchRadius = userSearchRadiusKm * 1000;
+            // Debounce fetchNearbyLocations — prevents rapid DB calls during panning
+            if (fetchNearbyDebounceRef.current) {
+              clearTimeout(fetchNearbyDebounceRef.current);
             }
-
-            dispatch(
-              fetchNearbyLocations({
-                latitude: newRegion.latitude,
-                longitude: newRegion.longitude,
-                radius: fetchRadius,
-              }),
-            );
+            fetchNearbyDebounceRef.current = setTimeout(() => {
+              let fetchRadius: number;
+              if (userSearchRadiusKm >= 999999) {
+                fetchRadius = 999999000;
+              } else {
+                fetchRadius = userSearchRadiusKm * 1000;
+              }
+              dispatch(
+                fetchNearbyLocations({
+                  latitude: newRegion.latitude,
+                  longitude: newRegion.longitude,
+                  radius: fetchRadius,
+                }),
+              );
+            }, 500);
           }
         }}
       >
