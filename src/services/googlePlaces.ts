@@ -9,7 +9,6 @@
  */
 
 import { logger } from "@/utils/logger";
-import { Platform } from "react-native";
 import { supabase } from "@/services/supabase";
 
 // ================================
@@ -132,37 +131,6 @@ const sessionTokenManager = new SessionTokenManager();
 // Debounce state for autocomplete — prevents firing on every keystroke
 let autocompleteDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-// ================================
-// HELPER FUNCTIONS
-// ================================
-
-function getApiKey(): string {
-    const apiKey = Platform.select({
-        ios: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS,
-        android: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID,
-        default: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID,
-    });
-    if (!apiKey) {
-        throw new Error('Google Maps API key not configured');
-    }
-    return apiKey;
-}
-
-async function fetchGoogleApi(url: string): Promise<any> {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`Google API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-        throw new Error(`Google API status: ${data.status}`);
-    }
-
-    return data;
-}
 
 // ================================
 // AUTOCOMPLETE
@@ -199,35 +167,13 @@ export async function getPlaceAutocomplete(
         autocompleteDebounceTimer = setTimeout(resolve, 300);
     });
 
-    const apiKey = getApiKey();
     const sessionToken = sessionTokenManager.get();
 
-    let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?` +
-        `input=${encodeURIComponent(query)}` +
-        `&key=${apiKey}` +
-        `&sessiontoken=${sessionToken}`;
-
-    // Location bias (show nearby results first)
-    if (latitude && longitude) {
-        url += `&location=${latitude},${longitude}`;
-        if (radius) {
-            url += `&radius=${radius}`;
-        }
-    }
-
-    // Filter by place types
-    if (types) {
-        url += `&types=${types}`;
-    }
-
-    // Filter by country/region
-    if (components) {
-        url += `&components=${components}`;
-    }
-
     try {
-        const data = await fetchGoogleApi(url);
-
+        const { data, error } = await supabase.functions.invoke('google-maps-proxy', {
+            body: { type: 'autocomplete', query, latitude, longitude, radius, types, components, session_token: sessionToken },
+        });
+        if (error) { logger.error('Autocomplete proxy error:', error); return []; }
         return data.predictions || [];
     } catch (error) {
         logger.error('Autocomplete error:', error);
@@ -354,37 +300,13 @@ export interface NearbySearchOptions {
 export async function getNearbyPlaces(
     options: NearbySearchOptions
 ): Promise<NearbySearchResult[]> {
-    const { latitude, longitude, radius, type, keyword, minprice, maxprice, opennow } = options;
-
-    const apiKey = getApiKey();
-
-    let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
-        `location=${latitude},${longitude}` +
-        `&radius=${Math.min(radius, 50000)}` +  // Max 50km
-        `&key=${apiKey}`;
-
-    if (type) {
-        url += `&type=${type}`;
-    }
-
-    if (keyword) {
-        url += `&keyword=${encodeURIComponent(keyword)}`;
-    }
-
-    if (minprice !== undefined) {
-        url += `&minprice=${minprice}`;
-    }
-
-    if (maxprice !== undefined) {
-        url += `&maxprice=${maxprice}`;
-    }
-
-    if (opennow) {
-        url += `&opennow=true`;
-    }
+    const { latitude, longitude, radius, keyword, minprice, maxprice, opennow } = options;
 
     try {
-        const data = await fetchGoogleApi(url);
+        const { data, error } = await supabase.functions.invoke('google-maps-proxy', {
+            body: { type: 'nearby_search', latitude, longitude, radius, keyword, minprice, maxprice, opennow },
+        });
+        if (error) { logger.error('Nearby search proxy error:', error); return []; }
         return data.results || [];
     } catch (error) {
         logger.error('Nearby search error:', error);
@@ -413,22 +335,11 @@ export async function forwardGeocode(
 ): Promise<GeocodingResult[]> {
     const { address, components, bounds } = options;
 
-    const apiKey = getApiKey();
-
-    let url = `https://maps.googleapis.com/maps/api/geocode/json?` +
-        `address=${encodeURIComponent(address)}` +
-        `&key=${apiKey}`;
-
-    if (components) {
-        url += `&components=${components}`;
-    }
-
-    if (bounds) {
-        url += `&bounds=${bounds.southwest.lat},${bounds.southwest.lng}|${bounds.northeast.lat},${bounds.northeast.lng}`;
-    }
-
     try {
-        const data = await fetchGoogleApi(url);
+        const { data, error } = await supabase.functions.invoke('google-maps-proxy', {
+            body: { type: 'forward_geocode', address, components, bounds },
+        });
+        if (error) { logger.error('Forward geocoding proxy error:', error); return []; }
         return data.results || [];
     } catch (error) {
         logger.error('Forward geocoding error:', error);
@@ -451,44 +362,16 @@ export async function reverseGeocode(
 ): Promise<GeocodingResult[]> {
     const { latitude, longitude, result_type, location_type } = options;
 
-    const apiKey = getApiKey();
-
-    let url = `https://maps.googleapis.com/maps/api/geocode/json?` +
-        `latlng=${latitude},${longitude}` +
-        `&key=${apiKey}`;
-
-    if (result_type && result_type.length > 0) {
-        url += `&result_type=${result_type.join('|')}`;
-    }
-
-    if (location_type && location_type.length > 0) {
-        url += `&location_type=${location_type.join('|')}`;
-    }
-
     try {
-        const data = await fetchGoogleApi(url);
+        const { data, error } = await supabase.functions.invoke('google-maps-proxy', {
+            body: { type: 'reverse_geocode', latitude, longitude, result_type, location_type },
+        });
+        if (error) { logger.error('Reverse geocoding proxy error:', error); return []; }
         return data.results || [];
     } catch (error) {
         logger.error('Reverse geocoding error:', error);
         return [];
     }
-}
-
-// ================================
-// HELPER: PHOTO URL
-// ================================
-
-/**
- * Get URL for a place photo
- * @param photoReference - from place details or nearby search
- * @param maxWidth - max width in pixels (max 1600)
- */
-export function getPhotoUrl(photoReference: string, maxWidth: number = 400): string {
-    const apiKey = getApiKey();
-    return `https://maps.googleapis.com/maps/api/place/photo?` +
-        `maxwidth=${Math.min(maxWidth, 1600)}` +
-        `&photo_reference=${photoReference}` +
-        `&key=${apiKey}`;
 }
 
 // ================================
@@ -509,8 +392,6 @@ export const googlePlacesService = {
     forwardGeocode,
     reverseGeocode,
 
-    // Photos
-    getPhotoUrl,
 
     // Session Management (if needed manually)
     session: {

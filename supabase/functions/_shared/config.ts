@@ -138,6 +138,9 @@ export const EDGE_CONFIG = {
         PATTERN_DETECTOR: { limit: 30, window_seconds: 3600 },
         PLACE_DETAILS: { limit: 30, window_seconds: 3600 },
         UPLOAD_AVATAR: { limit: 5, window_seconds: 3600 },
+        GOOGLE_MAPS_AUTOCOMPLETE: { limit: 60, window_seconds: 3600 },
+        GOOGLE_MAPS_GEOCODING: { limit: 60, window_seconds: 3600 },
+        GOOGLE_MAPS_NEARBY: { limit: 30, window_seconds: 3600 },
     },
     UPLOAD: {
         MAX_AVATAR_SIZE_BYTES: 2 * 1024 * 1024, // 2MB

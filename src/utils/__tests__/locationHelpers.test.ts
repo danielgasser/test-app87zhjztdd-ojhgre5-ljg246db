@@ -1,20 +1,19 @@
-import { getCompleteAddressFromCoordinates } from "../locationHelpers";
-
-// --- Mocks ---
-
-// Mock the logger so it doesn't produce noise in test output
-jest.mock('@/utils/logger', () => ({
-    logger: {
-        error: jest.fn(),
-        warn: jest.fn(),
-        info: jest.fn(),
+jest.mock('@/services/supabase', () => ({
+    supabase: {
+        functions: {
+            invoke: jest.fn(),
+        },
     },
 }));
 
-// Mock fetch globally — we control what it returns in each test
-global.fetch = jest.fn();
-const mockFetch = global.fetch as jest.Mock;
+import { getCompleteAddressFromCoordinates } from "../locationHelpers";
+import { supabase } from '@/services/supabase';
 
+jest.mock('@/utils/logger', () => ({
+    logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
+}));
+
+const mockInvoke = supabase.functions.invoke as jest.Mock;
 // --- Helpers ---
 
 /**
@@ -90,15 +89,15 @@ function buildGeocodingResponse(components: {
 // --- Setup / Teardown ---
 
 beforeEach(() => {
-    jest.resetAllMocks();
-    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = 'test-api-key';
+    jest.clearAllMocks();
 });
 
 // --- Test suites ---
+console.log('mockInvoke calls:', mockInvoke.mock.calls.length);
 
 describe('getCompleteAddressFromCoordinates', () => {
     it('returns full address data when all components are present', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => buildGeocodingResponse({
                 streetNumber: '123',
                 route: 'Main St',
@@ -107,7 +106,11 @@ describe('getCompleteAddressFromCoordinates', () => {
                 country: 'United States',
                 postalCode: '33601',
             }),
+            error: null,
+
         });
+        console.log('mockInvoke is:', mockInvoke.toString().substring(0, 50));
+        console.log('mockInvoke mock?', jest.isMockFunction(mockInvoke));
 
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
 
@@ -120,12 +123,14 @@ describe('getCompleteAddressFromCoordinates', () => {
     });
 
     it('returns real city from locality, not "Unknown"', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => buildGeocodingResponse({
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
             }),
+            error: null,
+
         });
 
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
@@ -135,12 +140,14 @@ describe('getCompleteAddressFromCoordinates', () => {
     });
 
     it('returns real state from administrative_area_level_1, not "Unknown"', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => buildGeocodingResponse({
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
             }),
+            error: null,
+
         });
 
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
@@ -150,13 +157,15 @@ describe('getCompleteAddressFromCoordinates', () => {
     });
 
     it('returns route name as address when no street number is present', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => buildGeocodingResponse({
                 route: 'Main St',
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
             }),
+            error: null,
+
         });
 
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
@@ -165,12 +174,14 @@ describe('getCompleteAddressFromCoordinates', () => {
     });
 
     it('returns locality as address when no street or route is present', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => buildGeocodingResponse({
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
             }),
+            error: null,
+
         });
 
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
@@ -178,18 +189,15 @@ describe('getCompleteAddressFromCoordinates', () => {
         expect(result?.address).toBe('Tampa');
     });
 
-    it('returns null when API key is not configured', async () => {
-        delete process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-        delete process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_IOS;
-        delete process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY_ANDROID;
+    it('returns null when Edge Function returns an error', async () => {
+        mockInvoke.mockResolvedValueOnce({ data: null, error: new Error('Function error') });
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
-
         expect(result).toBeNull();
-        expect(mockFetch).not.toHaveBeenCalled();
+        expect(mockInvoke).toHaveBeenCalled();
     });
 
     it('returns null when API returns non-OK status', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => ({ status: 'ZERO_RESULTS', results: [] }),
         });
 
@@ -199,7 +207,7 @@ describe('getCompleteAddressFromCoordinates', () => {
     });
 
     it('returns null when fetch throws a network error', async () => {
-        mockFetch.mockRejectedValueOnce(new Error('Network request failed'));
+        mockInvoke.mockRejectedValueOnce(new Error('Network request failed'));
 
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
 
@@ -207,7 +215,7 @@ describe('getCompleteAddressFromCoordinates', () => {
     });
 
     it('returns null when API returns empty results array', async () => {
-        mockFetch.mockResolvedValueOnce({
+        mockInvoke.mockResolvedValueOnce({
             json: async () => ({ status: 'OK', results: [] }),
         });
 
