@@ -99,7 +99,6 @@ export const getCompleteAddressFromCoordinates = async (
         const { data, error } = await supabase.functions.invoke('google-maps-proxy', {
             body: { type: 'reverse_geocode', latitude, longitude },
         });
-        console.log('invoke function is mock?', jest.isMockFunction(supabase.functions.invoke));
 
         if (error || !data?.results || data.results.length === 0) {
             logger.warn('No geocoding results found for coordinates:', { latitude, longitude });

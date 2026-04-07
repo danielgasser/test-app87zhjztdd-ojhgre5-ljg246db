@@ -30,3 +30,4 @@ export const supabase = {
         subscribe: jest.fn().mockReturnThis(),
     }),
 };
+(supabase as any).__mockId = 'global-mock';

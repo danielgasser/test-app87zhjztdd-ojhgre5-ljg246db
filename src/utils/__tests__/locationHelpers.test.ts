@@ -1,11 +1,3 @@
-jest.mock('@/services/supabase', () => ({
-    supabase: {
-        functions: {
-            invoke: jest.fn(),
-        },
-    },
-}));
-
 import { getCompleteAddressFromCoordinates } from "../locationHelpers";
 import { supabase } from '@/services/supabase';
 
@@ -93,12 +85,11 @@ beforeEach(() => {
 });
 
 // --- Test suites ---
-console.log('mockInvoke calls:', mockInvoke.mock.calls.length);
 
 describe('getCompleteAddressFromCoordinates', () => {
     it('returns full address data when all components are present', async () => {
         mockInvoke.mockResolvedValueOnce({
-            json: async () => buildGeocodingResponse({
+            data: async () => buildGeocodingResponse({
                 streetNumber: '123',
                 route: 'Main St',
                 locality: 'Tampa',
@@ -109,9 +100,6 @@ describe('getCompleteAddressFromCoordinates', () => {
             error: null,
 
         });
-        console.log('mockInvoke is:', mockInvoke.toString().substring(0, 50));
-        console.log('mockInvoke mock?', jest.isMockFunction(mockInvoke));
-
         const result = await getCompleteAddressFromCoordinates(27.9506, -82.4572);
 
         expect(result).not.toBeNull();
@@ -124,7 +112,7 @@ describe('getCompleteAddressFromCoordinates', () => {
 
     it('returns real city from locality, not "Unknown"', async () => {
         mockInvoke.mockResolvedValueOnce({
-            json: async () => buildGeocodingResponse({
+            data: async () => buildGeocodingResponse({
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
@@ -141,7 +129,7 @@ describe('getCompleteAddressFromCoordinates', () => {
 
     it('returns real state from administrative_area_level_1, not "Unknown"', async () => {
         mockInvoke.mockResolvedValueOnce({
-            json: async () => buildGeocodingResponse({
+            data: async () => buildGeocodingResponse({
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
@@ -158,7 +146,7 @@ describe('getCompleteAddressFromCoordinates', () => {
 
     it('returns route name as address when no street number is present', async () => {
         mockInvoke.mockResolvedValueOnce({
-            json: async () => buildGeocodingResponse({
+            data: async () => buildGeocodingResponse({
                 route: 'Main St',
                 locality: 'Tampa',
                 adminArea1: 'Florida',
@@ -175,7 +163,7 @@ describe('getCompleteAddressFromCoordinates', () => {
 
     it('returns locality as address when no street or route is present', async () => {
         mockInvoke.mockResolvedValueOnce({
-            json: async () => buildGeocodingResponse({
+            data: async () => buildGeocodingResponse({
                 locality: 'Tampa',
                 adminArea1: 'Florida',
                 country: 'United States',
