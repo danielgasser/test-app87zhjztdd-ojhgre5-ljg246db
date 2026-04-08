@@ -30,7 +30,7 @@ export function isValidPlaceId(value: unknown): boolean {
 
 export function isValidRouteCoordinates(coords: unknown): boolean {
     if (!Array.isArray(coords)) return false;
-    if (coords.length === 0 || coords.length > 500) return false;
+    if (coords.length === 0 || coords.length > 50000) return false;
     return coords.every(isValidCoordinate);
 }
 

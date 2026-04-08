@@ -88,7 +88,7 @@ serve(async (req: Request) => {
 
       case 'reverse_geocode': {
         const { latitude, longitude, result_type, location_type } = params;
-        if (!isValidCoordinate(latitude, longitude)) {
+        if (!isValidCoordinate({ latitude, longitude })) {
           return validationError('Invalid coordinates');
         }
         googleUrl = `${GEOCODE_BASE}?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`;
@@ -112,7 +112,7 @@ serve(async (req: Request) => {
 
       case 'nearby_search': {
         const { latitude, longitude, radius, type: placeType, keyword, minprice, maxprice, opennow } = params;
-        if (!isValidCoordinate(latitude, longitude)) {
+        if (!isValidCoordinate({ latitude, longitude })) {
           return validationError('Invalid coordinates');
         }
         googleUrl = `${PLACES_BASE}/nearbysearch/json?location=${latitude},${longitude}&radius=${Math.min(Number(radius) || 5000, 50000)}&key=${GOOGLE_API_KEY}`;
