@@ -676,7 +676,7 @@ export default function MapScreen() {
     try {
       const permissionPromise = Location.requestForegroundPermissionsAsync();
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Permission timeout")), 5000),
+        setTimeout(() => reject(new Error("Permission timeout")), 15000),
       );
       const { status } = (await Promise.race([
         permissionPromise,

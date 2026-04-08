@@ -130,6 +130,7 @@ export const EDGE_CONFIG = {
     },
     FUNCTION_RATE_LIMITS: {
         SMART_ROUTE_GENERATOR: { limit: 20, window_seconds: 3600 },
+        GET_ROUTE: { limit: 20, window_seconds: 3600 },
         ROUTE_SAFETY_SCORER: { limit: 60, window_seconds: 3600 },
         DANGER_ZONES: { limit: 60, window_seconds: 3600 },
         SAFETY_PREDICTOR: { limit: 100, window_seconds: 3600 },

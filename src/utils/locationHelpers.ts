@@ -99,7 +99,7 @@ export const getCompleteAddressFromCoordinates = async (
         const { data, error } = await supabase.functions.invoke('google-maps-proxy', {
             body: { type: 'reverse_geocode', latitude, longitude },
         });
-
+        console.log('invoke result:', JSON.stringify({ data, error }));
         if (error || !data?.results || data.results.length === 0) {
             logger.warn('No geocoding results found for coordinates:', { latitude, longitude });
             return null;
@@ -117,7 +117,7 @@ export const getCompleteAddressFromCoordinates = async (
         const route = getComponent('route');
         const address = streetNumber && route
             ? `${streetNumber} ${route}`
-            : route || result.formatted_address;
+            : route || getComponent('locality') || result.formatted_address;
 
         const city = getComponent('locality') ||
             getComponent('administrative_area_level_2') ||

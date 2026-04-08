@@ -786,18 +786,20 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               size={20}
               color={theme.colors.textSecondary}
             />
-            <TextInput
-              filtered={false}
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={
-                activeInput === "from"
-                  ? t("navigation.search_for_starting_point")
-                  : t("navigation.search_for_destination")
-              }
-              autoFocus
-            />
+            <View style={{ flex: 1 }}>
+              <TextInput
+                filtered={false}
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={
+                  activeInput === "from"
+                    ? t("navigation.search_for_starting_point")
+                    : t("navigation.search_for_destination")
+                }
+                autoFocus
+              />
+            </View>
             {searchLoading && (
               <ActivityIndicator size="small" color={theme.colors.primary} />
             )}
@@ -1136,7 +1138,6 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.backgroundSecondary,
   },
   searchInput: {
-    flex: 1,
     marginLeft: 12,
     fontSize: 16,
   },

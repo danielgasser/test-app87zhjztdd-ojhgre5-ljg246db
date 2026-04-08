@@ -76,3 +76,4 @@ credential.json
 eslint_output.json
 
 build-and-submit.sh
+gitpush.sh

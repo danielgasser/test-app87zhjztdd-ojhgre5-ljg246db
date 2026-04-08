@@ -1449,6 +1449,33 @@ export const getGoogleRoute = createAsyncThunk(
   }
 );
 
+export const getRouteViaEdge = createAsyncThunk(
+  'locations/getRouteViaEdge',
+  async (payload: {
+    origin: RouteCoordinate;
+    destination: RouteCoordinate;
+    waypoints?: RouteCoordinate[];
+  }) => {
+    const { origin, destination, waypoints } = payload;
+
+    const { data, error } = await supabase.functions.invoke('get-route-fallback', {
+      body: { origin, destination, waypoints: waypoints ?? [] },
+    });
+
+    if (error) throw error;
+    if (!data?.routes || data.routes.length === 0) {
+      throw new Error('No routes returned from get-route-fallback');
+    }
+
+    return data.routes as {
+      duration: number;
+      distance: number;
+      geometry: { coordinates: [number, number][]; type: string };
+      steps: NavigationStep[];
+    }[];
+  }
+);
+
 // Helper function to decode Google"s polyline format
 function decodePolyline(encoded: string): [number, number][] {
   const coordinates: [number, number][] = [];
@@ -1493,32 +1520,58 @@ export const generateSafeRoute = createAsyncThunk(
   "locations/generateSafeRoute",
   async (routeRequest: RouteRequest, { rejectWithValue, dispatch }) => {
     try {
-      // Step 1: Get route from Mapbox
-      const mapboxRoutes = await dispatch(getGoogleRoute({
-        origin: routeRequest.origin,
-        destination: routeRequest.destination,
-        profile: "driving"
-      })).unwrap();
-
-      if (!mapboxRoutes || mapboxRoutes.length === 0) {
-        throw new Error("No routes found from Mapbox");
+      // Step 1: Get route — try Edge Function first, fall back to client-side
+      let routes;
+      try {
+        routes = await dispatch(getRouteViaEdge({
+          origin: routeRequest.origin,
+          destination: routeRequest.destination,
+        })).unwrap();
+      } catch (edgeError) {
+        logger.error("⚠️ get-route-fallback failed, falling back to client-side routing:", edgeError);
+        routes = await dispatch(getGoogleRoute({
+          origin: routeRequest.origin,
+          destination: routeRequest.destination,
+          profile: "driving",
+        })).unwrap();
       }
 
-      const primaryRoute = mapboxRoutes[0];
+      if (!routes || routes.length === 0) {
+        throw new Error("No routes found");
+      }
+
+      const primaryRoute = routes[0];
 
       // Step 2: Convert coordinates for safety analysis
       const routeCoordinates: RouteCoordinate[] = primaryRoute.geometry.coordinates.map(
         ([lng, lat]: [number, number]) => ({
           latitude: lat,
-          longitude: lng
+          longitude: lng,
         })
       );
 
-      // Step 3: Calculate route safety
-      const safetyAnalysis = await dispatch(calculateRouteSafety({
-        route_coordinates: routeCoordinates,
-        user_demographics: routeRequest.user_demographics
-      })).unwrap();
+      // Step 3: Calculate route safety — best-effort, never blocks routing
+      let safetyAnalysis: RouteSafetyAnalysis;
+      try {
+        safetyAnalysis = await dispatch(calculateRouteSafety({
+          route_coordinates: routeCoordinates,
+          user_demographics: routeRequest.user_demographics,
+        })).unwrap();
+      } catch (safetyError) {
+        logger.error("⚠️ Safety analysis unavailable, using placeholder:", safetyError);
+        safetyAnalysis = {
+          overall_route_score: 0,
+          confidence_score: null,
+          confidence: 0,
+          segment_scores: [],
+          danger_zones_intersected: 0,
+          high_risk_segments: 0,
+          total_segments: 0,
+          safety_notes: ["navigation.route_note_analysis_unavailable"],
+          safety_summary: { safe_segments: 0, mixed_segments: 0, unsafe_segments: 0 },
+          analysis_timestamp: new Date().toISOString(),
+        };
+      }
 
       // Step 4: Create SafeRoute object
       const routeName = determineBestRouteName(safetyAnalysis);
@@ -1532,19 +1585,19 @@ export const generateSafeRoute = createAsyncThunk(
         steps: primaryRoute.steps,
         route_points: routeCoordinates,
         estimated_duration_minutes: Math.round(primaryRoute.duration / 60),
-        distance_kilometers: Math.round(primaryRoute.distance / 1000 * 10) / 10,
+        distance_kilometers: Math.round((primaryRoute.distance / 1000) * 10) / 10,
         safety_analysis: safetyAnalysis,
         created_at: new Date().toISOString(),
         mapbox_data: {
           duration: primaryRoute.duration,
           distance: primaryRoute.distance,
-          geometry: primaryRoute.geometry
-        }
+          geometry: primaryRoute.geometry,
+        },
       };
 
       return {
         route: safeRoute,
-        mapbox_routes: mapboxRoutes
+        mapbox_routes: routes,
       };
 
     } catch (error) {

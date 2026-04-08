@@ -155,8 +155,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
         t("map.search_limit_reached"),
         t("map.search_limit_reached_text", { daily_limit: DAILY_LIMIT }),
         [
-          { text: t('premium.maybe_later'), style: "cancel", onPress: () => {} },
-          { text: t('premium.upgrade'), onPress: () => router.push("/subscription") },
+          {
+            text: t("premium.maybe_later"),
+            style: "cancel",
+            onPress: () => {},
+          },
+          {
+            text: t("premium.upgrade"),
+            onPress: () => router.push("/subscription"),
+          },
         ],
       );
       return;
@@ -305,24 +312,26 @@ const SearchBar: React.FC<SearchBarProps> = ({
               color={theme.colors.textSecondary}
               style={styles.searchIcon}
             />
-            <TextInput
-              filtered={false}
-              style={styles.searchInput}
-              placeholder={t("map.search_for_places")}
-              value={searchText}
-              onChangeText={(text) => {
-                setSearchText(text);
-                performSearch(text);
-              }}
-              onFocus={() => {
-                setShowResults(true);
-                onSearchToggle?.(true);
-              }}
-              autoCorrect={false}
-              autoCapitalize="none"
-              returnKeyType="search"
-              onSubmitEditing={() => performSearch(searchText)}
-            />
+            <View style={{ flex: 1 }}>
+              <TextInput
+                filtered={false}
+                style={styles.searchInput}
+                placeholder={t("map.search_for_places")}
+                value={searchText}
+                onChangeText={(text) => {
+                  setSearchText(text);
+                  performSearch(text);
+                }}
+                onFocus={() => {
+                  setShowResults(true);
+                  onSearchToggle?.(true);
+                }}
+                autoCorrect={false}
+                autoCapitalize="none"
+                returnKeyType="search"
+                onSubmitEditing={() => performSearch(searchText)}
+              />
+            </View>
             {(searchText.length > 0 || searchLoading) && (
               <TouchableOpacity
                 style={styles.clearButton}
@@ -472,6 +481,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   searchInputContainer: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
