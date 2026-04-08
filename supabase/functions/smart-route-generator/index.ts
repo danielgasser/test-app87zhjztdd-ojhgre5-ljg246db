@@ -1,3 +1,5 @@
+// V1
+
 // supabase/functions/smart-route-generator/index.ts
 // PURPOSE: Generate demographically-safe routes that actively avoid danger zones
 
@@ -278,16 +280,17 @@ async function getGoogleRoute(
 async function scoreRoute(
   routeCoordinates: RouteCoordinate[],
   userDemographics: UserDemographics,
+  authHeader: string,
   routePreferences?: { avoid_evening_danger?: boolean; max_detour_minutes?: number; prioritize_safety?: boolean }
 ): Promise<any> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
-
+  console.log(`🗺️ scoreRoute: sending ${routeCoordinates.length} coords, first:`, JSON.stringify(routeCoordinates[0]));
   const response = await fetch(`${supabaseUrl}/functions/v1/route-safety-scorer`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${supabaseKey}`
+      'Authorization': authHeader
     },
     body: JSON.stringify({
       route_coordinates: routeCoordinates,
@@ -299,6 +302,8 @@ async function scoreRoute(
   });
 
   if (!response.ok) {
+    const errorBody = await response.text();
+    console.error(`route-safety-scorer returned ${response.status}:`, errorBody);
     throw new Error('Route safety scoring failed');
   }
 
@@ -412,7 +417,7 @@ async function findSafeBypassWaypoint(
  * Generate optimized route with safe waypoints
  */
 async function generateOptimizedRoute(
-  request: SmartRouteRequest
+  request: SmartRouteRequest, authHeader: string
 ): Promise<SmartRouteResponse> {
 
   console.log('🚀 Starting smart route generation...');
@@ -428,7 +433,7 @@ async function generateOptimizedRoute(
 
   // Step 2: Score the original route
   console.log('🔍 Step 2: Scoring original route...');
-  const originalSafety = await scoreRoute(originalCoords, request.user_demographics, request.route_preferences);
+  const originalSafety = await scoreRoute(originalCoords, request.user_demographics, authHeader, request.route_preferences);
   console.log(`📊 Original route safety: ${originalSafety.overall_route_score.toFixed(2)}/5.0`);
   console.log(`⚠️ Danger zones intersected: ${originalSafety.danger_zones_intersected || 0}`);
   console.log(`🚨 High risk segments: ${originalSafety.high_risk_segments || 0}`);
@@ -533,7 +538,7 @@ async function generateOptimizedRoute(
 
   // Step 7: Score the optimized route
   console.log('🔍 Step 6: Scoring optimized route...');
-  const optimizedSafety = await scoreRoute(optimizedCoords, request.user_demographics, request.route_preferences);
+  const optimizedSafety = await scoreRoute(optimizedCoords, request.user_demographics, authHeader, request.route_preferences);
 
   // Step 8: Calculate improvements
   const originalTime = originalRoute.duration / 60; // convert to minutes
@@ -669,7 +674,7 @@ serve(async (req) => {
     }
 
     // Generate optimized route
-    const result = await generateOptimizedRoute(request);
+    const result = await generateOptimizedRoute(request, authHeader);
 
     return new Response(
       JSON.stringify(result),
