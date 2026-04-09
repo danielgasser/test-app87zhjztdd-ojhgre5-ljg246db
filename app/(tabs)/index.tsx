@@ -14,6 +14,7 @@ import {
   Platform,
   Animated,
   Linking,
+  AppState,
 } from "react-native";
 import { AppText as Text } from "@/components/AppText";
 import MapView, {
@@ -194,7 +195,7 @@ export default function MapScreen() {
     (state: any) => state.user.profile,
     shallowEqual,
   );
-  const isAppReady = userId && userProfile && userLocation;
+  const isAppReady = userId && userProfile;
 
   const bannerState = useAppSelector(
     (state: any) => state.profileBanner,
@@ -879,7 +880,8 @@ export default function MapScreen() {
 
     const startLocationUpdates = async () => {
       if (!locationPermission) return;
-
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status !== "granted") return;
       try {
         locationSubscription = await Location.watchPositionAsync(
           {
@@ -1168,6 +1170,34 @@ export default function MapScreen() {
     }, [navigationIntent]),
   );
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextState) => {
+        if (nextState === "active") {
+          const { status } = await Location.getForegroundPermissionsAsync();
+          if (status === "granted") {
+            if (!locationPermission) {
+              setLocationPermission(true);
+              const location = await Location.getCurrentPositionAsync({});
+              if (location) {
+                dispatch(
+                  setUserLocation({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                  }),
+                );
+              }
+            }
+          } else {
+            setLocationPermission(false);
+          }
+        }
+      },
+    );
+    return () => subscription.remove();
+  }, [locationPermission]);
+
   // ============= CONDITIONAL RENDERS =============
   if (loading && nearbyLocations.length === 0 && !mapReady) {
     return (
@@ -1179,16 +1209,7 @@ export default function MapScreen() {
       </View>
     );
   }
-  if (!userLocation) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={commonStyles.loadingText}>
-          {t("map.getting_your_location")}
-        </Text>
-      </View>
-    );
-  }
+
   if (!isAppReady) {
     return (
       <View style={styles.centerContainer}>
@@ -2374,7 +2395,7 @@ const styles = StyleSheet.create({
   },
   locationPermissionBanner: {
     position: "absolute",
-    top: 60,
+    top: 130,
     left: 16,
     right: 16,
     zIndex: 999,

@@ -11,7 +11,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest --watchAll=false",
-    "eas-build-on-success": "if [ \"$EAS_BUILD_PROFILE\" = \"production\" ]; then if [ \"$EAS_BUILD_PLATFORM\" = \"android\" ]; then npx bugsnag-eas-build-on-success --version-name=$EAS_BUILD_VERSION --version-code=$EAS_BUILD_VERSION_CODE; else npx bugsnag-eas-build-on-success; fi; fi"
+    "eas-build-on-success": "if [ \"$EAS_BUILD_PROFILE\" = \"production\" ]; then if [ \"$EAS_BUILD_PLATFORM\" = \"android\" ]; then node_modules/@bugsnag/cli/bin/bugsnag-cli upload react-native-android --api-key=$EXPO_PUBLIC_BUGSNAG_API_KEY --version-name=0.9.69 --version-code=13 --project-root=/home/expo/workingdir/build /home/expo/workingdir/build; else npx bugsnag-eas-build-on-success; fi; fi"
   },
   "jest": {
     "preset": "jest-expo",

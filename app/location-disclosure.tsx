@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     gap: theme.spacing.md,
     marginBottom: theme.spacing.md,
+    zIndex: 100,
   },
   infoText: {
     flex: 1,

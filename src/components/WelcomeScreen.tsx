@@ -117,7 +117,7 @@ const WelcomeScreenNew = () => {
 
         {/* Hero Text */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>{t("profile.hero_title")}</Text>
+          <Text style={styles.heroTitle}>{t("common.hero_title")}</Text>
 
           <Text style={styles.heroSubtitle}>
             {t("profile.the_first_gps_app_that_shows_you_how")}
