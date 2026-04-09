@@ -30,7 +30,6 @@ import Bugsnag from "@bugsnag/expo";
 import BugsnagPerformance from "@bugsnag/expo-performance";
 Bugsnag.start({ apiKey: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY! });
 BugsnagPerformance.start({ apiKey: process.env.EXPO_PUBLIC_BUGSNAG_API_KEY! });
-Bugsnag.notify(new Error("Test error"));
 
 // Loading screen
 function SplashScreen() {

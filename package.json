@@ -102,7 +102,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@bugsnag/plugin-expo-eas-sourcemaps": "^55.0.0",
+    "@bugsnag/plugin-expo-eas-sourcemaps": "^54.1.0",
     "@bugsnag/source-maps": "^2.3.3",
     "@eslint/eslintrc": "^3.3.3",
     "@testing-library/react-native": "^13.3.3",

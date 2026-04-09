@@ -37,7 +37,7 @@ module.exports = () => {
         },
       },
       android: {
-        versionCode: 14,
+        versionCode: 15,
         minSdkVersion: 24, // Android 7.0
         targetSdkVersion: 34, // Android 14
         googleServicesFile:
