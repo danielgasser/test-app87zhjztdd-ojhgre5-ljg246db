@@ -115,6 +115,8 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     useFeatureAccess("routePlanning");
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const initialDestinationApplied = useRef(false);
+
   // Check profile completeness for safe routing
   const profileCheck = React.useMemo(() => {
     if (!userProfile) return { canUse: true, missingFields: [] };
@@ -174,7 +176,13 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
   }, [visible, userLocation, fromLocation]);
 
   useEffect(() => {
-    if (visible && initialDestination && !toLocation) {
+    if (
+      visible &&
+      initialDestination &&
+      !toLocation &&
+      !initialDestinationApplied.current
+    ) {
+      initialDestinationApplied.current = true;
       setToLocation({
         id: initialDestination.id,
         name: initialDestination.name,
@@ -520,9 +528,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
               query: location.name,
               selectedLocationId:
                 location.source === "database" ? location.id : undefined,
-              selectedName: location.name,
-              selectedLatitude: location.latitude,
-              selectedLongitude: location.longitude,
+              selectedName: details.name,
+              selectedLatitude: details.geometry.location.lat,
+              selectedLongitude: details.geometry.location.lng,
               searchContext: "route",
             }),
           );

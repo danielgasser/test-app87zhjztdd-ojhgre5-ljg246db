@@ -757,6 +757,7 @@ export default function MapScreen() {
           }
         : {},
     });
+    setSearchMarker(null);
   };
 
   const toggleDangerZonePanel = () => {
@@ -2023,20 +2024,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     borderRadius: 12,
   },
-  addLocationButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: APP_CONFIG.MAP_MARKERS.COLOR_SAFE,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    shadowColor: theme.colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
   viewLocationButton: {
     backgroundColor: APP_CONFIG.MAP_MARKERS.COLOR_NO_REVIEWS,
   },
@@ -2301,8 +2288,8 @@ const styles = StyleSheet.create({
   routeControls: {
     position: "absolute",
     top: 10,
-    left: 20,
-    right: 20,
+    left: 16,
+    right: 16,
     zIndex: 1000,
     elevation: 10,
   },

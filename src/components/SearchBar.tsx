@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     backgroundColor: theme.colors.background,
-    borderRadius: 12,
+    borderRadius: 8,
     shadowColor: theme.colors.overlay,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
