@@ -26,6 +26,7 @@ import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import * as ExpoLocation from "expo-location";
 
 const getOnboardingSteps = (t: (key: string) => string) => [
   { id: "welcome", title: t("onboarding.welcome_to_truguide") },
@@ -37,6 +38,7 @@ const getOnboardingSteps = (t: (key: string) => string) => [
   { id: "religion", title: t("onboarding.religious_identity") },
   { id: "age", title: t("onboarding.age_range") },
   { id: "privacy", title: t("onboarding.privacy") },
+  { id: "location", title: t("onboarding.enable_location") },
 ];
 
 const FIELD_TO_STEP_MAP: { [key: string]: number } = {
@@ -257,9 +259,13 @@ export default function OnboardingScreen() {
     if (!validateMandatoryFields(currentStepId)) {
       return;
     }
-
-    if (currentStep < ONBOARDING_STEPS.length - 1) {
-      setCurrentStep(currentStep + 1);
+    let nextStep = currentStep + 1;
+    // Skip location step when editing existing profile
+    if (isEditing && ONBOARDING_STEPS[nextStep]?.id === "location") {
+      nextStep++;
+    }
+    if (nextStep < ONBOARDING_STEPS.length) {
+      setCurrentStep(nextStep);
     }
   };
 
@@ -271,7 +277,9 @@ export default function OnboardingScreen() {
 
   const handleComplete = async () => {
     setAppleName(null);
-
+    if (!isEditing) {
+      await ExpoLocation.requestForegroundPermissionsAsync();
+    }
     if (!user?.id) {
       notify.error(t("onboarding.user_session_not_found_please_log_in"));
       return;
@@ -954,6 +962,40 @@ export default function OnboardingScreen() {
     </View>
   );
 
+  const renderLocationStep = () => (
+    <View style={styles.stepContainer}>
+      <Ionicons name="location" size={64} color={theme.colors.primary} />
+      <Text style={styles.stepTitle}>{t("onboarding.enable_location")}</Text>
+      <Text style={styles.stepDescription}>
+        {t("onboarding.location_permission_description")}
+      </Text>
+      <View style={styles.bulletPoints}>
+        <View style={styles.bulletPoint}>
+          <Ionicons name="navigate" size={20} color={theme.colors.primary} />
+          <Text style={styles.bulletText}>
+            {t("onboarding.location_reason_nearby")}
+          </Text>
+        </View>
+        <View style={styles.bulletPoint}>
+          <Ionicons
+            name="shield-checkmark"
+            size={20}
+            color={theme.colors.primary}
+          />
+          <Text style={styles.bulletText}>
+            {t("onboarding.location_reason_safety")}
+          </Text>
+        </View>
+        <View style={styles.bulletPoint}>
+          <Ionicons name="map" size={20} color={theme.colors.primary} />
+          <Text style={styles.bulletText}>
+            {t("onboarding.location_reason_routes")}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
   const renderCurrentStep = () => {
     switch (ONBOARDING_STEPS[currentStep].id) {
       case "welcome":
@@ -974,6 +1016,8 @@ export default function OnboardingScreen() {
         return renderAgeStep();
       case "privacy":
         return renderPrivacyStep();
+      case "location":
+        return renderLocationStep();
       default:
         return renderWelcomeStep();
     }

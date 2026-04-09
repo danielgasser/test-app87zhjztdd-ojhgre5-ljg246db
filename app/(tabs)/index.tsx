@@ -13,6 +13,7 @@ import {
   Keyboard,
   Platform,
   Animated,
+  Linking,
 } from "react-native";
 import { AppText as Text } from "@/components/AppText";
 import MapView, {
@@ -29,7 +30,6 @@ import {
   fetchNearbyLocations,
   fetchLocationDetails,
   setUserLocation,
-  setUserCountry,
   fetchDangerZones,
   toggleDangerZones,
   fetchMLPredictions,
@@ -51,10 +51,7 @@ import DangerZoneOverlay from "src/components/DangerZoneOverlay";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "src/store/hooks";
 import { setMapCenter } from "src/store/locationsSlice";
-import {
-  getCompleteAddressFromCoordinates,
-  getUserCountry,
-} from "src/utils/locationHelpers";
+import { getCompleteAddressFromCoordinates } from "src/utils/locationHelpers";
 
 import { APP_CONFIG } from "@/config/appConfig";
 import { requireAuth } from "@/utils/authHelpers";
@@ -672,75 +669,6 @@ export default function MapScreen() {
     }
   };
 
-  const requestLocationPermission = async () => {
-    try {
-      const permissionPromise = Location.requestForegroundPermissionsAsync();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Permission timeout")), 15000),
-      );
-      const { status } = (await Promise.race([
-        permissionPromise,
-        timeoutPromise,
-      ])) as any;
-
-      if (status === "granted" || status === undefined) {
-        setLocationPermission(true);
-        const location = await Location.getCurrentPositionAsync({});
-        if (location) {
-          const newRegion = {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          };
-          setRegion(newRegion);
-          dispatch(
-            setUserLocation({
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            }),
-          );
-          const countryCode = await getUserCountry({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          });
-          dispatch(setUserCountry(countryCode));
-        }
-      }
-    } catch (error) {
-      logger.error("❌ Permission error - trying fallback:", error);
-
-      // Android emulator workaround - try to get last known location
-      try {
-        const lastKnown = await Location.getLastKnownPositionAsync();
-        if (lastKnown) {
-          setLocationPermission(true);
-          const newRegion = {
-            latitude: lastKnown.coords.latitude,
-            longitude: lastKnown.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          };
-          setRegion(newRegion);
-          dispatch(
-            setUserLocation({
-              latitude: lastKnown.coords.latitude,
-              longitude: lastKnown.coords.longitude,
-            }),
-          );
-          const countryCode = await getUserCountry({
-            latitude: lastKnown.coords.latitude,
-            longitude: lastKnown.coords.longitude,
-          });
-          dispatch(setUserCountry(countryCode));
-        }
-      } catch (fallbackError) {
-        logger.error("Location permission failed", fallbackError);
-        setLocationPermission(false);
-      }
-    }
-  };
-
   const handleStartRouteSelection = () => {
     if (!requireAuth(userId, "plan a route")) return;
 
@@ -947,10 +875,6 @@ export default function MapScreen() {
   }, [userId, userLocation, mapReady, hasInitiallyRecentered]);
 
   useEffect(() => {
-    requestLocationPermission();
-  }, []);
-
-  useEffect(() => {
     let locationSubscription: Location.LocationSubscription | null = null;
 
     const startLocationUpdates = async () => {
@@ -1003,30 +927,26 @@ export default function MapScreen() {
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        notify.error(
-          "Location permission is required to show nearby locations",
-          "Permission Denied",
-        );
-        return;
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status === "granted") {
+        setLocationPermission(true);
+        const location = await Location.getCurrentPositionAsync({});
+        if (location) {
+          const newRegion = {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          };
+          setRegion(newRegion);
+          dispatch(
+            setUserLocation({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            }),
+          );
+        }
       }
-      setLocationPermission(true);
-
-      let location = await Location.getCurrentPositionAsync({});
-      const newRegion = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      };
-      setRegion(newRegion);
-      dispatch(
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        }),
-      );
     })();
   }, [dispatch]);
 
@@ -1249,16 +1169,6 @@ export default function MapScreen() {
   );
 
   // ============= CONDITIONAL RENDERS =============
-  if (!locationPermission) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={commonStyles.textError}>
-          {t("map.location_permission_is_required_to_use")}
-        </Text>
-      </View>
-    );
-  }
-
   if (loading && nearbyLocations.length === 0 && !mapReady) {
     return (
       <View style={styles.centerContainer}>
@@ -1301,6 +1211,23 @@ export default function MapScreen() {
             missingFields={profileCheck.missingFields}
             visible={showProfileBanner}
           />
+        </View>
+      )}
+      {!locationPermission && (
+        <View style={styles.locationPermissionBanner}>
+          <Ionicons
+            name="location-outline"
+            size={20}
+            color={theme.colors.background}
+          />
+          <Text style={styles.locationPermissionBannerText}>
+            {t("map.location_permission_banner")}
+          </Text>
+          <TouchableOpacity onPress={() => Linking.openSettings()}>
+            <Text style={styles.locationPermissionBannerButton}>
+              {t("onboarding.enable_location")}
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
       {!navigationActive && (
@@ -2444,5 +2371,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  locationPermissionBanner: {
+    position: "absolute",
+    top: 60,
+    left: 16,
+    right: 16,
+    zIndex: 999,
+    elevation: 9,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  locationPermissionBannerText: {
+    flex: 1,
+    color: theme.colors.background,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  locationPermissionBannerButton: {
+    color: theme.colors.background,
+    fontSize: 14,
+    fontWeight: "700",
+    textDecorationLine: "underline",
   },
 });
