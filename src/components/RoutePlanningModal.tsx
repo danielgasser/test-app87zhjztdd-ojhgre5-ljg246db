@@ -434,6 +434,16 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
     setMapboxResults([]);
   };
 
+  // Handle close
+  const handleClose = () => {
+    //setFromLocation(null);
+    setToLocation(null);
+    setActiveInput(null);
+    setSearchQuery("");
+    setMapboxResults([]);
+    onClose();
+  };
+
   // Handle location selection
   const handleLocationSelect = async (location: LocationResult) => {
     // Check search limit for free users
@@ -451,7 +461,9 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       return;
     }
     await incrementSearchCount();
-
+    setActiveInput(null);
+    setSearchQuery("");
+    setMapboxResults([]);
     // If location already has coordinates (database result), use it directly
 
     if (location.latitude !== 0 && location.longitude !== 0) {
@@ -464,7 +476,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
         dispatch(
           addToSearchHistory({
             userId: currentUser.id,
-            query: searchQuery,
+            query: location.name,
             selectedLocationId:
               location.source === "database" ? location.id : undefined,
             selectedName: location.name,
@@ -474,9 +486,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           }),
         );
       }
-      setActiveInput(null);
-      setSearchQuery("");
-      setMapboxResults([]);
+
       return;
     }
 
@@ -507,7 +517,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
           dispatch(
             addToSearchHistory({
               userId: currentUser.id,
-              query: searchQuery,
+              query: location.name,
               selectedLocationId:
                 location.source === "database" ? location.id : undefined,
               selectedName: location.name,
@@ -517,9 +527,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
             }),
           );
         }
-        setActiveInput(null);
-        setSearchQuery("");
-        setMapboxResults([]);
       } else {
         notify.error(t("navigation.unable_to_get_location_details_please"));
       }
@@ -757,7 +764,7 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
       )}
       {/* Header */}
       <View style={styles.specHeader}>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
           <Ionicons name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.title}>{t("navigation.plan_safe_route")}</Text>
@@ -827,6 +834,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                     style={styles.searchResultItem}
                     onPress={() => {
                       if (item.selected_latitude && item.selected_longitude) {
+                        const capturedInput = activeInput;
+                        setActiveInput(null);
+                        console.log("Search Query:", searchQuery);
+                        setSearchQuery("");
+                        setMapboxResults([]);
                         const location: LocationResult = {
                           id:
                             item.selected_location_id ||
@@ -840,13 +852,11 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                             ? "database"
                             : "mapbox",
                         };
-                        if (activeInput === "from") {
+                        if (capturedInput === "from") {
                           setFromLocation(location);
-                        } else if (activeInput === "to") {
+                        } else if (capturedInput === "to") {
                           setToLocation(location);
                         }
-                        setActiveInput(null);
-                        setSearchQuery("");
                       } else {
                         setSearchQuery(item.query);
                         performSearch(item.query);

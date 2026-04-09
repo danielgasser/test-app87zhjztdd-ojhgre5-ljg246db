@@ -251,7 +251,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!state.session?.user || state.onboardingChecked) {
-      logger.info("🔍 Skipping checkOnboardingStatus");
       return;
     }
     const userWithAmr = state.session.user as any;
@@ -265,7 +264,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [state.session?.user?.id, state.onboardingChecked, state.isAuthenticated]);
 
   const checkOnboardingStatus = async (userId: string) => {
-    logger.info("🔍 checkOnboardingStatus called", { userId });
     try {
       // Add 3 second timeout
       const timeoutPromise = new Promise<{ data: null; error: any }>(

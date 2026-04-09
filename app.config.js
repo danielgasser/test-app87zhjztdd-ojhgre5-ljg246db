@@ -69,6 +69,7 @@ module.exports = () => {
         "expo-secure-store",
         "expo-localization",
         "expo-web-browser",
+        "@bugsnag/plugin-expo-eas-sourcemaps",
         [
           "react-native-google-mobile-ads",
           {
