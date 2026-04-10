@@ -9,7 +9,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Linking,
 } from "react-native";
 import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../src/components/AppTextInput";
@@ -955,49 +954,6 @@ export default function OnboardingScreen() {
               formData.show_demographics && styles.switchThumbActive,
             ]}
           />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const renderLocationStep = () => (
-    <View style={styles.stepContainer}>
-      <Ionicons name="location" size={64} color={theme.colors.primary} />
-      <Text style={styles.stepTitle}>{t("onboarding.enable_location")}</Text>
-      <Text style={styles.stepDescription}>
-        {t("onboarding.location_permission_description")}
-      </Text>
-      <View style={styles.bulletPoints}>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="navigate" size={20} color={theme.colors.primary} />
-          <Text style={styles.bulletText}>
-            {t("onboarding.location_reason_nearby")}
-          </Text>
-        </View>
-        <View style={styles.bulletPoint}>
-          <Ionicons
-            name="shield-checkmark"
-            size={20}
-            color={theme.colors.primary}
-          />
-          <Text style={styles.bulletText}>
-            {t("onboarding.location_reason_safety")}
-          </Text>
-        </View>
-        <View style={styles.bulletPoint}>
-          <Ionicons name="map" size={20} color={theme.colors.primary} />
-          <Text style={styles.bulletText}>
-            {t("onboarding.location_reason_routes")}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={commonStyles.secondaryButton}
-          onPress={() => Linking.openSettings()}
-        >
-          <Text style={commonStyles.secondaryButtonText}>
-            {t("common.open_settings")}
-          </Text>
         </TouchableOpacity>
       </View>
     </View>
