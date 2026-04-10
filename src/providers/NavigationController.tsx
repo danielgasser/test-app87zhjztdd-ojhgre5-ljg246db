@@ -151,19 +151,19 @@ export function NavigationController({
         return;
       }
 
-      // Step 2: Location disclosure
-      if (!locationDisclosureAccepted) {
-        if (currentSegment !== "location-disclosure") {
-          router.replace("/location-disclosure");
+      // Step 2: Onboarding
+      if (needsOnboarding) {
+        if (currentSegment !== "onboarding") {
+          router.replace("/onboarding");
           hasNavigated.current = true;
         }
         return;
       }
 
-      // Step 3: Onboarding
-      if (needsOnboarding) {
-        if (currentSegment !== "onboarding") {
-          router.replace("/onboarding");
+      // Step 3: Location disclosure
+      if (!locationDisclosureAccepted) {
+        if (currentSegment !== "location-disclosure") {
+          router.replace("/location-disclosure");
           hasNavigated.current = true;
         }
         return;
@@ -180,6 +180,7 @@ export function NavigationController({
         "edit-review",
         "reset-password",
         "onboarding",
+        "location-disclosure",
         "subscription",
         "route-planning",
         "admin",

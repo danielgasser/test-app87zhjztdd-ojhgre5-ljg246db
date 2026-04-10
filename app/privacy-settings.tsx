@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
   confirmDeleteText: {
     fontSize: 16,
     fontWeight: "600",
-    color: theme.colors.text,
+    color: theme.colors.primary,
   },
   modalContainer: {
     flex: 1,

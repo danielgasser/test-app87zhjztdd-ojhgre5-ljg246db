@@ -188,7 +188,8 @@ export default function MapScreen() {
   if (locationsStateRef.current !== locationsState) {
     locationsStateRef.current = locationsState;
   }
-
+  const locationPermissionRef = useRef(locationPermission);
+  locationPermissionRef.current = locationPermission;
   const { user } = useAuth();
   const userId = user?.id;
   const userProfile = useAppSelector(
@@ -1177,7 +1178,7 @@ export default function MapScreen() {
         if (nextState === "active") {
           const { status } = await Location.getForegroundPermissionsAsync();
           if (status === "granted") {
-            if (!locationPermission) {
+            if (!locationPermissionRef.current) {
               setLocationPermission(true);
               const location = await Location.getCurrentPositionAsync({});
               if (location) {
@@ -1196,7 +1197,7 @@ export default function MapScreen() {
       },
     );
     return () => subscription.remove();
-  }, [locationPermission]);
+  }, []);
 
   // ============= CONDITIONAL RENDERS =============
   if (loading && nearbyLocations.length === 0 && !mapReady) {
