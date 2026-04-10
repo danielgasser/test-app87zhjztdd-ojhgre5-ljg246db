@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -6,6 +6,8 @@ import {
   ScrollView,
   ActivityIndicator,
   Platform,
+  Linking,
+  AppState,
 } from "react-native";
 import { AppText as Text } from "@/components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,6 +27,10 @@ export default function LocationDisclosureScreen() {
   const { t } = useTranslation();
   const { user, refreshOnboardingStatus } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [permissions, setPermissions] = useState({
+    foreground: false,
+    background: false,
+  });
 
   const handleContinue = async () => {
     if (!user?.id) return;
@@ -35,18 +41,6 @@ export default function LocationDisclosureScreen() {
       const { status: notifStatus } =
         await Notifications.requestPermissionsAsync();
       logger.info(`Notification permission: ${notifStatus}`);
-
-      // Request foreground location permission
-      const { status: foregroundStatus } =
-        await Location.requestForegroundPermissionsAsync();
-      logger.info(`Foreground location permission: ${foregroundStatus}`);
-
-      // Request background location permission (required for navigation alerts)
-      if (foregroundStatus === "granted") {
-        const { status: backgroundStatus } =
-          await Location.requestBackgroundPermissionsAsync();
-        logger.info(`Background location permission: ${backgroundStatus}`);
-      }
 
       // Save disclosure acceptance regardless of permission results
       const { error } = await supabase
@@ -69,18 +63,40 @@ export default function LocationDisclosureScreen() {
     }
   };
 
+  const checkLocationPermissions = async () => {
+    const foreground = await Location.getForegroundPermissionsAsync();
+    const background = await Location.getBackgroundPermissionsAsync();
+
+    console.log("Foreground:", foreground.status); // 'granted' | 'denied' | 'undetermined'
+    console.log("Background:", background.status);
+
+    return {
+      foreground: foreground.status === "granted",
+      background: background.status === "granted",
+    };
+  };
+  useEffect(() => {
+    checkLocationPermissions().then(setPermissions);
+  }, []);
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        checkLocationPermissions().then(setPermissions);
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
   return (
     <SafeAreaView style={commonStyles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconContainer}>
           <Ionicons name="location" size={64} color={theme.colors.primary} />
         </View>
-
         <Text style={styles.title}>{t("legal.location_access")}</Text>
         <Text style={styles.subtitle}>
           {t("legal.truguide_needs_location_access_to_keep")}
         </Text>
-
         <View style={styles.featureList}>
           <View style={styles.featureItem}>
             <View style={styles.featureIcon}>
@@ -132,7 +148,28 @@ export default function LocationDisclosureScreen() {
             </View>
           </View>
         </View>
-
+        {permissions.foreground && permissions.background ? (
+          <View style={styles.infoBoxSettings}>
+            <TouchableOpacity
+              style={[commonStyles.secondaryButton, commonStyles.buttonFake]}
+            >
+              <Text style={commonStyles.secondaryButtonText}>
+                {t("legal.location_access_granted")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.infoBoxSettings}>
+            <TouchableOpacity
+              style={commonStyles.secondaryButton}
+              onPress={() => Linking.openSettings()}
+            >
+              <Text style={commonStyles.secondaryButtonText}>
+                {t("common.open_settings")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.infoBox}>
           <Ionicons
             name="information-circle"
@@ -143,7 +180,6 @@ export default function LocationDisclosureScreen() {
             {t("legal.background_location_is_used_only_during")}
           </Text>
         </View>
-
         {Platform.OS === "android" && (
           <View style={styles.androidNote}>
             <Text style={styles.androidNoteText}>
@@ -197,7 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
   },
   featureList: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.sm,
   },
   featureItem: {
     flexDirection: "row",
@@ -235,6 +271,14 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
     marginBottom: theme.spacing.md,
     zIndex: 100,
+  },
+  infoBoxSettings: {
+    flex: 1,
+    justifyContent: "center",
+    marginTop: 0,
+    marginBottom: theme.spacing.md,
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
   },
   infoText: {
     flex: 1,

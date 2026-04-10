@@ -9,6 +9,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Linking,
 } from "react-native";
 import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../src/components/AppTextInput";
@@ -26,7 +27,6 @@ import { logger } from "@/utils/logger";
 import { useAuth } from "@/providers/AuthProvider";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
-import * as ExpoLocation from "expo-location";
 
 const getOnboardingSteps = (t: (key: string) => string) => [
   { id: "welcome", title: t("onboarding.welcome_to_truguide") },
@@ -38,7 +38,6 @@ const getOnboardingSteps = (t: (key: string) => string) => [
   { id: "religion", title: t("onboarding.religious_identity") },
   { id: "age", title: t("onboarding.age_range") },
   { id: "privacy", title: t("onboarding.privacy") },
-  { id: "location", title: t("onboarding.enable_location") },
 ];
 
 const FIELD_TO_STEP_MAP: { [key: string]: number } = {
@@ -252,7 +251,7 @@ export default function OnboardingScreen() {
     }
   }, [profile, appleUserName]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const currentStepId = ONBOARDING_STEPS[currentStep].id;
 
     // Validate mandatory fields before proceeding
@@ -264,6 +263,7 @@ export default function OnboardingScreen() {
     if (isEditing && ONBOARDING_STEPS[nextStep]?.id === "location") {
       nextStep++;
     }
+
     if (nextStep < ONBOARDING_STEPS.length) {
       setCurrentStep(nextStep);
     }
@@ -277,9 +277,7 @@ export default function OnboardingScreen() {
 
   const handleComplete = async () => {
     setAppleName(null);
-    if (!isEditing) {
-      await ExpoLocation.requestForegroundPermissionsAsync();
-    }
+
     if (!user?.id) {
       notify.error(t("onboarding.user_session_not_found_please_log_in"));
       return;
@@ -992,6 +990,15 @@ export default function OnboardingScreen() {
             {t("onboarding.location_reason_routes")}
           </Text>
         </View>
+
+        <TouchableOpacity
+          style={commonStyles.secondaryButton}
+          onPress={() => Linking.openSettings()}
+        >
+          <Text style={commonStyles.secondaryButtonText}>
+            {t("common.open_settings")}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -1016,8 +1023,6 @@ export default function OnboardingScreen() {
         return renderAgeStep();
       case "privacy":
         return renderPrivacyStep();
-      case "location":
-        return renderLocationStep();
       default:
         return renderWelcomeStep();
     }
@@ -1109,7 +1114,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: theme.colors.background,
     borderRadius: 12,
-    borderLeftWidth: 4,
+    borderLeftWidth: 0,
     borderLeftColor: theme.colors.primary,
   },
   welcomeBannerContent: {

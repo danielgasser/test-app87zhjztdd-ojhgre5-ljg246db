@@ -140,6 +140,12 @@ export const commonStyles = StyleSheet.create({
     opacity: 0.5,
   },
 
+  buttonFake: {
+    opacity: 0.75,
+    backgroundColor: theme.colors.primary,
+
+  },
+
   smallButton: {
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
