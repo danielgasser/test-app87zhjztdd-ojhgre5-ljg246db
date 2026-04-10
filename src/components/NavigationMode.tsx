@@ -594,7 +594,7 @@ const NavigationMode: React.FC<NavigationModeProps> = ({
         await Location.requestBackgroundPermissionsAsync();
       if (backgroundStatus !== "granted") {
         notify.error(
-          t("navigation.background_location_permission_required"),
+          t("community.background_location_permission_required"),
           t("common.permission_needed"),
         );
         onExit();

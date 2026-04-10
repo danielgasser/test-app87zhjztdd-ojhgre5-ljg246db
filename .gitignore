@@ -77,4 +77,3 @@ eslint_output.json
 
 bash-scripts/build-and-submit.sh
 bash-scripts/gitpush.sh
-bash-scripts/bugsnag-android-upload.sh
