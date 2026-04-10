@@ -75,5 +75,6 @@ credential.json
 
 eslint_output.json
 
-build-and-submit.sh
-gitpush.sh
+bash-scripts/build-and-submit.sh
+bash-scripts/gitpush.sh
+bash-scripts/bugsnag-android-upload.sh
