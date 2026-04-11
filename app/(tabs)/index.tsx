@@ -492,10 +492,17 @@ export default function MapScreen() {
     // Check if this is a searchMarker (temporary new location)
     if (searchMarker && searchMarker.id === locationId) {
       // For searchMarkers, trigger ML with coordinates directly
+      console.log("🤖 ML dispatch check:", {
+        hasProfile: !!userProfile,
+        hasPrediction: !!mlPredictions[locationId],
+        isLoading: mlPredictionsLoading[locationId],
+        alreadyRequested: requestedPredictions.current.has(locationId),
+      });
       if (
         userProfile &&
         !mlPredictions[locationId] &&
-        !mlPredictionsLoading[locationId]
+        !mlPredictionsLoading[locationId] &&
+        !requestedPredictions.current.has(locationId)
       ) {
         dispatch(
           fetchMLPredictions({
@@ -602,7 +609,8 @@ export default function MapScreen() {
     if (
       userProfile &&
       !mlPredictions[newMarker.id] &&
-      !mlPredictionsLoading[newMarker.id]
+      !mlPredictionsLoading[newMarker.id] &&
+      !requestedPredictions.current.has(newMarker.id)
     ) {
       dispatch(
         fetchMLPredictions({

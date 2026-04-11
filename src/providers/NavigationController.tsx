@@ -141,17 +141,7 @@ export function NavigationController({
         return;
       }
 
-      // Step 1: Terms acceptance
-
-      if (!termsAccepted) {
-        if (currentSegment !== "legal-acceptance") {
-          router.replace("/legal-acceptance");
-          hasNavigated.current = true;
-        }
-        return;
-      }
-
-      // Step 2: Onboarding
+      // Step 1: Onboarding
       if (needsOnboarding) {
         if (currentSegment !== "onboarding") {
           router.replace("/onboarding");
@@ -160,10 +150,20 @@ export function NavigationController({
         return;
       }
 
-      // Step 3: Location disclosure
+      // Step 2: Location disclosure
       if (!locationDisclosureAccepted) {
         if (currentSegment !== "location-disclosure") {
           router.replace("/location-disclosure");
+          hasNavigated.current = true;
+        }
+        return;
+      }
+
+      // Step 3: Terms acceptance
+
+      if (!termsAccepted) {
+        if (currentSegment !== "legal-acceptance") {
+          router.replace("/legal-acceptance");
           hasNavigated.current = true;
         }
         return;

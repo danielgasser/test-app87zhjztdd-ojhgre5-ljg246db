@@ -1214,7 +1214,7 @@ const styles = StyleSheet.create({
     height: 250,
   },
   androidPicker: {
-    height: 50,
+    height: 60,
   },
   iosPickerItem: {
     height: 250,

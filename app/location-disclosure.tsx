@@ -22,6 +22,7 @@ import { logger } from "@/utils/logger";
 import { recordLocationDisclosureAcceptance } from "@/services/consentService";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import { router } from "expo-router";
 
 export default function LocationDisclosureScreen() {
   const { t } = useTranslation();
@@ -33,26 +34,36 @@ export default function LocationDisclosureScreen() {
   });
 
   const handleContinue = async () => {
+    console.log("handleContinue called, user?.id:", user?.id);
+
     if (!user?.id) return;
 
     setIsLoading(true);
     try {
+      console.log("Requesting notification permissions...");
       // Request notification permissions
       const { status: notifStatus } =
         await Notifications.requestPermissionsAsync();
       logger.info(`Notification permission: ${notifStatus}`);
+      console.log("Notification permission:", notifStatus);
 
+      console.log("Updating profile...");
       // Save disclosure acceptance regardless of permission results
       const { error } = await supabase
         .from("profiles")
         .update({ location_disclosure_accepted_at: new Date().toISOString() })
         .eq("user_id", user.id);
 
+      console.log("Profile update error:", error);
       if (error) throw error;
+      console.log("Recording disclosure...");
       recordLocationDisclosureAcceptance().catch((err) => {
         logger.warn("Failed to record location disclosure to iubenda:", err);
       });
+      console.log("Refreshing onboarding status...");
       await refreshOnboardingStatus();
+      console.log("Done!");
+      router.replace("/(tabs)");
 
       // NavigationController will handle routing to onboarding
     } catch (error) {

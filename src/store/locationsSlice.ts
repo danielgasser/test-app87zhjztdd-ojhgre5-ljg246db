@@ -1184,14 +1184,15 @@ export const fetchMLPredictions = createAsyncThunk(
     try {
       const state = getState() as any;
       const userProfile = state.user.profile;
-
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
-
+      console.log('🔑 Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+      console.log('🔑 Anon key prefix:', process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20));
       if (!userId || !userProfile) {
         throw new Error("User not authenticated or profile not loaded");
       }
       const token = await getAuthToken();
+      console.log('🔑 Token obtained, length:', token?.length);
 
       const requestBody: any = {
         user_id: userId,
@@ -1213,7 +1214,8 @@ export const fetchMLPredictions = createAsyncThunk(
       } else {
         requestBody.location_id = locationId;
       }
-
+      console.log('🔑 Calling URL:', `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`);
+      console.log('🔑 Token length:', token?.length);
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
         {

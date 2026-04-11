@@ -12,12 +12,24 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const token = url.searchParams.get('token');           // 6-digit OTP
-    const token_hash = url.searchParams.get('token_hash'); // Secure hash
-    const type = url.searchParams.get('type');
-    const next = url.searchParams.get('next') ?? 'reset-password';
+    let token: string | null = null;
+    let token_hash: string | null = null;
+    let type: string | null = null;
+    let next = 'reset-password';
 
+    if (req.method === 'POST') {
+      const formData = await req.formData();
+      token = formData.get('token') as string | null;
+      token_hash = formData.get('token_hash') as string | null;
+      type = formData.get('type') as string | null;
+      next = formData.get('next') as string ?? 'reset-password';
+    } else {
+      const url = new URL(req.url);
+      token = url.searchParams.get('token');
+      token_hash = url.searchParams.get('token_hash');
+      type = url.searchParams.get('type');
+      next = url.searchParams.get('next') ?? 'reset-password';
+    }
     console.log('Auth verify request:', { token: !!token, token_hash: !!token_hash, type, next });
 
     if ((!token && !token_hash) || !type) {

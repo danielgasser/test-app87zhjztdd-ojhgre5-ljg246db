@@ -251,7 +251,7 @@ const getStyles = (isDark: boolean) =>
     },
     specContainer: {
       flex: 1,
-      backgroundColor: isDark ? "#1a1a2e" : theme.colors.primary,
+      backgroundColor: isDark ? "#232e1a" : theme.colors.primary,
     },
     gradient: {
       position: "absolute",
@@ -265,6 +265,7 @@ const getStyles = (isDark: boolean) =>
       paddingHorizontal: 24,
       justifyContent: "center",
       alignItems: "center",
+      height: "100%",
     },
     logoContainer: {
       marginBottom: 10,

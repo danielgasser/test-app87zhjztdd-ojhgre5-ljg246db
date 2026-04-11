@@ -91,8 +91,7 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
       default: return 'reset-password';
     }
   };
-  const confirmationUrl = `${baseUrl}/functions/v1/auth-verify?token=${tokenToUse}&token_hash=${token_hash}&type=${actionType}&next=${getNextRoute(actionType)}`;
-  switch (actionType) {
+  const confirmationUrl = `https://truguide.app/verify?token=${tokenToUse}&token_hash=${token_hash}&type=${actionType}&next=${getNextRoute(actionType)}`; switch (actionType) {
     case 'signup':
       return {
         subject: 'Confirm your TruGuide account',
