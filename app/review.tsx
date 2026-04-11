@@ -229,6 +229,8 @@ export default function ReviewScreen() {
         ],
       );
     } catch (error: any) {
+      console.log("Review error details:", JSON.stringify(error));
+
       logger.error("🚨 Review submission error:", error);
 
       if (error.code === "23505") {

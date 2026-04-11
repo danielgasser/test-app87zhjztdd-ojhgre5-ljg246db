@@ -25,7 +25,7 @@ export function isValidPlaceId(value: unknown): boolean {
     if (typeof value !== 'string') return false;
     if (value.length === 0 || value.length > 500) return false;
     // Google place IDs are alphanumeric with underscores and hyphens
-    return /^[a-zA-Z0-9_\-]+$/.test(value);
+    return /^[a-zA-Z0-9_\-:]+$/.test(value);
 }
 
 export function isValidRouteCoordinates(coords: unknown): boolean {

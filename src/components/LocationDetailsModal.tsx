@@ -339,7 +339,12 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     if (!placeIdToFetch) {
       return;
     }
-
+    if (
+      placeIdToFetch.startsWith("longpress-") ||
+      placeIdToFetch.startsWith("temp-")
+    ) {
+      return;
+    }
     try {
       const details = await googlePlacesService.getDetails({
         place_id: placeIdToFetch,

@@ -121,7 +121,7 @@ export default function OnboardingScreen() {
     if (stepId === "name") {
       if (!formData.full_name || formData.full_name.trim() === "") {
         notify.error(
-          t("onboarding.name_or_nickname"),
+          t("settings.name_or_nickname"),
           t("common.required_field"),
         );
         return false;
@@ -557,7 +557,7 @@ export default function OnboardingScreen() {
       </Text>
       <TextInput
         style={styles.nameInput}
-        placeholder={t("common.name_or_nickname")}
+        placeholder={t("settings.name_or_nickname")}
         value={formData.full_name}
         onChangeText={(text) => setFormData({ ...formData, full_name: text })}
         autoCapitalize="words"

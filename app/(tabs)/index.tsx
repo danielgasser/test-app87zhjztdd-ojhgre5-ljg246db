@@ -83,6 +83,7 @@ import MapFiltersModal, {
 } from "@/components/MapFiltersModal";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import { isUUID } from "@/utils/uuidHelpers";
 
 const getMarkerColor = (rating: number | string | null) => {
   if (rating === null || rating === undefined) {
@@ -491,6 +492,9 @@ export default function MapScreen() {
     setModalVisible(true);
     // Check if this is a searchMarker (temporary new location)
     if (searchMarker && searchMarker.id === locationId) {
+      if (!isUUID(locationId)) {
+        setSelectedGooglePlaceId(locationId);
+      }
       // For searchMarkers, trigger ML with coordinates directly
       if (
         userProfile &&

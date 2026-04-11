@@ -243,7 +243,7 @@ export default function EditProfileScreen() {
               style={commonStyles.input}
               value={fullName}
               onChangeText={setFullName}
-              placeholder={t("common.name_or_a_nickname")}
+              placeholder={t("settings.name_or_a_nickname")}
               placeholderTextColor={theme.colors.textSecondary}
               autoCapitalize="words"
             />

@@ -774,8 +774,9 @@ export const submitReview = createAsyncThunk(
 
       return data;
     } catch (error) {
+      console.log('submitReview actual error:', JSON.stringify(error));
       return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to submit review"
+        error instanceof Error ? error.message : (error as any)?.message || "Failed to submit review"
       );
     }
   }
@@ -1186,13 +1187,11 @@ export const fetchMLPredictions = createAsyncThunk(
       const userProfile = state.user.profile;
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
-      console.log('🔑 Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
-      console.log('🔑 Anon key prefix:', process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20));
+
       if (!userId || !userProfile) {
         throw new Error("User not authenticated or profile not loaded");
       }
       const token = await getAuthToken();
-      console.log('🔑 Token obtained, length:', token?.length);
 
       const requestBody: any = {
         user_id: userId,
@@ -1205,7 +1204,7 @@ export const fetchMLPredictions = createAsyncThunk(
           age_range: userProfile.age_range,
         }
       };
-      console.log('🤖 user_demographics:', JSON.stringify(requestBody.user_demographics));
+
       if (latitude !== undefined && longitude !== undefined) {
         requestBody.latitude = latitude;
         requestBody.longitude = longitude;
@@ -1214,8 +1213,7 @@ export const fetchMLPredictions = createAsyncThunk(
       } else {
         requestBody.location_id = locationId;
       }
-      console.log('🔑 Calling URL:', `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`);
-      console.log('🔑 Token length:', token?.length);
+
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/safety-predictor`,
         {
