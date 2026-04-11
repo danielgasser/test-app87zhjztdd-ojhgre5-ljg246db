@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Modal,
@@ -39,6 +39,7 @@ import TimeSafetyChart from "./TimeSafetyChart";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
 import { DragHandle } from "./DragHandle";
+import { isUUID } from "@/utils/uuidHelpers";
 
 interface SearchResult {
   id: string;
@@ -113,13 +114,15 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const mlRequestedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (locationId && visible) {
-      dispatch(fetchLocationDetails(locationId));
-      fetchReviews(locationId);
+      if (isUUID(locationId)) {
+        dispatch(fetchLocationDetails(locationId));
+        fetchReviews(locationId);
+      }
     } else if (visible && !locationId) {
-      // Clear reviews for new Google POIs (not in DB yet)
       setReviews([]);
     }
   }, [locationId, visible]);
@@ -153,10 +156,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
       const lat = selectedLocation?.latitude || searchMarker?.latitude;
       const lng = selectedLocation?.longitude || searchMarker?.longitude;
 
-      if (lat && lng) {
+      if (lat && lng && !mlRequestedRef.current.has(identifier)) {
+        mlRequestedRef.current.add(identifier);
         dispatch(
           fetchMLPredictions({
-            locationId: identifier, // Use the identifier, not null
+            locationId: identifier,
             latitude: lat,
             longitude: lng,
           }),
@@ -172,8 +176,6 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     reviews,
     loading,
     loadingReviews,
-    mlPredictions,
-    mlPredictionsLoading,
     dispatch,
   ]);
 
@@ -273,7 +275,11 @@ const LocationDetailsModal: React.FC<LocationDetailsModalProps> = ({
     if (!idToUse) {
       return;
     }
-
+    // Guard: only query if it's a UUID, not a Google Place ID
+    if (!isUUID || isUUID(idToUse)) {
+      setReviews([]);
+      return;
+    }
     setLoadingReviews(true);
     try {
       const { data, error } = await supabase

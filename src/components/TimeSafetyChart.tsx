@@ -98,7 +98,7 @@ const TimeSafetyChart: React.FC<TimeSafetyChartProps> = ({ data, loading }) => {
               {hasData ? (
                 <>
                   <Text style={[styles.rating, { color: safetyColor }]}>
-                    {periodData.avg_safety?.toFixed(1)} {t("common.astserix")}
+                    {periodData.avg_safety?.toFixed(1)} {t("common.asterix")}
                   </Text>
                   <Text style={styles.reviewCount}>
                     {t("community.review_count", {

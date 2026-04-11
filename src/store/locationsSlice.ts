@@ -1205,7 +1205,7 @@ export const fetchMLPredictions = createAsyncThunk(
           age_range: userProfile.age_range,
         }
       };
-
+      console.log('🤖 user_demographics:', JSON.stringify(requestBody.user_demographics));
       if (latitude !== undefined && longitude !== undefined) {
         requestBody.latitude = latitude;
         requestBody.longitude = longitude;

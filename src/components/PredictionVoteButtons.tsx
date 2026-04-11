@@ -15,6 +15,7 @@ import { notify } from "@/utils/notificationService";
 import { useAuth } from "@/providers";
 import { commonStyles } from "@/styles/common";
 import { useTranslation } from "react-i18next";
+import { isUUID } from "@/utils/uuidHelpers";
 
 interface PredictionVoteButtonsProps {
   locationId: string;
@@ -26,13 +27,6 @@ interface PredictionVoteButtonsProps {
   initialInaccurateCount?: number;
   currentUserVote?: "accurate" | "inaccurate" | null;
   onVoteSuccess?: () => void;
-}
-
-// Helper to determine if ID is a UUID (database location) or other identifier
-function isUUID(id: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
 }
 
 export default function PredictionVoteButtons({

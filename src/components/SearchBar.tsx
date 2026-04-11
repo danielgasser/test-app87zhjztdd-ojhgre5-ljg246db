@@ -161,7 +161,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             onPress: () => {},
           },
           {
-            text: t("premium.upgrade"),
+            text: t("premium.upgrade_now"),
             onPress: () => router.push("/subscription"),
           },
         ],

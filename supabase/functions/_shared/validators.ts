@@ -37,10 +37,18 @@ export function isValidRouteCoordinates(coords: unknown): boolean {
 export function isValidDemographics(demo: unknown): boolean {
     if (!demo || typeof demo !== 'object') return false;
     const d = demo as Record<string, unknown>;
-    const stringFields = ['race_ethnicity', 'gender', 'lgbtq_status', 'religion', 'disability_status', 'age_range'];
-    return stringFields.every(field =>
+    const stringFields = ['gender', 'religion', 'age_range'];
+    const arrayOrStringFields = ['race_ethnicity', 'disability_status'];
+    const validStrings = stringFields.every(field =>
         d[field] === undefined || d[field] === null || isValidString(d[field])
     );
+    const validArrays = arrayOrStringFields.every(field => {
+        const val = d[field];
+        if (val === undefined || val === null) return true;
+        if (Array.isArray(val)) return val.every(v => isValidString(v));
+        return isValidString(val);
+    });
+    return validStrings && validArrays;
 }
 
 export function validationError(message: string): Response {
