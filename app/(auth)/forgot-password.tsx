@@ -174,8 +174,12 @@ export default function ForgotPasswordScreen() {
 
                 {/* Resend Button */}
                 <TouchableOpacity
-                  style={styles.resendButton}
-                  onPress={() => setEmailSent(false)}
+                  style={[
+                    styles.resendButton,
+                    cooldown > 0 && styles.resetButtonDisabled,
+                  ]}
+                  onPress={() => cooldown === 0 && setEmailSent(false)}
+                  disabled={cooldown > 0}
                 >
                   <Text style={styles.resendButtonText}>
                     {cooldown > 0

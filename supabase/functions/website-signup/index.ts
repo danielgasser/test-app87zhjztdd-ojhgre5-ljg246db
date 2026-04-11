@@ -211,70 +211,15 @@ async function sendWelcomeEmail(email: string, firstName: string): Promise<void>
 }
 
 function buildWelcomeEmail(firstName?: string): string {
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 40px 20px;">
-        <tr>
-          <td align="center">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-              <!-- Header -->
-              <tr>
-                <td style="background: linear-gradient(135deg, #2A5C99 0%, #1A4679 50%, #5FB878 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
-                  <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold;">🛡️ TruGuide</h1>
-                  <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">Navigate Safely. Belong Everywhere.</p>
-                </td>
-              </tr>
-              <!-- Content -->
-              <tr>
-                <td style="padding: 40px;">
-                  <h2 style="margin: 0 0 20px 0; color: #2A5C99; font-size: 24px;">Welcome to TruGuide ${firstName ? ', ' + firstName : ''}! 🎉</h2>
-                  <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">
-                    Thank you for joining our community of conscious travelers! You're now on the early access list for the first GPS app that prioritizes safety for everyone.
-                  </p>
-                  
-                  <div style="background-color: #F5F7FA; padding: 20px; border-radius: 8px; margin: 30px 0;">
-                    <h3 style="margin: 0 0 15px 0; color: #2A5C99; font-size: 18px;">What's Next?</h3>
-                    <ul style="margin: 0; padding-left: 20px; color: #4a4a4a; line-height: 1.8;">
-                      <li>📱 You'll be first to know when we launch on iOS</li>
-                      <li>🎁 Early adopters get premium features free for 3 months</li>
-                      <li>💬 Join our community and help shape TruGuide</li>
-                      <li>🗺️ Get exclusive safety insights and travel tips</li>
-                    </ul>
-                  </div>
-
-                  <p style="margin: 0 0 20px 0; color: #4a4a4a; font-size: 16px; line-height: 1.6;">
-                    We're working hard to launch soon. In the meantime, follow us on social media for updates and behind-the-scenes content.
-                  </p>
-
-                  <div style="text-align: center; margin: 30px 0;">
-                    <a href="https://truguide.app" style="display: inline-block; padding: 14px 30px; background: linear-gradient(135deg, #2A5C99 0%, #1A4679 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">Visit Our Website</a>
-                  </div>
-                </td>
-              </tr>
-              <!-- Footer -->
-              <tr>
-                <td style="padding: 30px 40px; background-color: #f8f9fa; border-radius: 0 0 12px 12px; text-align: center;">
-                  <p style="margin: 0 0 10px 0; color: #6a6a6a; font-size: 13px;">
-                    You're receiving this because you signed up at truguide.app
-                  </p>
-                  <p style="margin: 0; color: #9a9a9a; font-size: 12px;">
-                    © 2025 TruGuide. All rights reserved.
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
-  `;
+  const name = firstName ? firstName : 'there';
+  return emailShell(`
+    <h2 style="margin:0 0 16px 0;color:#2C3E50;font-size:22px;font-weight:600;">Hi ${name}, you're on the list! 🎉</h2>
+    <p style="margin:0 0 16px 0;color:#4a4a4a;font-size:15px;line-height:1.6;">Thank you for signing up for early access to TruGuide — the first GPS app that shows you how safe a place is based on who you are.</p>
+    <p style="margin:0 0 24px 0;color:#4a4a4a;font-size:15px;line-height:1.6;">We'll be in touch as soon as your spot is ready. In the meantime, feel free to share TruGuide with anyone who could use safer, more inclusive navigation.</p>
+    <div style="padding:16px;background-color:#f5f7fa;border-radius:4px;border-left:3px solid #2A5C99;">
+      <p style="margin:0;color:#2C3E50;font-size:14px;line-height:1.6;"><strong>What to expect:</strong> Personalized safety ratings, demographic-aware route planning, and a community of conscious travelers.</p>
+    </div>
+  `, 'You\'re receiving this because you signed up at truguide.app. If this wasn\'t you, you can safely ignore this email.');
 }
 
 function jsonResponse(data: any, status: number, allowedOrigin: string) {

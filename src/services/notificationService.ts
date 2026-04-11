@@ -36,7 +36,7 @@ export const notificationService = {
         }
 
         if (finalStatus !== 'granted') {
-            logger.error('❌ Notification permissions not granted:', finalStatus);
+            logger.info(`❌ Notification permissions not granted: ${finalStatus}`);
             return null;
         }
 
