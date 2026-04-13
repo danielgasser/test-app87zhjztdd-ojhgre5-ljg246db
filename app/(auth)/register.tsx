@@ -14,7 +14,7 @@ import {
 import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../../src/components/AppTextInput";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "src/styles/theme";
 import { supabase } from "@/services/supabase";
@@ -67,20 +67,10 @@ export default function RegisterScreen() {
       const emailConfirmationRequired = data?.user && !data.session;
 
       if (emailConfirmationRequired) {
-        // User needs to confirm email
-        Alert.alert(
-          "Verify Your Email",
-          "Please check your email and click the verification link to activate your account.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                // Don't route - just inform user
-                // They'll need to click email link and come back
-              },
-            },
-          ],
-        );
+        router.push({
+          pathname: "/(auth)/verify-otp",
+          params: { email: trimmedEmail },
+        } as any);
       } else {
         // User is auto-signed in (email confirmation disabled or already confirmed)
         // Refresh onboarding status

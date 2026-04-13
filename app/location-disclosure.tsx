@@ -34,35 +34,26 @@ export default function LocationDisclosureScreen() {
   });
 
   const handleContinue = async () => {
-    console.log("handleContinue called, user?.id:", user?.id);
-
     if (!user?.id) return;
 
     setIsLoading(true);
     try {
-      console.log("Requesting notification permissions...");
       // Request notification permissions
       const { status: notifStatus } =
         await Notifications.requestPermissionsAsync();
       logger.info(`Notification permission: ${notifStatus}`);
-      console.log("Notification permission:", notifStatus);
 
-      console.log("Updating profile...");
       // Save disclosure acceptance regardless of permission results
       const { error } = await supabase
         .from("profiles")
         .update({ location_disclosure_accepted_at: new Date().toISOString() })
         .eq("user_id", user.id);
 
-      console.log("Profile update error:", error);
       if (error) throw error;
-      console.log("Recording disclosure...");
       recordLocationDisclosureAcceptance().catch((err) => {
         logger.warn("Failed to record location disclosure to iubenda:", err);
       });
-      console.log("Refreshing onboarding status...");
       await refreshOnboardingStatus();
-      console.log("Done!");
       router.replace("/(tabs)");
 
       // NavigationController will handle routing to onboarding
@@ -77,10 +68,6 @@ export default function LocationDisclosureScreen() {
   const checkLocationPermissions = async () => {
     const foreground = await Location.getForegroundPermissionsAsync();
     const background = await Location.getBackgroundPermissionsAsync();
-
-    console.log("Foreground:", foreground.status); // 'granted' | 'denied' | 'undetermined'
-    console.log("Background:", background.status);
-
     return {
       foreground: foreground.status === "granted",
       background: background.status === "granted",

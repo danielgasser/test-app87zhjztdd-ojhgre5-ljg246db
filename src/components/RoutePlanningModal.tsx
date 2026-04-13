@@ -844,7 +844,6 @@ const RoutePlanningModal: React.FC<RoutePlanningModalProps> = ({
                       if (item.selected_latitude && item.selected_longitude) {
                         const capturedInput = activeInput;
                         setActiveInput(null);
-                        console.log("Search Query:", searchQuery);
                         setSearchQuery("");
                         setMapboxResults([]);
                         const location: LocationResult = {

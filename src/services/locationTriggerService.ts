@@ -52,7 +52,6 @@ class LocationTriggerService {
      * Start monitoring user location for nearby highly-rated spots
      */
     async start(userId: string, userProfile: UserProfile): Promise<void> {
-        console.log("✅ Location trigger service started");
         if (this.isMonitoring) {
             return;
         }

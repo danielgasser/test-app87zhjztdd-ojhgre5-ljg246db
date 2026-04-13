@@ -774,7 +774,6 @@ export const submitReview = createAsyncThunk(
 
       return data;
     } catch (error) {
-      console.log('submitReview actual error:', JSON.stringify(error));
       return rejectWithValue(
         error instanceof Error ? error.message : (error as any)?.message || "Failed to submit review"
       );

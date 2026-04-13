@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { SafeAreaView as SafeArea } from "react-native-safe-area-context";
 import { AppText as Text } from "@/components/AppText";
 import { AppTextInput as TextInput } from "../src/components/AppTextInput";
 import { Picker } from "@react-native-picker/picker";
@@ -229,8 +230,6 @@ export default function ReviewScreen() {
         ],
       );
     } catch (error: any) {
-      console.log("Review error details:", JSON.stringify(error));
-
       logger.error("🚨 Review submission error:", error);
 
       if (error.code === "23505") {
@@ -269,8 +268,7 @@ export default function ReviewScreen() {
   }
 
   return (
-    <View style={commonStyles.container}>
-      <View style={styles.safeTop} />
+    <SafeArea style={commonStyles.container}>
       <ScrollView
         style={commonStyles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -591,7 +589,7 @@ export default function ReviewScreen() {
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
-    </View>
+    </SafeArea>
   );
 }
 

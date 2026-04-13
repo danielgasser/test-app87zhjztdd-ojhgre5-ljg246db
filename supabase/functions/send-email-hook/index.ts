@@ -97,18 +97,13 @@ function buildEmailContent(actionType, token, token_hash, redirectTo, user) {
         subject: 'Confirm your TruGuide account',
         html: emailShell(`
       <h2 style="margin:0 0 16px 0;color:#2C3E50;font-size:22px;font-weight:600;">Welcome to TruGuide! 🎉</h2>
-      <p style="margin:0 0 16px 0;color:#4a4a4a;font-size:15px;line-height:1.6;">Thank you for joining our community of conscious travelers. Please confirm your email address to get started.</p>
-      ${ctaButton(confirmationUrl, 'Confirm Your Email')}
-      <p style="margin:16px 0 8px 0;color:#607D8B;font-size:13px;">Or copy this link into your browser:</p>
-      <p style="margin:0;padding:12px;background-color:#f5f7fa;border-radius:4px;color:#2A5C99;font-size:12px;word-break:break-all;font-family:monospace;">${confirmationUrl}</p>
-      <div style="margin:24px 0;height:1px;background-color:#f0f0f0;"></div>
-      <p style="margin:0 0 8px 0;color:#2C3E50;font-size:14px;font-weight:600;">What's next?</p>
-      <ul style="margin:0;padding-left:20px;color:#4a4a4a;font-size:14px;line-height:1.8;">
-        <li>Complete your demographic profile for personalized recommendations</li>
-        <li>Explore safety ratings for locations you care about</li>
-        <li>Share your experiences to help others travel safely</li>
-      </ul>
-    `, 'This confirmation link will expire in 24 hours. If you didn\'t create a TruGuide account, you can safely ignore this email.')
+      <p style="margin:0 0 16px 0;color:#4a4a4a;font-size:15px;line-height:1.6;">Thank you for joining our community of conscious travelers. Enter this code in the app to confirm your email address:</p>
+      <div style="margin:24px 0;padding:24px;background-color:#f5f7fa;border-radius:8px;text-align:center;">
+        <p style="margin:0 0 8px 0;color:#607D8B;font-size:13px;letter-spacing:1px;text-transform:uppercase;">Your verification code</p>
+        <p style="margin:0;font-size:40px;font-weight:700;color:#2A5C99;letter-spacing:8px;">${token}</p>
+      </div>
+      <p style="margin:0;color:#607D8B;font-size:13px;text-align:center;">This code expires in 1 hour.</p>
+    `, 'If you didn\'t create a TruGuide account, you can safely ignore this email.')
       };
 
     case 'email_change':

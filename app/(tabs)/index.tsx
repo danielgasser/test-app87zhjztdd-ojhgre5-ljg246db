@@ -1381,7 +1381,7 @@ export default function MapScreen() {
                       longitude: Number(loc.longitude),
                     }}
                     onPress={() => handleMarkerPress(loc.id)}
-                    anchor={{ x: 0.5, y: 1 }}
+                    anchor={{ x: 1, y: 1 }}
                   >
                     <View
                       style={{
@@ -1409,7 +1409,7 @@ export default function MapScreen() {
                         {markerProps.score?.toFixed(1) ?? "?"}
                       </Text>
                     </View>
-                    <Callout>
+                    <Callout style={{ width: 220 }}>
                       <View style={styles.predictionCallout}>
                         <Text style={styles.calloutTitle}>{loc.name}</Text>
                         <Text style={styles.calloutPrediction}>

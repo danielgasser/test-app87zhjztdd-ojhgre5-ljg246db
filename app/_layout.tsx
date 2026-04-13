@@ -94,8 +94,8 @@ function AppNavigator() {
       <Stack.Screen name="privacy-settings" />
       <Stack.Screen name="notification-settings" />
       <Stack.Screen name="display-settings" />
-      <Stack.Screen name="edit-review" />
       <Stack.Screen name="admin" />
+      <Stack.Screen name="verify-otp" />
       <Stack.Screen
         name="subscription"
         options={{ headerShown: false, presentation: "modal" }}

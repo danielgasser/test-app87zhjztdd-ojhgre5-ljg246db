@@ -136,13 +136,14 @@ export default function ResetPasswordScreen() {
             ) : (
               <>
                 {/* Header */}
-                <View style={commonStyles.header}>
+                <View style={styles.specHeader}>
                   <Ionicons
                     name="key-outline"
                     size={64}
                     color={theme.colors.primary}
                     style={styles.icon}
                   />
+
                   <Text style={styles.title}>
                     {t("auth.create_new_password")}
                   </Text>
@@ -277,6 +278,10 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
+  specHeader: {
+    alignItems: "center",
+    marginBottom: theme.spacing.xxl,
+  },
   keyboardView: {
     flex: 1,
   },
@@ -294,6 +299,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     marginBottom: theme.spacing.sm,
     textAlign: "center",
+    display: "flex",
   },
   subtitle: {
     fontSize: 14,

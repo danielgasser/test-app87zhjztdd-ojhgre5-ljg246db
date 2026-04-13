@@ -16,7 +16,6 @@ export const useRealtimeReviews = (userId: string | null = null) => {
             channel = supabase
                 .channel(`navigation-alerts:${userId}`, { config: { private: true } })
                 .on('broadcast', { event: 'dangerous-review' }, (payload) => {
-                    console.log('📡 Received navigation review broadcast:', payload.payload?.id);
 
                     const review = payload.payload;
                     if (!review) return;
