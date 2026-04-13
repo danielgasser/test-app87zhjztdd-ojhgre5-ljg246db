@@ -75,4 +75,6 @@ credential.json
 
 eslint_output.json
 
-bash-scripts/*
+bash-scripts/build-and-submit.sh
+bash-scripts/gitpush.sh
+bash-scripts/sort-json.sh
